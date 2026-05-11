@@ -1,0 +1,103 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-bg: #f8fafc;
+    --color-text: #0f172a;
+    --color-primary: #4f46e5;
+  }
+
+  /* RTL Support Variables */
+  [dir="rtl"] {
+    font-family: 'Inter', 'Tajawal', sans-serif;
+  }
+
+  body {
+    @apply bg-slate-50 text-slate-900 font-sans antialiased overflow-x-hidden;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading tracking-tight;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-glass;
+  }
+  
+  .glass-nav {
+    @apply bg-white/80 backdrop-blur-lg border-b border-white/50 shadow-sm supports-[backdrop-filter]:bg-white/60;
+  }
+
+  .btn-primary {
+    @apply relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition-all duration-300 bg-primary-600 rounded-xl hover:bg-primary-700 hover:shadow-premium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center px-6 py-3 font-medium transition-all duration-300 bg-white border border-slate-200 text-slate-700 rounded-xl hover:bg-slate-50 hover:text-primary-600 hover:border-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-sm hover:shadow;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-shadow duration-200 shadow-sm hover:border-primary-300 outline-none;
+  }
+
+  .heading-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500;
+  }
+
+  .card-hover {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-card-hover border border-slate-100;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-slate-100;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-300 rounded-full hover:bg-slate-400 transition-colors;
+}
+
+/* Print Styles for PDF Export */
+@media print {
+  body {
+    @apply bg-white;
+  }
+  
+  .no-print {
+    display: none !important;
+  }
+
+  .page-break {
+    page-break-before: always;
+  }
+  
+  /* Ensure background colors print correctly */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+/* Resume Templates Base Styles */
+.resume-page {
+  @apply bg-white shadow-xl mx-auto overflow-hidden relative;
+  width: 210mm;
+  min-height: 297mm;
+  /* padding is handled by the template itself, typically 20mm */
+}
+
+/* Specific utilities for resume scaling in builder view */
+.resume-scale-wrapper {
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+}
