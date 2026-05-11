@@ -9,6 +9,7 @@ export default defineConfig({
     allowedHosts: true,
     hmr: {
       clientPort: 443,
+      protocol: 'wss',
     },
     watch: {
       ignored: [
