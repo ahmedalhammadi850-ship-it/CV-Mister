@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useCV } from '../../context/CVContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -137,10 +137,104 @@ const SectionToggleRow = ({ labelKey, checked, onChange, isRTL }) => (
 
 const labelClass = 'block text-xs font-medium text-slate-500 mb-2';
 
+const SECTION_LABELS = {
+  summary:    { en: 'Summary',    ar: 'الملخص المهني'  },
+  experience: { en: 'Experience', ar: 'الخبرة'         },
+  education:  { en: 'Education',  ar: 'التعليم'        },
+  skills:     { en: 'Skills',     ar: 'المهارات'       },
+  projects:   { en: 'Projects',   ar: 'المشاريع'       },
+  languages:  { en: 'Languages',  ar: 'اللغات'         },
+};
+
+const DraggableSectionList = ({ sectionOrder, visibleSections, toggleSection, reorderSections, isRTL }) => {
+  const dragIndex = useRef(null);
+  const [dragOverIndex, setDragOverIndex] = useState(null);
+
+  const handleDragStart = (e, index) => {
+    dragIndex.current = index;
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e, index) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setDragOverIndex(index);
+  };
+
+  const handleDrop = (e, index) => {
+    e.preventDefault();
+    if (dragIndex.current !== null && dragIndex.current !== index) {
+      reorderSections(dragIndex.current, index);
+    }
+    dragIndex.current = null;
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    dragIndex.current = null;
+    setDragOverIndex(null);
+  };
+
+  return (
+    <div className="space-y-1.5">
+      {sectionOrder.map((key, index) => {
+        const label = SECTION_LABELS[key]?.[isRTL ? 'ar' : 'en'] ?? key;
+        const isDragOver = dragOverIndex === index;
+        return (
+          <div
+            key={key}
+            draggable
+            onDragStart={e => handleDragStart(e, index)}
+            onDragOver={e => handleDragOver(e, index)}
+            onDrop={e => handleDrop(e, index)}
+            onDragEnd={handleDragEnd}
+            className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg bg-white border transition-all cursor-grab active:cursor-grabbing select-none ${
+              isDragOver
+                ? 'border-indigo-400 shadow-md bg-indigo-50 scale-[1.01]'
+                : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'
+            }`}
+            style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
+          >
+            {/* Drag handle */}
+            <svg className="w-4 h-4 text-slate-300 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M7 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM7 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 2a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 10a2 2 0 1 1-4 0 2 2 0 0 1 4 0zM17 18a2 2 0 1 1-4 0 2 2 0 0 1 4 0z" />
+            </svg>
+
+            {/* Index badge */}
+            <span className="w-5 h-5 rounded-full bg-slate-100 text-slate-500 text-xs font-bold flex items-center justify-center flex-shrink-0">
+              {index + 1}
+            </span>
+
+            {/* Label */}
+            <span className="flex-1 text-sm font-medium text-slate-700">{label}</span>
+
+            {/* Toggle */}
+            <button
+              onClick={() => toggleSection(key)}
+              className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none flex-shrink-0 ${
+                visibleSections[key] ? 'bg-indigo-600' : 'bg-slate-200'
+              }`}
+            >
+              <span
+                className="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transition-transform duration-200"
+                style={{ transform: visibleSections[key] ? 'translateX(18px)' : 'translateX(2px)' }}
+              />
+            </button>
+          </div>
+        );
+      })}
+      <p className="text-xs text-slate-400 text-center pt-1">
+        {isRTL ? '← اسحب للترتيب' : 'Drag to reorder'}
+      </p>
+    </div>
+  );
+};
+
 const CustomizePanel = () => {
   const {
     theme, setTheme,
     selectedTemplate, setSelectedTemplate,
+    sectionOrder, reorderSections,
     visibleSections, toggleSection,
     visiblePersonalFields, togglePersonalField,
   } = useCV();
@@ -315,18 +409,16 @@ const CustomizePanel = () => {
 
       {/* ── Sections ── */}
       <AccordionSection titleKey="sections" isRTL={isRTL}>
-        <p className="text-xs text-slate-400 -mt-1 mb-1">
-          {isRTL ? 'اختر الأقسام التي تظهر في السيرة الذاتية' : 'Choose which sections appear on the CV'}
+        <p className="text-xs text-slate-400 -mt-1 mb-2">
+          {isRTL ? 'اسحب لإعادة الترتيب • مفتاح التبديل لإظهار/إخفاء' : 'Drag to reorder • Toggle to show/hide'}
         </p>
-        {Object.keys(visibleSections).map(key => (
-          <SectionToggleRow
-            key={key}
-            labelKey={key}
-            checked={visibleSections[key]}
-            onChange={() => toggleSection(key)}
-            isRTL={isRTL}
-          />
-        ))}
+        <DraggableSectionList
+          sectionOrder={sectionOrder}
+          visibleSections={visibleSections}
+          toggleSection={toggleSection}
+          reorderSections={reorderSections}
+          isRTL={isRTL}
+        />
       </AccordionSection>
 
       {/* ── Other ── */}

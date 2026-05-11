@@ -7,6 +7,8 @@ export function useCV() {
   return useContext(CVContext);
 }
 
+const DEFAULT_SECTION_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
+
 export function CVProvider({ children }) {
   const [cvData, setCvData] = useState(sampleData);
   const [selectedTemplate, setSelectedTemplate] = useState('modern');
@@ -19,6 +21,8 @@ export function CVProvider({ children }) {
     pagePadding: 'medium',
     sectionSpacing: 'medium',
   });
+
+  const [sectionOrder, setSectionOrder] = useState(DEFAULT_SECTION_ORDER);
 
   const [visibleSections, setVisibleSections] = useState({
     summary: true,
@@ -49,6 +53,15 @@ export function CVProvider({ children }) {
     setVisiblePersonalFields(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
+  const reorderSections = (fromIndex, toIndex) => {
+    setSectionOrder(prev => {
+      const next = [...prev];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  };
+
   const value = {
     cvData,
     setCvData,
@@ -57,6 +70,8 @@ export function CVProvider({ children }) {
     setSelectedTemplate,
     theme,
     setTheme,
+    sectionOrder,
+    reorderSections,
     visibleSections,
     toggleSection,
     visiblePersonalFields,

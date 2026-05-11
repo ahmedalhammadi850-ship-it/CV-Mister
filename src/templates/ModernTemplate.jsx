@@ -12,7 +12,13 @@ const labels = {
 };
 const tr = (key, isRTL) => labels[key][isRTL ? 'ar' : 'en'];
 
-const ModernTemplate = ({ data, theme, isRTL = false, visibleSections = {}, visiblePersonalFields = {} }) => {
+const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
+
+const ModernTemplate = ({
+  data, theme, isRTL = false,
+  visibleSections = {}, visiblePersonalFields = {},
+  sectionOrder = DEFAULT_ORDER,
+}) => {
   const accent = theme?.primaryColor || '#4f46e5';
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
@@ -38,64 +44,84 @@ const ModernTemplate = ({ data, theme, isRTL = false, visibleSections = {}, visi
 
   const contact = buildContact(data.personalInfo, visiblePersonalFields, isRTL);
 
+  const renderSection = (key) => {
+    if (!show(key)) return null;
+    switch (key) {
+      case 'summary':
+        return data.personalInfo.summary ? (
+          <div key="summary">
+            <div style={s.heading}>{tr('summary', isRTL)}</div>
+            <div style={s.body}>{data.personalInfo.summary}</div>
+          </div>
+        ) : null;
+      case 'experience':
+        return data.experience?.length > 0 ? (
+          <div key="experience">
+            <div style={s.heading}>{tr('experience', isRTL)}</div>
+            {data.experience.map((e, i) => (
+              <div key={i} style={{ marginBottom: '10pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{e.jobTitle}</div>
+                  <div style={s.date}>{e.startDate} {tr('to', isRTL)} {e.current ? tr('present', isRTL) : e.endDate}</div>
+                </div>
+                <div style={s.meta}>{e.company}{e.location ? `، ${e.location}` : ''}</div>
+                <div style={s.body}>{e.description}</div>
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'education':
+        return data.education?.length > 0 ? (
+          <div key="education">
+            <div style={s.heading}>{tr('education', isRTL)}</div>
+            {data.education.map((e, i) => (
+              <div key={i} style={{ marginBottom: '8pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{e.degree}</div>
+                  <div style={s.date}>{e.startDate} {tr('to', isRTL)} {e.endDate}</div>
+                </div>
+                <div style={s.meta}>{e.institution}</div>
+                {e.description && <div style={s.body}>{e.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'skills':
+        return data.skills?.length > 0 ? (
+          <div key="skills">
+            <div style={s.heading}>{tr('skills', isRTL)}</div>
+            <div style={s.body}>{data.skills.join(' | ')}</div>
+          </div>
+        ) : null;
+      case 'languages':
+        return data.languages?.length > 0 ? (
+          <div key="languages">
+            <div style={s.heading}>{tr('languages', isRTL)}</div>
+            <div style={s.body}>{data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}</div>
+          </div>
+        ) : null;
+      case 'projects':
+        return data.projects?.length > 0 ? (
+          <div key="projects">
+            <div style={s.heading}>{tr('projects', isRTL)}</div>
+            {data.projects.map((p, i) => (
+              <div key={i} style={{ marginBottom: '8pt' }}>
+                <div style={s.role}>{p.title}</div>
+                <div style={s.body}>{p.description}</div>
+              </div>
+            ))}
+          </div>
+        ) : null;
+      default: return null;
+    }
+  };
+
   return (
     <div style={s.page}>
       <div style={s.name}>{data.personalInfo.fullName}</div>
       <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
       {contact && <div style={s.contact}>{contact}</div>}
-
-      {show('summary') && data.personalInfo.summary && <>
-        <div style={s.heading}>{tr('summary', isRTL)}</div>
-        <div style={s.body}>{data.personalInfo.summary}</div>
-      </>}
-
-      {show('experience') && data.experience?.length > 0 && <>
-        <div style={s.heading}>{tr('experience', isRTL)}</div>
-        {data.experience.map((e, i) => (
-          <div key={i} style={{ marginBottom: '10pt' }}>
-            <div style={s.row}>
-              <div style={s.role}>{e.jobTitle}</div>
-              <div style={s.date}>{e.startDate} {tr('to', isRTL)} {e.current ? tr('present', isRTL) : e.endDate}</div>
-            </div>
-            <div style={s.meta}>{e.company}{e.location ? `، ${e.location}` : ''}</div>
-            <div style={s.body}>{e.description}</div>
-          </div>
-        ))}
-      </>}
-
-      {show('education') && data.education?.length > 0 && <>
-        <div style={s.heading}>{tr('education', isRTL)}</div>
-        {data.education.map((e, i) => (
-          <div key={i} style={{ marginBottom: '8pt' }}>
-            <div style={s.row}>
-              <div style={s.role}>{e.degree}</div>
-              <div style={s.date}>{e.startDate} {tr('to', isRTL)} {e.endDate}</div>
-            </div>
-            <div style={s.meta}>{e.institution}</div>
-            {e.description && <div style={s.body}>{e.description}</div>}
-          </div>
-        ))}
-      </>}
-
-      {show('skills') && data.skills?.length > 0 && <>
-        <div style={s.heading}>{tr('skills', isRTL)}</div>
-        <div style={s.body}>{data.skills.join(' | ')}</div>
-      </>}
-
-      {show('languages') && data.languages?.length > 0 && <>
-        <div style={s.heading}>{tr('languages', isRTL)}</div>
-        <div style={s.body}>{data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}</div>
-      </>}
-
-      {show('projects') && data.projects?.length > 0 && <>
-        <div style={s.heading}>{tr('projects', isRTL)}</div>
-        {data.projects.map((p, i) => (
-          <div key={i} style={{ marginBottom: '8pt' }}>
-            <div style={s.role}>{p.title}</div>
-            <div style={s.body}>{p.description}</div>
-          </div>
-        ))}
-      </>}
+      {sectionOrder.map(key => renderSection(key))}
     </div>
   );
 };
