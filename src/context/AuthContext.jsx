@@ -1,6 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-// import { auth } from '../firebase/config';
-// import { onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext();
 
@@ -14,24 +12,33 @@ export function AuthProvider({ children }) {
   const [isRTL, setIsRTL] = useState(false);
 
   useEffect(() => {
-    // Mock auth for now until firebase is fully setup
-    const user = { uid: '123', email: 'user@example.com', displayName: 'Demo User' };
-    setCurrentUser(user);
-    setLoading(false);
-    
-    /*
-    const unsubscribe = onAuthStateChanged(auth, user => {
-      setCurrentUser(user);
-      setLoading(false);
-    });
-
-    return unsubscribe;
-    */
+    fetch('/__replauthuser', { credentials: 'include' })
+      .then(res => {
+        if (res.ok) return res.json();
+        return null;
+      })
+      .then(data => {
+        if (data && data.id) {
+          setCurrentUser({
+            uid: data.id,
+            name: data.name,
+            displayName: data.name,
+            profileImage: data.profileImage,
+          });
+        } else {
+          setCurrentUser(null);
+        }
+      })
+      .catch(() => setCurrentUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
   const toggleRTL = () => {
-    setIsRTL(prev => !prev);
-    document.documentElement.dir = !isRTL ? 'rtl' : 'ltr';
+    setIsRTL(prev => {
+      const next = !prev;
+      document.documentElement.dir = next ? 'rtl' : 'ltr';
+      return next;
+    });
   };
 
   const value = {
