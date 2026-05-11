@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCV } from '../context/CVContext';
 import { useAuth } from '../context/AuthContext';
 import ModernTemplate from '../templates/ModernTemplate';
@@ -55,7 +55,7 @@ const PREVIEW_SCALE = 0.28;
 const PREVIEW_W = 794;
 const PREVIEW_H = 1122;
 
-const TemplateCard = ({ template, isSelected, isRTL, onSelect }) => {
+const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse }) => {
   const Component = template.component;
   const previewTheme = { primaryColor: template.color };
 
@@ -64,7 +64,7 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect }) => {
       className={`group rounded-2xl overflow-hidden border-2 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl ${
         isSelected ? 'border-primary-500 shadow-lg shadow-primary-100' : 'border-slate-200 hover:border-primary-300'
       }`}
-      onClick={() => onSelect(template.id)}
+      onClick={() => onUse(template.id)}
     >
       {/* Live mini preview */}
       <div className="relative overflow-hidden bg-slate-100" style={{ height: PREVIEW_H * PREVIEW_SCALE }}>
@@ -128,8 +128,14 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect }) => {
 const TemplatesPage = () => {
   const { selectedTemplate, setSelectedTemplate } = useCV();
   const { isRTL } = useAuth();
+  const navigate = useNavigate();
 
   const active = templates.find(t => t.id === selectedTemplate);
+
+  const handleUse = (id) => {
+    setSelectedTemplate(id);
+    navigate('/builder');
+  };
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -161,6 +167,7 @@ const TemplatesPage = () => {
               isSelected={selectedTemplate === template.id}
               isRTL={isRTL}
               onSelect={setSelectedTemplate}
+              onUse={handleUse}
             />
           ))}
         </div>
