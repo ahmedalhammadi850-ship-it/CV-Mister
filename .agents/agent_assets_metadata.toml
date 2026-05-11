@@ -1,0 +1,20 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "px2hoOQuDJebWe2ysiy_G"
+uri = "file://artifacts/mockup-sandbox/public/images/cv-luxury-hero.png"
+type = "image"
+title = "architectural luxury resume abstraction"
+
+[[generated]]
+id = "od-hGwSuqkOZrFXGNaQvW"
+uri = "file://artifacts/mockup-sandbox/public/images/cv-luxury-preview.png"
+type = "image"
+title = "premium resume template close-up"
+
+[[generated]]
+id = "x2Q4LztbQrqaI1ELeEBK_"
+uri = "file://artifacts/mockup-sandbox/public/images/cv-luxury-details.png"
+type = "image"
+title = "elegant desk with pen"

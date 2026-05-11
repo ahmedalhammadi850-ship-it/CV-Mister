@@ -1,0 +1,50 @@
+/* _group_bold.css */
+
+@keyframes bv-gradient-x {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.bv-animate-gradient {
+  background-size: 200% auto;
+  animation: bv-gradient-x 4s linear infinite;
+}
+
+@keyframes bv-float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-15px) rotate(2deg); }
+}
+
+.bv-animate-float {
+  animation: bv-float 5s ease-in-out infinite;
+}
+
+@keyframes bv-pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px 0 rgba(168, 85, 247, 0.2); }
+  50% { box-shadow: 0 0 40px 10px rgba(168, 85, 247, 0.4); }
+}
+
+.bv-glow {
+  animation: bv-pulse-glow 3s ease-in-out infinite;
+}
+
+.bv-grid-pattern {
+  background-image: linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.bv-radial-gradient {
+  background: radial-gradient(circle at center, rgba(168, 85, 247, 0.15) 0%, rgba(9, 9, 11, 1) 70%);
+}
+
+.bv-diagonal-stripe {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(168, 85, 247, 0.05),
+    rgba(168, 85, 247, 0.05) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+}
