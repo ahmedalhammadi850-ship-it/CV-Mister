@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useCV } from '../context/CVContext';
+import { useAuth } from '../context/AuthContext';
 import ModernTemplate from '../templates/ModernTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeTemplate from '../templates/CreativeTemplate';
@@ -10,102 +11,87 @@ import { sampleData } from '../utils/sampleData';
 const templates = [
   {
     id: 'modern',
-    name: 'Modern',
-    arabicName: 'عصري',
-    description: 'Two-column layout with a bold colored sidebar.',
-    arabicDescription: 'تصميم عمودين مع شريط جانبي ملون وجذاب.',
+    name: 'Modern',         arabicName: 'عصري',
+    desc: 'Simple layout with a strong accent color on the name and section headings.',
+    arabicDesc: 'تصميم بسيط مع تمييز لوني قوي على الاسم وعناوين الأقسام.',
     color: '#4f46e5',
     component: ModernTemplate,
   },
   {
     id: 'classic',
-    name: 'Classic',
-    arabicName: 'كلاسيكي',
-    description: 'Traditional elegant single-column design.',
-    arabicDescription: 'تصميم تقليدي أنيق بعمود واحد.',
+    name: 'Classic',        arabicName: 'كلاسيكي',
+    desc: 'Centered header, elegant dividers, traditional single-column layout.',
+    arabicDesc: 'رأسية مركزية، فواصل أنيقة، تصميم تقليدي بعمود واحد.',
     color: '#1e3a5f',
     component: ClassicTemplate,
   },
   {
     id: 'creative',
-    name: 'Creative',
-    arabicName: 'إبداعي',
-    description: 'Vibrant layout with gradient accents and skill bars.',
-    arabicDescription: 'تصميم نابض بالحياة مع تدرجات لونية وأشرطة مهارات.',
+    name: 'Creative',       arabicName: 'إبداعي',
+    desc: 'Left accent bar with colored company names and a modern feel.',
+    arabicDesc: 'شريط لوني جانبي مع أسماء شركات ملوّنة وإحساس عصري.',
     color: '#7c3aed',
     component: CreativeTemplate,
   },
   {
     id: 'minimal',
-    name: 'Minimal',
-    arabicName: 'بسيط',
-    description: 'Clean whitespace-driven typography-first design.',
-    arabicDescription: 'تصميم نظيف يعتمد على المساحة البيضاء والطباعة.',
-    color: '#111827',
+    name: 'Minimal',        arabicName: 'بسيط',
+    desc: 'Maximum whitespace, light grey dividers, clean typography.',
+    arabicDesc: 'مساحة بيضاء واسعة، فواصل رمادية خفيفة، طباعة نظيفة.',
+    color: '#374151',
     component: MinimalTemplate,
   },
   {
     id: 'executive',
-    name: 'Executive',
-    arabicName: 'تنفيذي',
-    description: 'Prestigious dark header with gold accents for senior roles.',
-    arabicDescription: 'رأسية داكنة مع لمسات ذهبية للمناصب القيادية.',
+    name: 'Executive',      arabicName: 'تنفيذي',
+    desc: 'Uppercase name, double-line divider, gold section rule lines.',
+    arabicDesc: 'اسم بأحرف كبيرة، خط مزدوج فاصل، خطوط ذهبية للأقسام.',
     color: '#0f2942',
     component: ExecutiveTemplate,
   },
 ];
 
 const PREVIEW_SCALE = 0.28;
-const PREVIEW_WIDTH = 794;
-const PREVIEW_HEIGHT = 1122;
+const PREVIEW_W = 794;
+const PREVIEW_H = 1122;
 
-const TemplateCard = ({ template, isSelected, onSelect }) => {
+const TemplateCard = ({ template, isSelected, isRTL, onSelect }) => {
   const Component = template.component;
-  const previewTheme = { primaryColor: template.color, fontFamily: 'Inter, sans-serif' };
+  const previewTheme = { primaryColor: template.color };
 
   return (
     <div
       className={`group rounded-2xl overflow-hidden border-2 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl ${
-        isSelected
-          ? 'border-primary-500 shadow-lg shadow-primary-100'
-          : 'border-slate-200 hover:border-primary-300'
+        isSelected ? 'border-primary-500 shadow-lg shadow-primary-100' : 'border-slate-200 hover:border-primary-300'
       }`}
       onClick={() => onSelect(template.id)}
     >
-      {/* Template Preview */}
-      <div
-        className="relative overflow-hidden bg-slate-100"
-        style={{ height: PREVIEW_HEIGHT * PREVIEW_SCALE }}
-      >
+      {/* Live mini preview */}
+      <div className="relative overflow-hidden bg-slate-100" style={{ height: PREVIEW_H * PREVIEW_SCALE }}>
         <div
           style={{
             transform: `scale(${PREVIEW_SCALE})`,
             transformOrigin: 'top left',
-            width: PREVIEW_WIDTH,
-            height: PREVIEW_HEIGHT,
+            width: PREVIEW_W,
+            height: PREVIEW_H,
             pointerEvents: 'none',
             userSelect: 'none',
           }}
         >
-          <Component data={sampleData} theme={previewTheme} />
+          <Component data={sampleData} theme={previewTheme} isRTL={isRTL} />
         </div>
 
-        {/* Overlay on hover */}
+        {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            {isSelected ? (
-              <span className="bg-white text-primary-600 font-semibold text-sm px-4 py-2 rounded-full shadow-md">
-                ✓ Selected
-              </span>
-            ) : (
-              <span className="bg-white text-slate-700 font-semibold text-sm px-4 py-2 rounded-full shadow-md">
-                Use Template
-              </span>
-            )}
+            <span className="bg-white text-slate-700 font-semibold text-sm px-4 py-2 rounded-full shadow-md">
+              {isSelected
+                ? (isRTL ? '✓ محدد' : '✓ Selected')
+                : (isRTL ? 'استخدام القالب' : 'Use Template')}
+            </span>
           </div>
         </div>
 
-        {/* Selected badge */}
         {isSelected && (
           <div
             className="absolute top-3 right-3 w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-md"
@@ -116,27 +102,34 @@ const TemplateCard = ({ template, isSelected, onSelect }) => {
         )}
       </div>
 
-      {/* Card info */}
+      {/* Card footer */}
       <div className="p-4 bg-white">
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: template.color }} />
-            <h3 className="font-bold text-slate-800">{template.name}</h3>
+            <h3 className="font-bold text-slate-800">
+              {isRTL ? template.arabicName : template.name}
+            </h3>
           </div>
           {isSelected && (
             <span className="text-xs font-medium text-primary-600 bg-primary-50 px-2 py-0.5 rounded-full">
-              Active
+              {isRTL ? 'نشط' : 'Active'}
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-500">{template.description}</p>
+        <p className="text-xs text-slate-500">
+          {isRTL ? template.arabicDesc : template.desc}
+        </p>
       </div>
     </div>
   );
 };
 
 const TemplatesPage = () => {
-  const { selectedTemplate, setSelectedTemplate, isRTL } = useCV();
+  const { selectedTemplate, setSelectedTemplate } = useCV();
+  const { isRTL } = useAuth();
+
+  const active = templates.find(t => t.id === selectedTemplate);
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -152,8 +145,8 @@ const TemplatesPage = () => {
           </h1>
           <p className="text-slate-500 max-w-xl mx-auto text-base">
             {isRTL
-              ? 'كل قالب مصمم باحترافية عالية ومحسّن لأنظمة تتبع المتقدمين.'
-              : 'Every template is professionally designed and optimized for applicant tracking systems.'}
+              ? 'كل قالب مصمم باحترافية عالية ومتوافق مع خط Calibri وأنظمة ATS.'
+              : 'Every template uses Calibri font and is fully optimized for applicant tracking systems.'}
           </p>
         </div>
       </div>
@@ -166,6 +159,7 @@ const TemplatesPage = () => {
               key={template.id}
               template={template}
               isSelected={selectedTemplate === template.id}
+              isRTL={isRTL}
               onSelect={setSelectedTemplate}
             />
           ))}
@@ -175,14 +169,11 @@ const TemplatesPage = () => {
         <div className="mt-12 text-center">
           <p className="text-slate-500 mb-4 text-sm">
             {isRTL
-              ? `تم اختيار قالب "${templates.find(t => t.id === selectedTemplate)?.arabicName || ''}"`
-              : `"${templates.find(t => t.id === selectedTemplate)?.name || ''}" template selected`}
+              ? `تم اختيار قالب "${active?.arabicName || ''}"`
+              : `"${active?.name || ''}" template selected`}
           </p>
-          <Link
-            to="/builder"
-            className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-base"
-          >
-            {isRTL ? 'ابدأ بناء سيرتك الذاتية ←' : 'Start Building Your Resume →'}
+          <Link to="/builder" className="btn-primary inline-flex items-center gap-2 px-8 py-3 text-base">
+            {isRTL ? '→ ابدأ بناء سيرتك الذاتية' : 'Start Building Your Resume →'}
           </Link>
         </div>
       </div>

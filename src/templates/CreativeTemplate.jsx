@@ -1,100 +1,98 @@
-/*
-  ATS-SAFE | Calibri 11pt body / 14pt headings / 20pt name
-  Left-aligned header with accent bar. Single column. No icons or backgrounds.
-*/
-const CreativeTemplate = ({ data, theme }) => {
+const t = {
+  summary:    { en: 'Professional Summary',  ar: 'الملخص المهني'     },
+  experience: { en: 'Work Experience',       ar: 'الخبرة العملية'    },
+  education:  { en: 'Education',             ar: 'التعليم'           },
+  skills:     { en: 'Skills',                ar: 'المهارات'          },
+  languages:  { en: 'Languages',             ar: 'اللغات'            },
+  projects:   { en: 'Projects',              ar: 'المشاريع'          },
+  email:      { en: 'Email',                 ar: 'البريد الإلكتروني' },
+  phone:      { en: 'Phone',                 ar: 'الهاتف'            },
+  location:   { en: 'Location',              ar: 'الموقع'            },
+  linkedin:   { en: 'LinkedIn',              ar: 'لينكد إن'          },
+  present:    { en: 'Present',               ar: 'حتى الآن'          },
+};
+const tr = (key, isRTL) => t[key][isRTL ? 'ar' : 'en'];
+
+const CreativeTemplate = ({ data, theme, isRTL = false }) => {
   const accentColor = theme?.primaryColor || '#7c3aed';
+  const dir = isRTL ? 'rtl' : 'ltr';
+  const font = isRTL
+    ? "'Tajawal', Arial, sans-serif"
+    : "'Calibri', 'Carlito', Arial, sans-serif";
+
+  const borderSide = isRTL ? 'borderRight' : 'borderLeft';
 
   const s = {
     page: {
-      fontFamily: "'Calibri', 'Carlito', Arial, sans-serif",
+      fontFamily: font,
       fontSize: '11pt',
       color: '#1a1a1a',
       backgroundColor: '#ffffff',
       padding: '36pt 44pt',
-      lineHeight: 1.4,
+      lineHeight: isRTL ? 1.8 : 1.4,
       width: '794px',
       minHeight: '1122px',
       boxSizing: 'border-box',
+      direction: dir,
+      textAlign: isRTL ? 'right' : 'left',
     },
     accentBar: {
       width: '48pt',
       height: '3pt',
       backgroundColor: accentColor,
       marginBottom: '8pt',
+      marginLeft: isRTL ? 'auto' : 0,
+      marginRight: isRTL ? 0 : 'auto',
     },
-    name: {
-      fontSize: '20pt',
-      fontWeight: '700',
-      color: '#1a1a1a',
-      marginBottom: '2pt',
-      lineHeight: 1.2,
-    },
-    jobTitle: {
-      fontSize: '11pt',
-      color: accentColor,
-      fontWeight: '600',
-      marginBottom: '6pt',
-    },
-    contactRow: {
-      fontSize: '10pt',
-      color: '#444',
-      marginBottom: '14pt',
-    },
+    name: { fontSize: '20pt', fontWeight: '700', color: '#1a1a1a', marginBottom: '2pt', lineHeight: 1.2 },
+    jobTitle: { fontSize: '11pt', color: accentColor, fontWeight: '600', marginBottom: '6pt' },
+    contactRow: { fontSize: '10pt', color: '#444', marginBottom: '14pt' },
     sectionHeading: {
-      fontSize: '14pt',
-      fontWeight: '700',
-      color: '#1a1a1a',
-      marginTop: '14pt',
-      marginBottom: '4pt',
-      paddingLeft: '8pt',
-      borderLeft: `3pt solid ${accentColor}`,
+      fontSize: '14pt', fontWeight: '700', color: '#1a1a1a',
+      marginTop: '14pt', marginBottom: '4pt',
+      paddingLeft: isRTL ? 0 : '8pt',
+      paddingRight: isRTL ? '8pt' : 0,
+      [borderSide]: `3pt solid ${accentColor}`,
     },
     jobRole: { fontSize: '11pt', fontWeight: '700', marginBottom: '1pt' },
     jobMeta: { fontSize: '10pt', color: '#555', marginBottom: '4pt' },
-    bodyText: { fontSize: '11pt', color: '#222', lineHeight: 1.5, whiteSpace: 'pre-line' },
-    row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
-    date: { fontSize: '10pt', color: '#666', whiteSpace: 'nowrap', marginLeft: '12pt' },
+    bodyText: { fontSize: '11pt', color: '#222', lineHeight: isRTL ? 1.9 : 1.5, whiteSpace: 'pre-line' },
+    row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isRTL ? 'row-reverse' : 'row' },
+    date: { fontSize: '10pt', color: '#666', whiteSpace: 'nowrap', marginLeft: isRTL ? 0 : '12pt', marginRight: isRTL ? '12pt' : 0 },
   };
+
+  const contactParts = [
+    data.personalInfo.email    && `${tr('email', isRTL)}: ${data.personalInfo.email}`,
+    data.personalInfo.phone    && `${tr('phone', isRTL)}: ${data.personalInfo.phone}`,
+    data.personalInfo.location && `${tr('location', isRTL)}: ${data.personalInfo.location}`,
+    data.personalInfo.linkedin && `${tr('linkedin', isRTL)}: ${data.personalInfo.linkedin}`,
+  ].filter(Boolean);
 
   return (
     <div style={s.page}>
-
-      {/* Accent bar + Name */}
       <div style={s.accentBar} />
       <div style={s.name}>{data.personalInfo.fullName}</div>
       <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
+      <div style={s.contactRow}>{contactParts.join('   |   ')}</div>
 
-      {/* Contact */}
-      <div style={s.contactRow}>
-        {[
-          data.personalInfo.email && `Email: ${data.personalInfo.email}`,
-          data.personalInfo.phone && `Phone: ${data.personalInfo.phone}`,
-          data.personalInfo.location && `Location: ${data.personalInfo.location}`,
-          data.personalInfo.linkedin && `LinkedIn: ${data.personalInfo.linkedin}`,
-        ].filter(Boolean).join('   |   ')}
-      </div>
-
-      {/* Professional Summary */}
       {data.personalInfo.summary && (
         <div>
-          <div style={s.sectionHeading}>Professional Summary</div>
+          <div style={s.sectionHeading}>{tr('summary', isRTL)}</div>
           <div style={{ ...s.bodyText, marginTop: '6pt' }}>{data.personalInfo.summary}</div>
         </div>
       )}
 
-      {/* Work Experience */}
       {data.experience?.length > 0 && (
         <div>
-          <div style={s.sectionHeading}>Work Experience</div>
+          <div style={s.sectionHeading}>{tr('experience', isRTL)}</div>
           {data.experience.map((exp, i) => (
             <div key={i} style={{ marginTop: '8pt', marginBottom: '6pt' }}>
               <div style={s.row}>
                 <div style={s.jobRole}>{exp.jobTitle}</div>
-                <div style={s.date}>{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</div>
+                <div style={s.date}>{exp.startDate} – {exp.current ? tr('present', isRTL) : exp.endDate}</div>
               </div>
               <div style={{ ...s.jobMeta, color: accentColor, fontWeight: '600' }}>
-                {exp.company}{exp.location ? `, ${exp.location}` : ''}
+                {exp.company}{exp.location ? `، ${exp.location}` : ''}
               </div>
               <div style={s.bodyText}>{exp.description}</div>
             </div>
@@ -102,10 +100,9 @@ const CreativeTemplate = ({ data, theme }) => {
         </div>
       )}
 
-      {/* Education */}
       {data.education?.length > 0 && (
         <div>
-          <div style={s.sectionHeading}>Education</div>
+          <div style={s.sectionHeading}>{tr('education', isRTL)}</div>
           {data.education.map((edu, i) => (
             <div key={i} style={{ marginTop: '8pt', marginBottom: '6pt' }}>
               <div style={s.row}>
@@ -119,21 +116,31 @@ const CreativeTemplate = ({ data, theme }) => {
         </div>
       )}
 
-      {/* Skills */}
       {data.skills?.length > 0 && (
         <div>
-          <div style={s.sectionHeading}>Skills</div>
+          <div style={s.sectionHeading}>{tr('skills', isRTL)}</div>
           <div style={{ ...s.bodyText, marginTop: '6pt' }}>{data.skills.join(' | ')}</div>
         </div>
       )}
 
-      {/* Languages */}
       {data.languages?.length > 0 && (
         <div>
-          <div style={s.sectionHeading}>Languages</div>
+          <div style={s.sectionHeading}>{tr('languages', isRTL)}</div>
           <div style={{ ...s.bodyText, marginTop: '6pt' }}>
             {data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}
           </div>
+        </div>
+      )}
+
+      {data.projects?.length > 0 && (
+        <div>
+          <div style={s.sectionHeading}>{tr('projects', isRTL)}</div>
+          {data.projects.map((proj, i) => (
+            <div key={i} style={{ marginTop: '6pt' }}>
+              <div style={s.jobRole}>{proj.title}</div>
+              <div style={s.bodyText}>{proj.description}</div>
+            </div>
+          ))}
         </div>
       )}
     </div>
