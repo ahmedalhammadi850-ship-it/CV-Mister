@@ -8,8 +8,16 @@ import BuilderPage from './pages/BuilderPage';
 import AboutPage from './pages/AboutPage';
 import TemplatesPage from './pages/TemplatesPage';
 
-const LoginPage = () => <div className="p-8">Login</div>;
-const SignupPage = () => <div className="p-8">Sign Up</div>;
+import { useEffect } from 'react';
+
+const LoginPage = () => {
+  useEffect(() => { window.location.href = '/api/login'; }, []);
+  return null;
+};
+const SignupPage = () => {
+  useEffect(() => { window.location.href = '/api/login'; }, []);
+  return null;
+};
 
 function App() {
   const { isRTL } = useAuth();
