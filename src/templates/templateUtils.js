@@ -28,15 +28,31 @@ const SECTION_MT = {
   relaxed: '22pt',
 };
 
+const LATIN_ONLY_FONTS = new Set([
+  'Calibri', 'Arial', 'Georgia', 'Times New Roman',
+  'Verdana', 'Trebuchet MS', 'Inter', 'Merriweather', 'Outfit',
+]);
+
+const ARABIC_FONTS = new Set([
+  'Tajawal', 'Cairo', 'Amiri', 'Noto Naskh Arabic', 'Scheherazade New',
+]);
+
 export function resolveTheme(theme, isRTL) {
-  const fontSize    = theme?.fontSize    || 'medium';
-  const fontFamily  = theme?.fontFamily  || 'Calibri';
-  const pagePadding = theme?.pagePadding || 'medium';
-  const lineHeightKey = theme?.lineHeight || 'normal';
+  const fontSize       = theme?.fontSize       || 'medium';
+  let   fontFamily     = theme?.fontFamily     || (isRTL ? 'Tajawal' : 'Calibri');
+  const pagePadding    = theme?.pagePadding    || 'medium';
+  const lineHeightKey  = theme?.lineHeight     || 'normal';
   const sectionSpacing = theme?.sectionSpacing || 'medium';
 
+  if (isRTL && LATIN_ONLY_FONTS.has(fontFamily)) {
+    fontFamily = 'Tajawal';
+  }
+  if (!isRTL && ARABIC_FONTS.has(fontFamily)) {
+    fontFamily = 'Calibri';
+  }
+
   const baseFont = isRTL
-    ? "'Tajawal', Arial, sans-serif"
+    ? `'${fontFamily}', 'Tajawal', Arial, sans-serif`
     : `'${fontFamily}', 'Calibri', Arial, sans-serif`;
 
   return {
@@ -60,11 +76,12 @@ export function buildContact(info, visible, isRTL) {
   };
   const L = (k) => labels[k]?.[isRTL ? 'ar' : 'en'] ?? k;
 
+  const vis = visible || {};
   return [
-    visible.email     !== false && info.email    && `${L('email')}: ${info.email}`,
-    visible.phone     !== false && info.phone     && `${L('phone')}: ${info.phone}`,
-    visible.location  !== false && info.location  && `${L('location')}: ${info.location}`,
-    visible.linkedin  !== false && info.linkedin  && `${L('linkedin')}: ${info.linkedin}`,
-    visible.portfolio !== false && info.portfolio && `${L('portfolio')}: ${info.portfolio}`,
+    vis.email     !== false && info?.email     && `${L('email')}: ${info.email}`,
+    vis.phone     !== false && info?.phone     && `${L('phone')}: ${info.phone}`,
+    vis.location  !== false && info?.location  && `${L('location')}: ${info.location}`,
+    vis.linkedin  !== false && info?.linkedin  && `${L('linkedin')}: ${info.linkedin}`,
+    vis.portfolio !== false && info?.portfolio && `${L('portfolio')}: ${info.portfolio}`,
   ].filter(Boolean).join('   |   ');
 }

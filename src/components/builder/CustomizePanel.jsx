@@ -15,13 +15,21 @@ const COLORS = [
   { label: 'Black',    value: '#111111' },
 ];
 
-const FONTS = [
-  { label: 'Calibri',   value: 'Calibri'  },
-  { label: 'Arial',     value: 'Arial'    },
-  { label: 'Georgia',   value: 'Georgia'  },
-  { label: 'Times New Roman', value: 'Times New Roman' },
-  { label: 'Verdana',   value: 'Verdana'  },
-  { label: 'Trebuchet', value: 'Trebuchet MS' },
+const FONTS_EN = [
+  { label: 'Calibri',        value: 'Calibri'        },
+  { label: 'Arial',          value: 'Arial'          },
+  { label: 'Georgia',        value: 'Georgia'        },
+  { label: 'Times New Roman',value: 'Times New Roman'},
+  { label: 'Verdana',        value: 'Verdana'        },
+  { label: 'Trebuchet MS',   value: 'Trebuchet MS'   },
+];
+
+const FONTS_AR = [
+  { label: 'تجوال',          value: 'Tajawal'               },
+  { label: 'كايرو',          value: 'Cairo'                 },
+  { label: 'أميري',          value: 'Amiri'                 },
+  { label: 'نوتو نسخ',       value: 'Noto Naskh Arabic'     },
+  { label: 'شهرزاد',         value: 'Scheherazade New'      },
 ];
 
 const TEMPLATES = [
@@ -108,12 +116,12 @@ const AccordionSection = ({ titleKey, isRTL, children, defaultOpen = false }) =>
 };
 
 const SegmentedControl = ({ options, value, onChange, isRTL }) => (
-  <div className="flex gap-1.5 flex-wrap">
+  <div className="flex gap-1.5" style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}>
     {options.map(opt => (
       <button
         key={opt.value}
         onClick={() => onChange(opt.value)}
-        className={`flex-1 min-w-0 py-1.5 px-2 rounded-lg text-xs font-medium border transition-all ${
+        className={`flex-1 py-2 px-1 rounded-lg text-xs font-medium border transition-all text-center leading-tight ${
           value === opt.value
             ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
             : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
@@ -269,18 +277,25 @@ const CustomizePanel = () => {
         {/* Font Family */}
         <div>
           <label className={labelClass}>{t('fontFamily', isRTL)}</label>
-          <select
-            value={theme.fontFamily}
-            onChange={e => setTheme({ ...theme, fontFamily: e.target.value })}
-            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
-            style={{ fontFamily: theme.fontFamily }}
-          >
-            {FONTS.map(f => (
-              <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
+          <div className="grid grid-cols-1 gap-1.5">
+            {(isRTL ? FONTS_AR : FONTS_EN).map(f => (
+              <button
+                key={f.value}
+                onClick={() => setTheme({ ...theme, fontFamily: f.value })}
+                className={`w-full text-right px-3 py-2 rounded-lg text-sm border transition-all ${
+                  theme.fontFamily === f.value
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
+                }`}
+                style={{
+                  fontFamily: `'${f.value}', sans-serif`,
+                  textAlign: isRTL ? 'right' : 'left',
+                }}
+              >
                 {f.label}
-              </option>
+              </button>
             ))}
-          </select>
+          </div>
         </div>
       </AccordionSection>
 
