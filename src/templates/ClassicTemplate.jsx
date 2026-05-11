@@ -1,114 +1,141 @@
 /*
-  ATS-SAFE: Single column, clear section headings, no emoji, plain text contact labels.
+  ATS-SAFE | Calibri 11pt body / 14pt headings / 20pt name
+  Centered header, single column, clean dividers.
 */
 const ClassicTemplate = ({ data, theme }) => {
-  const primaryColor = theme?.primaryColor || '#1e3a5f';
-  const fontFamily = theme?.fontFamily || 'Georgia, serif';
+  const accentColor = theme?.primaryColor || '#1e3a5f';
 
-  const sectionHeading = {
-    fontSize: '0.7rem',
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: '0.15em',
-    color: primaryColor,
-    marginBottom: '0.5rem',
-    paddingBottom: '0.3rem',
-    borderBottom: `1px solid ${primaryColor}`,
+  const s = {
+    page: {
+      fontFamily: "'Calibri', 'Carlito', Arial, sans-serif",
+      fontSize: '11pt',
+      color: '#1a1a1a',
+      backgroundColor: '#ffffff',
+      padding: '36pt 44pt',
+      lineHeight: 1.4,
+      width: '794px',
+      minHeight: '1122px',
+      boxSizing: 'border-box',
+    },
+    header: {
+      textAlign: 'center',
+      borderBottom: `2px solid ${accentColor}`,
+      paddingBottom: '10pt',
+      marginBottom: '12pt',
+    },
+    name: {
+      fontSize: '20pt',
+      fontWeight: '700',
+      color: accentColor,
+      marginBottom: '3pt',
+    },
+    jobTitle: {
+      fontSize: '11pt',
+      color: '#555',
+      marginBottom: '5pt',
+    },
+    contactRow: {
+      fontSize: '10pt',
+      color: '#444',
+    },
+    sectionHeading: {
+      fontSize: '14pt',
+      fontWeight: '700',
+      color: accentColor,
+      marginTop: '14pt',
+      marginBottom: '5pt',
+      textTransform: 'uppercase',
+      letterSpacing: '0.04em',
+    },
+    divider: {
+      borderBottom: `1px solid ${accentColor}`,
+      marginBottom: '7pt',
+    },
+    jobRole: { fontSize: '11pt', fontWeight: '700', marginBottom: '1pt' },
+    jobMeta: { fontSize: '10pt', color: '#555', fontStyle: 'italic', marginBottom: '4pt' },
+    bodyText: { fontSize: '11pt', color: '#222', lineHeight: 1.5, whiteSpace: 'pre-line' },
+    row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' },
+    date: { fontSize: '10pt', color: '#555', whiteSpace: 'nowrap', marginLeft: '12pt' },
   };
 
   return (
-    <div className="resume-page bg-white text-slate-800 p-10" style={{ fontFamily }}>
+    <div style={s.page}>
 
-      {/* Header */}
-      <div style={{ textAlign: 'center', borderBottom: `2px solid ${primaryColor}`, paddingBottom: '1.25rem', marginBottom: '1.25rem' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: '700', letterSpacing: '0.05em', color: primaryColor, marginBottom: '0.25rem' }}>
-          {data.personalInfo.fullName}
-        </h1>
-        <h2 style={{ fontSize: '1rem', color: '#64748b', fontWeight: '400', marginBottom: '0.75rem' }}>
-          {data.personalInfo.jobTitle}
-        </h2>
-        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', fontSize: '0.78rem', color: '#475569' }}>
-          {data.personalInfo.email && <span>Email: {data.personalInfo.email}</span>}
-          {data.personalInfo.phone && <span>Phone: {data.personalInfo.phone}</span>}
-          {data.personalInfo.location && <span>Location: {data.personalInfo.location}</span>}
-          {data.personalInfo.linkedin && <span>LinkedIn: {data.personalInfo.linkedin}</span>}
+      {/* Centered header */}
+      <div style={s.header}>
+        <div style={s.name}>{data.personalInfo.fullName}</div>
+        <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
+        <div style={s.contactRow}>
+          {[
+            data.personalInfo.email && `Email: ${data.personalInfo.email}`,
+            data.personalInfo.phone && `Phone: ${data.personalInfo.phone}`,
+            data.personalInfo.location && `Location: ${data.personalInfo.location}`,
+            data.personalInfo.linkedin && `LinkedIn: ${data.personalInfo.linkedin}`,
+          ].filter(Boolean).join('   |   ')}
         </div>
       </div>
 
       {/* Professional Summary */}
       {data.personalInfo.summary && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <p style={sectionHeading}>Professional Summary</p>
-          <p style={{ fontSize: '0.8rem', color: '#475569', lineHeight: '1.7' }}>{data.personalInfo.summary}</p>
+        <div>
+          <div style={s.sectionHeading}>Professional Summary</div>
+          <div style={s.divider} />
+          <div style={s.bodyText}>{data.personalInfo.summary}</div>
         </div>
       )}
 
       {/* Work Experience */}
       {data.experience?.length > 0 && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <p style={sectionHeading}>Work Experience</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {data.experience.map((exp, i) => (
-              <div key={i}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <h4 style={{ fontWeight: '700', fontSize: '0.875rem', color: '#1e293b' }}>{exp.jobTitle}</h4>
-                    <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
-                      {exp.company}{exp.location ? `, ${exp.location}` : ''}
-                    </p>
-                  </div>
-                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
-                    {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
-                  </span>
-                </div>
-                <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: '1.65', marginTop: '0.25rem', whiteSpace: 'pre-line' }}>
-                  {exp.description}
-                </p>
+        <div>
+          <div style={s.sectionHeading}>Work Experience</div>
+          <div style={s.divider} />
+          {data.experience.map((exp, i) => (
+            <div key={i} style={{ marginBottom: '10pt' }}>
+              <div style={s.row}>
+                <div style={s.jobRole}>{exp.jobTitle}</div>
+                <div style={s.date}>{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</div>
               </div>
-            ))}
-          </div>
+              <div style={s.jobMeta}>{exp.company}{exp.location ? `, ${exp.location}` : ''}</div>
+              <div style={s.bodyText}>{exp.description}</div>
+            </div>
+          ))}
         </div>
       )}
 
       {/* Education */}
       {data.education?.length > 0 && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <p style={sectionHeading}>Education</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {data.education.map((edu, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <h4 style={{ fontWeight: '700', fontSize: '0.875rem', color: '#1e293b' }}>{edu.degree}</h4>
-                  <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>{edu.institution}</p>
-                  {edu.description && (
-                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.15rem' }}>{edu.description}</p>
-                  )}
-                </div>
-                <span style={{ fontSize: '0.72rem', color: '#94a3b8', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
-                  {edu.startDate} – {edu.endDate}
-                </span>
+        <div>
+          <div style={s.sectionHeading}>Education</div>
+          <div style={s.divider} />
+          {data.education.map((edu, i) => (
+            <div key={i} style={{ marginBottom: '8pt' }}>
+              <div style={s.row}>
+                <div style={s.jobRole}>{edu.degree}</div>
+                <div style={s.date}>{edu.startDate} – {edu.endDate}</div>
               </div>
-            ))}
-          </div>
+              <div style={s.jobMeta}>{edu.institution}</div>
+              {edu.description && <div style={s.bodyText}>{edu.description}</div>}
+            </div>
+          ))}
         </div>
       )}
 
       {/* Skills */}
       {data.skills?.length > 0 && (
-        <div style={{ marginBottom: '1.25rem' }}>
-          <p style={sectionHeading}>Skills</p>
-          <p style={{ fontSize: '0.8rem', color: '#475569' }}>{data.skills.join(' | ')}</p>
+        <div>
+          <div style={s.sectionHeading}>Skills</div>
+          <div style={s.divider} />
+          <div style={s.bodyText}>{data.skills.join(' | ')}</div>
         </div>
       )}
 
       {/* Languages */}
       {data.languages?.length > 0 && (
         <div>
-          <p style={sectionHeading}>Languages</p>
-          <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: '#475569' }}>
-            {data.languages.map((lang, i) => (
-              <span key={i}><strong>{lang.name}</strong> – {lang.level}</span>
-            ))}
+          <div style={s.sectionHeading}>Languages</div>
+          <div style={s.divider} />
+          <div style={s.bodyText}>
+            {data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}
           </div>
         </div>
       )}
