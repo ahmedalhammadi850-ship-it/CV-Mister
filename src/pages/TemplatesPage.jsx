@@ -71,7 +71,7 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect }) => {
         <div
           style={{
             transform: `scale(${PREVIEW_SCALE})`,
-            transformOrigin: 'top left',
+            transformOrigin: isRTL ? 'top right' : 'top left',
             width: PREVIEW_W,
             height: PREVIEW_H,
             pointerEvents: 'none',
