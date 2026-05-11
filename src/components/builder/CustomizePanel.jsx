@@ -1,0 +1,355 @@
+import { useState } from 'react';
+import { useCV } from '../../context/CVContext';
+import { useAuth } from '../../context/AuthContext';
+
+const COLORS = [
+  { label: 'Indigo',   value: '#4f46e5' },
+  { label: 'Blue',     value: '#1d4ed8' },
+  { label: 'Navy',     value: '#1e3a5f' },
+  { label: 'Teal',     value: '#0f766e' },
+  { label: 'Green',    value: '#15803d' },
+  { label: 'Purple',   value: '#7c3aed' },
+  { label: 'Crimson',  value: '#b91c1c' },
+  { label: 'Orange',   value: '#c2410c' },
+  { label: 'Charcoal', value: '#374151' },
+  { label: 'Black',    value: '#111111' },
+];
+
+const FONTS = [
+  { label: 'Calibri',   value: 'Calibri'  },
+  { label: 'Arial',     value: 'Arial'    },
+  { label: 'Georgia',   value: 'Georgia'  },
+  { label: 'Times New Roman', value: 'Times New Roman' },
+  { label: 'Verdana',   value: 'Verdana'  },
+  { label: 'Trebuchet', value: 'Trebuchet MS' },
+];
+
+const TEMPLATES = [
+  { value: 'modern',    en: 'Modern',    ar: 'عصري'    },
+  { value: 'classic',   en: 'Classic',   ar: 'كلاسيكي' },
+  { value: 'creative',  en: 'Creative',  ar: 'إبداعي'  },
+  { value: 'minimal',   en: 'Minimal',   ar: 'بسيط'    },
+  { value: 'executive', en: 'Executive', ar: 'تنفيذي'  },
+];
+
+const ui = {
+  basics:           { en: 'Basics',           ar: 'الأساسيات'        },
+  layoutSpacing:    { en: 'Layout & Spacing',  ar: 'التخطيط والمسافات' },
+  design:           { en: 'Design',           ar: 'التصميم'           },
+  personalDetails:  { en: 'Personal details', ar: 'البيانات الشخصية'  },
+  sections:         { en: 'Sections',         ar: 'الأقسام'           },
+  other:            { en: 'Other',            ar: 'أخرى'              },
+  template:         { en: 'Template',         ar: 'القالب'            },
+  fontFamily:       { en: 'Font Family',      ar: 'نوع الخط'          },
+  accentColor:      { en: 'Accent Color',     ar: 'اللون الرئيسي'     },
+  fontSize:         { en: 'Font Size',        ar: 'حجم الخط'          },
+  lineHeight:       { en: 'Line Height',      ar: 'ارتفاع السطر'      },
+  pagePadding:      { en: 'Page Margins',     ar: 'هوامش الصفحة'      },
+  sectionSpacing:   { en: 'Section Spacing',  ar: 'مسافة بين الأقسام' },
+  small:            { en: 'Small',            ar: 'صغير'              },
+  medium:           { en: 'Medium',           ar: 'متوسط'             },
+  large:            { en: 'Large',            ar: 'كبير'              },
+  compact:          { en: 'Compact',          ar: 'مضغوط'             },
+  relaxed:          { en: 'Relaxed',          ar: 'مريح'              },
+  narrow:           { en: 'Narrow',           ar: 'ضيق'              },
+  wide:             { en: 'Wide',             ar: 'واسع'              },
+  email:            { en: 'Email',            ar: 'البريد الإلكتروني' },
+  phone:            { en: 'Phone',            ar: 'الهاتف'            },
+  location:         { en: 'Location',         ar: 'الموقع'            },
+  linkedin:         { en: 'LinkedIn',         ar: 'لينكد إن'          },
+  portfolio:        { en: 'Portfolio',        ar: 'البورتفوليو'        },
+  summary:          { en: 'Summary',          ar: 'الملخص المهني'     },
+  experience:       { en: 'Experience',       ar: 'الخبرة'            },
+  education:        { en: 'Education',        ar: 'التعليم'           },
+  skills:           { en: 'Skills',           ar: 'المهارات'          },
+  projects:         { en: 'Projects',         ar: 'المشاريع'          },
+  languages:        { en: 'Languages',        ar: 'اللغات'            },
+  pageSize:         { en: 'Page Size',        ar: 'حجم الصفحة'        },
+  dateFormat:       { en: 'Date Format',      ar: 'تنسيق التاريخ'     },
+};
+const t = (key, isRTL) => ui[key]?.[isRTL ? 'ar' : 'en'] ?? key;
+
+const Toggle = ({ checked, onChange }) => (
+  <button
+    onClick={onChange}
+    className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors duration-200 focus:outline-none flex-shrink-0 ${checked ? 'bg-indigo-600' : 'bg-slate-200'}`}
+  >
+    <span
+      className={`inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform duration-200 ${checked ? 'translate-x-4.5' : 'translate-x-0.5'}`}
+      style={{ transform: checked ? 'translateX(18px)' : 'translateX(2px)' }}
+    />
+  </button>
+);
+
+const AccordionSection = ({ titleKey, isRTL, children, defaultOpen = false }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border-b border-slate-100 last:border-b-0">
+      <button
+        onClick={() => setOpen(o => !o)}
+        className="w-full flex items-center justify-between px-5 py-4 text-slate-800 font-semibold text-sm hover:bg-slate-50 transition-colors"
+        style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
+      >
+        <span>{t(titleKey, isRTL)}</span>
+        <svg
+          className={`w-4 h-4 text-slate-400 transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        >
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+        </svg>
+      </button>
+      {open && (
+        <div className="px-5 pb-5 pt-1 space-y-4 bg-slate-50/40">
+          {children}
+        </div>
+      )}
+    </div>
+  );
+};
+
+const SegmentedControl = ({ options, value, onChange, isRTL }) => (
+  <div className="flex gap-1.5 flex-wrap">
+    {options.map(opt => (
+      <button
+        key={opt.value}
+        onClick={() => onChange(opt.value)}
+        className={`flex-1 min-w-0 py-1.5 px-2 rounded-lg text-xs font-medium border transition-all ${
+          value === opt.value
+            ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+            : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+        }`}
+      >
+        {t(opt.labelKey, isRTL)}
+      </button>
+    ))}
+  </div>
+);
+
+const SectionToggleRow = ({ labelKey, checked, onChange, isRTL }) => (
+  <div
+    className="flex items-center justify-between py-1"
+    style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
+  >
+    <span className="text-sm text-slate-700">{t(labelKey, isRTL)}</span>
+    <Toggle checked={checked} onChange={onChange} />
+  </div>
+);
+
+const labelClass = 'block text-xs font-medium text-slate-500 mb-2';
+
+const CustomizePanel = () => {
+  const {
+    theme, setTheme,
+    selectedTemplate, setSelectedTemplate,
+    visibleSections, toggleSection,
+    visiblePersonalFields, togglePersonalField,
+  } = useCV();
+  const { isRTL } = useAuth();
+
+  return (
+    <div className="flex flex-col pb-20" dir={isRTL ? 'rtl' : 'ltr'}>
+
+      {/* ── Basics ── */}
+      <AccordionSection titleKey="basics" isRTL={isRTL} defaultOpen>
+
+        {/* Template */}
+        <div>
+          <label className={labelClass}>{t('template', isRTL)}</label>
+          <div className="grid grid-cols-2 gap-2">
+            {TEMPLATES.map(tpl => (
+              <button
+                key={tpl.value}
+                onClick={() => setSelectedTemplate(tpl.value)}
+                className={`py-2 px-3 rounded-lg text-sm font-medium border transition-all ${
+                  selectedTemplate === tpl.value
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
+                }`}
+              >
+                {isRTL ? tpl.ar : tpl.en}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Font Family */}
+        <div>
+          <label className={labelClass}>{t('fontFamily', isRTL)}</label>
+          <select
+            value={theme.fontFamily}
+            onChange={e => setTheme({ ...theme, fontFamily: e.target.value })}
+            className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            style={{ fontFamily: theme.fontFamily }}
+          >
+            {FONTS.map(f => (
+              <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </AccordionSection>
+
+      {/* ── Layout & Spacing ── */}
+      <AccordionSection titleKey="layoutSpacing" isRTL={isRTL}>
+
+        <div>
+          <label className={labelClass}>{t('pagePadding', isRTL)}</label>
+          <SegmentedControl
+            value={theme.pagePadding}
+            onChange={v => setTheme({ ...theme, pagePadding: v })}
+            isRTL={isRTL}
+            options={[
+              { value: 'narrow', labelKey: 'narrow' },
+              { value: 'medium', labelKey: 'medium' },
+              { value: 'wide',   labelKey: 'wide'   },
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass}>{t('sectionSpacing', isRTL)}</label>
+          <SegmentedControl
+            value={theme.sectionSpacing}
+            onChange={v => setTheme({ ...theme, sectionSpacing: v })}
+            isRTL={isRTL}
+            options={[
+              { value: 'compact', labelKey: 'compact' },
+              { value: 'medium',  labelKey: 'medium'  },
+              { value: 'relaxed', labelKey: 'relaxed' },
+            ]}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass}>{t('lineHeight', isRTL)}</label>
+          <SegmentedControl
+            value={theme.lineHeight}
+            onChange={v => setTheme({ ...theme, lineHeight: v })}
+            isRTL={isRTL}
+            options={[
+              { value: 'compact', labelKey: 'compact' },
+              { value: 'normal',  labelKey: 'medium'  },
+              { value: 'relaxed', labelKey: 'relaxed' },
+            ]}
+          />
+        </div>
+      </AccordionSection>
+
+      {/* ── Design ── */}
+      <AccordionSection titleKey="design" isRTL={isRTL}>
+
+        {/* Accent Color */}
+        <div>
+          <label className={labelClass}>{t('accentColor', isRTL)}</label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {COLORS.map(c => (
+              <button
+                key={c.value}
+                title={c.label}
+                onClick={() => setTheme({ ...theme, primaryColor: c.value })}
+                className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none"
+                style={{
+                  backgroundColor: c.value,
+                  borderColor: theme.primaryColor === c.value ? '#fff' : 'transparent',
+                  boxShadow: theme.primaryColor === c.value ? `0 0 0 2.5px ${c.value}` : 'none',
+                }}
+              />
+            ))}
+            <label
+              className="w-7 h-7 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 relative overflow-hidden"
+              title="Custom color"
+            >
+              <span className="text-slate-400 text-xs font-bold select-none">+</span>
+              <input
+                type="color"
+                value={theme.primaryColor}
+                onChange={e => setTheme({ ...theme, primaryColor: e.target.value })}
+                className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+              />
+            </label>
+          </div>
+        </div>
+
+        {/* Font Size */}
+        <div>
+          <label className={labelClass}>{t('fontSize', isRTL)}</label>
+          <SegmentedControl
+            value={theme.fontSize}
+            onChange={v => setTheme({ ...theme, fontSize: v })}
+            isRTL={isRTL}
+            options={[
+              { value: 'small',  labelKey: 'small'  },
+              { value: 'medium', labelKey: 'medium' },
+              { value: 'large',  labelKey: 'large'  },
+            ]}
+          />
+          <div className="mt-2.5 p-2.5 bg-white border border-slate-200 rounded-lg" style={{ direction: 'ltr' }}>
+            <span style={{
+              fontFamily: theme.fontFamily,
+              fontSize: theme.fontSize === 'small' ? '10pt' : theme.fontSize === 'large' ? '13pt' : '11pt',
+              color: theme.primaryColor,
+              fontWeight: '700',
+            }}>
+              {theme.fontSize === 'small' ? 'Aa — Small (10pt)' : theme.fontSize === 'large' ? 'Aa — Large (13pt)' : 'Aa — Medium (11pt)'}
+            </span>
+          </div>
+        </div>
+      </AccordionSection>
+
+      {/* ── Personal details ── */}
+      <AccordionSection titleKey="personalDetails" isRTL={isRTL}>
+        <p className="text-xs text-slate-400 -mt-1 mb-1">
+          {isRTL ? 'اختر الحقول التي تظهر في السيرة الذاتية' : 'Choose which fields appear on the CV'}
+        </p>
+        {Object.keys(visiblePersonalFields).map(key => (
+          <SectionToggleRow
+            key={key}
+            labelKey={key}
+            checked={visiblePersonalFields[key]}
+            onChange={() => togglePersonalField(key)}
+            isRTL={isRTL}
+          />
+        ))}
+      </AccordionSection>
+
+      {/* ── Sections ── */}
+      <AccordionSection titleKey="sections" isRTL={isRTL}>
+        <p className="text-xs text-slate-400 -mt-1 mb-1">
+          {isRTL ? 'اختر الأقسام التي تظهر في السيرة الذاتية' : 'Choose which sections appear on the CV'}
+        </p>
+        {Object.keys(visibleSections).map(key => (
+          <SectionToggleRow
+            key={key}
+            labelKey={key}
+            checked={visibleSections[key]}
+            onChange={() => toggleSection(key)}
+            isRTL={isRTL}
+          />
+        ))}
+      </AccordionSection>
+
+      {/* ── Other ── */}
+      <AccordionSection titleKey="other" isRTL={isRTL}>
+        <div>
+          <label className={labelClass}>{t('pageSize', isRTL)}</label>
+          <select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="a4">A4</option>
+            <option value="letter">US Letter</option>
+          </select>
+        </div>
+        <div>
+          <label className={labelClass}>{t('dateFormat', isRTL)}</label>
+          <select className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-300">
+            <option value="mmm-yyyy">Jan 2024</option>
+            <option value="mm-yyyy">01/2024</option>
+            <option value="yyyy">2024</option>
+          </select>
+        </div>
+      </AccordionSection>
+
+    </div>
+  );
+};
+
+export default CustomizePanel;

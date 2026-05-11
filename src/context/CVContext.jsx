@@ -8,24 +8,45 @@ export function useCV() {
 }
 
 export function CVProvider({ children }) {
-  // Main CV Data State
   const [cvData, setCvData] = useState(sampleData);
-  
-  // Customization State
-  const [selectedTemplate, setSelectedTemplate] = useState('modern'); // classic, modern, creative, executive, minimal
-  
+  const [selectedTemplate, setSelectedTemplate] = useState('modern');
+
   const [theme, setTheme] = useState({
-    primaryColor: '#4f46e5', // Indigo-600
-    fontFamily: 'Inter',
-    fontSize: 'medium', // small, medium, large
+    primaryColor: '#4f46e5',
+    fontFamily: 'Calibri',
+    fontSize: 'medium',
+    lineHeight: 'normal',
+    pagePadding: 'medium',
+    sectionSpacing: 'medium',
   });
 
-  // Action to update specific section data
+  const [visibleSections, setVisibleSections] = useState({
+    summary: true,
+    experience: true,
+    education: true,
+    skills: true,
+    projects: true,
+    languages: true,
+  });
+
+  const [visiblePersonalFields, setVisiblePersonalFields] = useState({
+    email: true,
+    phone: true,
+    location: true,
+    linkedin: true,
+    portfolio: true,
+  });
+
   const updateSection = (section, data) => {
-    setCvData(prev => ({
-      ...prev,
-      [section]: data
-    }));
+    setCvData(prev => ({ ...prev, [section]: data }));
+  };
+
+  const toggleSection = (key) => {
+    setVisibleSections(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const togglePersonalField = (key) => {
+    setVisiblePersonalFields(prev => ({ ...prev, [key]: !prev[key] }));
   };
 
   const value = {
@@ -35,7 +56,11 @@ export function CVProvider({ children }) {
     selectedTemplate,
     setSelectedTemplate,
     theme,
-    setTheme
+    setTheme,
+    visibleSections,
+    toggleSection,
+    visiblePersonalFields,
+    togglePersonalField,
   };
 
   return (
