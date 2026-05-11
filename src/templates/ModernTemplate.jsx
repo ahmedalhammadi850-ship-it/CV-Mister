@@ -1,77 +1,99 @@
+/*
+  ATS-SAFE: DOM order = name → title → contact → summary → experience → education → skills → languages
+  CSS Grid positions sidebar sections visually in column 1 without changing read order.
+*/
 const ModernTemplate = ({ data, theme }) => {
   const primaryColor = theme?.primaryColor || '#4f46e5';
   const fontFamily = theme?.fontFamily || 'Inter, sans-serif';
 
+  const sidebarStyle = { backgroundColor: primaryColor, color: '#fff' };
+  const headingStyle = {
+    fontSize: '0.65rem',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.12em',
+    marginBottom: '0.75rem',
+    paddingBottom: '0.4rem',
+    borderBottom: '1px solid rgba(255,255,255,0.2)',
+  };
+
   return (
-    <div 
-      className="resume-page bg-white text-slate-800 flex"
-      style={{ fontFamily }}
+    <div
+      className="resume-page bg-white text-slate-800"
+      style={{
+        fontFamily,
+        display: 'grid',
+        gridTemplateColumns: '1fr 2fr',
+      }}
     >
-      {/* Left Sidebar */}
-      <div className="w-1/3 text-white p-8" style={{ backgroundColor: primaryColor }}>
-        
-        <div className="mb-10 text-center">
-          <h1 className="text-3xl font-bold mb-1 tracking-tight">{data.personalInfo.fullName}</h1>
-          <h2 className="text-lg opacity-90 font-light">{data.personalInfo.jobTitle}</h2>
-        </div>
+      {/* ── BLOCK 1 (DOM first): Sidebar top — name, title, contact ── */}
+      <div style={{ ...sidebarStyle, gridColumn: 1, gridRow: 1, padding: '2rem' }}>
+        <h1 style={{ fontSize: '1.5rem', fontWeight: '800', lineHeight: 1.2, marginBottom: '0.25rem' }}>
+          {data.personalInfo.fullName}
+        </h1>
+        <h2 style={{ fontSize: '0.875rem', fontWeight: '300', opacity: 0.85, marginBottom: '1.75rem' }}>
+          {data.personalInfo.jobTitle}
+        </h2>
 
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 border-b border-white/20 pb-2 uppercase tracking-wider text-sm">Contact</h3>
-          <div className="space-y-3 text-sm opacity-90">
-            {data.personalInfo.phone && <div className="flex items-center gap-2"><span>📱</span> {data.personalInfo.phone}</div>}
-            {data.personalInfo.email && <div className="flex items-center gap-2"><span>✉️</span> {data.personalInfo.email}</div>}
-            {data.personalInfo.location && <div className="flex items-center gap-2"><span>📍</span> {data.personalInfo.location}</div>}
-            {data.personalInfo.linkedin && <div className="flex items-center gap-2"><span>💼</span> {data.personalInfo.linkedin}</div>}
+        <div>
+          <p style={headingStyle}>Contact</p>
+          <div style={{ fontSize: '0.75rem', opacity: 0.9, lineHeight: '1.8' }}>
+            {data.personalInfo.phone && (
+              <div>Phone: {data.personalInfo.phone}</div>
+            )}
+            {data.personalInfo.email && (
+              <div>Email: {data.personalInfo.email}</div>
+            )}
+            {data.personalInfo.location && (
+              <div>Location: {data.personalInfo.location}</div>
+            )}
+            {data.personalInfo.linkedin && (
+              <div>LinkedIn: {data.personalInfo.linkedin}</div>
+            )}
+            {data.personalInfo.portfolio && (
+              <div>Portfolio: {data.personalInfo.portfolio}</div>
+            )}
           </div>
         </div>
-
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 border-b border-white/20 pb-2 uppercase tracking-wider text-sm">Skills</h3>
-          <div className="flex flex-wrap gap-2">
-            {data.skills.map((skill, i) => (
-              <span key={i} className="bg-white/10 px-2 py-1 rounded text-xs">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-
-        <div className="mb-8">
-          <h3 className="text-xl font-bold mb-4 border-b border-white/20 pb-2 uppercase tracking-wider text-sm">Languages</h3>
-          <div className="space-y-2">
-            {data.languages.map((lang, i) => (
-              <div key={i} className="flex justify-between text-sm">
-                <span>{lang.name}</span>
-                <span className="opacity-75 text-xs">{lang.level}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
       </div>
 
-      {/* Right Content Area */}
-      <div className="w-2/3 p-8 bg-white text-slate-800">
-        
+      {/* ── BLOCK 2 (DOM second): Main — summary, experience, education ── */}
+      <div style={{ gridColumn: 2, gridRow: '1 / 3', padding: '2rem', backgroundColor: '#fff' }}>
         {data.personalInfo.summary && (
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-3 uppercase tracking-wider text-sm" style={{ color: primaryColor }}>Profile</h3>
-            <p className="text-sm text-slate-600 leading-relaxed">
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h3 style={{
+              fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase',
+              letterSpacing: '0.12em', color: primaryColor, marginBottom: '0.5rem',
+            }}>
+              Professional Summary
+            </h3>
+            <p style={{ fontSize: '0.8rem', color: '#475569', lineHeight: '1.7' }}>
               {data.personalInfo.summary}
             </p>
           </div>
         )}
 
-        {data.experience && data.experience.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4 uppercase tracking-wider text-sm" style={{ color: primaryColor }}>Experience</h3>
-            <div className="space-y-6">
+        {data.experience?.length > 0 && (
+          <div style={{ marginBottom: '1.75rem' }}>
+            <h3 style={{
+              fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase',
+              letterSpacing: '0.12em', color: primaryColor, marginBottom: '1rem',
+            }}>
+              Work Experience
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
               {data.experience.map((exp, i) => (
-                <div key={i} className="relative pl-4 border-l-2" style={{ borderColor: primaryColor }}>
-                  <div className="absolute w-3 h-3 rounded-full -left-[7px] top-1" style={{ backgroundColor: primaryColor }}></div>
-                  <h4 className="font-bold text-slate-800">{exp.jobTitle}</h4>
-                  <div className="text-sm font-medium text-slate-600 mb-1">{exp.company} | {exp.startDate} - {exp.current ? 'Present' : exp.endDate}</div>
-                  <p className="text-sm text-slate-600 whitespace-pre-line leading-relaxed">
+                <div key={i} style={{ paddingLeft: '1rem', borderLeft: `2px solid ${primaryColor}`, position: 'relative' }}>
+                  <div style={{
+                    position: 'absolute', left: '-5px', top: '4px',
+                    width: '8px', height: '8px', borderRadius: '50%',
+                    backgroundColor: primaryColor,
+                  }} />
+                  <h4 style={{ fontWeight: '700', fontSize: '0.85rem', color: '#1e293b' }}>{exp.jobTitle}</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.25rem' }}>
+                    {exp.company} | {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
+                  </p>
+                  <p style={{ fontSize: '0.75rem', color: '#475569', lineHeight: '1.6', whiteSpace: 'pre-line' }}>
                     {exp.description}
                   </p>
                 </div>
@@ -80,23 +102,64 @@ const ModernTemplate = ({ data, theme }) => {
           </div>
         )}
 
-        {data.education && data.education.length > 0 && (
-          <div className="mb-8">
-            <h3 className="text-xl font-bold mb-4 uppercase tracking-wider text-sm" style={{ color: primaryColor }}>Education</h3>
-            <div className="space-y-4">
+        {data.education?.length > 0 && (
+          <div>
+            <h3 style={{
+              fontSize: '0.65rem', fontWeight: '700', textTransform: 'uppercase',
+              letterSpacing: '0.12em', color: primaryColor, marginBottom: '0.75rem',
+            }}>
+              Education
+            </h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {data.education.map((edu, i) => (
                 <div key={i}>
-                  <h4 className="font-bold text-slate-800">{edu.degree}</h4>
-                  <div className="text-sm font-medium text-slate-600">{edu.institution} | {edu.startDate} - {edu.endDate}</div>
-                  <p className="text-sm text-slate-600 mt-1">
-                    {edu.description}
+                  <h4 style={{ fontWeight: '700', fontSize: '0.85rem', color: '#1e293b' }}>{edu.degree}</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                    {edu.institution} | {edu.startDate} – {edu.endDate}
                   </p>
+                  {edu.description && (
+                    <p style={{ fontSize: '0.75rem', color: '#475569', marginTop: '0.2rem' }}>{edu.description}</p>
+                  )}
                 </div>
               ))}
             </div>
           </div>
         )}
+      </div>
 
+      {/* ── BLOCK 3 (DOM third): Sidebar bottom — skills, languages ── */}
+      <div style={{ ...sidebarStyle, gridColumn: 1, gridRow: 2, padding: '0 2rem 2rem' }}>
+        {data.skills?.length > 0 && (
+          <div style={{ marginBottom: '1.5rem' }}>
+            <p style={headingStyle}>Skills</p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem' }}>
+              {data.skills.map((skill, i) => (
+                <span key={i} style={{
+                  backgroundColor: 'rgba(255,255,255,0.12)',
+                  borderRadius: '4px',
+                  padding: '2px 8px',
+                  fontSize: '0.7rem',
+                }}>
+                  {skill}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {data.languages?.length > 0 && (
+          <div>
+            <p style={headingStyle}>Languages</p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.4rem' }}>
+              {data.languages.map((lang, i) => (
+                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', opacity: 0.9 }}>
+                  <span>{lang.name}</span>
+                  <span style={{ opacity: 0.7, fontSize: '0.7rem' }}>{lang.level}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

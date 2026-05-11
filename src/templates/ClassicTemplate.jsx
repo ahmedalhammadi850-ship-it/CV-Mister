@@ -1,53 +1,69 @@
+/*
+  ATS-SAFE: Single column, clear section headings, no emoji, plain text contact labels.
+*/
 const ClassicTemplate = ({ data, theme }) => {
   const primaryColor = theme?.primaryColor || '#1e3a5f';
   const fontFamily = theme?.fontFamily || 'Georgia, serif';
+
+  const sectionHeading = {
+    fontSize: '0.7rem',
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: '0.15em',
+    color: primaryColor,
+    marginBottom: '0.5rem',
+    paddingBottom: '0.3rem',
+    borderBottom: `1px solid ${primaryColor}`,
+  };
 
   return (
     <div className="resume-page bg-white text-slate-800 p-10" style={{ fontFamily }}>
 
       {/* Header */}
-      <div className="text-center border-b-2 pb-6 mb-6" style={{ borderColor: primaryColor }}>
-        <h1 className="text-4xl font-bold tracking-wide mb-1" style={{ color: primaryColor }}>
+      <div style={{ textAlign: 'center', borderBottom: `2px solid ${primaryColor}`, paddingBottom: '1.25rem', marginBottom: '1.25rem' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: '700', letterSpacing: '0.05em', color: primaryColor, marginBottom: '0.25rem' }}>
           {data.personalInfo.fullName}
         </h1>
-        <h2 className="text-lg text-slate-500 font-normal mb-3">{data.personalInfo.jobTitle}</h2>
-        <div className="flex flex-wrap justify-center gap-4 text-sm text-slate-600">
-          {data.personalInfo.email && <span>✉ {data.personalInfo.email}</span>}
-          {data.personalInfo.phone && <span>✆ {data.personalInfo.phone}</span>}
-          {data.personalInfo.location && <span>⌖ {data.personalInfo.location}</span>}
-          {data.personalInfo.linkedin && <span>⊞ {data.personalInfo.linkedin}</span>}
+        <h2 style={{ fontSize: '1rem', color: '#64748b', fontWeight: '400', marginBottom: '0.75rem' }}>
+          {data.personalInfo.jobTitle}
+        </h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem', fontSize: '0.78rem', color: '#475569' }}>
+          {data.personalInfo.email && <span>Email: {data.personalInfo.email}</span>}
+          {data.personalInfo.phone && <span>Phone: {data.personalInfo.phone}</span>}
+          {data.personalInfo.location && <span>Location: {data.personalInfo.location}</span>}
+          {data.personalInfo.linkedin && <span>LinkedIn: {data.personalInfo.linkedin}</span>}
         </div>
       </div>
 
-      {/* Summary */}
+      {/* Professional Summary */}
       {data.personalInfo.summary && (
-        <div className="mb-6">
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-2" style={{ color: primaryColor }}>
-            Professional Summary
-          </h3>
-          <p className="text-sm text-slate-600 leading-relaxed">{data.personalInfo.summary}</p>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <p style={sectionHeading}>Professional Summary</p>
+          <p style={{ fontSize: '0.8rem', color: '#475569', lineHeight: '1.7' }}>{data.personalInfo.summary}</p>
         </div>
       )}
 
-      {/* Experience */}
+      {/* Work Experience */}
       {data.experience?.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-3 border-b pb-1" style={{ color: primaryColor, borderColor: primaryColor }}>
-            Work Experience
-          </h3>
-          <div className="space-y-5">
+        <div style={{ marginBottom: '1.25rem' }}>
+          <p style={sectionHeading}>Work Experience</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
             {data.experience.map((exp, i) => (
               <div key={i}>
-                <div className="flex justify-between items-start">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <h4 className="font-bold text-slate-800">{exp.jobTitle}</h4>
-                    <span className="text-sm text-slate-600 italic">{exp.company}, {exp.location}</span>
+                    <h4 style={{ fontWeight: '700', fontSize: '0.875rem', color: '#1e293b' }}>{exp.jobTitle}</h4>
+                    <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>
+                      {exp.company}{exp.location ? `, ${exp.location}` : ''}
+                    </p>
                   </div>
-                  <span className="text-xs text-slate-500 whitespace-nowrap ml-4">
+                  <span style={{ fontSize: '0.72rem', color: '#94a3b8', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
                     {exp.startDate} – {exp.current ? 'Present' : exp.endDate}
                   </span>
                 </div>
-                <p className="text-sm text-slate-600 mt-1 whitespace-pre-line leading-relaxed">{exp.description}</p>
+                <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: '1.65', marginTop: '0.25rem', whiteSpace: 'pre-line' }}>
+                  {exp.description}
+                </p>
               </div>
             ))}
           </div>
@@ -56,19 +72,21 @@ const ClassicTemplate = ({ data, theme }) => {
 
       {/* Education */}
       {data.education?.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-3 border-b pb-1" style={{ color: primaryColor, borderColor: primaryColor }}>
-            Education
-          </h3>
-          <div className="space-y-3">
+        <div style={{ marginBottom: '1.25rem' }}>
+          <p style={sectionHeading}>Education</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {data.education.map((edu, i) => (
-              <div key={i} className="flex justify-between items-start">
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
-                  <h4 className="font-bold text-slate-800">{edu.degree}</h4>
-                  <span className="text-sm text-slate-600 italic">{edu.institution}</span>
-                  {edu.description && <p className="text-sm text-slate-500 mt-0.5">{edu.description}</p>}
+                  <h4 style={{ fontWeight: '700', fontSize: '0.875rem', color: '#1e293b' }}>{edu.degree}</h4>
+                  <p style={{ fontSize: '0.8rem', color: '#64748b', fontStyle: 'italic' }}>{edu.institution}</p>
+                  {edu.description && (
+                    <p style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.15rem' }}>{edu.description}</p>
+                  )}
                 </div>
-                <span className="text-xs text-slate-500 whitespace-nowrap ml-4">{edu.startDate} – {edu.endDate}</span>
+                <span style={{ fontSize: '0.72rem', color: '#94a3b8', whiteSpace: 'nowrap', marginLeft: '1rem' }}>
+                  {edu.startDate} – {edu.endDate}
+                </span>
               </div>
             ))}
           </div>
@@ -77,21 +95,17 @@ const ClassicTemplate = ({ data, theme }) => {
 
       {/* Skills */}
       {data.skills?.length > 0 && (
-        <div className="mb-6">
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-2 border-b pb-1" style={{ color: primaryColor, borderColor: primaryColor }}>
-            Skills
-          </h3>
-          <p className="text-sm text-slate-600">{data.skills.join(' • ')}</p>
+        <div style={{ marginBottom: '1.25rem' }}>
+          <p style={sectionHeading}>Skills</p>
+          <p style={{ fontSize: '0.8rem', color: '#475569' }}>{data.skills.join(' | ')}</p>
         </div>
       )}
 
       {/* Languages */}
       {data.languages?.length > 0 && (
         <div>
-          <h3 className="text-sm font-bold uppercase tracking-widest mb-2 border-b pb-1" style={{ color: primaryColor, borderColor: primaryColor }}>
-            Languages
-          </h3>
-          <div className="flex gap-6 text-sm text-slate-600">
+          <p style={sectionHeading}>Languages</p>
+          <div style={{ display: 'flex', gap: '1.5rem', fontSize: '0.8rem', color: '#475569' }}>
             {data.languages.map((lang, i) => (
               <span key={i}><strong>{lang.name}</strong> – {lang.level}</span>
             ))}

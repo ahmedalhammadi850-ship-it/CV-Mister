@@ -1,128 +1,80 @@
+/*
+  ATS-SAFE: CSS Grid reorders DOM so ATS reads:
+  name → title → contact → summary → experience → education → projects → skills → languages
+  Visual two-column layout is preserved via gridColumn/gridRow placement.
+*/
 const CreativeTemplate = ({ data, theme }) => {
   const primaryColor = theme?.primaryColor || '#7c3aed';
   const fontFamily = theme?.fontFamily || 'Inter, sans-serif';
 
+  const sidebarHeading = {
+    fontSize: '0.6rem',
+    fontWeight: '900',
+    textTransform: 'uppercase',
+    letterSpacing: '0.15em',
+    color: primaryColor,
+    marginBottom: '0.6rem',
+  };
+
+  const mainHeading = { ...sidebarHeading };
+
   return (
-    <div className="resume-page bg-white text-slate-800" style={{ fontFamily }}>
+    <div
+      className="resume-page bg-white text-slate-800"
+      style={{ fontFamily, display: 'flex', flexDirection: 'column' }}
+    >
+      {/* Top gradient bar */}
+      <div style={{ height: '6px', background: `linear-gradient(90deg, ${primaryColor}, #ec4899)` }} />
 
-      {/* Top accent bar */}
-      <div className="h-2 w-full" style={{ background: `linear-gradient(90deg, ${primaryColor}, #ec4899)` }} />
+      <div style={{ display: 'grid', gridTemplateColumns: '38% 62%', flex: 1 }}>
 
-      <div className="flex">
-        {/* Left narrow sidebar */}
-        <div className="w-[38%] p-8 bg-slate-50 border-r border-slate-100">
+        {/* ── BLOCK 1 (DOM first): Sidebar top — name, title, contact ── */}
+        <div style={{ gridColumn: 1, gridRow: 1, backgroundColor: '#f8fafc', borderRight: '1px solid #f1f5f9', padding: '2rem' }}>
+          <h1 style={{ fontSize: '1.3rem', fontWeight: '900', color: primaryColor, lineHeight: 1.2, marginBottom: '0.2rem' }}>
+            {data.personalInfo.fullName}
+          </h1>
+          <div style={{ height: '3px', width: '2.5rem', borderRadius: '2px', backgroundColor: primaryColor, marginBottom: '0.4rem' }} />
+          <h2 style={{ fontSize: '0.7rem', fontWeight: '500', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '1.5rem' }}>
+            {data.personalInfo.jobTitle}
+          </h2>
 
-          {/* Name & Title */}
-          <div className="mb-8">
-            <h1 className="text-2xl font-black leading-tight mb-1" style={{ color: primaryColor }}>
-              {data.personalInfo.fullName}
-            </h1>
-            <div className="h-1 w-12 rounded-full mb-2" style={{ background: primaryColor }} />
-            <h2 className="text-sm font-medium text-slate-500 uppercase tracking-wider">
-              {data.personalInfo.jobTitle}
-            </h2>
-          </div>
-
-          {/* Contact */}
-          <div className="mb-7">
-            <h3 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: primaryColor }}>Contact</h3>
-            <div className="space-y-2 text-xs text-slate-600">
-              {data.personalInfo.email && (
-                <div className="flex items-start gap-2">
-                  <span className="mt-0.5" style={{ color: primaryColor }}>✉</span>
-                  <span className="break-all">{data.personalInfo.email}</span>
-                </div>
-              )}
-              {data.personalInfo.phone && (
-                <div className="flex items-center gap-2">
-                  <span style={{ color: primaryColor }}>✆</span>
-                  <span>{data.personalInfo.phone}</span>
-                </div>
-              )}
-              {data.personalInfo.location && (
-                <div className="flex items-center gap-2">
-                  <span style={{ color: primaryColor }}>⌖</span>
-                  <span>{data.personalInfo.location}</span>
-                </div>
-              )}
-              {data.personalInfo.linkedin && (
-                <div className="flex items-start gap-2">
-                  <span style={{ color: primaryColor }}>⊞</span>
-                  <span className="break-all">{data.personalInfo.linkedin}</span>
-                </div>
-              )}
+          <div>
+            <p style={sidebarHeading}>Contact</p>
+            <div style={{ fontSize: '0.72rem', color: '#475569', lineHeight: '1.9' }}>
+              {data.personalInfo.email && <div>Email: {data.personalInfo.email}</div>}
+              {data.personalInfo.phone && <div>Phone: {data.personalInfo.phone}</div>}
+              {data.personalInfo.location && <div>Location: {data.personalInfo.location}</div>}
+              {data.personalInfo.linkedin && <div>LinkedIn: {data.personalInfo.linkedin}</div>}
             </div>
           </div>
-
-          {/* Skills */}
-          {data.skills?.length > 0 && (
-            <div className="mb-7">
-              <h3 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: primaryColor }}>Skills</h3>
-              <div className="flex flex-wrap gap-1.5">
-                {data.skills.map((skill, i) => (
-                  <span
-                    key={i}
-                    className="text-xs px-2 py-0.5 rounded-full font-medium"
-                    style={{ backgroundColor: `${primaryColor}15`, color: primaryColor }}
-                  >
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Languages */}
-          {data.languages?.length > 0 && (
-            <div>
-              <h3 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: primaryColor }}>Languages</h3>
-              <div className="space-y-2">
-                {data.languages.map((lang, i) => (
-                  <div key={i}>
-                    <div className="flex justify-between text-xs mb-1">
-                      <span className="font-medium text-slate-700">{lang.name}</span>
-                      <span className="text-slate-400">{lang.level}</span>
-                    </div>
-                    <div className="h-1 bg-slate-200 rounded-full">
-                      <div
-                        className="h-1 rounded-full"
-                        style={{
-                          backgroundColor: primaryColor,
-                          width: lang.level === 'Native' ? '100%' : lang.level === 'Fluent' ? '90%' : lang.level === 'Advanced' ? '75%' : lang.level === 'Intermediate' ? '55%' : '30%'
-                        }}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Right main content */}
-        <div className="w-[62%] p-8">
-
+        {/* ── BLOCK 2 (DOM second): Main — summary, experience, education, projects ── */}
+        <div style={{ gridColumn: 2, gridRow: '1 / 3', padding: '2rem' }}>
           {data.personalInfo.summary && (
-            <div className="mb-7">
-              <h3 className="text-xs font-black uppercase tracking-widest mb-3" style={{ color: primaryColor }}>About Me</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{data.personalInfo.summary}</p>
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p style={mainHeading}>Professional Summary</p>
+              <p style={{ fontSize: '0.78rem', color: '#475569', lineHeight: '1.7' }}>{data.personalInfo.summary}</p>
             </div>
           )}
 
           {data.experience?.length > 0 && (
-            <div className="mb-7">
-              <h3 className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: primaryColor }}>Experience</h3>
-              <div className="space-y-5">
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p style={mainHeading}>Work Experience</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '1.1rem' }}>
                 {data.experience.map((exp, i) => (
-                  <div key={i} className="relative pl-4">
-                    <div className="absolute left-0 top-1.5 w-2 h-2 rounded-full" style={{ backgroundColor: primaryColor }} />
-                    <div className="absolute left-[3px] top-4 bottom-0 w-0.5 bg-slate-100" style={{ display: i === data.experience.length - 1 ? 'none' : 'block' }} />
-                    <h4 className="font-bold text-slate-800 text-sm">{exp.jobTitle}</h4>
-                    <div className="flex justify-between items-center mb-1">
-                      <span className="text-xs font-medium" style={{ color: primaryColor }}>{exp.company}</span>
-                      <span className="text-xs text-slate-400">{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</span>
+                  <div key={i} style={{ paddingLeft: '0.9rem', position: 'relative' }}>
+                    <div style={{
+                      position: 'absolute', left: 0, top: '5px',
+                      width: '7px', height: '7px', borderRadius: '50%',
+                      backgroundColor: primaryColor,
+                    }} />
+                    <h4 style={{ fontWeight: '700', fontSize: '0.82rem', color: '#1e293b' }}>{exp.jobTitle}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                      <span style={{ fontSize: '0.72rem', fontWeight: '600', color: primaryColor }}>{exp.company}</span>
+                      <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{exp.startDate} – {exp.current ? 'Present' : exp.endDate}</span>
                     </div>
-                    <p className="text-xs text-slate-600 whitespace-pre-line leading-relaxed">{exp.description}</p>
+                    <p style={{ fontSize: '0.72rem', color: '#475569', lineHeight: '1.6', whiteSpace: 'pre-line' }}>{exp.description}</p>
                   </div>
                 ))}
               </div>
@@ -130,15 +82,15 @@ const CreativeTemplate = ({ data, theme }) => {
           )}
 
           {data.education?.length > 0 && (
-            <div className="mb-7">
-              <h3 className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: primaryColor }}>Education</h3>
-              <div className="space-y-3">
+            <div style={{ marginBottom: '1.5rem' }}>
+              <p style={mainHeading}>Education</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 {data.education.map((edu, i) => (
-                  <div key={i} className="pl-4 border-l-2" style={{ borderColor: `${primaryColor}40` }}>
-                    <h4 className="font-bold text-slate-800 text-sm">{edu.degree}</h4>
-                    <div className="flex justify-between">
-                      <span className="text-xs text-slate-500">{edu.institution}</span>
-                      <span className="text-xs text-slate-400">{edu.startDate} – {edu.endDate}</span>
+                  <div key={i} style={{ paddingLeft: '0.75rem', borderLeft: `2px solid ${primaryColor}40` }}>
+                    <h4 style={{ fontWeight: '700', fontSize: '0.82rem', color: '#1e293b' }}>{edu.degree}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '0.72rem', color: '#64748b' }}>{edu.institution}</span>
+                      <span style={{ fontSize: '0.68rem', color: '#94a3b8' }}>{edu.startDate} – {edu.endDate}</span>
                     </div>
                   </div>
                 ))}
@@ -148,18 +100,65 @@ const CreativeTemplate = ({ data, theme }) => {
 
           {data.projects?.length > 0 && (
             <div>
-              <h3 className="text-xs font-black uppercase tracking-widest mb-4" style={{ color: primaryColor }}>Projects</h3>
-              <div className="space-y-3">
+              <p style={mainHeading}>Projects</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
                 {data.projects.map((proj, i) => (
-                  <div key={i} className="p-3 rounded-lg" style={{ backgroundColor: `${primaryColor}08` }}>
-                    <h4 className="font-bold text-sm text-slate-800">{proj.title}</h4>
-                    <p className="text-xs text-slate-600 mt-1">{proj.description}</p>
+                  <div key={i} style={{ padding: '0.6rem 0.75rem', borderRadius: '6px', backgroundColor: `${primaryColor}08` }}>
+                    <h4 style={{ fontWeight: '700', fontSize: '0.8rem', color: '#1e293b' }}>{proj.title}</h4>
+                    <p style={{ fontSize: '0.7rem', color: '#475569', marginTop: '0.2rem' }}>{proj.description}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
         </div>
+
+        {/* ── BLOCK 3 (DOM third): Sidebar bottom — skills, languages ── */}
+        <div style={{ gridColumn: 1, gridRow: 2, backgroundColor: '#f8fafc', borderRight: '1px solid #f1f5f9', padding: '0 2rem 2rem' }}>
+          {data.skills?.length > 0 && (
+            <div style={{ marginBottom: '1.25rem' }}>
+              <p style={sidebarHeading}>Skills</p>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+                {data.skills.map((skill, i) => (
+                  <span key={i} style={{
+                    fontSize: '0.68rem',
+                    fontWeight: '500',
+                    padding: '2px 8px',
+                    borderRadius: '999px',
+                    backgroundColor: `${primaryColor}15`,
+                    color: primaryColor,
+                  }}>
+                    {skill}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {data.languages?.length > 0 && (
+            <div>
+              <p style={sidebarHeading}>Languages</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {data.languages.map((lang, i) => {
+                  const pct = lang.level === 'Native' ? '100%' : lang.level === 'Fluent' ? '90%'
+                    : lang.level === 'Advanced' ? '75%' : lang.level === 'Intermediate' ? '55%' : '30%';
+                  return (
+                    <div key={i}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.72rem', marginBottom: '3px' }}>
+                        <span style={{ fontWeight: '500', color: '#334155' }}>{lang.name}</span>
+                        <span style={{ color: '#94a3b8' }}>{lang.level}</span>
+                      </div>
+                      <div style={{ height: '3px', backgroundColor: '#e2e8f0', borderRadius: '2px' }}>
+                        <div style={{ height: '3px', width: pct, backgroundColor: primaryColor, borderRadius: '2px' }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+
       </div>
     </div>
   );
