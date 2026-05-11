@@ -8,7 +8,7 @@ import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
 import { useEffect, useRef, useState } from 'react';
 
 const LivePreview = () => {
-  const { cvData, selectedTemplate, theme } = useCV();
+  const { cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields } = useCV();
   const { isRTL } = useAuth();
   const previewRef = useRef(null);
   const [scale, setScale] = useState(1);
@@ -27,7 +27,7 @@ const LivePreview = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  const props = { data: cvData, theme, isRTL };
+  const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields };
 
   const renderTemplate = () => {
     switch (selectedTemplate) {

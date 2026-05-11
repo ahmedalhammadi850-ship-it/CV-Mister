@@ -1,8 +1,4 @@
-const SIZES = {
-  small:  { name: '18pt', heading: '12pt', body: '10pt', meta: '9pt'  },
-  medium: { name: '20pt', heading: '14pt', body: '11pt', meta: '10pt' },
-  large:  { name: '22pt', heading: '16pt', body: '13pt', meta: '11pt' },
-};
+import { resolveTheme, buildContact } from './templateUtils';
 
 const labels = {
   execSummary: { en: 'Executive Summary',      ar: 'الملخص التنفيذي'   },
@@ -10,25 +6,23 @@ const labels = {
   education:   { en: 'Education',               ar: 'التعليم'           },
   skills:      { en: 'Core Competencies',       ar: 'الكفاءات الأساسية' },
   languages:   { en: 'Languages',               ar: 'اللغات'            },
-  email:       { en: 'Email',                   ar: 'البريد الإلكتروني' },
-  phone:       { en: 'Phone',                   ar: 'الهاتف'            },
-  location:    { en: 'Location',                ar: 'الموقع'            },
-  linkedin:    { en: 'LinkedIn',                ar: 'لينكد إن'          },
+  projects:    { en: 'Projects',                ar: 'المشاريع'          },
   present:     { en: 'Present',                 ar: 'حتى الآن'          },
 };
 const tr = (key, isRTL) => labels[key][isRTL ? 'ar' : 'en'];
 
-const ExecutiveTemplate = ({ data, theme, isRTL = false }) => {
+const ExecutiveTemplate = ({ data, theme, isRTL = false, visibleSections = {}, visiblePersonalFields = {} }) => {
   const accent = theme?.primaryColor || '#0f2942';
   const gold = '#c9a84c';
-  const sz = SIZES[theme?.fontSize || 'medium'];
+  const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
-  const font = isRTL ? "'Tajawal', Arial, sans-serif" : "'Calibri', 'Carlito', Arial, sans-serif";
+
+  const show = (key) => visibleSections[key] !== false;
 
   const s = {
     page: {
       fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: '#ffffff',
-      padding: '36pt 44pt', lineHeight: isRTL ? 1.8 : 1.4, width: '794px', minHeight: '1122px',
+      padding, lineHeight, width: '794px', minHeight: '1122px',
       boxSizing: 'border-box', direction: dir, textAlign: isRTL ? 'right' : 'left',
     },
     name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '2pt', textTransform: 'uppercase', letterSpacing: '0.04em' },
@@ -37,13 +31,13 @@ const ExecutiveTemplate = ({ data, theme, isRTL = false }) => {
     hdivider:{ borderBottom: `3px double ${accent}`, marginBottom: '14pt' },
     role:    { fontSize: sz.body,    fontWeight: '700', marginBottom: '1pt' },
     meta:    { fontSize: sz.meta,    color: '#555', marginBottom: '4pt' },
-    body:    { fontSize: sz.body,    color: '#222', lineHeight: isRTL ? 1.9 : 1.5, whiteSpace: 'pre-line' },
+    body:    { fontSize: sz.body,    color: '#222', lineHeight, whiteSpace: 'pre-line' },
     row:     { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isRTL ? 'row-reverse' : 'row' },
     date:    { fontSize: sz.meta, color: '#555', whiteSpace: 'nowrap', marginLeft: isRTL ? 0 : '12pt', marginRight: isRTL ? '12pt' : 0 },
   };
 
   const SectionHeading = ({ labelKey }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8pt', marginTop: '14pt', marginBottom: '8pt', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8pt', marginTop: sectionMt, marginBottom: '8pt', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
       <div style={{ fontSize: sz.heading, fontWeight: '700', color: accent, whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         {tr(labelKey, isRTL)}
       </div>
@@ -51,26 +45,21 @@ const ExecutiveTemplate = ({ data, theme, isRTL = false }) => {
     </div>
   );
 
-  const contact = [
-    data.personalInfo.email    && `${tr('email', isRTL)}: ${data.personalInfo.email}`,
-    data.personalInfo.phone    && `${tr('phone', isRTL)}: ${data.personalInfo.phone}`,
-    data.personalInfo.location && `${tr('location', isRTL)}: ${data.personalInfo.location}`,
-    data.personalInfo.linkedin && `${tr('linkedin', isRTL)}: ${data.personalInfo.linkedin}`,
-  ].filter(Boolean).join('   |   ');
+  const contact = buildContact(data.personalInfo, visiblePersonalFields, isRTL);
 
   return (
     <div style={s.page}>
       <div style={s.name}>{data.personalInfo.fullName}</div>
       <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
-      <div style={s.contact}>{contact}</div>
+      {contact && <div style={s.contact}>{contact}</div>}
       <div style={s.hdivider} />
 
-      {data.personalInfo.summary && <>
+      {show('summary') && data.personalInfo.summary && <>
         <SectionHeading labelKey="execSummary" />
         <div style={{ ...s.body, fontStyle: 'italic' }}>{data.personalInfo.summary}</div>
       </>}
 
-      {data.experience?.length > 0 && <>
+      {show('experience') && data.experience?.length > 0 && <>
         <SectionHeading labelKey="experience" />
         {data.experience.map((e, i) => (
           <div key={i} style={{ marginBottom: '10pt' }}>
@@ -84,7 +73,7 @@ const ExecutiveTemplate = ({ data, theme, isRTL = false }) => {
         ))}
       </>}
 
-      {data.education?.length > 0 && <>
+      {show('education') && data.education?.length > 0 && <>
         <SectionHeading labelKey="education" />
         {data.education.map((e, i) => (
           <div key={i} style={{ marginBottom: '8pt' }}>
@@ -98,14 +87,24 @@ const ExecutiveTemplate = ({ data, theme, isRTL = false }) => {
         ))}
       </>}
 
-      {data.skills?.length > 0 && <>
+      {show('skills') && data.skills?.length > 0 && <>
         <SectionHeading labelKey="skills" />
         <div style={s.body}>{data.skills.join(' | ')}</div>
       </>}
 
-      {data.languages?.length > 0 && <>
+      {show('languages') && data.languages?.length > 0 && <>
         <SectionHeading labelKey="languages" />
         <div style={s.body}>{data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}</div>
+      </>}
+
+      {show('projects') && data.projects?.length > 0 && <>
+        <SectionHeading labelKey="projects" />
+        {data.projects.map((p, i) => (
+          <div key={i} style={{ marginBottom: '8pt' }}>
+            <div style={s.role}>{p.title}</div>
+            <div style={s.body}>{p.description}</div>
+          </div>
+        ))}
       </>}
     </div>
   );
