@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-family-sans: 'Inter', sans-serif;
-  --font-family-heading: 'Outfit', sans-serif;
+  --font-family-sans: 'Inter', 'Tajawal', sans-serif;
+  --font-family-heading: 'Outfit', 'Tajawal', sans-serif;
   --font-family-serif: 'Merriweather', serif;
 
   --color-primary-50: #eef2ff;
@@ -17,16 +17,16 @@
   --color-primary-900: #312e81;
   --color-primary-950: #1e1b4b;
 
-  --color-accent-50: #faf5ff;
-  --color-accent-100: #f3e8ff;
-  --color-accent-200: #e9d5ff;
-  --color-accent-300: #d8b4fe;
-  --color-accent-400: #c084fc;
-  --color-accent-500: #a855f7;
-  --color-accent-600: #9333ea;
-  --color-accent-700: #7e22ce;
-  --color-accent-800: #6b21a8;
-  --color-accent-900: #581c87;
+  --color-accent-50: #fdf4ff;
+  --color-accent-100: #fae8ff;
+  --color-accent-200: #f5d0fe;
+  --color-accent-300: #f0abfc;
+  --color-accent-400: #e879f9;
+  --color-accent-500: #d946ef;
+  --color-accent-600: #c026d3;
+  --color-accent-700: #a21caf;
+  --color-accent-800: #86198f;
+  --color-accent-900: #701a75;
 
   --color-surface-50: #f8fafc;
   --color-surface-100: #f1f5f9;
@@ -40,10 +40,11 @@
   --color-surface-900: #0f172a;
   --color-surface-950: #020617;
 
-  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
-  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
-  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.15);
-  --shadow-premium: 0 20px 60px rgba(99, 102, 241, 0.2);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.12);
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.07);
+  --shadow-card-hover: 0 20px 50px rgba(0, 0, 0, 0.13);
+  --shadow-premium: 0 20px 60px rgba(99, 102, 241, 0.25);
+  --shadow-glow: 0 0 40px rgba(99, 102, 241, 0.15);
 
   --animate-fade-in: fadeIn 0.6s ease-out forwards;
   --animate-slide-up: slideUp 0.6s ease-out forwards;
@@ -51,10 +52,11 @@
   --animate-slide-in-right: slideInRight 0.3s ease-out forwards;
   --animate-scale-in: scaleIn 0.3s ease-out forwards;
   --animate-float: float 6s ease-in-out infinite;
-  --animate-pulse-slow: pulse 3s ease-in-out infinite;
+  --animate-float-delayed: float 6s ease-in-out 2s infinite;
+  --animate-pulse-slow: pulse 4s ease-in-out infinite;
   --animate-gradient: gradient 8s ease infinite;
-  --animate-spin-slow: spin 8s linear infinite;
-  --animate-bounce-slow: bounce 3s infinite;
+  --animate-spin-slow: spin 12s linear infinite;
+  --animate-shimmer: shimmer 2.5s linear infinite;
 }
 
 @keyframes fadeIn {
@@ -62,7 +64,7 @@
   100% { opacity: 1; }
 }
 @keyframes slideUp {
-  0% { opacity: 0; transform: translateY(30px); }
+  0% { opacity: 0; transform: translateY(28px); }
   100% { opacity: 1; transform: translateY(0); }
 }
 @keyframes slideDown {
@@ -78,12 +80,21 @@
   100% { opacity: 1; transform: scale(1); }
 }
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-18px) rotate(1deg); }
 }
 @keyframes gradient {
   0%, 100% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
+}
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+@keyframes orbMove {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -20px) scale(1.05); }
+  66% { transform: translate(-20px, 15px) scale(0.95); }
 }
 
 @layer base {
@@ -94,7 +105,15 @@
   }
 
   [dir="rtl"] {
-    font-family: 'Inter', 'Tajawal', sans-serif;
+    font-family: 'Tajawal', 'Inter', sans-serif;
+  }
+
+  [dir="rtl"] h1,
+  [dir="rtl"] h2,
+  [dir="rtl"] h3,
+  [dir="rtl"] h4 {
+    font-family: 'Tajawal', 'Outfit', sans-serif;
+    letter-spacing: 0;
   }
 
   body {
@@ -106,44 +125,58 @@
     font-family: var(--font-family-heading);
     letter-spacing: -0.025em;
   }
+
+  * {
+    scroll-behavior: smooth;
+  }
 }
 
 @layer components {
   .glass-panel {
-    background: rgba(255,255,255,0.7);
-    backdrop-filter: blur(12px);
-    border: 1px solid rgba(255,255,255,0.4);
+    background: rgba(255,255,255,0.72);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(255,255,255,0.5);
     box-shadow: var(--shadow-glass);
   }
 
   .glass-nav {
-    background: rgba(255,255,255,0.8);
-    backdrop-filter: blur(16px);
-    border-bottom: 1px solid rgba(255,255,255,0.5);
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    background: rgba(255,255,255,0.85);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(226,232,240,0.6);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.06);
   }
 
   .btn-primary {
-    @apply relative inline-flex items-center justify-center px-6 py-3 overflow-hidden font-medium text-white transition-all duration-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2;
-    background-color: var(--color-primary-600);
+    @apply relative inline-flex items-center justify-center gap-2 px-6 py-3 overflow-hidden font-semibold text-white transition-all duration-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-primary-700) 100%);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.35);
   }
 
   .btn-primary:hover {
-    background-color: var(--color-primary-700);
-    box-shadow: var(--shadow-premium);
+    background: linear-gradient(135deg, var(--color-primary-500) 0%, var(--color-primary-600) 100%);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active {
+    transform: translateY(0);
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center px-6 py-3 font-medium transition-all duration-300 bg-white border border-slate-200 text-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 shadow-sm hover:shadow;
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 font-semibold transition-all duration-300 bg-white border border-slate-200 text-slate-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
   }
 
   .btn-secondary:hover {
-    @apply bg-slate-50 border-slate-300;
-    color: var(--color-primary-600);
+    @apply border-primary-200 text-primary-600 bg-primary-50;
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.12);
+    transform: translateY(-1px);
   }
 
   .input-field {
-    @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-xl transition-shadow duration-200 shadow-sm outline-none;
+    @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-xl transition-all duration-200 shadow-sm outline-none text-slate-800 placeholder-slate-400;
   }
 
   .input-field:hover {
@@ -152,60 +185,59 @@
 
   .input-field:focus {
     border-color: var(--color-primary-500);
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary-500) 20%, transparent);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.12);
   }
 
   .heading-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(to right, var(--color-primary-600), var(--color-accent-500));
+    background-image: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-accent-500) 100%);
   }
 
   .card-hover {
-    @apply transition-all duration-300 border border-slate-100;
+    @apply transition-all duration-300;
   }
 
   .card-hover:hover {
-    transform: translateY(-4px);
+    transform: translateY(-5px);
     box-shadow: var(--shadow-card-hover);
+  }
+
+  .orb {
+    border-radius: 50%;
+    filter: blur(80px);
+    animation: orbMove 12s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .section-tag {
+    @apply inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold;
+    background: linear-gradient(135deg, rgba(99,102,241,0.1) 0%, rgba(217,70,239,0.1) 100%);
+    color: var(--color-primary-700);
+    border: 1px solid rgba(99,102,241,0.2);
+  }
+
+  .stat-number {
+    @apply text-4xl font-extrabold;
+    font-family: var(--font-family-heading);
+    background: linear-gradient(135deg, var(--color-primary-600) 0%, var(--color-accent-500) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
 
 /* Custom Scrollbar */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { @apply bg-slate-100; }
+::-webkit-scrollbar-thumb { @apply bg-slate-300 rounded-full; }
+::-webkit-scrollbar-thumb:hover { @apply bg-slate-400; }
 
-::-webkit-scrollbar-track {
-  @apply bg-slate-100;
-}
-
-::-webkit-scrollbar-thumb {
-  @apply bg-slate-300 rounded-full;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  @apply bg-slate-400;
-}
-
-/* Print Styles for PDF Export */
+/* Print Styles */
 @media print {
-  body {
-    @apply bg-white;
-  }
-
-  .no-print {
-    display: none !important;
-  }
-
-  .page-break {
-    page-break-before: always;
-  }
-
-  * {
-    -webkit-print-color-adjust: exact !important;
-    print-color-adjust: exact !important;
-  }
+  body { @apply bg-white; }
+  .no-print { display: none !important; }
+  .page-break { page-break-before: always; }
+  * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 
 /* Resume Templates Base Styles */
@@ -215,7 +247,6 @@
   min-height: 297mm;
 }
 
-/* Specific utilities for resume scaling in builder view */
 .resume-scale-wrapper {
   transform-origin: top center;
   transition: transform 0.2s ease;
