@@ -1,5 +1,9 @@
 import { useCV } from '../../context/CVContext';
 import ModernTemplate from '../../templates/ModernTemplate';
+import ClassicTemplate from '../../templates/ClassicTemplate';
+import CreativeTemplate from '../../templates/CreativeTemplate';
+import MinimalTemplate from '../../templates/MinimalTemplate';
+import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
 import { useEffect, useRef, useState } from 'react';
 
 const LivePreview = () => {
@@ -26,12 +30,12 @@ const LivePreview = () => {
 
   const renderTemplate = () => {
     switch (selectedTemplate) {
-      case 'modern':
-        return <ModernTemplate data={cvData} theme={theme} />;
-      // case 'classic': return <ClassicTemplate data={cvData} theme={theme} />;
-      // Add other templates here...
-      default:
-        return <ModernTemplate data={cvData} theme={theme} />;
+      case 'modern':    return <ModernTemplate    data={cvData} theme={theme} />;
+      case 'classic':   return <ClassicTemplate   data={cvData} theme={theme} />;
+      case 'creative':  return <CreativeTemplate  data={cvData} theme={theme} />;
+      case 'minimal':   return <MinimalTemplate   data={cvData} theme={theme} />;
+      case 'executive': return <ExecutiveTemplate data={cvData} theme={theme} />;
+      default:          return <ModernTemplate    data={cvData} theme={theme} />;
     }
   };
 

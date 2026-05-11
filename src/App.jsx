@@ -6,8 +6,8 @@ import Footer from './components/layout/Footer';
 import HomePage from './pages/HomePage';
 import BuilderPage from './pages/BuilderPage';
 import AboutPage from './pages/AboutPage';
+import TemplatesPage from './pages/TemplatesPage';
 
-const TemplatesPage = () => <div className="p-8">Templates Gallery</div>;
 const LoginPage = () => <div className="p-8">Login</div>;
 const SignupPage = () => <div className="p-8">Sign Up</div>;
 
