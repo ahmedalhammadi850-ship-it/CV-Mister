@@ -119,6 +119,41 @@ const CVBuilder = () => {
     }
   };
 
+  const flattenOklchColors = (root) => {
+    const COLOR_PROPS = [
+      'color', 'backgroundColor', 'borderColor',
+      'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
+      'outlineColor', 'textDecorationColor', 'columnRuleColor',
+    ];
+    const snapshots = [];
+    const all = [root, ...root.querySelectorAll('*')];
+    for (const el of all) {
+      const computed = window.getComputedStyle(el);
+      const overrides = {};
+      for (const prop of COLOR_PROPS) {
+        const val = computed[prop];
+        if (val && val.includes('oklch')) {
+          overrides[prop] = val;
+        }
+      }
+      if (Object.keys(overrides).length > 0) {
+        const prev = {};
+        for (const prop of Object.keys(overrides)) {
+          prev[prop] = el.style[prop];
+          el.style[prop] = overrides[prop];
+        }
+        snapshots.push({ el, prev });
+      }
+    }
+    return () => {
+      for (const { el, prev } of snapshots) {
+        for (const [prop, val] of Object.entries(prev)) {
+          el.style[prop] = val;
+        }
+      }
+    };
+  };
+
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
@@ -134,6 +169,8 @@ const CVBuilder = () => {
       printRoot.style.cssText =
         'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
 
+      const restoreColors = flattenOklchColors(element);
+
       const canvas = await html2canvas(element, {
         scale: 2,
         useCORS: true,
@@ -146,6 +183,8 @@ const CVBuilder = () => {
         x: 0,
         y: 0,
       });
+
+      restoreColors();
 
       printRoot.setAttribute('style', savedStyle);
 
