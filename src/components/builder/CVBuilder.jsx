@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
@@ -94,6 +94,8 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
   );
 };
 
+const PAGE_H_PX = 1122; // A4 height at 96 dpi
+
 const CVBuilder = () => {
   const { selectedTemplate, cvData, theme, visibleSections, visiblePersonalFields, sectionOrder, saveCurrentCV, currentCVId, currentCVName } = useCV();
   const { isRTL } = useAuth();
@@ -103,6 +105,7 @@ const CVBuilder = () => {
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const breakDataRef = useRef({ breaks: [], totalHeight: PAGE_H_PX });
 
   const handleSave = (name) => {
     saveCurrentCV(name);
@@ -136,24 +139,21 @@ const CVBuilder = () => {
       printRoot.style.cssText =
         'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
 
+      const PR = 2; // pixelRatio
       let dataUrl;
       try {
-        // html-to-image fetches font binaries from fonts.gstatic.com which
-        // supports CORS (Access-Control-Allow-Origin: *), so skipFonts is NOT
-        // needed — fonts are embedded correctly in the output image.
         dataUrl = await toPng(element, {
           backgroundColor: '#ffffff',
           width: 794,
-          pixelRatio: 2,
+          pixelRatio: PR,
           cacheBust: false,
         });
       } catch (fontErr) {
         console.warn('Font embed failed, retrying without fonts:', fontErr);
-        // Fallback: skip fonts if gstatic fetch fails for any reason
         dataUrl = await toPng(element, {
           backgroundColor: '#ffffff',
           width: 794,
-          pixelRatio: 2,
+          pixelRatio: PR,
           skipFonts: true,
         });
       } finally {
@@ -170,31 +170,40 @@ const CVBuilder = () => {
       const A4_W_MM = 210;
       const A4_H_MM = 297;
       const imgW = img.naturalWidth;
-      const imgH = img.naturalHeight;
-      const pageSliceH = Math.round((A4_H_MM / A4_W_MM) * imgW);
+      // Full A4 page height in image pixels (at pixelRatio PR)
+      const a4SliceH = Math.round((A4_H_MM / A4_W_MM) * imgW);
+
+      // Build page content ranges from smart breaks (in content px) → image px
+      const { breaks, totalHeight } = breakDataRef.current;
+      const contentRanges = [];
+      let prev = 0;
+      for (const brk of breaks) {
+        contentRanges.push({ start: prev, end: brk });
+        prev = brk;
+      }
+      contentRanges.push({ start: prev, end: totalHeight });
 
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-      let pageTop = 0;
-      let pageNum = 0;
+      for (let i = 0; i < contentRanges.length; i++) {
+        if (i > 0) pdf.addPage();
 
-      while (pageTop < imgH) {
-        if (pageNum > 0) pdf.addPage();
+        const { start, end } = contentRanges[i];
+        // Convert content-space pixels to image pixels
+        const imgSliceTop = Math.round(start * PR);
+        const imgSliceH   = Math.round((end - start) * PR);
 
-        const sliceH = Math.min(pageSliceH, imgH - pageTop);
         const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = imgW;
-        pageCanvas.height = pageSliceH;
+        pageCanvas.width  = imgW;
+        pageCanvas.height = a4SliceH;
 
         const ctx = pageCanvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, imgW, pageSliceH);
-        ctx.drawImage(img, 0, pageTop, imgW, sliceH, 0, 0, imgW, sliceH);
+        ctx.fillRect(0, 0, imgW, a4SliceH);
+        // Draw this page's content slice at the top of the A4 canvas
+        ctx.drawImage(img, 0, imgSliceTop, imgW, imgSliceH, 0, 0, imgW, imgSliceH);
 
         pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
-
-        pageTop += pageSliceH;
-        pageNum++;
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
@@ -324,7 +333,7 @@ const CVBuilder = () => {
         </div>
 
         <div className="p-4 md:p-8 flex justify-center pb-20">
-          <LivePreview />
+          <LivePreview breakDataRef={breakDataRef} />
         </div>
       </div>
     </div>

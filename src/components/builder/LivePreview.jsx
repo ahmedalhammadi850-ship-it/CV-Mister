@@ -126,7 +126,7 @@ const DragHandle = ({ breakIndex, breakY, pageStart, nextPageEnd, scale, isRTL, 
 };
 
 /* ── Main component ── */
-const LivePreview = () => {
+const LivePreview = ({ breakDataRef }) => {
   const { cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder } = useCV();
   const { isRTL } = useAuth();
   const wrapperRef = useRef(null);
@@ -138,6 +138,13 @@ const LivePreview = () => {
   const [totalHeight, setTotalHeight]   = useState(PAGE_H);
 
   const activeBreaks = manualBreaks ?? autoBreaks;
+
+  /* ── expose break data for PDF export ── */
+  useEffect(() => {
+    if (breakDataRef) {
+      breakDataRef.current = { breaks: activeBreaks, totalHeight };
+    }
+  }, [activeBreaks, totalHeight, breakDataRef]);
 
   /* ── scale ── */
   const calcScale = useCallback(() => {
