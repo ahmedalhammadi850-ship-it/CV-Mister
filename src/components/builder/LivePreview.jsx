@@ -26,6 +26,7 @@ import ArabicProTemplate from '../../templates/ArabicProTemplate';
 import ArabicSlateSidebarTemplate from '../../templates/ArabicSlateSidebarTemplate';
 import ArabicModernTemplate from '../../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../../templates/ArabicCardTemplate';
+import ArabicEliteTemplate from '../../templates/ArabicEliteTemplate';
 import TealProTemplate from '../../templates/TealProTemplate';
 import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
@@ -255,6 +256,7 @@ const LivePreview = ({ breakDataRef }) => {
       case 'arabicslatesidebar': return <ArabicSlateSidebarTemplate {...props} />;
       case 'arabicmodern':       return <ArabicModernTemplate       {...props} />;
       case 'arabiccard':         return <ArabicCardTemplate         {...props} />;
+      case 'arabicelite':        return <ArabicEliteTemplate        {...props} />;
       default:              return <ModernTemplate         {...props} />;
     }
   };

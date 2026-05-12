@@ -28,10 +28,11 @@ import ArabicProTemplate from '../templates/ArabicProTemplate';
 import ArabicSlateSidebarTemplate from '../templates/ArabicSlateSidebarTemplate';
 import ArabicModernTemplate from '../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../templates/ArabicCardTemplate';
+import ArabicEliteTemplate from '../templates/ArabicEliteTemplate';
 import TealProTemplate from '../templates/TealProTemplate';
 import RoseElegantTemplate from '../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
-import { sampleData } from '../utils/sampleData';
+import { sampleData, arabicSampleData } from '../utils/sampleData';
 
 const templates = [
   {
@@ -278,6 +279,17 @@ const templates = [
     atsScore: null,
   },
   {
+    id: 'arabicelite',
+    name: 'Arabic Elite',    arabicName: 'النخبة العربي',
+    desc: 'Dark navy sidebar with circular photo, star-rated skills, circular language gauges, and icon-grid interests. RTL two-column layout.',
+    arabicDesc: 'شريط جانبي داكن مع صورة دائرية، تقييم المهارات بالنجوم، مقاييس اللغات الدائرية، وشبكة أيقونات الاهتمامات. تخطيط بعمودين RTL.',
+    color: '#1f7a8a',
+    component: ArabicEliteTemplate,
+    previewData: arabicSampleData,
+    previewIsRTL: true,
+    atsScore: null,
+  },
+  {
     id: 'arabiccard',
     name: 'Arabic Card',     arabicName: 'بطاقة عربية',
     desc: 'Light gray sidebar on right with teal card-style section headers, two-column RTL.',
@@ -324,7 +336,7 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse }) => {
             userSelect: 'none',
           }}
         >
-          <Component data={sampleData} theme={previewTheme} isRTL={isRTL} />
+          <Component data={template.previewData || sampleData} theme={previewTheme} isRTL={template.previewIsRTL ?? isRTL} />
         </div>
 
         {/* ATS badge */}

@@ -1,3 +1,83 @@
+export const arabicSampleData = {
+  personalInfo: {
+    fullName: "محمد الأحمد",
+    jobTitle: "مدير مشاريع",
+    email: "info@example.com",
+    phone: "+966665555055",
+    location: "الرياض، السعودية",
+    linkedin: "",
+    portfolio: "Web.site.com",
+    summary: "إذا كنت لا تزال غير قادر على إلغاء تأمين الملف، فتأكد من أن التطبيق الذي يقفل الملف قد أُغلق بالكامل ولا يعمل في الخلفية. يمكنك التحقق من ذلك عبر إدارة المهام أو مراقب النشاط على نظام ماك.",
+  },
+  experience: [
+    {
+      id: "exp-1",
+      jobTitle: "اسم الوظيفة",
+      company: "اسم الشركة",
+      location: "الموقع",
+      startDate: "2008",
+      endDate: "2016",
+      current: false,
+      description: "إذا كنت لا تزال غير قادر على إلغاء تأمين الملف، فتأكد من أن التطبيق الذي يقفل الملف قد أُغلق بالكامل ولا يعمل في الخلفية. يمكنك التحقق من ذلك عبر إدارة المهام.",
+    },
+    {
+      id: "exp-2",
+      jobTitle: "اسم الوظيفة",
+      company: "اسم الشركة",
+      location: "الموقع",
+      startDate: "2008",
+      endDate: "2016",
+      current: false,
+      description: "إذا كنت لا تزال غير قادر على إلغاء تأمين الملف، فتأكد من أن التطبيق الذي يقفل الملف قد أُغلق بالكامل ولا يعمل في الخلفية. يمكنك التحقق من ذلك عبر إدارة المهام.",
+    },
+  ],
+  education: [
+    {
+      id: "edu-1",
+      degree: "اسم الجامعة",
+      institution: "التخصص",
+      location: "",
+      startDate: "2013",
+      endDate: "2018",
+      description: "إذا كنت لا تزال غير قادر على إلغاء تأمين الملف.",
+    },
+    {
+      id: "edu-2",
+      degree: "اسم الجامعة",
+      institution: "التخصص",
+      location: "",
+      startDate: "2013",
+      endDate: "2018",
+      description: "إذا كنت لا تزال غير قادر على إلغاء تأمين الملف.",
+    },
+  ],
+  skills: [
+    { name: "مهارة اللغة", level: 5 },
+    { name: "مهارة ثانية", level: 4 },
+    { name: "مهارة ثالثة", level: 3 },
+    { name: "مهارة رابعة", level: 4 },
+  ],
+  projects: [],
+  languages: [
+    { id: "lang-1", name: "FN",  proficiency: 5 },
+    { id: "lang-2", name: "EN",  proficiency: 4 },
+    { id: "lang-3", name: "AR",  proficiency: 4 },
+  ],
+  certificates: [],
+  interests: [
+    { name: "🏊 السباحة" },
+    { name: "📚 القراءة" },
+    { name: "✈️ السفر" },
+    { name: "💻 التقنية" },
+  ],
+  courses: [],
+  awards: [],
+  organisations: [],
+  publications: [],
+  references: [],
+  customSections: [],
+};
+
 export const blankData = {
   personalInfo: {
     fullName: '',
