@@ -47,7 +47,11 @@ const TEMPLATES = [
   { value: 'atsharvard', en: 'ATS Harvard',  ar: 'ATS هارفارد'   },
   { value: 'atscenter',  en: 'ATS Center',   ar: 'ATS توسيط'     },
   { value: 'atselegant', en: 'ATS Elegant',  ar: 'ATS أنيق'      },
-  { value: 'prestige',   en: 'Prestige',     ar: 'بريستيج'        },
+  { value: 'prestige',      en: 'Prestige',        ar: 'بريستيج'          },
+  { value: 'classicserif',  en: 'Classic Serif',   ar: 'كلاسيك سيريف'     },
+  { value: 'atlanticblue',  en: 'Atlantic Blue',   ar: 'أتلانتيك بلو'     },
+  { value: 'mercuryflow',   en: 'Mercury Flow',    ar: 'ميركوري فلو'      },
+  { value: 'editorialrule', en: 'Editorial Rule',  ar: 'إديتوريال رول'    },
 ];
 
 const ui = {

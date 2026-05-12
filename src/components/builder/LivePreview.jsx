@@ -15,6 +15,10 @@ import ATSHarvardTemplate from '../../templates/ATSHarvardTemplate';
 import ATSCenterTemplate from '../../templates/ATSCenterTemplate';
 import ATSElegantTemplate from '../../templates/ATSElegantTemplate';
 import PrestigeTemplate from '../../templates/PrestigeTemplate';
+import ClassicSerifTemplate from '../../templates/ClassicSerifTemplate';
+import AtlanticBlueTemplate from '../../templates/AtlanticBlueTemplate';
+import MercuryFlowTemplate from '../../templates/MercuryFlowTemplate';
+import EditorialRuleTemplate from '../../templates/EditorialRuleTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
@@ -226,8 +230,12 @@ const LivePreview = ({ breakDataRef }) => {
       case 'atsharvard':  return <ATSHarvardTemplate  {...props} />;
       case 'atscenter':   return <ATSCenterTemplate   {...props} />;
       case 'atselegant':  return <ATSElegantTemplate  {...props} />;
-      case 'prestige':    return <PrestigeTemplate    {...props} />;
-      default:            return <ModernTemplate      {...props} />;
+      case 'prestige':      return <PrestigeTemplate      {...props} />;
+      case 'classicserif':  return <ClassicSerifTemplate  {...props} />;
+      case 'atlanticblue':  return <AtlanticBlueTemplate  {...props} />;
+      case 'mercuryflow':   return <MercuryFlowTemplate   {...props} />;
+      case 'editorialrule': return <EditorialRuleTemplate {...props} />;
+      default:              return <ModernTemplate         {...props} />;
     }
   };
 

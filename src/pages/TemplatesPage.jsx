@@ -17,6 +17,10 @@ import ATSHarvardTemplate from '../templates/ATSHarvardTemplate';
 import ATSCenterTemplate from '../templates/ATSCenterTemplate';
 import ATSElegantTemplate from '../templates/ATSElegantTemplate';
 import PrestigeTemplate from '../templates/PrestigeTemplate';
+import ClassicSerifTemplate from '../templates/ClassicSerifTemplate';
+import AtlanticBlueTemplate from '../templates/AtlanticBlueTemplate';
+import MercuryFlowTemplate from '../templates/MercuryFlowTemplate';
+import EditorialRuleTemplate from '../templates/EditorialRuleTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -145,6 +149,42 @@ const templates = [
     color: '#0f4c75',
     component: ATSElegantTemplate,
     atsScore: 99,
+  },
+  {
+    id: 'classicserif',
+    name: 'Classic Serif',   arabicName: 'كلاسيك سيريف',
+    desc: 'Two-column layout with a subtle sidebar: contact & skills on the left, experience on the right.',
+    arabicDesc: 'تصميم بعمودين: معلومات التواصل والمهارات على الجانب، والخبرة في المحتوى الرئيسي.',
+    color: '#1e3a5f',
+    component: ClassicSerifTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'atlanticblue',
+    name: 'Atlantic Blue',   arabicName: 'أتلانتيك بلو',
+    desc: 'Bold dark-blue sidebar with white text, clean white right section for experience.',
+    arabicDesc: 'شريط جانبي داكن أزرق بنص أبيض، وقسم أبيض نظيف للخبرة.',
+    color: '#1e3d6e',
+    component: AtlanticBlueTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'mercuryflow',
+    name: 'Mercury Flow',    arabicName: 'ميركوري فلو',
+    desc: 'Colored header with avatar initials, accent-colored contact strip, accent vertical bars on sections.',
+    arabicDesc: 'هيدر ملون مع أحرف الاسم الأولى، شريط تواصل، وأقسام بشريط لوني جانبي.',
+    color: '#2a7d6e',
+    component: MercuryFlowTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'editorialrule',
+    name: 'Editorial Rule',  arabicName: 'إديتوريال رول',
+    desc: 'Large editorial name header, ruled section dividers, two-column bottom grid with dot ratings.',
+    arabicDesc: 'اسم بارز بحجم كبير، فواصل أقسام بخطوط، وشبكة سفلية بعمودين مع تقييمات بالنقاط.',
+    color: '#2c3e50',
+    component: EditorialRuleTemplate,
+    atsScore: null,
   },
   {
     id: 'prestige',

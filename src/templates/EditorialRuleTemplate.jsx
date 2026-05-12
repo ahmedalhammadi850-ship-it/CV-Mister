@@ -1,0 +1,284 @@
+import { resolveTheme, BREAK_ITEM, BREAK_HEADING } from './templateUtils';
+
+const labels = {
+  summary:       { en: 'Summary',             ar: 'الملخص المهني'        },
+  experience:    { en: 'Experience',           ar: 'الخبرة العملية'       },
+  education:     { en: 'Education',           ar: 'التعليم'              },
+  skills:        { en: 'Skills',              ar: 'المهارات'             },
+  languages:     { en: 'Languages',           ar: 'اللغات'               },
+  projects:      { en: 'Projects',            ar: 'المشاريع'             },
+  certificates:  { en: 'Certificates',        ar: 'الشهادات'             },
+  interests:     { en: 'Interests',           ar: 'الاهتمامات'           },
+  courses:       { en: 'Courses',             ar: 'الدورات'              },
+  awards:        { en: 'Awards',              ar: 'الجوائز'              },
+  organisations: { en: 'Organisations',       ar: 'المنظمات'             },
+  publications:  { en: 'Publications',        ar: 'المنشورات'            },
+  references:    { en: 'References',          ar: 'المراجع'              },
+  present:       { en: 'Present',             ar: 'حتى الآن'             },
+};
+const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
+
+const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages', 'certificates', 'awards'];
+
+const DotsRating = ({ level = 3, accent }) => {
+  const filled = Math.min(Math.max(Math.round(level), 1), 5);
+  return (
+    <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>
+      {[1,2,3,4,5].map(i => (
+        <span key={i} style={{ width: '7pt', height: '7pt', borderRadius: '50%', backgroundColor: i <= filled ? accent : '#e0e0e0', display: 'inline-block' }} />
+      ))}
+    </span>
+  );
+};
+
+const EditorialRuleTemplate = ({
+  data, theme, isRTL = false,
+  visibleSections = {}, visiblePersonalFields = {},
+  sectionOrder = DEFAULT_ORDER,
+}) => {
+  const accent = theme?.primaryColor || '#2c3e50';
+  const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
+  const dir = isRTL ? 'rtl' : 'ltr';
+  const show = (key) => visibleSections[key] !== false;
+
+  const info = data?.personalInfo || {};
+  const vis  = visiblePersonalFields || {};
+
+  const contactParts = [
+    vis.phone     !== false && info.phone     && info.phone,
+    vis.email     !== false && info.email     && info.email,
+    vis.location  !== false && info.location  && info.location,
+    vis.linkedin  !== false && info.linkedin  && info.linkedin,
+    vis.portfolio !== false && info.portfolio && info.portfolio,
+  ].filter(Boolean);
+
+  const BOTTOM_SECTIONS = new Set(['skills', 'languages', 'interests', 'certificates', 'courses', 'awards', 'organisations']);
+
+  const s = {
+    page: {
+      fontFamily: font, fontSize: sz.body, color: '#1a1a1a',
+      backgroundColor: '#ffffff',
+      padding: '36pt 44pt',
+      width: '794px', minHeight: '1122px',
+      boxSizing: 'border-box', direction: dir,
+    },
+    nameRow: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'flex-end',
+      marginBottom: '4pt',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+    },
+    name: { fontSize: '26pt', fontWeight: '700', color: '#111', lineHeight: 1.1, letterSpacing: '-0.02em' },
+    jobTitle: { fontSize: sz.body, color: '#666', textAlign: isRTL ? 'left' : 'right', fontStyle: 'italic', paddingBottom: '4pt' },
+    mainRule: { borderTop: `3px solid ${accent}`, marginBottom: '4pt' },
+    thinRule: { borderTop: '1px solid #ddd', marginBottom: '8pt' },
+    contactRow: {
+      display: 'flex', flexWrap: 'wrap', gap: '4pt 0',
+      fontSize: sz.meta, color: '#555',
+      marginBottom: '20pt',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+    },
+    contactSep: { padding: '0 8pt', color: '#bbb' },
+    heading: {
+      fontSize: sz.heading, fontWeight: '700', color: accent,
+      textTransform: 'uppercase', letterSpacing: '0.10em',
+      marginTop: sectionMt, marginBottom: '4pt',
+      textAlign: isRTL ? 'right' : 'left',
+      ...BREAK_HEADING,
+    },
+    headingRule: { borderTop: `2px solid ${accent}`, marginBottom: '8pt' },
+    row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8pt', flexDirection: isRTL ? 'row-reverse' : 'row' },
+    role: { fontSize: sz.body, fontWeight: '700', color: '#111', flex: 1 },
+    date: { fontSize: sz.meta, color: '#888', whiteSpace: 'nowrap', flexShrink: 0, fontStyle: 'italic' },
+    company: { fontSize: sz.meta, color: '#555', marginBottom: '4pt' },
+    bodyText: { fontSize: sz.body, color: '#333', lineHeight, whiteSpace: 'pre-line' },
+    item: { marginBottom: '10pt', ...BREAK_ITEM },
+    twoCol: { display: 'flex', gap: '24pt', flexDirection: isRTL ? 'row-reverse' : 'row' },
+    col: { flex: 1 },
+    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6pt', flexDirection: isRTL ? 'row-reverse' : 'row' },
+    skillName: { fontSize: sz.body, color: '#333' },
+  };
+
+  const SectionHead = ({ labelKey }) => (
+    <div style={BREAK_HEADING}>
+      <div style={s.heading}>{tr(labelKey, isRTL)}</div>
+      <div style={s.headingRule} />
+    </div>
+  );
+
+  const renderMainSection = (key) => {
+    if (!show(key) || BOTTOM_SECTIONS.has(key)) return null;
+    switch (key) {
+      case 'summary':
+        return info.summary ? (
+          <div key="summary" style={BREAK_ITEM}>
+            <SectionHead labelKey="summary" />
+            <div style={s.bodyText}>{info.summary}</div>
+          </div>
+        ) : null;
+
+      case 'experience':
+        return data.experience?.length > 0 ? (
+          <div key="experience">
+            <SectionHead labelKey="experience" />
+            {data.experience.map((e, i) => (
+              <div key={i} style={s.item}>
+                <div style={s.row}>
+                  <div style={s.role}>{e.jobTitle}</div>
+                  <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
+                </div>
+                <div style={s.company}>{e.company}{e.location ? `, ${e.location}` : ''}</div>
+                {e.description && <div style={s.bodyText}>{e.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+      case 'education':
+        return data.education?.length > 0 ? (
+          <div key="education">
+            <SectionHead labelKey="education" />
+            {data.education.map((e, i) => (
+              <div key={i} style={s.item}>
+                <div style={s.row}>
+                  <div style={s.role}>{e.degree}</div>
+                  <div style={s.date}>{e.startDate} – {e.endDate}</div>
+                </div>
+                <div style={s.company}>{e.institution}{e.location ? `, ${e.location}` : ''}</div>
+                {e.description && <div style={s.bodyText}>{e.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+      case 'projects':
+        return data.projects?.length > 0 ? (
+          <div key="projects">
+            <SectionHead labelKey="projects" />
+            {data.projects.map((p, i) => (
+              <div key={i} style={s.item}>
+                <div style={s.role}>{p.name}</div>
+                {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.url}</div>}
+                {p.description && <div style={s.bodyText}>{p.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+      default: return null;
+    }
+  };
+
+  const bottomKeys = sectionOrder.filter(k => BOTTOM_SECTIONS.has(k) && show(k));
+
+  const renderBottomSection = (key) => {
+    switch (key) {
+      case 'skills':
+        return data.skills?.length > 0 ? (
+          <div key="skills" style={s.col}>
+            <SectionHead labelKey="skills" />
+            {data.skills.map((sk, i) => (
+              <div key={i} style={s.skillRow}>
+                <span style={s.skillName}>{sk.name || sk}</span>
+                <DotsRating level={sk.proficiency || 3} accent={accent} />
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+      case 'languages':
+        return data.languages?.length > 0 ? (
+          <div key="languages" style={s.col}>
+            <SectionHead labelKey="languages" />
+            {data.languages.map((l, i) => (
+              <div key={i} style={s.skillRow}>
+                <span style={s.skillName}>{l.name}</span>
+                <DotsRating level={l.proficiency || 3} accent={accent} />
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+      case 'certificates':
+        return data.certificates?.length > 0 ? (
+          <div key="certificates" style={s.col}>
+            <SectionHead labelKey="certificates" />
+            {data.certificates.map((c, i) => (
+              <div key={i} style={{ fontSize: sz.body, color: '#333', marginBottom: '5pt' }}>
+                <div style={{ fontWeight: '600' }}>{c.name || c}</div>
+                {c.issuer && <div style={{ color: '#777', fontSize: sz.meta }}>{c.issuer}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+      case 'interests':
+        return data.interests?.length > 0 ? (
+          <div key="interests" style={s.col}>
+            <SectionHead labelKey="interests" />
+            <div style={{ fontSize: sz.body, color: '#333', lineHeight: 1.7 }}>
+              {data.interests.map(i => i.name || i).join('  ·  ')}
+            </div>
+          </div>
+        ) : null;
+
+      case 'awards':
+        return data.awards?.length > 0 ? (
+          <div key="awards" style={s.col}>
+            <SectionHead labelKey="awards" />
+            {data.awards.map((a, i) => (
+              <div key={i} style={{ marginBottom: '5pt' }}>
+                <div style={{ fontWeight: '600', fontSize: sz.body }}>{a.title || a.name || a}</div>
+                {a.issuer && <div style={{ color: '#777', fontSize: sz.meta }}>{a.issuer}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+
+      default: return null;
+    }
+  };
+
+  const bottomPairs = [];
+  for (let i = 0; i < bottomKeys.length; i += 2) {
+    bottomPairs.push(bottomKeys.slice(i, i + 2));
+  }
+
+  return (
+    <div style={s.page}>
+      {/* Header */}
+      <div style={s.nameRow}>
+        <div style={s.name}>{info.fullName || 'Your Name'}</div>
+        <div style={s.jobTitle}>{info.jobTitle || ''}</div>
+      </div>
+      <div style={s.mainRule} />
+      <div style={s.thinRule} />
+
+      {/* Contact */}
+      {contactParts.length > 0 && (
+        <div style={s.contactRow}>
+          {contactParts.map((c, i) => (
+            <span key={i} style={{ display: 'flex', alignItems: 'center' }}>
+              {i > 0 && <span style={s.contactSep}>|</span>}
+              {c}
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* Main sections */}
+      {sectionOrder.map(k => renderMainSection(k))}
+
+      {/* Bottom two-column grid */}
+      {bottomPairs.map((pair, i) => (
+        <div key={i} style={{ ...s.twoCol, marginTop: i === 0 ? sectionMt : '0' }}>
+          {pair.map(k => renderBottomSection(k))}
+          {pair.length === 1 && <div style={s.col} />}
+        </div>
+      ))}
+    </div>
+  );
+};
+
+export default EditorialRuleTemplate;
