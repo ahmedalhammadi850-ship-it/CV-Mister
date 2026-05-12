@@ -119,17 +119,72 @@ const CVBuilder = () => {
     }
   };
 
-  const handleDownloadPDF = () => {
-    const originalTitle = document.title;
-    document.title = `${cvData.personalInfo.fullName || 'Resume'} - CV`;
+  const handleDownloadPDF = async () => {
     setIsPrinting(true);
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => {
-        document.title = originalTitle;
-        setIsPrinting(false);
-      }, 1000);
-    }, 150);
+    try {
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
+        import('jspdf'),
+      ]);
+
+      const printRoot = document.getElementById('cv-print-root');
+      const element = printRoot.firstElementChild;
+
+      const savedStyle = printRoot.getAttribute('style');
+      printRoot.style.cssText =
+        'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
+
+      const canvas = await html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        width: 794,
+        windowWidth: 794,
+        scrollX: 0,
+        scrollY: 0,
+        x: 0,
+        y: 0,
+      });
+
+      printRoot.setAttribute('style', savedStyle);
+
+      const A4_W_MM  = 210;
+      const A4_H_MM  = 297;
+      const canvasW  = canvas.width;
+      const pageSliceH = Math.round((A4_H_MM / A4_W_MM) * canvasW);
+
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      let pageTop = 0;
+      let pageNum  = 0;
+
+      while (pageTop < canvas.height) {
+        if (pageNum > 0) pdf.addPage();
+
+        const sliceH    = Math.min(pageSliceH, canvas.height - pageTop);
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width  = canvasW;
+        pageCanvas.height = pageSliceH;
+
+        const ctx = pageCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvasW, pageSliceH);
+        ctx.drawImage(canvas, 0, pageTop, canvasW, sliceH, 0, 0, canvasW, sliceH);
+
+        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+
+        pageTop += pageSliceH;
+        pageNum++;
+      }
+
+      const name = cvData.personalInfo?.fullName || 'Resume';
+      pdf.save(`${name} - CV.pdf`);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+    } finally {
+      setIsPrinting(false);
+    }
   };
 
   return (
