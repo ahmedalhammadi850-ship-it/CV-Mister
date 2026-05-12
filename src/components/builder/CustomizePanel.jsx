@@ -44,6 +44,7 @@ const TEMPLATES = [
   { value: 'atsbold',    en: 'ATS Bold',     ar: 'ATS قوي'       },
   { value: 'atscompact', en: 'ATS Compact',  ar: 'ATS مضغوط'     },
   { value: 'atsmodern',  en: 'ATS Modern',   ar: 'ATS عصري'      },
+  { value: 'atsharvard', en: 'ATS Harvard',  ar: 'ATS هارفارد'   },
 ];
 
 const ui = {

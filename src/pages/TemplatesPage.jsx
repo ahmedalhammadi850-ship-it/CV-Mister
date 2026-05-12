@@ -12,6 +12,7 @@ import ATSSimpleTemplate from '../templates/ATSSimpleTemplate';
 import ATSBoldTemplate from '../templates/ATSBoldTemplate';
 import ATSCompactTemplate from '../templates/ATSCompactTemplate';
 import ATSModernTemplate from '../templates/ATSModernTemplate';
+import ATSHarvardTemplate from '../templates/ATSHarvardTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -113,6 +114,15 @@ const templates = [
     color: '#0d4f6e',
     component: ATSModernTemplate,
     atsScore: 98,
+  },
+  {
+    id: 'atsharvard',
+    name: 'ATS Harvard',     arabicName: 'ATS هارفارد',
+    desc: 'Classic Harvard-style — centered name, full-width rules above each section, zero decoration.',
+    arabicDesc: 'نمط هارفارد الكلاسيكي — اسم مركزي، خطوط كاملة فوق كل قسم، بدون زخارف.',
+    color: '#1a3a5c',
+    component: ATSHarvardTemplate,
+    atsScore: 100,
   },
 ];
 
