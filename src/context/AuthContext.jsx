@@ -1,13 +1,4 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-  sendPasswordResetEmail,
-  updateProfile,
-} from 'firebase/auth';
-import { auth } from '../firebase/config';
 
 const AuthContext = createContext();
 
@@ -21,38 +12,45 @@ export function AuthProvider({ children }) {
   const [isRTL, setIsRTL] = useState(false);
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setCurrentUser({
-          uid: user.uid,
-          name: user.displayName || user.email,
-          displayName: user.displayName || user.email?.split('@')[0],
-          profileImage: user.photoURL || null,
-          email: user.email,
-        });
-      } else {
-        setCurrentUser(null);
-      }
-      setLoading(false);
-    });
-    return unsub;
+    fetch('/api/auth/user', { credentials: 'include' })
+      .then(res => {
+        if (res.status === 401) return null;
+        if (!res.ok) throw new Error('Failed to fetch user');
+        return res.json();
+      })
+      .then(user => {
+        if (user) {
+          setCurrentUser({
+            uid: user.id,
+            id: user.id,
+            name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
+            displayName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email?.split('@')[0],
+            profileImage: user.profileImageUrl || null,
+            email: user.email,
+          });
+        } else {
+          setCurrentUser(null);
+        }
+      })
+      .catch(() => setCurrentUser(null))
+      .finally(() => setLoading(false));
   }, []);
 
-  const signIn = (email, password) =>
-    signInWithEmailAndPassword(auth, email, password);
-
-  const signUp = async (email, password, name) => {
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    if (name) {
-      await updateProfile(cred.user, { displayName: name });
-      setCurrentUser(prev => ({ ...prev, displayName: name, name }));
-    }
-    return cred;
+  const signIn = () => {
+    window.location.href = '/api/login';
   };
 
-  const signOutUser = () => signOut(auth);
+  const signUp = () => {
+    window.location.href = '/api/login';
+  };
 
-  const sendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
+  const signOutUser = () => {
+    window.location.href = '/api/logout';
+  };
+
+  const sendPasswordReset = () => {
+    window.location.href = '/api/login';
+  };
 
   const toggleRTL = () => {
     setIsRTL(prev => {

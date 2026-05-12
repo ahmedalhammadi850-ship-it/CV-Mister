@@ -12,7 +12,10 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 function ProtectedRoute({ children }) {
   const { currentUser } = useAuth();
-  if (!currentUser) return <Navigate to="/login" replace />;
+  if (!currentUser) {
+    window.location.href = '/api/login';
+    return null;
+  }
   return children;
 }
 

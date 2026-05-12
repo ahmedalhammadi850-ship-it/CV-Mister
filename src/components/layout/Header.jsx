@@ -31,10 +31,9 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const handleSignOut = async () => {
+  const handleSignOut = () => {
     setUserMenuOpen(false);
-    await signOutUser();
-    navigate('/login');
+    window.location.href = '/api/logout';
   };
 
   const navLinks = [
@@ -176,19 +175,19 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <Link
-                  to="/login"
+                <a
+                  href="/api/login"
                   className="text-sm font-medium text-slate-600 hover:text-primary-600 px-4 py-2 transition-colors duration-200"
                 >
                   {isRTL ? 'تسجيل الدخول' : 'Log in'}
-                </Link>
-                <Link
-                  to="/signup"
+                </a>
+                <a
+                  href="/api/login"
                   className="text-sm py-2 px-5 rounded-xl text-white font-semibold transition-all"
                   style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}
                 >
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
-                </Link>
+                </a>
               </div>
             )}
           </div>
@@ -255,19 +254,19 @@ const Header = () => {
               </div>
             ) : (
               <div className="pt-3 mt-3 border-t border-slate-100 flex flex-col gap-2">
-                <Link
-                  to="/login"
+                <a
+                  href="/api/login"
                   className="w-full text-center py-2.5 px-4 rounded-xl text-sm font-medium border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-all"
                 >
                   {isRTL ? 'تسجيل الدخول' : 'Log in'}
-                </Link>
-                <Link
-                  to="/signup"
+                </a>
+                <a
+                  href="/api/login"
                   className="w-full text-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white transition-all"
                   style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}
                 >
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
-                </Link>
+                </a>
               </div>
             )}
           </div>
