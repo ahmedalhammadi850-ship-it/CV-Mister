@@ -2,8 +2,29 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
+function wsKeepalive(intervalMs = 10000) {
+  return {
+    name: 'ws-keepalive',
+    apply: 'serve',
+    configureServer(server) {
+      server.hot.on('vite:client:connect', (_data, client) => {
+        const socket = client.socket;
+        if (!socket) return;
+        const timer = setInterval(() => {
+          if (socket.readyState === 1) {
+            socket.ping();
+          } else {
+            clearInterval(timer);
+          }
+        }, intervalMs);
+        socket.once('close', () => clearInterval(timer));
+      });
+    },
+  };
+}
+
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), wsKeepalive(10000)],
   resolve: {
     alias: {
       '@shared': path.resolve(import.meta.dirname, 'shared'),
@@ -13,11 +34,6 @@ export default defineConfig({
     host: '0.0.0.0',
     port: 5000,
     allowedHosts: true,
-    hmr: {
-      clientPort: 443,
-      protocol: 'wss',
-      host: process.env.REPLIT_DEV_DOMAIN,
-    },
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
