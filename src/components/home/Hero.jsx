@@ -14,76 +14,173 @@ const Hero = () => {
     ? ['قوالب احترافية', 'متوافق مع ATS', 'تصدير PDF فوري', 'دعم العربية']
     : ['Professional templates', 'ATS-optimized', 'Instant PDF export', 'Arabic & English'];
 
+  const particles = [
+    { size: 3, top: '15%', left: '20%', delay: '0s',   color: 'rgba(167,139,250,0.7)' },
+    { size: 2, top: '30%', left: '75%', delay: '2s',   color: 'rgba(99,102,241,0.8)' },
+    { size: 4, top: '60%', left: '8%',  delay: '4s',   color: 'rgba(192,132,252,0.6)' },
+    { size: 2, top: '70%', left: '85%', delay: '1s',   color: 'rgba(6,182,212,0.7)' },
+    { size: 3, top: '45%', left: '50%', delay: '5s',   color: 'rgba(167,139,250,0.5)' },
+    { size: 2, top: '20%', left: '60%', delay: '3s',   color: 'rgba(236,72,153,0.5)' },
+    { size: 3, top: '80%', left: '40%', delay: '6s',   color: 'rgba(99,102,241,0.6)' },
+    { size: 2, top: '10%', left: '90%', delay: '1.5s', color: 'rgba(192,132,252,0.7)' },
+  ];
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-6 pb-24"
-      style={{ background: '#0a0a0a' }}>
+      style={{ background: '#060611' }}>
 
-      {/* ── Background Image ── */}
+      <style>{`
+        @keyframes orbFloat {
+          0%, 100% { transform: translate(0, 0) scale(1); }
+          33%       { transform: translate(30px, -40px) scale(1.05); }
+          66%       { transform: translate(-20px, 20px) scale(0.97); }
+        }
+        @keyframes particleFloat {
+          0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.8; }
+          50%       { transform: translate(10px, -20px) scale(1.3); opacity: 1; }
+        }
+      `}</style>
+
+      {/* ── Background ── */}
       <div className="absolute inset-0" style={{ zIndex: 0 }}>
-        <img
-          src="/hero-bg.png"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ opacity: 1 }}
-        />
-        {/* Dark overlay to keep text readable */}
-        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} />
 
-        {/* Mesh grid */}
+        {/* Base gradient */}
         <div className="absolute inset-0" style={{
-          backgroundImage: `
-            linear-gradient(rgba(255,200,100,0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,200,100,0.03) 1px, transparent 1px)
-          `,
-          backgroundSize: '64px 64px',
+          background: 'linear-gradient(135deg, #060611 0%, #0d0b2a 40%, #0a0620 70%, #03020f 100%)',
         }} />
 
-        {/* Fine dot grid */}
+        {/* Purple orb — top left */}
+        <div className="absolute" style={{
+          width: '900px', height: '900px',
+          top: '-300px', left: '-200px',
+          background: 'radial-gradient(circle, rgba(109,40,217,0.35) 0%, rgba(79,46,220,0.15) 40%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(40px)',
+          animation: 'orbFloat 12s ease-in-out infinite',
+        }} />
+
+        {/* Indigo orb — bottom right */}
+        <div className="absolute" style={{
+          width: '800px', height: '800px',
+          bottom: '-200px', right: '-150px',
+          background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(67,56,202,0.12) 40%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(50px)',
+          animation: 'orbFloat 15s ease-in-out infinite reverse',
+        }} />
+
+        {/* Pink orb — center right */}
+        <div className="absolute" style={{
+          width: '500px', height: '500px',
+          top: '20%', right: '10%',
+          background: 'radial-gradient(circle, rgba(192,38,211,0.2) 0%, rgba(168,85,247,0.08) 45%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(35px)',
+          animation: 'orbFloat 10s ease-in-out infinite',
+          animationDelay: '3s',
+        }} />
+
+        {/* Teal orb — bottom left */}
+        <div className="absolute" style={{
+          width: '400px', height: '400px',
+          bottom: '10%', left: '15%',
+          background: 'radial-gradient(circle, rgba(6,182,212,0.18) 0%, rgba(14,165,233,0.06) 50%, transparent 70%)',
+          borderRadius: '50%',
+          filter: 'blur(30px)',
+          animation: 'orbFloat 9s ease-in-out infinite reverse',
+          animationDelay: '6s',
+        }} />
+
+        {/* Dot grid */}
         <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
-          backgroundSize: '28px 28px',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
+          backgroundSize: '32px 32px',
         }} />
 
-        {/* Top header fade */}
-        <div className="absolute top-0 left-0 right-0 h-28" style={{
-          background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
+        {/* Diagonal stripe */}
+        <div className="absolute inset-0" style={{
+          backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 80px, rgba(139,92,246,0.03) 80px, rgba(139,92,246,0.03) 81px)',
         }} />
 
-        {/* Glowing arc line */}
-        <div className="absolute top-1/2 left-0 right-0 h-[2px]" style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(180,83,9,0.5) 20%, rgba(234,179,8,0.7) 50%, rgba(180,83,9,0.5) 80%, transparent 100%)',
-          transform: 'translateY(-150px)',
-          filter: 'blur(1px)',
+        {/* Glowing beam */}
+        <div className="absolute left-0 right-0" style={{
+          top: '42%', height: '1px',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(139,92,246,0.6) 25%, rgba(167,139,250,0.9) 50%, rgba(139,92,246,0.6) 75%, transparent 100%)',
+          filter: 'blur(0.5px)',
         }} />
-        <div className="absolute top-1/2 left-0 right-0 h-px" style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 20%, rgba(255,255,255,0.3) 50%, rgba(255,255,255,0.12) 80%, transparent 100%)',
-          transform: 'translateY(-150px)',
+        <div className="absolute left-0 right-0" style={{
+          top: 'calc(42% - 30px)', height: '60px',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(139,92,246,0.04) 25%, rgba(167,139,250,0.08) 50%, rgba(139,92,246,0.04) 75%, transparent 100%)',
         }} />
 
-        {/* Floating geometric shapes */}
-        <div className="absolute top-[14%] left-[7%] w-20 h-20 rounded-2xl rotate-12 animate-float"
-          style={{ border: '1px solid rgba(180,83,9,0.4)', animationDelay: '0s', boxShadow: '0 0 20px rgba(180,83,9,0.15) inset' }} />
-        <div className="absolute top-[22%] right-[9%] w-12 h-12 rounded-full animate-float"
-          style={{ border: '1px solid rgba(234,179,8,0.4)', animationDelay: '1.5s', boxShadow: '0 0 15px rgba(234,179,8,0.12) inset' }} />
-        <div className="absolute bottom-[18%] left-[13%] w-10 h-10 rounded-xl -rotate-6 animate-float"
-          style={{ border: '1px solid rgba(146,64,14,0.4)', animationDelay: '3s', boxShadow: '0 0 12px rgba(146,64,14,0.12) inset' }} />
-        <div className="absolute bottom-[28%] right-[11%] w-16 h-16 rounded-2xl rotate-45 animate-float"
-          style={{ border: '1px solid rgba(161,91,15,0.35)', animationDelay: '2s', boxShadow: '0 0 18px rgba(161,91,15,0.1) inset' }} />
-        <div className="absolute top-[58%] left-[4%] w-7 h-7 rounded-full animate-float"
-          style={{ background: 'rgba(180,83,9,0.35)', animationDelay: '4s', boxShadow: '0 0 14px rgba(180,83,9,0.5)' }} />
-        <div className="absolute top-[38%] right-[4%] w-5 h-5 rounded-full animate-float"
-          style={{ background: 'rgba(234,179,8,0.3)', animationDelay: '1s', boxShadow: '0 0 12px rgba(234,179,8,0.5)' }} />
-        <div className="absolute top-[70%] right-[20%] w-8 h-8 rounded-lg rotate-12 animate-float"
-          style={{ border: '1px solid rgba(146,64,14,0.35)', animationDelay: '3.5s', boxShadow: '0 0 14px rgba(146,64,14,0.1) inset' }} />
-        <div className="absolute top-[10%] left-[40%] w-4 h-4 rounded-full animate-float"
-          style={{ background: 'rgba(234,179,8,0.35)', animationDelay: '5s', boxShadow: '0 0 10px rgba(234,179,8,0.5)' }} />
+        {/* Floating particles */}
+        {particles.map((p, i) => (
+          <div key={i} className="absolute rounded-full" style={{
+            width: p.size, height: p.size,
+            top: p.top, left: p.left,
+            background: p.color,
+            boxShadow: `0 0 ${p.size * 4}px ${p.color}`,
+            animation: 'particleFloat 8s ease-in-out infinite',
+            animationDelay: p.delay,
+          }} />
+        ))}
 
-        {/* Bottom vignette */}
+        {/* Floating geometric borders */}
+        <div className="absolute rounded-2xl rotate-12 animate-float" style={{
+          top: '12%', left: '6%', width: '80px', height: '80px',
+          border: '1px solid rgba(139,92,246,0.35)',
+          boxShadow: '0 0 20px rgba(139,92,246,0.1) inset',
+          animationDelay: '0s',
+        }} />
+        <div className="absolute rounded-full animate-float" style={{
+          top: '20%', right: '8%', width: '50px', height: '50px',
+          border: '1px solid rgba(99,102,241,0.35)',
+          boxShadow: '0 0 15px rgba(99,102,241,0.1) inset',
+          animationDelay: '2s',
+        }} />
+        <div className="absolute rounded-xl -rotate-6 animate-float" style={{
+          bottom: '20%', left: '12%', width: '42px', height: '42px',
+          border: '1px solid rgba(6,182,212,0.3)',
+          boxShadow: '0 0 12px rgba(6,182,212,0.1) inset',
+          animationDelay: '4s',
+        }} />
+        <div className="absolute rounded-2xl rotate-45 animate-float" style={{
+          bottom: '30%', right: '10%', width: '64px', height: '64px',
+          border: '1px solid rgba(192,38,211,0.25)',
+          boxShadow: '0 0 18px rgba(192,38,211,0.08) inset',
+          animationDelay: '1s',
+        }} />
+        <div className="absolute rounded-full animate-float" style={{
+          top: '55%', left: '3%', width: '24px', height: '24px',
+          background: 'rgba(139,92,246,0.3)',
+          boxShadow: '0 0 16px rgba(139,92,246,0.5)',
+          animationDelay: '3s',
+        }} />
+        <div className="absolute rounded-full animate-float" style={{
+          top: '35%', right: '3%', width: '16px', height: '16px',
+          background: 'rgba(6,182,212,0.4)',
+          boxShadow: '0 0 12px rgba(6,182,212,0.6)',
+          animationDelay: '5s',
+        }} />
+        <div className="absolute rounded-full animate-float" style={{
+          top: '10%', left: '40%', width: '12px', height: '12px',
+          background: 'rgba(236,72,153,0.4)',
+          boxShadow: '0 0 10px rgba(236,72,153,0.6)',
+          animationDelay: '2.5s',
+        }} />
+
+        {/* Top fade */}
+        <div className="absolute top-0 left-0 right-0 h-32" style={{
+          background: 'linear-gradient(to bottom, rgba(6,6,17,0.8) 0%, transparent 100%)',
+        }} />
+
+        {/* Bottom fade */}
         <div className="absolute bottom-0 left-0 right-0 h-40" style={{
-          background: 'linear-gradient(to top, rgba(40,15,5,0.5) 0%, transparent 100%)',
+          background: 'linear-gradient(to top, rgba(3,2,15,0.7) 0%, transparent 100%)',
         }} />
       </div>
 
+      {/* ── Content ── */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div className="max-w-4xl mx-auto text-center">
 
@@ -215,7 +312,6 @@ const Hero = () => {
               backdropFilter: 'blur(16px)',
               border: '1px solid rgba(255,255,255,0.12)',
               boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-              divideColor: 'rgba(255,255,255,0.1)',
             }}
           >
             {stats.map(({ value, label }, i) => (
