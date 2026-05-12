@@ -57,6 +57,7 @@ const TEMPLATES = [
   { value: 'roseelegant',  en: 'Rose Elegant',    ar: 'روز إيليغانت'     },
   { value: 'darkheader',   en: 'Dark Header',     ar: 'هيدر داكن'        },
   { value: 'arabicnavy',         en: 'Arabic Navy',          ar: 'نيفي عربي'           },
+  { value: 'arabicpro',          en: 'Arabic Pro',           ar: 'عربي احترافي'        },
   { value: 'arabictealsidebar',  en: 'Arabic Teal Sidebar',  ar: 'شريط زمردي عربي'     },
   { value: 'arabicslatesidebar', en: 'Arabic Slate Sidebar', ar: 'شريط كحلي عربي'      },
   { value: 'arabicmodern', en: 'Arabic Modern',   ar: 'عصري عربي'        },

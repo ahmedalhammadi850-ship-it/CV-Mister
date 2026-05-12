@@ -27,6 +27,7 @@ import EditorialRuleTemplate from '../../templates/EditorialRuleTemplate';
 import SidebarLightTemplate from '../../templates/SidebarLightTemplate';
 import ArabicNavyTemplate from '../../templates/ArabicNavyTemplate';
 import ArabicTealSidebarTemplate from '../../templates/ArabicTealSidebarTemplate';
+import ArabicProTemplate from '../../templates/ArabicProTemplate';
 import ArabicSlateSidebarTemplate from '../../templates/ArabicSlateSidebarTemplate';
 import ArabicModernTemplate from '../../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../../templates/ArabicCardTemplate';
@@ -122,6 +123,7 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'roseelegant':   return <RoseElegantTemplate   {...props} />;
       case 'darkheader':    return <DarkHeaderTemplate    {...props} />;
       case 'arabicnavy':         return <ArabicNavyTemplate         {...props} />;
+      case 'arabicpro':          return <ArabicProTemplate          {...props} />;
       case 'arabictealsidebar':  return <ArabicTealSidebarTemplate  {...props} />;
       case 'arabicslatesidebar': return <ArabicSlateSidebarTemplate {...props} />;
       case 'arabicmodern':       return <ArabicModernTemplate       {...props} />;

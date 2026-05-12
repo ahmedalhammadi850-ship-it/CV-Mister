@@ -24,6 +24,7 @@ import EditorialRuleTemplate from '../templates/EditorialRuleTemplate';
 import SidebarLightTemplate from '../templates/SidebarLightTemplate';
 import ArabicNavyTemplate from '../templates/ArabicNavyTemplate';
 import ArabicTealSidebarTemplate from '../templates/ArabicTealSidebarTemplate';
+import ArabicProTemplate from '../templates/ArabicProTemplate';
 import ArabicSlateSidebarTemplate from '../templates/ArabicSlateSidebarTemplate';
 import ArabicModernTemplate from '../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../templates/ArabicCardTemplate';
@@ -229,6 +230,15 @@ const templates = [
     arabicDesc: 'هيدر بنفسجي داكن كامل العرض، وجسم بعمودين مع شريط جانبي بتقييم نقطي.',
     color: '#4a1f6e',
     component: DarkHeaderTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabicpro',
+    name: 'Arabic Pro',          arabicName: 'عربي احترافي',
+    desc: 'Full-width dark teal header with overlapping circular photo, RTL two-column layout — dark sidebar with skill/language bars and teal badge section headings.',
+    arabicDesc: 'هيدر زمردي داكن بصورة دائرية تتداخل معه، تخطيط بعمودين RTL — شريط جانبي داكن بأشرطة المهارات واللغات وعناوين بطاقات زمردية.',
+    color: '#2a7f8a',
+    component: ArabicProTemplate,
     atsScore: null,
   },
   {
