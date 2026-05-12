@@ -38,8 +38,10 @@ const TEMPLATES = [
   { value: 'creative',  en: 'Creative',  ar: 'إبداعي'      },
   { value: 'minimal',   en: 'Minimal',   ar: 'بسيط'        },
   { value: 'executive', en: 'Executive', ar: 'تنفيذي'      },
-  { value: 'atsclean',  en: 'ATS Clean', ar: 'ATS نظيف'   },
-  { value: 'atspro',    en: 'ATS Pro',   ar: 'ATS احترافي' },
+  { value: 'atsclean',  en: 'ATS Clean',   ar: 'ATS نظيف'      },
+  { value: 'atspro',    en: 'ATS Pro',     ar: 'ATS احترافي'   },
+  { value: 'atssimple', en: 'ATS Simple',  ar: 'ATS بسيط جداً' },
+  { value: 'atsbold',   en: 'ATS Bold',    ar: 'ATS قوي'       },
 ];
 
 const ui = {

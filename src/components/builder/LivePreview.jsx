@@ -7,6 +7,8 @@ import MinimalTemplate from '../../templates/MinimalTemplate';
 import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
 import ATSCleanTemplate from '../../templates/ATSCleanTemplate';
 import ATSProTemplate from '../../templates/ATSProTemplate';
+import ATSSimpleTemplate from '../../templates/ATSSimpleTemplate';
+import ATSBoldTemplate from '../../templates/ATSBoldTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
@@ -211,6 +213,8 @@ const LivePreview = ({ breakDataRef }) => {
       case 'executive': return <ExecutiveTemplate {...props} />;
       case 'atsclean':  return <ATSCleanTemplate  {...props} />;
       case 'atspro':    return <ATSProTemplate    {...props} />;
+      case 'atssimple': return <ATSSimpleTemplate {...props} />;
+      case 'atsbold':   return <ATSBoldTemplate   {...props} />;
       default:          return <ModernTemplate    {...props} />;
     }
   };

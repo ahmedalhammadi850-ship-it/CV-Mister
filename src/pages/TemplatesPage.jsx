@@ -8,6 +8,8 @@ import MinimalTemplate from '../templates/MinimalTemplate';
 import ExecutiveTemplate from '../templates/ExecutiveTemplate';
 import ATSCleanTemplate from '../templates/ATSCleanTemplate';
 import ATSProTemplate from '../templates/ATSProTemplate';
+import ATSSimpleTemplate from '../templates/ATSSimpleTemplate';
+import ATSBoldTemplate from '../templates/ATSBoldTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -73,6 +75,24 @@ const templates = [
     color: '#0f4c75',
     component: ATSProTemplate,
     atsScore: 98,
+  },
+  {
+    id: 'atssimple',
+    name: 'ATS Simple',      arabicName: 'ATS بسيط جداً',
+    desc: 'Word-processor style — centered header, double-line dividers, maximum parser compatibility.',
+    arabicDesc: 'نمط معالج النصوص — رأسية مركزية، فواصل مزدوجة، أقصى توافق مع المحللات.',
+    color: '#2d6a9f',
+    component: ATSSimpleTemplate,
+    atsScore: 100,
+  },
+  {
+    id: 'atsbold',
+    name: 'ATS Bold',        arabicName: 'ATS قوي',
+    desc: 'Filled accent heading blocks, bullet-point skills grid, strong visual hierarchy.',
+    arabicDesc: 'عناوين أقسام بخلفية ملونة، شبكة مهارات بنقاط، تسلسل بصري قوي.',
+    color: '#155e75',
+    component: ATSBoldTemplate,
+    atsScore: 97,
   },
 ];
 
