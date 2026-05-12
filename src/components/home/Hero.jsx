@@ -1,98 +1,6 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 
-const ResumeCard = () => (
-  <div
-    className="bg-white rounded-2xl overflow-hidden relative"
-    style={{ boxShadow: '0 40px 100px rgba(79,70,229,0.18), 0 8px 30px rgba(0,0,0,0.08)' }}
-  >
-    {/* Header */}
-    <div className="px-7 pt-6 pb-5" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #a855f7 100%)' }}>
-      <div className="flex items-center gap-3.5">
-        <div className="w-13 h-13 rounded-xl bg-white/20 flex items-center justify-center text-white font-bold text-lg border border-white/30 backdrop-blur-sm shrink-0" style={{ width: 52, height: 52 }}>
-          AH
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="h-3.5 w-28 bg-white rounded-full mb-2" style={{ opacity: 0.95 }} />
-          <div className="h-2.5 w-20 bg-white/50 rounded-full" />
-        </div>
-        <div className="flex flex-col items-end gap-1.5">
-          <div className="h-2 w-16 bg-white/40 rounded-full" />
-          <div className="h-2 w-12 bg-white/30 rounded-full" />
-        </div>
-      </div>
-    </div>
-
-    {/* Body */}
-    <div className="px-7 py-5 space-y-5">
-      {/* Summary */}
-      <div>
-        <div className="flex items-center gap-2 mb-2.5">
-          <div className="h-2 w-2 rounded-full bg-indigo-400" />
-          <div className="h-2 w-16 bg-indigo-200 rounded-full" />
-        </div>
-        <div className="space-y-1.5">
-          <div className="h-2 w-full bg-slate-100 rounded-full" />
-          <div className="h-2 w-[90%] bg-slate-100 rounded-full" />
-          <div className="h-2 w-[70%] bg-slate-100 rounded-full" />
-        </div>
-      </div>
-
-      <div className="h-px bg-slate-100" />
-
-      {/* Experience */}
-      <div>
-        <div className="flex items-center gap-2 mb-2.5">
-          <div className="h-2 w-2 rounded-full bg-violet-400" />
-          <div className="h-2 w-20 bg-violet-200 rounded-full" />
-        </div>
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <div className="h-2.5 w-28 bg-slate-800/20 rounded-full" />
-            <div className="h-2 w-16 bg-slate-100 rounded-full" />
-          </div>
-          <div className="h-2 w-24 bg-slate-100 rounded-full" />
-          <div className="h-2 w-full bg-slate-100 rounded-full" />
-          <div className="h-2 w-[80%] bg-slate-100 rounded-full" />
-        </div>
-      </div>
-
-      <div className="h-px bg-slate-100" />
-
-      {/* Skills */}
-      <div>
-        <div className="flex items-center gap-2 mb-2.5">
-          <div className="h-2 w-2 rounded-full bg-purple-400" />
-          <div className="h-2 w-14 bg-purple-200 rounded-full" />
-        </div>
-        <div className="flex gap-1.5 flex-wrap">
-          {['React', 'TypeScript', 'Node.js', 'Python'].map(s => (
-            <span key={s} className="px-2.5 py-1 text-[10px] font-semibold rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
-              {s}
-            </span>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    {/* ATS Score */}
-    <div className="mx-7 mb-6 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-xl px-4 py-3 border border-emerald-100 flex items-center justify-between">
-      <div className="flex items-center gap-2">
-        <span className="relative flex h-2.5 w-2.5">
-          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500" />
-        </span>
-        <span className="text-xs font-semibold text-emerald-700">ATS Score</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <div className="w-20 h-1.5 bg-emerald-100 rounded-full overflow-hidden">
-          <div className="h-full bg-gradient-to-r from-emerald-400 to-teal-400 rounded-full" style={{ width: '98%' }} />
-        </div>
-        <span className="text-sm font-bold text-emerald-600">98/100</span>
-      </div>
-    </div>
-  </div>
-);
 
 const Hero = () => {
   const { isRTL } = useAuth();
@@ -212,18 +120,6 @@ const Hero = () => {
             </div>
           </div>
 
-          {/* ── Right / Resume Card ── */}
-          <div className="flex-1 w-full max-w-[360px] mx-auto lg:mx-0 animate-slide-up relative" style={{ animationDelay: '0.4s' }}>
-
-
-            {/* Glow behind card */}
-            <div
-              className="absolute inset-0 -z-10 rounded-3xl blur-3xl opacity-30 scale-95"
-              style={{ background: 'linear-gradient(135deg, #4f46e5, #a855f7, #c026d3)' }}
-            />
-
-            <ResumeCard />
-          </div>
 
         </div>
       </div>
