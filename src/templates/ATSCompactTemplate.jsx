@@ -21,12 +21,12 @@ const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
 
 /**
- * ATS Compact — dense single-column layout ideal for experienced candidates.
- * Fits more content per page with tighter spacing while remaining 100% ATS-safe.
- *   • Slim top header with name + contact on same visual block
- *   • Section headings: colored text label + full-width light rule
- *   • Skills as inline pipe-separated list — maximum content density
- *   • Reduced vertical gaps between items
+ * ATS Compact — redesigned with a professional centered header and
+ * bold full-width section rules. Stays fully single-column and ATS-safe.
+ *   • Centered name + job title + contact info header
+ *   • Section headings: bold ALL-CAPS text + full-width rule below
+ *   • Tight compact spacing throughout
+ *   • Skills as pipe-separated plain text
  */
 const ATSCompactTemplate = ({
   data, theme, isRTL = false,
@@ -34,12 +34,9 @@ const ATSCompactTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#1b4f72';
-  const { sz, font, lineHeight } = resolveTheme(theme, isRTL);
+  const { sz, font } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
-
-  const compactPadding = '28pt 32pt';
-  const compactMt = '10pt';
 
   const s = {
     page: {
@@ -47,64 +44,66 @@ const ATSCompactTemplate = ({
       fontSize: sz.body,
       color: '#111',
       backgroundColor: '#ffffff',
-      padding: compactPadding,
-      lineHeight: '1.35',
+      padding: '30pt 36pt',
+      lineHeight: '1.38',
       width: '794px',
       minHeight: '1122px',
       boxSizing: 'border-box',
       direction: dir,
       textAlign: isRTL ? 'right' : 'left',
     },
-    headerTop: {
-      borderBottom: `2px solid ${accent}`,
-      paddingBottom: '7pt',
-      marginBottom: '8pt',
+
+    /* ── Header ── */
+    header: {
+      textAlign: 'center',
+      paddingBottom: '8pt',
+      marginBottom: '4pt',
       ...BREAK_ITEM,
     },
     name: {
       fontSize: sz.name,
       fontWeight: '800',
       color: '#000',
-      display: 'inline',
+      letterSpacing: '0.01em',
+      marginBottom: '2pt',
     },
-    jobTitleInline: {
-      fontSize: '10pt',
+    jobTitle: {
+      fontSize: '10.5pt',
       color: accent,
       fontWeight: '600',
-      marginLeft: '8pt',
+      marginBottom: '4pt',
     },
     contact: {
       fontSize: sz.meta,
-      color: '#444',
-      marginTop: '3pt',
+      color: '#333',
     },
-    headingRow: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '6pt',
-      marginTop: compactMt,
-      marginBottom: '4pt',
+
+    /* ── Section heading ── */
+    sectionBlock: {
+      marginTop: '10pt',
+      marginBottom: '5pt',
       ...BREAK_HEADING,
     },
-    headingLabel: {
-      fontSize: '8.5pt',
+    headingText: {
+      fontSize: '8pt',
       fontWeight: '800',
-      color: accent,
+      color: '#000',
       textTransform: 'uppercase',
-      letterSpacing: '0.1em',
-      whiteSpace: 'nowrap',
+      letterSpacing: '0.12em',
+      marginBottom: '2pt',
     },
     headingRule: {
-      flex: 1,
-      borderBottom: `1px solid ${accent}`,
-      opacity: 0.4,
+      borderBottom: `1.5px solid ${accent}`,
     },
+
+    /* ── Content rows ── */
     roleRow: {
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'baseline',
       gap: '8pt',
       marginBottom: '0pt',
+      marginTop: '5pt',
     },
     role: {
       fontSize: sz.body,
@@ -115,27 +114,29 @@ const ATSCompactTemplate = ({
     },
     date: {
       fontSize: sz.meta,
-      color: '#555',
+      color: '#444',
       whiteSpace: 'nowrap',
       flexShrink: 0,
     },
     company: {
       fontSize: sz.meta,
       color: '#444',
+      fontStyle: 'italic',
       marginBottom: '2pt',
     },
     body: {
       fontSize: sz.body,
       color: '#222',
-      lineHeight: '1.35',
+      lineHeight: '1.38',
       whiteSpace: 'pre-line',
     },
     item: { marginBottom: '7pt', ...BREAK_ITEM },
     itemSm: { marginBottom: '5pt', ...BREAK_ITEM },
-    skills: {
+    skillsText: {
       fontSize: sz.body,
       color: '#222',
       lineHeight: '1.5',
+      marginTop: '3pt',
     },
     tag: {
       display: 'inline-block',
@@ -152,8 +153,8 @@ const ATSCompactTemplate = ({
   const contact = buildContact(data.personalInfo, visiblePersonalFields, isRTL);
 
   const SectionHead = ({ label }) => (
-    <div style={s.headingRow}>
-      <div style={s.headingLabel}>{label}</div>
+    <div style={s.sectionBlock}>
+      <div style={s.headingText}>{label}</div>
       <div style={s.headingRule} />
     </div>
   );
@@ -207,7 +208,7 @@ const ATSCompactTemplate = ({
         return data.skills?.length > 0 ? (
           <div key="skills" style={BREAK_ITEM}>
             <SectionHead label={tr('skills', isRTL)} />
-            <div style={s.skills}>{data.skills.join(' | ')}</div>
+            <div style={s.skillsText}>{data.skills.join(' | ')}</div>
           </div>
         ) : null;
 
@@ -215,7 +216,7 @@ const ATSCompactTemplate = ({
         return data.languages?.length > 0 ? (
           <div key="languages" style={BREAK_ITEM}>
             <SectionHead label={tr('languages', isRTL)} />
-            <div style={s.skills}>{data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}</div>
+            <div style={s.skillsText}>{data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}</div>
           </div>
         ) : null;
 
@@ -225,7 +226,8 @@ const ATSCompactTemplate = ({
             <SectionHead label={tr('projects', isRTL)} />
             {data.projects.map((p, i) => (
               <div key={i} style={s.itemSm}>
-                <div style={s.role}>{p.title}{p.link ? <span style={{ ...s.company, marginLeft: '6pt', fontStyle: 'italic' }}> · {p.link}</span> : ''}</div>
+                <div style={{ ...s.role, marginTop: '5pt' }}>{p.title}</div>
+                {p.link && <div style={s.company}>{p.link}</div>}
                 <div style={s.body}>{p.description}</div>
               </div>
             ))}
@@ -253,7 +255,7 @@ const ATSCompactTemplate = ({
         return data.interests?.length > 0 ? (
           <div key="interests" style={BREAK_ITEM}>
             <SectionHead label={tr('interests', isRTL)} />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3pt' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '3pt', marginTop: '3pt' }}>
               {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
             </div>
           </div>
@@ -331,7 +333,7 @@ const ATSCompactTemplate = ({
             <SectionHead label={tr('references', isRTL)} />
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
-                <div style={s.role}>{r.name}</div>
+                <div style={{ ...s.role, marginTop: '5pt' }}>{r.name}</div>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
@@ -348,7 +350,7 @@ const ATSCompactTemplate = ({
               <SectionHead label={sec.title} />
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
-                  {item.title && <div style={s.role}>{item.title}</div>}
+                  {item.title && <div style={{ ...s.role, marginTop: '5pt' }}>{item.title}</div>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <div style={s.body}>{item.description}</div>}
                 </div>
@@ -362,15 +364,14 @@ const ATSCompactTemplate = ({
 
   return (
     <div style={s.page}>
-      <div style={s.headerTop}>
-        <div>
-          <span style={s.name}>{data.personalInfo.fullName}</span>
-          {data.personalInfo.jobTitle && (
-            <span style={s.jobTitleInline}>· {data.personalInfo.jobTitle}</span>
-          )}
-        </div>
+      {/* Centered professional header */}
+      <div style={s.header}>
+        <div style={s.name}>{data.personalInfo.fullName}</div>
+        {data.personalInfo.jobTitle && <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>}
         {contact && <div style={s.contact}>{contact}</div>}
       </div>
+      {/* Full-width rule separating header from body */}
+      <div style={{ borderBottom: `2px solid ${accent}`, marginBottom: '2pt' }} />
       {sectionOrder.map(key => renderSection(key))}
     </div>
   );
