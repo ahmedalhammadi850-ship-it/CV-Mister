@@ -219,13 +219,21 @@ const LivePreview = () => {
                 }} />
               )}
 
-              {/* White bottom-margin overlay (all pages except last) */}
-              {!isLast && (
-                <div style={{
-                  position: 'absolute', bottom: 0, left: 0, right: 0,
-                  height: MARGIN * scale, background: '#fff', zIndex: 5,
-                }} />
-              )}
+              {/* White bottom overlay (all pages except last):
+                  covers everything from the smart break point to the page bottom,
+                  so no content bleeds across the boundary */}
+              {!isLast && (() => {
+                // How far into this page frame does the content reach?
+                const contentEndInFrame = (end - clipStart) * scale;
+                const overlayH = (PAGE_H * scale) - contentEndInFrame;
+                if (overlayH <= 0) return null;
+                return (
+                  <div style={{
+                    position: 'absolute', bottom: 0, left: 0, right: 0,
+                    height: overlayH, background: '#fff', zIndex: 5,
+                  }} />
+                );
+              })()}
             </div>
           </div>
         );
