@@ -13,6 +13,7 @@ function wsKeepalive(intervalMs = 10000) {
         const timer = setInterval(() => {
           if (socket.readyState === 1) {
             socket.ping();
+            socket.send(JSON.stringify({ type: 'custom', event: 'keepalive' }));
           } else {
             clearInterval(timer);
           }
