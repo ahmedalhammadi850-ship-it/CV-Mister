@@ -36,7 +36,7 @@ const Footer = () => {
   const t = (en, ar) => isRTL ? ar : en;
 
   return (
-    <footer style={{ background: 'linear-gradient(180deg, #0f0c1f 0%, #09080f 100%)' }}>
+    <footer style={{ background: 'linear-gradient(160deg, #0d0221 0%, #130a2e 25%, #0f0826 50%, #1a0535 75%, #0d0221 100%)' }}>
 
       {/* Top glow line */}
       <div style={{
