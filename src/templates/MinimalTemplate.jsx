@@ -25,6 +25,7 @@ const MinimalTemplate = ({
   visibleSections = {}, visiblePersonalFields = {},
   sectionOrder = DEFAULT_ORDER,
 }) => {
+  const accent = theme?.primaryColor || '#374151';
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
 
@@ -38,15 +39,15 @@ const MinimalTemplate = ({
     },
     name:    { fontSize: sz.name,    fontWeight: '700', color: '#111', marginBottom: '2pt', letterSpacing: '-0.01em' },
     jobTitle:{ fontSize: sz.body,    color: '#777', marginBottom: '8pt' },
-    contact: { fontSize: sz.meta,    color: '#555', marginBottom: '16pt', paddingBottom: '12pt', borderBottom: '1px solid #ddd' },
-    heading: { fontSize: sz.heading, fontWeight: '700', color: '#111', marginTop: sectionMt, marginBottom: '2pt', ...BREAK_HEADING },
-    divider: { borderBottom: '1px solid #e0e0e0', marginBottom: '8pt' },
+    contact: { fontSize: sz.meta,    color: '#555', marginBottom: '16pt', paddingBottom: '12pt', borderBottom: `1px solid ${accent}` },
+    heading: { fontSize: sz.heading, fontWeight: '700', color: accent, marginTop: sectionMt, marginBottom: '2pt', ...BREAK_HEADING },
+    divider: { borderBottom: `1px solid ${accent}30`, marginBottom: '8pt' },
     meta:    { fontSize: sz.meta,    color: '#666', marginBottom: '4pt' },
     body:    { fontSize: sz.body,    color: '#333', lineHeight, whiteSpace: 'pre-line' },
     row:     { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: 'row', gap: '12pt' },
     role:    { fontSize: sz.body, fontWeight: '700', marginBottom: '1pt', flex: 1, minWidth: 0 },
     date:    { fontSize: sz.meta, color: '#888', whiteSpace: 'nowrap', flexShrink: 0 },
-    tag:     { display: 'inline-block', border: '1px solid #ccc', color: '#555', borderRadius: '3pt', padding: '1pt 5pt', fontSize: sz.meta, marginRight: '4pt', marginBottom: '3pt' },
+    tag:     { display: 'inline-block', border: `1px solid ${accent}50`, color: accent, borderRadius: '3pt', padding: '1pt 5pt', fontSize: sz.meta, marginRight: '4pt', marginBottom: '3pt' },
     item:    { marginBottom: '10pt', ...BREAK_ITEM },
     itemSm:  { marginBottom: '6pt',  ...BREAK_ITEM },
   };

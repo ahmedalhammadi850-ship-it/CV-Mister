@@ -35,7 +35,7 @@ const ATSModernTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#0d4f6e';
-  const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
+  const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
 
@@ -54,7 +54,7 @@ const ATSModernTemplate = ({
     },
     stripe: {
       backgroundColor: accent,
-      padding: '22pt 32pt 18pt',
+      padding: `22pt ${padding.split(' ')[1] || '32pt'} 18pt`,
       ...BREAK_ITEM,
     },
     name: {
@@ -75,7 +75,7 @@ const ATSModernTemplate = ({
       color: 'rgba(255,255,255,0.9)',
     },
     body_wrap: {
-      padding: '16pt 32pt',
+      padding: `14pt ${padding.split(' ')[1] || '32pt'}`,
     },
     heading: {
       fontSize: sz.heading,
