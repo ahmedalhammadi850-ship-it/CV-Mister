@@ -126,15 +126,16 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse }) => {
 };
 
 const TemplatesPage = () => {
-  const { selectedTemplate, setSelectedTemplate } = useCV();
+  const { selectedTemplate, setSelectedTemplate, previewTemplate } = useCV();
   const { isRTL } = useAuth();
   const navigate = useNavigate();
 
   const active = templates.find(t => t.id === selectedTemplate);
 
   const handleUse = (id) => {
-    setSelectedTemplate(id);
-    navigate('/builder');
+    const tpl = templates.find(t => t.id === id);
+    previewTemplate(id, tpl?.color);
+    navigate('/builder?from=template');
   };
 
   return (

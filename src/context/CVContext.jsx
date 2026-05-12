@@ -220,6 +220,22 @@ export function CVProvider({ children }) {
     setCurrentCVName('My Resume');
   };
 
+  const previewTemplate = (templateId, templateColor) => {
+    setCvData(sampleData);
+    setSelectedTemplate(templateId || 'modern');
+    setTheme({
+      primaryColor: templateColor || '#4f46e5',
+      fontFamily: 'Calibri',
+      fontSize: 'medium',
+      lineHeight: 'normal',
+      pagePadding: 'medium',
+      sectionSpacing: 'medium',
+    });
+    setSectionOrder(DEFAULT_SECTION_ORDER);
+    setCurrentCVId(null);
+    setCurrentCVName('My Resume');
+  };
+
   const value = {
     cvData,
     setCvData,
@@ -245,6 +261,7 @@ export function CVProvider({ children }) {
     deleteCV,
     duplicateCV,
     startNewCV,
+    previewTemplate,
   };
 
   return (

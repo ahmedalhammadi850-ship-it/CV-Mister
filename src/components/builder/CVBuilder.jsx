@@ -139,6 +139,7 @@ const CVBuilder = () => {
         backgroundColor: '#ffffff',
         width: 794,
         pixelRatio: 2,
+        skipFonts: true,
       });
 
       printRoot.setAttribute('style', savedStyle);
