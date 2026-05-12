@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-family-sans: 'Inter', 'Tajawal', sans-serif;
-  --font-family-heading: 'Outfit', 'Tajawal', sans-serif;
+  --font-family-sans: 'DM Sans', 'Tajawal', sans-serif;
+  --font-family-heading: 'Plus Jakarta Sans', 'Tajawal', sans-serif;
   --font-family-serif: 'Merriweather', serif;
 
   --color-primary-50: #eef2ff;
