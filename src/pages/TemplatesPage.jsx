@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCV } from '../context/useCV';
 import { useAuth } from '../context/AuthContext';
@@ -238,10 +239,17 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse }) => {
   );
 };
 
+const TABS = [
+  { id: 'all',     en: 'All Templates',  ar: 'جميع القوالب'   },
+  { id: 'design',  en: 'Design',         ar: 'تصميمية'        },
+  { id: 'ats',     en: 'ATS Compatible', ar: 'متوافقة مع ATS' },
+];
+
 const TemplatesPage = () => {
   const { selectedTemplate, setSelectedTemplate, previewTemplate } = useCV();
   const { isRTL } = useAuth();
   const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState('all');
 
   const active = templates.find(t => t.id === selectedTemplate);
 
@@ -250,6 +258,12 @@ const TemplatesPage = () => {
     previewTemplate(id, tpl?.color);
     navigate('/builder?from=template');
   };
+
+  const visibleTemplates = templates.filter(t => {
+    if (activeTab === 'ats')    return t.atsScore !== null;
+    if (activeTab === 'design') return t.atsScore === null;
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -265,16 +279,72 @@ const TemplatesPage = () => {
           </h1>
           <p className="text-slate-500 max-w-xl mx-auto text-base">
             {isRTL
-              ? 'كل قالب مصمم باحترافية عالية ومتوافق مع خط Calibri وأنظمة ATS.'
-              : 'Every template uses Calibri font and is fully optimized for applicant tracking systems.'}
+              ? 'اختر من بين قوالب تصميمية أنيقة أو قوالب مُحسَّنة لأنظمة ATS.'
+              : 'Choose from elegant design templates or templates optimized for ATS systems.'}
           </p>
+        </div>
+      </div>
+
+      {/* Filter Navbar */}
+      <div className="bg-white border-b border-slate-100 sticky top-0 z-20 shadow-sm">
+        <div className="container mx-auto max-w-6xl px-4">
+          <div className="flex items-center gap-1 py-3 overflow-x-auto">
+            {TABS.map(tab => {
+              const isActive = activeTab === tab.id;
+              const count = tab.id === 'all'
+                ? templates.length
+                : tab.id === 'ats'
+                ? templates.filter(t => t.atsScore !== null).length
+                : templates.filter(t => t.atsScore === null).length;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
+                    isActive
+                      ? 'bg-primary-600 text-white shadow-md shadow-primary-200'
+                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                  }`}
+                >
+                  {tab.id === 'ats' && (
+                    <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${isActive ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'}`}>
+                      ✓
+                    </span>
+                  )}
+                  {tab.id === 'design' && (
+                    <span className={`text-xs ${isActive ? 'opacity-80' : 'text-slate-400'}`}>✦</span>
+                  )}
+                  {isRTL ? tab.ar : tab.en}
+                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
+                    isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'
+                  }`}>
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+
+            {/* ATS info pill */}
+            {activeTab === 'design' && (
+              <div className="mr-auto flex items-center gap-1.5 px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-700 font-medium">
+                <span>⚠</span>
+                <span>{isRTL ? 'هذه القوالب غير مُحسَّنة لـ ATS' : 'These templates are not ATS-optimized'}</span>
+              </div>
+            )}
+            {activeTab === 'ats' && (
+              <div className="mr-auto flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full text-xs text-green-700 font-medium">
+                <span>✓</span>
+                <span>{isRTL ? 'مُحسَّنة لأنظمة تتبع المتقدمين' : 'Optimized for applicant tracking systems'}</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Grid */}
       <div className="container mx-auto max-w-6xl px-4 py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {templates.map(template => (
+          {visibleTemplates.map(template => (
             <TemplateCard
               key={template.id}
               template={template}
