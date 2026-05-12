@@ -7,8 +7,9 @@ import MinimalTemplate from '../../templates/MinimalTemplate';
 import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-const PAGE_H = 1122; // A4 at 96 dpi
-const PAGE_W = 794;
+const PAGE_H = 1122;   // A4 height at 96 dpi
+const PAGE_W = 794;    // A4 width  at 96 dpi
+const PAGE_TOP_MARGIN = 48; // matches template medium top padding (36pt ≈ 48px)
 
 const LivePreview = () => {
   const { cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder } = useCV();
@@ -60,7 +61,7 @@ const LivePreview = () => {
   const scaledW  = PAGE_W * scale;
 
   return (
-    <div ref={wrapperRef} className="w-full flex flex-col items-center gap-0">
+    <div ref={wrapperRef} className="w-full flex flex-col items-center">
 
       {/* Page count badge */}
       {numPages > 1 && (
@@ -72,7 +73,7 @@ const LivePreview = () => {
         </div>
       )}
 
-      {/* Hidden full-size content used only for measurement */}
+      {/* Hidden full-size content — used only for height measurement */}
       <div
         ref={contentRef}
         aria-hidden="true"
@@ -88,44 +89,69 @@ const LivePreview = () => {
         {renderTemplate()}
       </div>
 
-      {/* Render each page as a clipped window into the full CV */}
+      {/* Render each A4 page as a clipped window */}
       {Array.from({ length: numPages }, (_, pageIndex) => {
-        const offsetY = pageIndex * PAGE_H;
+        /*
+         * For page 1 (index 0): clip starts at y = 0  (normal)
+         * For page 2+ (index i): clip starts at y = i*PAGE_H - PAGE_TOP_MARGIN
+         *   so that a white overlay of PAGE_TOP_MARGIN height can sit at the top,
+         *   giving the same top-margin feel as the first page.
+         */
+        const clipStart = pageIndex === 0
+          ? 0
+          : pageIndex * PAGE_H - PAGE_TOP_MARGIN;
+
         return (
           <div key={pageIndex} className="flex flex-col items-center w-full">
 
-            {/* Page label (above page 2+) */}
+            {/* Divider + page label between pages */}
             {pageIndex > 0 && (
-              <div className="flex items-center gap-3 my-3" style={{ width: scaledW }}>
+              <div className="flex items-center gap-3 my-4" style={{ width: scaledW }}>
                 <div className="flex-1 h-px bg-slate-300" />
-                <span className="text-xs text-slate-400 font-medium px-2 py-0.5 bg-slate-100 border border-slate-200 rounded-full">
+                <span className="text-xs text-slate-400 font-medium px-3 py-1 bg-white border border-slate-200 rounded-full shadow-sm">
                   {isRTL ? `صفحة ${pageIndex + 1}` : `Page ${pageIndex + 1}`}
                 </span>
                 <div className="flex-1 h-px bg-slate-300" />
               </div>
             )}
 
-            {/* Page frame */}
+            {/* Page frame — same size as A4 */}
             <div
               className="shadow-2xl overflow-hidden bg-white relative"
               style={{
                 width: scaledW,
                 height: PAGE_H * scale,
+                flexShrink: 0,
               }}
             >
-              {/* Scaled and offset CV content */}
+              {/* Scaled CV content, shifted so clipStart aligns with the top */}
               <div
                 style={{
                   transform: `scale(${scale})`,
                   transformOrigin: 'top left',
                   width: PAGE_W,
                   position: 'absolute',
-                  top: -offsetY * scale,
+                  top: -(clipStart * scale),
                   left: 0,
                 }}
               >
                 {renderTemplate()}
               </div>
+
+              {/* White top-margin overlay for continuation pages */}
+              {pageIndex > 0 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    height: PAGE_TOP_MARGIN * scale,
+                    background: '#ffffff',
+                    zIndex: 5,
+                  }}
+                />
+              )}
             </div>
           </div>
         );
