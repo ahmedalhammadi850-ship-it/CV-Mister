@@ -175,19 +175,19 @@ const Header = () => {
               </div>
             ) : (
               <div className="flex items-center gap-2">
-                <a
-                  href="/api/login"
+                <Link
+                  to="/login"
                   className="text-sm font-medium text-slate-600 hover:text-primary-600 px-4 py-2 transition-colors duration-200"
                 >
                   {isRTL ? 'تسجيل الدخول' : 'Log in'}
-                </a>
-                <a
-                  href="/api/login"
-                  className="text-sm py-2 px-5 rounded-xl text-white font-semibold transition-all"
+                </Link>
+                <Link
+                  to="/signup"
+                  className="text-sm py-2 px-5 rounded-xl text-white font-semibold transition-all hover:opacity-90"
                   style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}
                 >
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
-                </a>
+                </Link>
               </div>
             )}
           </div>
@@ -254,19 +254,19 @@ const Header = () => {
               </div>
             ) : (
               <div className="pt-3 mt-3 border-t border-slate-100 flex flex-col gap-2">
-                <a
-                  href="/api/login"
+                <Link
+                  to="/login"
                   className="w-full text-center py-2.5 px-4 rounded-xl text-sm font-medium border border-slate-200 text-slate-700 bg-white hover:bg-slate-50 transition-all"
                 >
                   {isRTL ? 'تسجيل الدخول' : 'Log in'}
-                </a>
-                <a
-                  href="/api/login"
+                </Link>
+                <Link
+                  to="/signup"
                   className="w-full text-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white transition-all"
                   style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}
                 >
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
-                </a>
+                </Link>
               </div>
             )}
           </div>
