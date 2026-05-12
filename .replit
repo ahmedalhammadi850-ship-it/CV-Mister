@@ -47,4 +47,3 @@ publicDir = "dist"
 [userenv]
 
 [userenv.shared]
-VITE_FIREBASE_API_KEY = "AIzaSyAWOigTY6lsunLk6tTgeoXTm4JmwWUR4No"
