@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme {
-  --font-family-sans: 'Space Grotesk', 'Tajawal', sans-serif;
-  --font-family-heading: 'Syne', 'Cairo', sans-serif;
+  --font-family-sans: 'DM Sans', 'Tajawal', sans-serif;
+  --font-family-heading: 'Plus Jakarta Sans', 'Tajawal', sans-serif;
   --font-family-serif: 'Merriweather', serif;
 
   --color-primary-50: #eef2ff;
@@ -105,14 +105,14 @@
   }
 
   [dir="rtl"] {
-    font-family: 'Tajawal', 'Space Grotesk', sans-serif;
+    font-family: 'Tajawal', 'Inter', sans-serif;
   }
 
   [dir="rtl"] h1,
   [dir="rtl"] h2,
   [dir="rtl"] h3,
   [dir="rtl"] h4 {
-    font-family: 'Cairo', 'Syne', sans-serif;
+    font-family: 'Tajawal', 'Outfit', sans-serif;
     letter-spacing: 0;
   }
 
