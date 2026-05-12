@@ -119,81 +119,70 @@ const CVBuilder = () => {
     }
   };
 
-  const handleDownloadPDF = async () => {
+  const handleDownloadPDF = () => {
     setIsPrinting(true);
     try {
-      const [{ toPng }, { jsPDF }] = await Promise.all([
-        import('html-to-image'),
-        import('jspdf'),
-      ]);
-
+      // Grab the already-rendered CV element from the hidden print layer
       const printRoot = document.getElementById('cv-print-root');
-      const element = printRoot.firstElementChild;
+      const templateEl = printRoot?.firstElementChild;
+      if (!templateEl) { setIsPrinting(false); return; }
 
-      const savedStyle = printRoot.getAttribute('style');
-      printRoot.style.cssText =
-        'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
+      // Collect all Google Font <link> tags from this page
+      const fontLinks = Array.from(
+        document.querySelectorAll('link[href*="fonts.googleapis.com"]')
+      ).map(l => l.outerHTML).join('\n');
 
-      // Temporarily remove Google Fonts <link> tags so html-to-image won't
-      // try to fetch them (CORS blocked). The browser already has them cached
-      // and applied, so the rendered pixels are still correct.
-      const gFontLinks = Array.from(
-        document.querySelectorAll('link[href*="fonts.googleapis.com"], link[href*="fonts.gstatic.com"]')
-      );
-      gFontLinks.forEach(l => l.remove());
+      // Collect all inline <style> blocks (Tailwind, component CSS, etc.)
+      const styleBlocks = Array.from(document.querySelectorAll('style'))
+        .map(s => `<style>${s.textContent}</style>`)
+        .join('\n');
 
-      let dataUrl;
-      try {
-        dataUrl = await toPng(element, {
-          backgroundColor: '#ffffff',
-          width: 794,
-          pixelRatio: 3,
-        });
-      } finally {
-        // Always restore the font links
-        gFontLinks.forEach(l => document.head.appendChild(l));
-        printRoot.setAttribute('style', savedStyle);
+      // The template HTML already has every style inlined via React style={}
+      const cvHtml = templateEl.outerHTML;
+      const docDir = isRTL ? 'rtl' : 'ltr';
+      const cvName = cvData.personalInfo?.fullName || 'Resume';
+
+      const printWindow = window.open('', '_blank', 'width=900,height=1200');
+      if (!printWindow) {
+        alert(isRTL
+          ? 'يرجى السماح بالنوافذ المنبثقة لتنزيل PDF'
+          : 'Please allow pop-ups to download the PDF');
+        setIsPrinting(false);
+        return;
       }
 
-      const img = new Image();
-      await new Promise((resolve) => { img.onload = resolve; img.src = dataUrl; });
-
-      const A4_W_MM = 210;
-      const A4_H_MM = 297;
-      const imgW = img.naturalWidth;
-      const imgH = img.naturalHeight;
-      const pageSliceH = Math.round((A4_H_MM / A4_W_MM) * imgW);
-
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-
-      let pageTop = 0;
-      let pageNum = 0;
-
-      while (pageTop < imgH) {
-        if (pageNum > 0) pdf.addPage();
-
-        const sliceH = Math.min(pageSliceH, imgH - pageTop);
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width = imgW;
-        pageCanvas.height = pageSliceH;
-
-        const ctx = pageCanvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, imgW, pageSliceH);
-        ctx.drawImage(img, 0, pageTop, imgW, sliceH, 0, 0, imgW, sliceH);
-
-        // PNG is lossless — no compression artifacts on text
-        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, A4_W_MM, A4_H_MM);
-
-        pageTop += pageSliceH;
-        pageNum++;
-      }
-
-      const name = cvData.personalInfo?.fullName || 'Resume';
-      pdf.save(`${name} - CV.pdf`);
+      printWindow.document.write(`<!DOCTYPE html>
+<html dir="${docDir}" lang="${isRTL ? 'ar' : 'en'}">
+<head>
+  <meta charset="utf-8" />
+  <title>${cvName} - CV</title>
+  ${fontLinks}
+  ${styleBlocks}
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #fff; }
+    @page { size: A4 portrait; margin: 0; }
+    @media print {
+      html, body { margin: 0; padding: 0; }
+      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+    }
+  </style>
+</head>
+<body>
+  ${cvHtml}
+  <script>
+    document.fonts.ready.then(function() {
+      setTimeout(function() {
+        window.print();
+        setTimeout(function() { window.close(); }, 1500);
+      }, 600);
+    });
+  </script>
+</body>
+</html>`);
+      printWindow.document.close();
     } catch (err) {
       console.error('PDF export failed:', err);
-      alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');
     } finally {
       setIsPrinting(false);
     }
