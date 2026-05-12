@@ -129,8 +129,8 @@ const SignupPage = () => {
               </h1>
               <p className="text-slate-500 text-sm">
                 {isRTL
-                  ? 'أنشئ حسابك باستخدام Replit في ثوانٍ'
-                  : 'Create your account with Replit in seconds'}
+                  ? 'أنشئ حسابك في ثوانٍ'
+                  : 'Create your account in seconds'}
               </p>
             </div>
 
@@ -143,7 +143,7 @@ const SignupPage = () => {
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/>
               </svg>
-              {isRTL ? 'إنشاء حساب بـ Replit' : 'Sign up with Replit'}
+              {isRTL ? 'إنشاء حساب' : 'Create Account'}
             </a>
 
             {/* Divider */}

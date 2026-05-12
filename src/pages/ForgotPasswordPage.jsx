@@ -20,8 +20,8 @@ const ForgotPasswordPage = () => {
             </h1>
             <p className="text-slate-500 text-sm leading-relaxed">
               {isRTL
-                ? 'نستخدم Replit للمصادقة، لذا يرجى تسجيل الدخول مباشرة عبر حسابك في Replit.'
-                : 'We use Replit for authentication. Please sign in directly with your Replit account.'}
+                ? 'يرجى تسجيل الدخول مباشرة للوصول إلى حسابك.'
+                : 'Please sign in directly to access your account.'}
             </p>
           </div>
           <a
@@ -29,7 +29,7 @@ const ForgotPasswordPage = () => {
             className="flex items-center justify-center gap-3 w-full py-3.5 px-6 rounded-2xl text-white font-semibold text-sm transition-all duration-200 hover:opacity-90 hover:scale-[1.02]"
             style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' }}
           >
-            {isRTL ? 'تسجيل الدخول بـ Replit' : 'Continue with Replit'}
+            {isRTL ? 'تسجيل الدخول' : 'Continue'}
           </a>
           <Link to="/login" className="block text-slate-400 text-sm hover:text-slate-600 transition-colors">
             ← {isRTL ? 'العودة لتسجيل الدخول' : 'Back to login'}

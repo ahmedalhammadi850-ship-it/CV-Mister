@@ -94,8 +94,8 @@ const LoginPage = () => {
               </h1>
               <p className="text-slate-500 text-sm">
                 {isRTL
-                  ? 'سجّل دخولك باستخدام حسابك في Replit'
-                  : 'Sign in with your Replit account to continue'}
+                  ? 'سجّل دخولك للمتابعة'
+                  : 'Sign in to continue'}
               </p>
             </div>
 
@@ -108,7 +108,7 @@ const LoginPage = () => {
               <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/>
               </svg>
-              {isRTL ? 'تسجيل الدخول بـ Replit' : 'Continue with Replit'}
+              {isRTL ? 'تسجيل الدخول' : 'Continue'}
             </a>
 
             {/* Divider */}
