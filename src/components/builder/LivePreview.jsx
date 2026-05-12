@@ -1,4 +1,4 @@
-import { useCV } from '../../context/CVContext';
+import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
 import ModernTemplate from '../../templates/ModernTemplate';
 import ClassicTemplate from '../../templates/ClassicTemplate';

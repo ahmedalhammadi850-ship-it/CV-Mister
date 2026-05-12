@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { useCV } from '../context/CVContext';
+import { useCV } from '../context/useCV';
 import CVBuilder from '../components/builder/CVBuilder';
 
 const BuilderPage = () => {

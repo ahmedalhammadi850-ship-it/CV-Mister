@@ -3,11 +3,7 @@ import { sampleData, blankData } from '../utils/sampleData';
 import { saveCV, getCVById, getSavedCVs, deleteCV as deleteCVLocal, duplicateCV as duplicateCVLocal } from '../utils/cvStorage';
 import { useAuth } from './AuthContext';
 
-const CVContext = createContext();
-
-export function useCV() {
-  return useContext(CVContext);
-}
+export const CVContext = createContext();
 
 const DEFAULT_SECTION_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
 
@@ -243,6 +239,7 @@ export function CVProvider({ children }) {
     currentCVName,
     setCurrentCVName,
     savedCVs,
+    setSavedCVs,
     saveCurrentCV,
     loadCVById,
     deleteCV,

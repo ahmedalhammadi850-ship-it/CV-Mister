@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useCV } from '../context/CVContext';
+import { useCV } from '../context/useCV';
 import { formatDate } from '../utils/cvStorage';
 
 const TEMPLATE_COLORS = {

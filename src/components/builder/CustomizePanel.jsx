@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { useCV } from '../../context/CVContext';
+import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
 
 const COLORS = [
