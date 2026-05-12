@@ -36,7 +36,7 @@ const ATSHarvardTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#1a3a5c';
-  const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
+  const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
 
@@ -46,8 +46,8 @@ const ATSHarvardTemplate = ({
       fontSize: sz.body,
       color: '#111',
       backgroundColor: '#ffffff',
-      padding: '36pt 40pt',
-      lineHeight: '1.4',
+      padding,
+      lineHeight,
       width: '794px',
       minHeight: '1122px',
       boxSizing: 'border-box',
