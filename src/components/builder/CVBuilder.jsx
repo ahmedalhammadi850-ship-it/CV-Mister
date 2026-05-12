@@ -87,9 +87,9 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
     <div
       id="cv-print-root"
       aria-hidden="true"
-      style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1, pointerEvents: 'none' }}
+      style={{ position: 'absolute', top: '-9999px', left: '-9999px', zIndex: -1, pointerEvents: 'none', width: '794px' }}
     >
-      <div>{renderTemplate()}</div>
+      <div style={{ width: '794px' }}>{renderTemplate()}</div>
     </div>
   );
 };
@@ -130,34 +130,52 @@ const CVBuilder = () => {
         import('jspdf'),
       ]);
 
+      // Wait for all fonts to be loaded so text renders identically to the preview
+      await document.fonts.ready;
+
       const printRoot = document.getElementById('cv-print-root');
       const element = printRoot?.firstElementChild;
       if (!element) return;
 
-      // Make the print layer temporarily visible for capture
-      const savedStyle = printRoot.getAttribute('style');
-      printRoot.style.cssText =
-        'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
+      // Fetch Google Fonts CSS via server proxy (bypasses CORS restriction)
+      // and inject it as an inline <style> tag so html-to-image can embed the fonts
+      let injectedStyle = null;
+      try {
+        const googleFontsUrl = encodeURIComponent(
+          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
+        );
+        const cssRes = await fetch(`/api/font-proxy?url=${googleFontsUrl}`);
+        if (cssRes.ok) {
+          const css = await cssRes.text();
+          injectedStyle = document.createElement('style');
+          injectedStyle.setAttribute('data-pdf-fonts', '1');
+          injectedStyle.textContent = css;
+          element.prepend(injectedStyle);
+        }
+      } catch (_) { /* font injection failed silently — PDF will still generate */ }
 
-      const PR = 2; // pixelRatio
+      const PR = 3; // higher pixel ratio = sharper text in PDF
       let dataUrl;
       try {
         dataUrl = await toPng(element, {
           backgroundColor: '#ffffff',
           width: 794,
+          height: element.scrollHeight,
           pixelRatio: PR,
           cacheBust: false,
         });
-      } catch (fontErr) {
-        console.warn('Font embed failed, retrying without fonts:', fontErr);
+      } catch {
+        // fallback: skip font embedding if capture fails
         dataUrl = await toPng(element, {
           backgroundColor: '#ffffff',
           width: 794,
+          height: element.scrollHeight,
           pixelRatio: PR,
           skipFonts: true,
         });
       } finally {
-        printRoot.setAttribute('style', savedStyle);
+        // Remove injected style tag after capture
+        if (injectedStyle) injectedStyle.remove();
       }
 
       const img = new Image();
@@ -173,7 +191,7 @@ const CVBuilder = () => {
       // Full A4 page height in image pixels (at pixelRatio PR)
       const a4SliceH = Math.round((A4_H_MM / A4_W_MM) * imgW);
 
-      // Build page content ranges from smart breaks (in content px) → image px
+      // Use the same break points as the live preview
       const { breaks, totalHeight } = breakDataRef.current;
       const contentRanges = [];
       let prev = 0;
@@ -189,7 +207,7 @@ const CVBuilder = () => {
         if (i > 0) pdf.addPage();
 
         const { start, end } = contentRanges[i];
-        // Convert content-space pixels to image pixels
+        // Convert content-space pixels → image pixels
         const imgSliceTop = Math.round(start * PR);
         const imgSliceH   = Math.round((end - start) * PR);
 
@@ -200,10 +218,9 @@ const CVBuilder = () => {
         const ctx = pageCanvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, imgW, a4SliceH);
-        // Draw this page's content slice at the top of the A4 canvas
         ctx.drawImage(img, 0, imgSliceTop, imgW, imgSliceH, 0, 0, imgW, imgSliceH);
 
-        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, A4_W_MM, A4_H_MM);
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
