@@ -87,9 +87,10 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
     <div
       id="cv-print-root"
       aria-hidden="true"
+      dir={isRTL ? 'rtl' : 'ltr'}
       style={{ position: 'absolute', top: '-9999px', left: '-9999px', zIndex: -1, pointerEvents: 'none', width: '794px' }}
     >
-      <div style={{ width: '794px' }}>{renderTemplate()}</div>
+      <div dir={isRTL ? 'rtl' : 'ltr'} style={{ width: '794px' }}>{renderTemplate()}</div>
     </div>
   );
 };
@@ -186,15 +187,23 @@ const CVBuilder = () => {
         im.src = fullDataUrl;
       });
 
-      // Use the same break points as the live preview
-      const { breaks, totalHeight } = breakDataRef.current;
+      // Use the PrintLayer's actual scrollHeight as the ground truth for page slicing.
+      // breakDataRef comes from LivePreview which may measure at a slightly different
+      // time; scaling the break positions proportionally prevents a blank last page.
+      const printH = element.scrollHeight;
+      const { breaks: rawBreaks, totalHeight: previewH } = breakDataRef.current;
+      const scale  = previewH > 0 ? printH / previewH : 1;
+      const breaks = rawBreaks.map(b => Math.round(b * scale));
+
       const contentRanges = [];
       let prev = 0;
       for (const brk of breaks) {
-        contentRanges.push({ start: prev, end: brk });
-        prev = brk;
+        if (brk > prev && brk < printH) {
+          contentRanges.push({ start: prev, end: brk });
+          prev = brk;
+        }
       }
-      contentRanges.push({ start: prev, end: totalHeight });
+      contentRanges.push({ start: prev, end: printH });
 
       const imgW = CONTENT_W * PR;
       const a4H  = Math.round((A4_H_MM / A4_W_MM) * imgW); // A4 height in image pixels
