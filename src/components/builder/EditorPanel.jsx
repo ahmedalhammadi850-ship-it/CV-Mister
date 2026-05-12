@@ -1,6 +1,8 @@
 import { useCV } from '../../context/CVContext';
 import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
+import ExperienceCard from './ExperienceCard';
+import EducationCard from './EducationCard';
 
 const ui = {
   personalInfo:  { en: 'Personal Information',  ar: 'المعلومات الشخصية' },
@@ -194,14 +196,39 @@ const EditorPanel = () => {
         {openSection === 'experience' && (
           <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
             {cvData.experience.map((exp) => (
-              <div key={exp.id} className="border border-slate-200 bg-white rounded-lg p-3">
-                <div className="font-medium text-slate-800">{exp.jobTitle}</div>
-                <div className="text-sm text-slate-500">
-                  {exp.company} • {exp.startDate} - {exp.current ? t('present', isRTL) : exp.endDate}
-                </div>
-              </div>
+              <ExperienceCard
+                key={exp.id}
+                exp={exp}
+                isRTL={isRTL}
+                labelClass={labelClass}
+                inputClass={inputClass}
+                onChange={(field, value) => {
+                  const updated = cvData.experience.map(e =>
+                    e.id === exp.id ? { ...e, [field]: value } : e
+                  );
+                  updateSection('experience', updated);
+                }}
+                onDelete={() => {
+                  updateSection('experience', cvData.experience.filter(e => e.id !== exp.id));
+                }}
+              />
             ))}
-            <button className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium hover:border-primary-400 hover:text-primary-600 transition-colors text-sm">
+            <button
+              onClick={() => {
+                const newExp = {
+                  id: `exp-${Date.now()}`,
+                  jobTitle: '',
+                  company: '',
+                  location: '',
+                  startDate: '',
+                  endDate: '',
+                  current: false,
+                  description: '',
+                };
+                updateSection('experience', [...cvData.experience, newExp]);
+              }}
+              className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium hover:border-primary-400 hover:text-primary-600 transition-colors text-sm"
+            >
               {t('addExperience', isRTL)}
             </button>
           </div>
@@ -214,12 +241,38 @@ const EditorPanel = () => {
         {openSection === 'education' && (
           <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
             {cvData.education.map((edu) => (
-              <div key={edu.id} className="border border-slate-200 bg-white rounded-lg p-3">
-                <div className="font-medium text-slate-800">{edu.degree}</div>
-                <div className="text-sm text-slate-500">{edu.institution}</div>
-              </div>
+              <EducationCard
+                key={edu.id}
+                edu={edu}
+                isRTL={isRTL}
+                labelClass={labelClass}
+                inputClass={inputClass}
+                onChange={(field, value) => {
+                  const updated = cvData.education.map(e =>
+                    e.id === edu.id ? { ...e, [field]: value } : e
+                  );
+                  updateSection('education', updated);
+                }}
+                onDelete={() => {
+                  updateSection('education', cvData.education.filter(e => e.id !== edu.id));
+                }}
+              />
             ))}
-            <button className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium hover:border-primary-400 hover:text-primary-600 transition-colors text-sm">
+            <button
+              onClick={() => {
+                const newEdu = {
+                  id: `edu-${Date.now()}`,
+                  degree: '',
+                  institution: '',
+                  location: '',
+                  startDate: '',
+                  endDate: '',
+                  description: '',
+                };
+                updateSection('education', [...cvData.education, newEdu]);
+              }}
+              className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium hover:border-primary-400 hover:text-primary-600 transition-colors text-sm"
+            >
               {t('addEducation', isRTL)}
             </button>
           </div>
