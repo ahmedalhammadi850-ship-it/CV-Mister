@@ -137,46 +137,17 @@ const CVBuilder = () => {
       const element = printRoot?.firstElementChild;
       if (!element) return;
 
-      // Fetch Google Fonts CSS via server proxy (bypasses CORS restriction)
-      // and inject it as an inline <style> tag so html-to-image can embed the fonts
-      let injectedStyle = null;
-      try {
-        const googleFontsUrl = encodeURIComponent(
-          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
-        );
-        const cssRes = await fetch(`/api/font-proxy?url=${googleFontsUrl}`);
-        if (cssRes.ok) {
-          const css = await cssRes.text();
-          injectedStyle = document.createElement('style');
-          injectedStyle.setAttribute('data-pdf-fonts', '1');
-          injectedStyle.textContent = css;
-          element.prepend(injectedStyle);
-        }
-      } catch (_) { /* font injection failed silently — PDF will still generate */ }
-
       const PR = 3; // higher pixel ratio = sharper text in PDF
-      let dataUrl;
-      try {
-        dataUrl = await toPng(element, {
-          backgroundColor: '#ffffff',
-          width: 794,
-          height: element.scrollHeight,
-          pixelRatio: PR,
-          cacheBust: false,
-        });
-      } catch {
-        // fallback: skip font embedding if capture fails
-        dataUrl = await toPng(element, {
-          backgroundColor: '#ffffff',
-          width: 794,
-          height: element.scrollHeight,
-          pixelRatio: PR,
-          skipFonts: true,
-        });
-      } finally {
-        // Remove injected style tag after capture
-        if (injectedStyle) injectedStyle.remove();
-      }
+      // skipFonts: true prevents html-to-image from reading cross-origin stylesheets
+      // (which causes CORS errors). Fonts still render correctly because they are
+      // already loaded in the browser via the same-origin proxy style tag.
+      const dataUrl = await toPng(element, {
+        backgroundColor: '#ffffff',
+        width: 794,
+        height: element.scrollHeight,
+        pixelRatio: PR,
+        skipFonts: true,
+      });
 
       const img = new Image();
       await new Promise((resolve, reject) => {
