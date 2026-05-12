@@ -1,11 +1,13 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 const Header = () => {
   const { isRTL, toggleRTL, currentUser } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
   const location = useLocation();
 
   useEffect(() => {
@@ -18,14 +20,28 @@ const Header = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname]);
 
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
   const navLinks = [
-    { to: '/', label: isRTL ? 'الرئيسية' : 'Home' },
-    { to: '/templates', label: isRTL ? 'القوالب' : 'Templates' },
-    { to: '/builder', label: isRTL ? 'المنشئ' : 'Builder' },
-    { to: '/about', label: isRTL ? 'من نحن' : 'About' },
+    { to: '/',          label: isRTL ? 'الرئيسية' : 'Home'      },
+    { to: '/templates', label: isRTL ? 'القوالب'  : 'Templates'  },
+    { to: '/builder',   label: isRTL ? 'المنشئ'   : 'Builder'    },
+    { to: '/about',     label: isRTL ? 'من نحن'   : 'About'      },
   ];
 
   const isActive = (path) => location.pathname === path;
+
+  const initials = currentUser?.displayName
+    ? currentUser.displayName.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
+    : '?';
 
   return (
     <header
@@ -49,9 +65,7 @@ const Header = () => {
             >
               CV
             </div>
-            <span className="font-heading font-bold text-xl text-slate-900 tracking-tight">
-              Mister
-            </span>
+            <span className="font-heading font-bold text-xl text-slate-900 tracking-tight">Mister</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -81,9 +95,75 @@ const Header = () => {
             </button>
 
             {currentUser ? (
-              <Link to="/builder" className="btn-primary text-sm py-2 px-5">
-                {isRTL ? 'سيرتي الذاتية' : 'My Resumes'}
-              </Link>
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  onClick={() => setUserMenuOpen(o => !o)}
+                  className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-slate-100 transition-all"
+                >
+                  {currentUser.profileImage ? (
+                    <img
+                      src={currentUser.profileImage}
+                      alt="avatar"
+                      className="w-8 h-8 rounded-lg object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <div
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+                      style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}
+                    >
+                      {initials}
+                    </div>
+                  )}
+                  <span className="text-sm font-medium text-slate-700 max-w-[100px] truncate">
+                    {currentUser.displayName}
+                  </span>
+                  <svg className={`w-4 h-4 text-slate-400 transition-transform ${userMenuOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 top-12 bg-white border border-slate-100 rounded-2xl shadow-xl z-50 w-56 py-2 overflow-hidden">
+                    <div className="px-4 py-3 border-b border-slate-100">
+                      <p className="text-xs text-slate-400">{isRTL ? 'مسجّل دخول بـ' : 'Signed in as'}</p>
+                      <p className="text-sm font-semibold text-slate-800 truncate">{currentUser.displayName}</p>
+                    </div>
+                    <div className="py-1">
+                      <Link
+                        to="/dashboard"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        {isRTL ? 'لوحة التحكم' : 'Dashboard'}
+                      </Link>
+                      <Link
+                        to="/builder"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 transition-colors"
+                      >
+                        <svg className="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                        </svg>
+                        {isRTL ? 'سيرة ذاتية جديدة' : 'New Resume'}
+                      </Link>
+                    </div>
+                    <div className="border-t border-slate-100 py-1">
+                      <a
+                        href="/api/logout"
+                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        {isRTL ? 'تسجيل الخروج' : 'Sign out'}
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Link
@@ -133,6 +213,15 @@ const Header = () => {
                 {label}
               </Link>
             ))}
+
+            {currentUser && (
+              <Link
+                to="/dashboard"
+                className="block px-4 py-2.5 rounded-xl text-sm font-medium text-slate-700 hover:text-primary-600 hover:bg-slate-50 transition-all"
+              >
+                {isRTL ? 'لوحة التحكم' : 'Dashboard'}
+              </Link>
+            )}
 
             <button
               onClick={toggleRTL}

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useCV } from '../../context/CVContext';
 import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
@@ -27,24 +28,98 @@ const CustomizeIcon = () => (
 );
 
 const PANEL_TABS = [
-  { key: 'overview',   enLabel: 'Overview',   arLabel: 'نظرة عامة', Icon: OverviewIcon   },
-  { key: 'content',    enLabel: 'Content',    arLabel: 'المحتوى',   Icon: ContentIcon    },
-  { key: 'customize',  enLabel: 'Customize',  arLabel: 'تخصيص',     Icon: CustomizeIcon  },
+  { key: 'overview',  enLabel: 'Overview',  arLabel: 'نظرة عامة', Icon: OverviewIcon  },
+  { key: 'content',   enLabel: 'Content',   arLabel: 'المحتوى',   Icon: ContentIcon   },
+  { key: 'customize', enLabel: 'Customize', arLabel: 'تخصيص',     Icon: CustomizeIcon },
 ];
 
+const SaveModal = ({ isRTL, defaultName, onSave, onClose }) => {
+  const [name, setName] = useState(defaultName);
+  return (
+    <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6">
+        <h3 className="font-bold text-slate-900 text-lg mb-1">
+          {isRTL ? 'حفظ السيرة الذاتية' : 'Save Resume'}
+        </h3>
+        <p className="text-sm text-slate-500 mb-4">
+          {isRTL ? 'اختر اسماً لسيرتك الذاتية' : 'Give your resume a name'}
+        </p>
+        <input
+          type="text"
+          value={name}
+          onChange={e => setName(e.target.value)}
+          onKeyDown={e => e.key === 'Enter' && onSave(name)}
+          autoFocus
+          className="input-field py-2.5 text-sm w-full mb-4"
+          placeholder={isRTL ? 'مثال: سيرتي الذاتية' : 'e.g. Software Engineer CV'}
+        />
+        <div className="flex gap-2">
+          <button
+            onClick={() => onSave(name)}
+            className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors text-sm"
+          >
+            {isRTL ? 'حفظ' : 'Save'}
+          </button>
+          <button
+            onClick={onClose}
+            className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition-colors text-sm"
+          >
+            {isRTL ? 'إلغاء' : 'Cancel'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CVBuilder = () => {
-  const { selectedTemplate, cvData, theme, visibleSections } = useCV();
+  const { selectedTemplate, cvData, theme, visibleSections, saveCurrentCV, currentCVId, currentCVName } = useCV();
   const { isRTL } = useAuth();
+  const navigate = useNavigate();
   const [mobileTab, setMobileTab] = useState('editor');
   const [panelTab, setPanelTab] = useState('content');
+  const [showSaveModal, setShowSaveModal] = useState(false);
+  const [saveToast, setSaveToast] = useState(false);
+
+  const handleSave = (name) => {
+    saveCurrentCV(name);
+    setShowSaveModal(false);
+    setSaveToast(true);
+    setTimeout(() => setSaveToast(false), 2500);
+  };
+
+  const handleSaveClick = () => {
+    if (currentCVId) {
+      handleSave(currentCVName);
+    } else {
+      setShowSaveModal(true);
+    }
+  };
 
   return (
     <div
       className="flex flex-col md:flex-row h-[calc(100vh-80px)] overflow-hidden bg-slate-100"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      {showSaveModal && (
+        <SaveModal
+          isRTL={isRTL}
+          defaultName={currentCVName}
+          onSave={handleSave}
+          onClose={() => setShowSaveModal(false)}
+        />
+      )}
 
-      {/* Mobile top tabs: Edit / Preview */}
+      {saveToast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-medium flex items-center gap-2 animate-fade-in">
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          {isRTL ? 'تم الحفظ بنجاح!' : 'Saved successfully!'}
+        </div>
+      )}
+
+      {/* Mobile top tabs */}
       <div className="md:hidden flex bg-white border-b border-slate-200 sticky top-0 z-10">
         <button
           onClick={() => setMobileTab('editor')}
@@ -86,8 +161,8 @@ const CVBuilder = () => {
 
         {/* Panel content */}
         <div className="overflow-y-auto flex-1">
-          {panelTab === 'overview' && <OverviewPanel cvData={cvData} theme={theme} selectedTemplate={selectedTemplate} visibleSections={visibleSections} isRTL={isRTL} setPanelTab={setPanelTab} />}
-          {panelTab === 'content' && <EditorPanel />}
+          {panelTab === 'overview'  && <OverviewPanel cvData={cvData} theme={theme} selectedTemplate={selectedTemplate} visibleSections={visibleSections} isRTL={isRTL} setPanelTab={setPanelTab} />}
+          {panelTab === 'content'   && <EditorPanel />}
           {panelTab === 'customize' && <CustomizePanel />}
         </div>
       </div>
@@ -96,12 +171,25 @@ const CVBuilder = () => {
       <div className={`flex-1 bg-slate-100 overflow-y-auto ${mobileTab === 'preview' ? 'block' : 'hidden md:block'}`}>
         <div className="sticky top-0 right-0 p-4 flex justify-end gap-3 z-10 pointer-events-none">
           <div className="pointer-events-auto">
-            <button className="bg-white border border-slate-200 text-slate-700 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
+            <button
+              onClick={() => navigate('/dashboard')}
+              className="bg-white border border-slate-200 text-slate-600 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm"
+            >
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              {isRTL ? 'تقييم ATS: 95/100' : 'ATS Score: 95/100'}
+              {isRTL ? 'لوحة التحكم' : 'Dashboard'}
+            </button>
+          </div>
+          <div className="pointer-events-auto">
+            <button
+              onClick={handleSaveClick}
+              className="bg-white border border-slate-200 text-slate-700 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm"
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+              </svg>
+              {isRTL ? 'حفظ' : 'Save'}
             </button>
           </div>
           <div className="pointer-events-auto">
@@ -134,41 +222,31 @@ const SECTION_LABELS = {
 
 const OverviewPanel = ({ cvData, theme, selectedTemplate, visibleSections, isRTL, setPanelTab }) => {
   const completionItems = [
-    { key: 'name',       label: isRTL ? 'الاسم'              : 'Name',             done: !!cvData.personalInfo.fullName   },
-    { key: 'jobTitle',   label: isRTL ? 'المسمى الوظيفي'     : 'Job title',         done: !!cvData.personalInfo.jobTitle   },
-    { key: 'email',      label: isRTL ? 'البريد الإلكتروني'  : 'Email',             done: !!cvData.personalInfo.email      },
-    { key: 'summary',    label: isRTL ? 'الملخص المهني'      : 'Summary',           done: !!cvData.personalInfo.summary    },
-    { key: 'experience', label: isRTL ? 'الخبرة'             : 'Experience',        done: cvData.experience?.length > 0   },
-    { key: 'education',  label: isRTL ? 'التعليم'            : 'Education',         done: cvData.education?.length > 0    },
-    { key: 'skills',     label: isRTL ? 'المهارات'           : 'Skills',            done: cvData.skills?.length > 0       },
+    { key: 'name',       label: isRTL ? 'الاسم'              : 'Name',       done: !!cvData.personalInfo.fullName  },
+    { key: 'jobTitle',   label: isRTL ? 'المسمى الوظيفي'     : 'Job title',  done: !!cvData.personalInfo.jobTitle  },
+    { key: 'email',      label: isRTL ? 'البريد الإلكتروني'  : 'Email',      done: !!cvData.personalInfo.email     },
+    { key: 'summary',    label: isRTL ? 'الملخص المهني'      : 'Summary',    done: !!cvData.personalInfo.summary   },
+    { key: 'experience', label: isRTL ? 'الخبرة'             : 'Experience', done: cvData.experience?.length > 0   },
+    { key: 'education',  label: isRTL ? 'التعليم'            : 'Education',  done: cvData.education?.length > 0    },
+    { key: 'skills',     label: isRTL ? 'المهارات'           : 'Skills',     done: cvData.skills?.length > 0       },
   ];
   const doneCount = completionItems.filter(i => i.done).length;
   const pct = Math.round((doneCount / completionItems.length) * 100);
-
   const activeSections = Object.entries(visibleSections).filter(([, v]) => v).map(([k]) => k);
 
   return (
     <div className="p-5 space-y-6 pb-20" dir={isRTL ? 'rtl' : 'ltr'}>
-
-      {/* Completion */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4 space-y-3">
         <div className="flex items-center justify-between">
           <span className="font-semibold text-slate-800 text-sm">{isRTL ? 'اكتمال السيرة الذاتية' : 'CV Completion'}</span>
           <span className="text-sm font-bold text-indigo-600">{pct}%</span>
         </div>
         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-500"
-            style={{ width: `${pct}%`, background: theme.primaryColor }}
-          />
+          <div className="h-full rounded-full transition-all duration-500" style={{ width: `${pct}%`, background: theme.primaryColor }} />
         </div>
         <div className="space-y-1.5">
           {completionItems.map(item => (
-            <div
-              key={item.key}
-              className="flex items-center gap-2 text-sm"
-              style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
-            >
+            <div key={item.key} className="flex items-center gap-2 text-sm" style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}>
               <span className={`w-4 h-4 rounded-full flex items-center justify-center flex-shrink-0 ${item.done ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
                 {item.done
                   ? <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>
@@ -181,28 +259,20 @@ const OverviewPanel = ({ cvData, theme, selectedTemplate, visibleSections, isRTL
         </div>
       </div>
 
-      {/* Active template */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
         <p className="text-xs font-medium text-slate-400 mb-1">{isRTL ? 'القالب المحدد' : 'Active template'}</p>
         <div className="flex items-center justify-between">
           <span className="font-semibold text-slate-800 capitalize">{selectedTemplate}</span>
-          <button
-            onClick={() => setPanelTab('customize')}
-            className="text-xs text-indigo-600 font-medium hover:underline"
-          >
+          <button onClick={() => setPanelTab('customize')} className="text-xs text-indigo-600 font-medium hover:underline">
             {isRTL ? 'تغيير' : 'Change'}
           </button>
         </div>
       </div>
 
-      {/* Active sections */}
       <div className="bg-white rounded-xl border border-slate-100 shadow-sm p-4">
         <div className="flex items-center justify-between mb-3">
           <p className="text-xs font-medium text-slate-400">{isRTL ? 'الأقسام الفعّالة' : 'Active sections'}</p>
-          <button
-            onClick={() => setPanelTab('customize')}
-            className="text-xs text-indigo-600 font-medium hover:underline"
-          >
+          <button onClick={() => setPanelTab('customize')} className="text-xs text-indigo-600 font-medium hover:underline">
             {isRTL ? 'تعديل' : 'Edit'}
           </button>
         </div>
@@ -215,19 +285,12 @@ const OverviewPanel = ({ cvData, theme, selectedTemplate, visibleSections, isRTL
         </div>
       </div>
 
-      {/* Quick links */}
       <div className="grid grid-cols-2 gap-2">
-        <button
-          onClick={() => setPanelTab('content')}
-          className="flex flex-col items-center gap-1.5 p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"
-        >
+        <button onClick={() => setPanelTab('content')} className="flex flex-col items-center gap-1.5 p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-indigo-200 hover:bg-indigo-50/30 transition-all">
           <ContentIcon />
           <span className="text-xs font-medium text-slate-600">{isRTL ? 'تعديل المحتوى' : 'Edit Content'}</span>
         </button>
-        <button
-          onClick={() => setPanelTab('customize')}
-          className="flex flex-col items-center gap-1.5 p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-indigo-200 hover:bg-indigo-50/30 transition-all"
-        >
+        <button onClick={() => setPanelTab('customize')} className="flex flex-col items-center gap-1.5 p-4 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-indigo-200 hover:bg-indigo-50/30 transition-all">
           <CustomizeIcon />
           <span className="text-xs font-medium text-slate-600">{isRTL ? 'تخصيص التصميم' : 'Customize Design'}</span>
         </button>
