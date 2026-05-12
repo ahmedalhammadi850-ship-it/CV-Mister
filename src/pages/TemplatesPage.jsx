@@ -15,6 +15,7 @@ import ATSModernTemplate from '../templates/ATSModernTemplate';
 import ATSHarvardTemplate from '../templates/ATSHarvardTemplate';
 import ATSCenterTemplate from '../templates/ATSCenterTemplate';
 import ATSElegantTemplate from '../templates/ATSElegantTemplate';
+import PrestigeTemplate from '../templates/PrestigeTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -143,6 +144,15 @@ const templates = [
     color: '#0f4c75',
     component: ATSElegantTemplate,
     atsScore: 99,
+  },
+  {
+    id: 'prestige',
+    name: 'Prestige',        arabicName: 'بريستيج',
+    desc: 'Bold dark header with centered white name, elegant centered section dividers — striking and professional.',
+    arabicDesc: 'هيدر داكن بالاسم الأبيض في المنتصف، فواصل أقسام أنيقة — مميز واحترافي.',
+    color: '#1b2a4a',
+    component: PrestigeTemplate,
+    atsScore: null,
   },
 ];
 

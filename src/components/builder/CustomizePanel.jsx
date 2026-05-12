@@ -47,6 +47,7 @@ const TEMPLATES = [
   { value: 'atsharvard', en: 'ATS Harvard',  ar: 'ATS هارفارد'   },
   { value: 'atscenter',  en: 'ATS Center',   ar: 'ATS توسيط'     },
   { value: 'atselegant', en: 'ATS Elegant',  ar: 'ATS أنيق'      },
+  { value: 'prestige',   en: 'Prestige',     ar: 'بريستيج'        },
 ];
 
 const ui = {
