@@ -29,6 +29,7 @@ import ArabicSlateSidebarTemplate from '../templates/ArabicSlateSidebarTemplate'
 import ArabicModernTemplate from '../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../templates/ArabicCardTemplate';
 import ArabicEliteTemplate from '../templates/ArabicEliteTemplate';
+import ArabicWaveTemplate from '../templates/ArabicWaveTemplate';
 import TealProTemplate from '../templates/TealProTemplate';
 import RoseElegantTemplate from '../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
@@ -296,6 +297,17 @@ const templates = [
     arabicDesc: 'شريط جانبي فاتح على اليمين مع عناوين بطاقات زمردية، تخطيط بعمودين RTL.',
     color: '#2d6a8a',
     component: ArabicCardTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabicwave',
+    name: 'Arabic Wave',     arabicName: 'موجة عربية',
+    desc: 'Dark navy right sidebar with circular photo, teal contact banner, star skills, circular language gauges, and wave-line section separators.',
+    arabicDesc: 'شريط جانبي كحلي داكن مع صورة دائرية، بانر تواصل زمردي، تقييم المهارات بنجوم، مقاييس اللغات الدائرية، وفواصل أقسام بخط موجي.',
+    color: '#2a8a96',
+    component: ArabicWaveTemplate,
+    previewData: arabicSampleData,
+    previewIsRTL: true,
     atsScore: null,
   },
   {

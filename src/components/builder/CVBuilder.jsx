@@ -31,6 +31,7 @@ import ArabicProTemplate from '../../templates/ArabicProTemplate';
 import ArabicSlateSidebarTemplate from '../../templates/ArabicSlateSidebarTemplate';
 import ArabicModernTemplate from '../../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../../templates/ArabicCardTemplate';
+import ArabicWaveTemplate from '../../templates/ArabicWaveTemplate';
 import TealProTemplate from '../../templates/TealProTemplate';
 import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
@@ -128,6 +129,7 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'arabicslatesidebar': return <ArabicSlateSidebarTemplate {...props} />;
       case 'arabicmodern':       return <ArabicModernTemplate       {...props} />;
       case 'arabiccard':         return <ArabicCardTemplate         {...props} />;
+      case 'arabicwave':         return <ArabicWaveTemplate         {...props} />;
       default:              return <ModernTemplate        {...props} />;
     }
   };
