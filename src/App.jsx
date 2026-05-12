@@ -11,11 +11,9 @@ import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 
 function ProtectedRoute({ children }) {
-  const { currentUser } = useAuth();
-  if (!currentUser) {
-    window.location.href = '/api/login';
-    return null;
-  }
+  const { currentUser, loading } = useAuth();
+  if (loading) return null;
+  if (!currentUser) return <Navigate to="/login" replace />;
   return children;
 }
 

@@ -50,6 +50,19 @@ async function deleteAPICV(id) {
   }
 }
 
+async function duplicateAPICV(entry) {
+  try {
+    await fetch('/api/cvs', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
+  } catch (e) {
+    console.error('API CV duplicate failed', e);
+  }
+}
+
 export function CVProvider({ children }) {
   const { currentUser } = useAuth();
   const [cvData, setCvData] = useState(sampleData);
@@ -185,6 +198,16 @@ export function CVProvider({ children }) {
     }
   };
 
+  const duplicateCV = (id) => {
+    const copy = duplicateCVLocal(id);
+    if (!copy) return null;
+    setSavedCVs(getSavedCVs());
+    if (currentUser) {
+      duplicateAPICV(copy);
+    }
+    return copy;
+  };
+
   const startNewCV = () => {
     setCvData(sampleData);
     setSelectedTemplate('modern');
@@ -223,6 +246,7 @@ export function CVProvider({ children }) {
     saveCurrentCV,
     loadCVById,
     deleteCV,
+    duplicateCV,
     startNewCV,
   };
 
