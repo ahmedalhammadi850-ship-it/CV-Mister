@@ -119,70 +119,89 @@ const CVBuilder = () => {
     }
   };
 
-  const handleDownloadPDF = () => {
+  const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      // Grab the already-rendered CV element from the hidden print layer
+      const [{ toPng }, { jsPDF }] = await Promise.all([
+        import('html-to-image'),
+        import('jspdf'),
+      ]);
+
       const printRoot = document.getElementById('cv-print-root');
-      const templateEl = printRoot?.firstElementChild;
-      if (!templateEl) { setIsPrinting(false); return; }
+      const element = printRoot?.firstElementChild;
+      if (!element) return;
 
-      // Collect all Google Font <link> tags from this page
-      const fontLinks = Array.from(
-        document.querySelectorAll('link[href*="fonts.googleapis.com"]')
-      ).map(l => l.outerHTML).join('\n');
+      // Make the print layer temporarily visible for capture
+      const savedStyle = printRoot.getAttribute('style');
+      printRoot.style.cssText =
+        'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
 
-      // Collect all inline <style> blocks (Tailwind, component CSS, etc.)
-      const styleBlocks = Array.from(document.querySelectorAll('style'))
-        .map(s => `<style>${s.textContent}</style>`)
-        .join('\n');
-
-      // The template HTML already has every style inlined via React style={}
-      const cvHtml = templateEl.outerHTML;
-      const docDir = isRTL ? 'rtl' : 'ltr';
-      const cvName = cvData.personalInfo?.fullName || 'Resume';
-
-      const printWindow = window.open('', '_blank', 'width=900,height=1200');
-      if (!printWindow) {
-        alert(isRTL
-          ? 'يرجى السماح بالنوافذ المنبثقة لتنزيل PDF'
-          : 'Please allow pop-ups to download the PDF');
-        setIsPrinting(false);
-        return;
+      let dataUrl;
+      try {
+        // html-to-image fetches font binaries from fonts.gstatic.com which
+        // supports CORS (Access-Control-Allow-Origin: *), so skipFonts is NOT
+        // needed — fonts are embedded correctly in the output image.
+        dataUrl = await toPng(element, {
+          backgroundColor: '#ffffff',
+          width: 794,
+          pixelRatio: 2,
+          cacheBust: false,
+        });
+      } catch (fontErr) {
+        console.warn('Font embed failed, retrying without fonts:', fontErr);
+        // Fallback: skip fonts if gstatic fetch fails for any reason
+        dataUrl = await toPng(element, {
+          backgroundColor: '#ffffff',
+          width: 794,
+          pixelRatio: 2,
+          skipFonts: true,
+        });
+      } finally {
+        printRoot.setAttribute('style', savedStyle);
       }
 
-      printWindow.document.write(`<!DOCTYPE html>
-<html dir="${docDir}" lang="${isRTL ? 'ar' : 'en'}">
-<head>
-  <meta charset="utf-8" />
-  <title>${cvName} - CV</title>
-  ${fontLinks}
-  ${styleBlocks}
-  <style>
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: #fff; }
-    @page { size: A4 portrait; margin: 0; }
-    @media print {
-      html, body { margin: 0; padding: 0; }
-      * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
-    }
-  </style>
-</head>
-<body>
-  ${cvHtml}
-  <script>
-    document.fonts.ready.then(function() {
-      setTimeout(function() {
-        window.print();
-        setTimeout(function() { window.close(); }, 1500);
-      }, 600);
-    });
-  </script>
-</body>
-</html>`);
-      printWindow.document.close();
+      const img = new Image();
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+
+      const A4_W_MM = 210;
+      const A4_H_MM = 297;
+      const imgW = img.naturalWidth;
+      const imgH = img.naturalHeight;
+      const pageSliceH = Math.round((A4_H_MM / A4_W_MM) * imgW);
+
+      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      let pageTop = 0;
+      let pageNum = 0;
+
+      while (pageTop < imgH) {
+        if (pageNum > 0) pdf.addPage();
+
+        const sliceH = Math.min(pageSliceH, imgH - pageTop);
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width = imgW;
+        pageCanvas.height = pageSliceH;
+
+        const ctx = pageCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, imgW, pageSliceH);
+        ctx.drawImage(img, 0, pageTop, imgW, sliceH, 0, 0, imgW, sliceH);
+
+        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+
+        pageTop += pageSliceH;
+        pageNum++;
+      }
+
+      const name = cvData.personalInfo?.fullName || 'Resume';
+      pdf.save(`${name} - CV.pdf`);
     } catch (err) {
       console.error('PDF export failed:', err);
+      alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');
     } finally {
       setIsPrinting(false);
     }
