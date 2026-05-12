@@ -2,12 +2,20 @@ import type { Express } from "express";
 import { isAuthenticated } from "../replit_integrations/auth";
 import { db } from "../db";
 import { cvs } from "@shared/models/cv";
+import { users } from "@shared/models/auth";
 import { eq, and, desc } from "drizzle-orm";
+
+function getUserId(req: any): string {
+  if ((req.session as any)?.userId) {
+    return (req.session as any).userId;
+  }
+  return req.user?.claims?.sub;
+}
 
 export function registerCVRoutes(app: Express) {
   app.get("/api/cvs", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const userCVs = await db
         .select()
         .from(cvs)
@@ -22,7 +30,7 @@ export function registerCVRoutes(app: Express) {
 
   app.get("/api/cvs/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const [cv] = await db
         .select()
         .from(cvs)
@@ -37,7 +45,7 @@ export function registerCVRoutes(app: Express) {
 
   app.post("/api/cvs", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       const { id, name, cvData, template, theme, atsScore } = req.body;
       const [cv] = await db
         .insert(cvs)
@@ -56,7 +64,7 @@ export function registerCVRoutes(app: Express) {
 
   app.delete("/api/cvs/:id", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = getUserId(req);
       await db.delete(cvs).where(and(eq(cvs.id, req.params.id), eq(cvs.userId, userId)));
       res.json({ success: true });
     } catch (err) {
