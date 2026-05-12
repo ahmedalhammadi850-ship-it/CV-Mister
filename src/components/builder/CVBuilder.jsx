@@ -137,30 +137,31 @@ const CVBuilder = () => {
       const element = printRoot?.firstElementChild;
       if (!element) return;
 
-      const PR = 3; // higher pixel ratio = sharper text in PDF
-      // skipFonts: true prevents html-to-image from reading cross-origin stylesheets
-      // (which causes CORS errors). Fonts still render correctly because they are
-      // already loaded in the browser via the same-origin proxy style tag.
-      const dataUrl = await toPng(element, {
+      const PR = 2; // pixelRatio 2 is sharp enough without freezing the browser
+      const A4_W_MM = 210;
+      const A4_H_MM = 297;
+      const CONTENT_W = 794; // fixed A4 width in CSS pixels
+
+      // Capture the full CV as one image (once only)
+      // skipFonts avoids cross-origin stylesheet errors; fonts render fine since
+      // they are already loaded in the browser via the same-origin proxy.
+      const fullDataUrl = await toPng(element, {
         backgroundColor: '#ffffff',
-        width: 794,
+        width: CONTENT_W,
         height: element.scrollHeight,
         pixelRatio: PR,
         skipFonts: true,
       });
 
-      const img = new Image();
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-        img.src = dataUrl;
-      });
+      // Yield to keep the UI responsive after the heavy capture
+      await new Promise(r => setTimeout(r, 0));
 
-      const A4_W_MM = 210;
-      const A4_H_MM = 297;
-      const imgW = img.naturalWidth;
-      // Full A4 page height in image pixels (at pixelRatio PR)
-      const a4SliceH = Math.round((A4_H_MM / A4_W_MM) * imgW);
+      const fullImg = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = fullDataUrl;
+      });
 
       // Use the same break points as the live preview
       const { breaks, totalHeight } = breakDataRef.current;
@@ -172,26 +173,33 @@ const CVBuilder = () => {
       }
       contentRanges.push({ start: prev, end: totalHeight });
 
+      const imgW = CONTENT_W * PR;
+      const a4H  = Math.round((A4_H_MM / A4_W_MM) * imgW); // A4 height in image pixels
+
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
       for (let i = 0; i < contentRanges.length; i++) {
+        await new Promise(r => setTimeout(r, 0)); // yield between pages
+
         if (i > 0) pdf.addPage();
 
         const { start, end } = contentRanges[i];
-        // Convert content-space pixels → image pixels
-        const imgSliceTop = Math.round(start * PR);
-        const imgSliceH   = Math.round((end - start) * PR);
+        const sliceH = Math.round((end - start) * PR); // content height in image pixels
 
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width  = imgW;
-        pageCanvas.height = a4SliceH;
-
-        const ctx = pageCanvas.getContext('2d');
+        // Draw this page's slice onto a full-A4-height canvas
+        const a4Canvas = document.createElement('canvas');
+        a4Canvas.width  = imgW;
+        a4Canvas.height = a4H;
+        const ctx = a4Canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, imgW, a4SliceH);
-        ctx.drawImage(img, 0, imgSliceTop, imgW, imgSliceH, 0, 0, imgW, imgSliceH);
+        ctx.fillRect(0, 0, imgW, a4H);
+        ctx.drawImage(
+          fullImg,
+          0, Math.round(start * PR), imgW, sliceH, // source: slice from full image
+          0, 0,                       imgW, sliceH  // dest: top of A4 canvas
+        );
 
-        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, A4_W_MM, A4_H_MM);
+        pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
