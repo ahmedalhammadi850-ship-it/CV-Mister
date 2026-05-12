@@ -151,45 +151,18 @@ const Features = () => {
   return (
     <>
       {/* ── Features Section ── */}
-      <section className="py-24 relative overflow-hidden" style={{ background: 'linear-gradient(180deg, #0a0818 0%, #0f0c1f 40%, #12102a 100%)' }}>
-
-        {/* Background ambient orbs */}
-        <div className="absolute top-0 left-1/4 w-[500px] h-[500px] rounded-full pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(99,102,241,0.12) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }} />
-        <div className="absolute bottom-0 right-1/4 w-[500px] h-[500px] rounded-full pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(168,85,247,0.1) 0%, transparent 70%)',
-          filter: 'blur(60px)',
-        }} />
-        <div className="absolute top-1/2 left-0 w-[300px] h-[300px] rounded-full pointer-events-none" style={{
-          background: 'radial-gradient(circle, rgba(20,184,166,0.07) 0%, transparent 70%)',
-          filter: 'blur(50px)',
-        }} />
-
-        {/* Dot grid */}
-        <div className="absolute inset-0 pointer-events-none" style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.06) 1px, transparent 1px)',
-          backgroundSize: '32px 32px',
-        }} />
-
-        {/* Top fade from hero */}
-        <div className="absolute top-0 left-0 right-0 h-24 pointer-events-none" style={{
-          background: 'linear-gradient(180deg, rgba(14,11,32,0.9) 0%, transparent 100%)',
-        }} />
-
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <section className="py-24 relative" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%)' }}>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 
           {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3.5 py-1.5 mb-4"
-              style={{ color: '#a78bfa', background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.25)' }}>
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-3.5 py-1.5 mb-4">
               {isRTL ? 'المميزات' : 'Features'}
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4 leading-tight" style={{ color: '#f1f5f9' }}>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-4 leading-tight">
               {isRTL ? 'كل ما تحتاجه للحصول على المقابلة' : 'Everything you need to get the interview'}
             </h2>
-            <p className="text-lg leading-relaxed" style={{ color: 'rgba(148,163,184,0.8)' }}>
+            <p className="text-lg text-slate-500 leading-relaxed">
               {isRTL
                 ? 'أدوات متكاملة تجعلك تبرز من بين آلاف المتقدمين وتصل لوظيفة أحلامك.'
                 : "We've built every tool you need to craft a resume that gets noticed and lands interviews."}
@@ -204,37 +177,24 @@ const Features = () => {
             {features.map((feature, i) => (
               <div
                 key={i}
-                className="group relative p-7 rounded-2xl transition-all duration-300 hover:-translate-y-1.5 overflow-hidden cursor-default"
-                style={{
-                  background: 'rgba(255,255,255,0.03)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  boxShadow: '0 4px 24px rgba(0,0,0,0.3)',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.border = `1px solid ${feature.glow.replace('0.15', '0.5')}`;
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.055)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.border = '1px solid rgba(255,255,255,0.08)';
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.03)';
-                }}
+                className={`group relative p-7 rounded-2xl border ${feature.light} ${feature.border} transition-all duration-300 hover:-translate-y-1 overflow-hidden`}
+                style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
               >
                 {/* Hover glow */}
                 <div
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-400 pointer-events-none"
-                  style={{ background: `radial-gradient(ellipse at top left, ${feature.glow.replace('0.15', '0.2')} 0%, transparent 65%)` }}
+                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
+                  style={{ background: `radial-gradient(ellipse at top left, ${feature.glow} 0%, transparent 70%)` }}
                 />
 
                 <div
                   className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} text-white flex items-center justify-center mb-5 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
-                  style={{ boxShadow: `0 6px 20px ${feature.glow.replace('0.15', '0.5')}` }}
                 >
                   {feature.icon}
                 </div>
-                <h3 className="relative text-base font-heading font-bold mb-2" style={{ color: '#e2e8f0' }}>
+                <h3 className="relative text-base font-heading font-bold text-slate-900 mb-2">
                   {feature.title[isRTL ? 'ar' : 'en']}
                 </h3>
-                <p className="relative text-sm leading-relaxed" style={{ color: 'rgba(148,163,184,0.75)' }}>
+                <p className="relative text-sm text-slate-500 leading-relaxed">
                   {feature.description[isRTL ? 'ar' : 'en']}
                 </p>
               </div>

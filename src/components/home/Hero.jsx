@@ -16,82 +16,120 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-6 pb-24"
-      style={{ background: 'linear-gradient(135deg, #0f0c29 0%, #1a1040 30%, #24243e 60%, #0f0c29 100%)' }}>
+      style={{ background: '#050310' }}>
 
       {/* ── Stunning Background ── */}
       <div className="absolute inset-0" style={{ zIndex: 0 }}>
 
-        {/* Aurora mesh layers */}
+        {/* Deep base gradient */}
         <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 80% 60% at 20% 30%, rgba(99,102,241,0.35) 0%, transparent 60%)',
-        }} />
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 70% 50% at 80% 70%, rgba(168,85,247,0.30) 0%, transparent 55%)',
-        }} />
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 60% 40% at 50% 50%, rgba(59,130,246,0.15) 0%, transparent 60%)',
+          background: 'linear-gradient(160deg, #0d0221 0%, #0a0118 25%, #060014 50%, #0a0220 75%, #0d0221 100%)',
         }} />
 
-        {/* Animated orbs */}
-        <div className="orb absolute w-[700px] h-[700px] -top-48 -left-32" style={{
-          background: 'radial-gradient(circle, rgba(99,102,241,0.5) 0%, transparent 70%)',
+        {/* Aurora layer 1 — electric violet */}
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse 110% 70% at 15% 20%, rgba(124,58,237,0.55) 0%, transparent 55%)',
+        }} />
+
+        {/* Aurora layer 2 — cobalt blue */}
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse 90% 60% at 85% 15%, rgba(37,99,235,0.45) 0%, transparent 50%)',
+        }} />
+
+        {/* Aurora layer 3 — hot pink center */}
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse 80% 55% at 50% 60%, rgba(219,39,119,0.3) 0%, transparent 55%)',
+        }} />
+
+        {/* Aurora layer 4 — teal accent bottom right */}
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse 70% 50% at 90% 85%, rgba(20,184,166,0.25) 0%, transparent 50%)',
+        }} />
+
+        {/* Aurora layer 5 — cyan shimmer top right */}
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse 60% 40% at 80% 30%, rgba(6,182,212,0.2) 0%, transparent 50%)',
+        }} />
+
+        {/* Animated pulsing orbs */}
+        <div className="orb absolute w-[800px] h-[800px] -top-60 -left-40" style={{
+          background: 'radial-gradient(circle, rgba(109,40,217,0.6) 0%, rgba(124,58,237,0.3) 35%, transparent 70%)',
           animationDelay: '0s',
+          opacity: 0.7,
+        }} />
+        <div className="orb absolute w-[700px] h-[700px] -bottom-40 -right-20" style={{
+          background: 'radial-gradient(circle, rgba(219,39,119,0.5) 0%, rgba(168,85,247,0.3) 35%, transparent 70%)',
+          animationDelay: '5s',
           opacity: 0.6,
         }} />
-        <div className="orb absolute w-[600px] h-[600px] -bottom-32 right-0" style={{
-          background: 'radial-gradient(circle, rgba(168,85,247,0.45) 0%, transparent 70%)',
-          animationDelay: '4s',
+        <div className="orb absolute w-[500px] h-[500px] top-1/3 left-1/2 -translate-x-1/2" style={{
+          background: 'radial-gradient(circle, rgba(37,99,235,0.4) 0%, rgba(99,102,241,0.2) 40%, transparent 70%)',
+          animationDelay: '2.5s',
           opacity: 0.5,
         }} />
-        <div className="orb absolute w-[500px] h-[500px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{
-          background: 'radial-gradient(circle, rgba(59,130,246,0.3) 0%, transparent 70%)',
-          animationDelay: '2s',
-          opacity: 0.4,
-        }} />
-        <div className="orb absolute w-[350px] h-[350px] top-1/4 right-1/4" style={{
-          background: 'radial-gradient(circle, rgba(236,72,153,0.25) 0%, transparent 70%)',
-          animationDelay: '6s',
-          opacity: 0.4,
+        <div className="orb absolute w-[400px] h-[400px] bottom-1/4 left-1/4" style={{
+          background: 'radial-gradient(circle, rgba(20,184,166,0.35) 0%, transparent 70%)',
+          animationDelay: '7s',
+          opacity: 0.45,
         }} />
 
-        {/* Grid overlay */}
+        {/* Glowing mesh grid */}
         <div className="absolute inset-0" style={{
           backgroundImage: `
-            linear-gradient(rgba(99,102,241,0.08) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(99,102,241,0.08) 1px, transparent 1px)
+            linear-gradient(rgba(139,92,246,0.07) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(139,92,246,0.07) 1px, transparent 1px)
           `,
-          backgroundSize: '60px 60px',
+          backgroundSize: '64px 64px',
         }} />
 
-        {/* Dot grid overlay */}
+        {/* Fine dot grid */}
         <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.12) 1px, transparent 1px)',
-          backgroundSize: '30px 30px',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '28px 28px',
         }} />
 
-        {/* Top fade for header readability */}
-        <div className="absolute top-0 left-0 right-0 h-24" style={{
-          background: 'linear-gradient(to bottom, rgba(15,12,41,0.6) 0%, transparent 100%)',
+        {/* Radial spotlight center */}
+        <div className="absolute inset-0" style={{
+          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(109,40,217,0.12) 0%, transparent 70%)',
         }} />
 
-        {/* Glowing horizontal line */}
+        {/* Top header fade */}
+        <div className="absolute top-0 left-0 right-0 h-28" style={{
+          background: 'linear-gradient(to bottom, rgba(5,3,16,0.75) 0%, transparent 100%)',
+        }} />
+
+        {/* Glowing arc line */}
+        <div className="absolute top-1/2 left-0 right-0 h-[2px]" style={{
+          background: 'linear-gradient(90deg, transparent 0%, rgba(124,58,237,0.5) 20%, rgba(219,39,119,0.8) 50%, rgba(124,58,237,0.5) 80%, transparent 100%)',
+          transform: 'translateY(-150px)',
+          filter: 'blur(1px)',
+        }} />
         <div className="absolute top-1/2 left-0 right-0 h-px" style={{
-          background: 'linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.4) 30%, rgba(168,85,247,0.6) 50%, rgba(99,102,241,0.4) 70%, transparent 100%)',
-          transform: 'translateY(-120px)',
+          background: 'linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.15) 20%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0.15) 80%, transparent 100%)',
+          transform: 'translateY(-150px)',
         }} />
 
         {/* Floating geometric shapes */}
-        <div className="absolute top-[15%] left-[8%] w-16 h-16 border border-indigo-500/20 rounded-lg rotate-12 animate-float" style={{ animationDelay: '0s' }} />
-        <div className="absolute top-[25%] right-[10%] w-10 h-10 border border-purple-500/25 rounded-full animate-float" style={{ animationDelay: '1.5s' }} />
-        <div className="absolute bottom-[20%] left-[15%] w-8 h-8 border border-blue-500/20 rounded-lg -rotate-6 animate-float" style={{ animationDelay: '3s' }} />
-        <div className="absolute bottom-[30%] right-[12%] w-14 h-14 border border-pink-500/20 rounded-xl rotate-45 animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[60%] left-[5%] w-6 h-6 bg-indigo-500/20 rounded-full animate-float" style={{ animationDelay: '4s' }} />
-        <div className="absolute top-[40%] right-[5%] w-5 h-5 bg-purple-500/20 rounded-full animate-float" style={{ animationDelay: '1s' }} />
+        <div className="absolute top-[14%] left-[7%] w-20 h-20 rounded-2xl rotate-12 animate-float"
+          style={{ border: '1px solid rgba(139,92,246,0.35)', animationDelay: '0s', boxShadow: '0 0 20px rgba(139,92,246,0.15) inset' }} />
+        <div className="absolute top-[22%] right-[9%] w-12 h-12 rounded-full animate-float"
+          style={{ border: '1px solid rgba(219,39,119,0.4)', animationDelay: '1.5s', boxShadow: '0 0 15px rgba(219,39,119,0.15) inset' }} />
+        <div className="absolute bottom-[18%] left-[13%] w-10 h-10 rounded-xl -rotate-6 animate-float"
+          style={{ border: '1px solid rgba(37,99,235,0.3)', animationDelay: '3s', boxShadow: '0 0 12px rgba(37,99,235,0.12) inset' }} />
+        <div className="absolute bottom-[28%] right-[11%] w-16 h-16 rounded-2xl rotate-45 animate-float"
+          style={{ border: '1px solid rgba(20,184,166,0.3)', animationDelay: '2s', boxShadow: '0 0 18px rgba(20,184,166,0.1) inset' }} />
+        <div className="absolute top-[58%] left-[4%] w-7 h-7 rounded-full animate-float"
+          style={{ background: 'rgba(124,58,237,0.3)', animationDelay: '4s', boxShadow: '0 0 14px rgba(124,58,237,0.5)' }} />
+        <div className="absolute top-[38%] right-[4%] w-5 h-5 rounded-full animate-float"
+          style={{ background: 'rgba(219,39,119,0.35)', animationDelay: '1s', boxShadow: '0 0 12px rgba(219,39,119,0.5)' }} />
+        <div className="absolute top-[70%] right-[20%] w-8 h-8 rounded-lg rotate-12 animate-float"
+          style={{ border: '1px solid rgba(6,182,212,0.3)', animationDelay: '3.5s', boxShadow: '0 0 14px rgba(6,182,212,0.12) inset' }} />
+        <div className="absolute top-[10%] left-[40%] w-4 h-4 rounded-full animate-float"
+          style={{ background: 'rgba(6,182,212,0.4)', animationDelay: '5s', boxShadow: '0 0 10px rgba(6,182,212,0.6)' }} />
 
-        {/* Noise texture overlay for depth */}
-        <div className="absolute inset-0 opacity-[0.03]" style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
-          backgroundRepeat: 'repeat',
+        {/* Bottom vignette */}
+        <div className="absolute bottom-0 left-0 right-0 h-40" style={{
+          background: 'linear-gradient(to top, rgba(5,3,16,0.6) 0%, transparent 100%)',
         }} />
       </div>
 
