@@ -13,6 +13,8 @@ import ATSBoldTemplate from '../templates/ATSBoldTemplate';
 import ATSCompactTemplate from '../templates/ATSCompactTemplate';
 import ATSModernTemplate from '../templates/ATSModernTemplate';
 import ATSHarvardTemplate from '../templates/ATSHarvardTemplate';
+import ATSCenterTemplate from '../templates/ATSCenterTemplate';
+import ATSElegantTemplate from '../templates/ATSElegantTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -123,6 +125,24 @@ const templates = [
     color: '#1a3a5c',
     component: ATSHarvardTemplate,
     atsScore: 100,
+  },
+  {
+    id: 'atscenter',
+    name: 'ATS Center',      arabicName: 'ATS توسيط',
+    desc: 'Centered name & centered section headings with lines on both sides — fully ATS-safe.',
+    arabicDesc: 'اسم وعناوين أقسام في المنتصف مع خطوط على الجانبين — متوافق بالكامل مع ATS.',
+    color: '#1a56a0',
+    component: ATSCenterTemplate,
+    atsScore: 98,
+  },
+  {
+    id: 'atselegant',
+    name: 'ATS Elegant',     arabicName: 'ATS أنيق',
+    desc: 'Centered bold uppercase headings with a full-width rule below — clean, timeless, ATS-safe.',
+    arabicDesc: 'عناوين مركزية بالأحرف الكبيرة مع خط كامل أسفلها — نظيف وكلاسيكي ومتوافق مع ATS.',
+    color: '#0f4c75',
+    component: ATSElegantTemplate,
+    atsScore: 99,
   },
 ];
 

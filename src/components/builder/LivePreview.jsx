@@ -12,6 +12,8 @@ import ATSBoldTemplate from '../../templates/ATSBoldTemplate';
 import ATSCompactTemplate from '../../templates/ATSCompactTemplate';
 import ATSModernTemplate from '../../templates/ATSModernTemplate';
 import ATSHarvardTemplate from '../../templates/ATSHarvardTemplate';
+import ATSCenterTemplate from '../../templates/ATSCenterTemplate';
+import ATSElegantTemplate from '../../templates/ATSElegantTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
@@ -221,6 +223,8 @@ const LivePreview = ({ breakDataRef }) => {
       case 'atscompact':  return <ATSCompactTemplate  {...props} />;
       case 'atsmodern':   return <ATSModernTemplate   {...props} />;
       case 'atsharvard':  return <ATSHarvardTemplate  {...props} />;
+      case 'atscenter':   return <ATSCenterTemplate   {...props} />;
+      case 'atselegant':  return <ATSElegantTemplate  {...props} />;
       default:            return <ModernTemplate      {...props} />;
     }
   };
