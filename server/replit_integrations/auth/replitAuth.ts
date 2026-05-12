@@ -18,6 +18,18 @@ const getOidcConfig = memoize(
   { maxAge: 3600 * 1000 }
 );
 
+function getCallbackDomain(req: any): string {
+  // Prefer the Replit dev domain env var — req.hostname can resolve to
+  // "localhost" when requests pass through the internal Vite proxy.
+  if (process.env.REPLIT_DEV_DOMAIN) {
+    return process.env.REPLIT_DEV_DOMAIN;
+  }
+  // In production deployments, fall back to the forwarded host.
+  const forwarded =
+    req.headers["x-forwarded-host"] || req.headers["host"] || req.hostname;
+  return Array.isArray(forwarded) ? forwarded[0] : forwarded;
+}
+
 export function getSession() {
   const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
   const pgStore = connectPg(session);
@@ -78,10 +90,9 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  // Keep track of registered strategies
+  // Keep track of registered strategies per domain
   const registeredStrategies = new Set<string>();
 
-  // Helper function to ensure strategy exists for a domain
   const ensureStrategy = (domain: string) => {
     const strategyName = `replitauth:${domain}`;
     if (!registeredStrategies.has(strategyName)) {
@@ -96,6 +107,7 @@ export async function setupAuth(app: Express) {
       );
       passport.use(strategy);
       registeredStrategies.add(strategyName);
+      console.log(`[Auth] Registered strategy for domain: ${domain}`);
     }
   };
 
@@ -103,27 +115,30 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const domain = getCallbackDomain(req);
+    ensureStrategy(domain);
+    passport.authenticate(`replitauth:${domain}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    ensureStrategy(req.hostname);
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const domain = getCallbackDomain(req);
+    ensureStrategy(domain);
+    passport.authenticate(`replitauth:${domain}`, {
       successReturnToOrRedirect: "/",
       failureRedirect: "/api/login",
     })(req, res, next);
   });
 
   app.get("/api/logout", (req, res) => {
+    const domain = getCallbackDomain(req);
     req.logout(() => {
       res.redirect(
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
-          post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
+          post_logout_redirect_uri: `https://${domain}`,
         }).href
       );
     });
