@@ -142,16 +142,39 @@ const CVBuilder = () => {
       const A4_H_MM = 297;
       const CONTENT_W = 794; // fixed A4 width in CSS pixels
 
-      // Capture the full CV as one image (once only)
-      // skipFonts avoids cross-origin stylesheet errors; fonts render fine since
-      // they are already loaded in the browser via the same-origin proxy.
-      const fullDataUrl = await toPng(element, {
-        backgroundColor: '#ffffff',
-        width: CONTENT_W,
-        height: element.scrollHeight,
-        pixelRatio: PR,
-        skipFonts: true,
-      });
+      // Inject font CSS from the same-origin proxy DIRECTLY into the print element.
+      // This lets html-to-image read @font-face rules (same-origin, no CORS) and
+      // embed the Arabic + Latin fonts into the SVG so they render identically to
+      // the live preview — including Arabic ligatures and RTL shaping.
+      let injectedFontStyle = null;
+      try {
+        const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
+          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
+        );
+        const res = await fetch(proxyUrl);
+        if (res.ok) {
+          const css = await res.text();
+          injectedFontStyle = document.createElement('style');
+          injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
+          injectedFontStyle.textContent = css;
+          element.prepend(injectedFontStyle);
+        }
+      } catch (_) { /* proceed without font injection if proxy unavailable */ }
+
+      // Capture the full CV as one image (once only).
+      // With same-origin @font-face rules injected, html-to-image can embed fonts
+      // properly — critical for Arabic text shaping and RTL layout in the PDF.
+      let fullDataUrl;
+      try {
+        fullDataUrl = await toPng(element, {
+          backgroundColor: '#ffffff',
+          width: CONTENT_W,
+          height: element.scrollHeight,
+          pixelRatio: PR,
+        });
+      } finally {
+        if (injectedFontStyle) injectedFontStyle.remove();
+      }
 
       // Yield to keep the UI responsive after the heavy capture
       await new Promise(r => setTimeout(r, 0));

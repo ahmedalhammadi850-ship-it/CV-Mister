@@ -28,11 +28,9 @@
             document.head.appendChild(s);
           })
           .catch(function () {
-            // fallback: load directly from Google Fonts if proxy fails
-            var link = document.createElement('link');
-            link.rel = 'stylesheet';
-            link.href = FONTS_URL;
-            document.head.appendChild(link);
+            // No cross-origin fallback — if the proxy fails, system fonts are used.
+            // This avoids CORS errors in html-to-image when reading document.styleSheets.
+            console.warn('[CV-Mister] Font proxy failed; system fonts will be used.');
           });
       })();
     </script>
