@@ -25,8 +25,10 @@ const MercuryFlowTemplate = ({
   visibleSections = {}, visiblePersonalFields = {},
   sectionOrder = DEFAULT_ORDER,
 }) => {
-  const accent = theme?.primaryColor || '#2a7d6e';
-  const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
+  const accent       = theme?.primaryColor || '#2a7d6e';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
+  const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
 
@@ -43,6 +45,8 @@ const MercuryFlowTemplate = ({
     vis.portfolio !== false && info.portfolio && info.portfolio,
   ].filter(Boolean);
 
+  const hPad = padding.split(' ')[1] || '42pt';
+
   const s = {
     page: {
       fontFamily: font, fontSize: sz.body, color: '#1a1a1a',
@@ -51,7 +55,7 @@ const MercuryFlowTemplate = ({
     },
     header: {
       backgroundColor: accent,
-      padding: '28pt 40pt',
+      padding: `28pt ${hPad}`,
       display: 'flex',
       alignItems: 'center',
       gap: '22pt',
@@ -66,14 +70,14 @@ const MercuryFlowTemplate = ({
     },
     headerText: { flex: 1 },
     name: {
-      fontSize: '20pt', fontWeight: '700', color: '#fff',
+      fontSize: sz.name, fontWeight: '700', color: '#fff',
       marginBottom: '3pt', lineHeight: 1.2,
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: headerAlign,
     },
     jobTitle: {
       fontSize: sz.body, color: 'rgba(255,255,255,0.80)',
       marginBottom: '8pt', fontStyle: 'italic',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: headerAlign,
     },
     contactStrip: {
       backgroundColor: '#f0f7f5',
@@ -94,11 +98,16 @@ const MercuryFlowTemplate = ({
       width: '4pt', height: '4pt', borderRadius: '50%',
       backgroundColor: accent, display: 'inline-block', flexShrink: 0,
     },
-    body: { padding: '24pt 40pt', lineHeight },
+    body: { padding: `24pt ${hPad}`, lineHeight },
     heading: {
       display: 'flex', alignItems: 'center', gap: '8pt',
       marginTop: sectionMt, marginBottom: '8pt',
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: headingAlign === 'right'
+        ? (isRTL ? 'row' : 'row-reverse')
+        : headingAlign === 'center'
+        ? 'row'
+        : (isRTL ? 'row-reverse' : 'row'),
+      justifyContent: headingAlign === 'center' ? 'center' : 'flex-start',
       ...BREAK_HEADING,
     },
     headingAccent: { width: '5pt', height: '18pt', backgroundColor: accent, borderRadius: '2pt', flexShrink: 0 },
@@ -106,7 +115,7 @@ const MercuryFlowTemplate = ({
       fontSize: sz.heading, fontWeight: '700', color: '#111',
       textTransform: 'uppercase', letterSpacing: '0.06em',
     },
-    headingRule: { flex: 1, height: '1px', backgroundColor: '#ddd' },
+    headingRule: { flex: headingAlign === 'center' ? 'unset' : 1, width: headingAlign === 'center' ? '60pt' : 'auto', height: '1px', backgroundColor: '#ddd' },
     row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8pt', flexDirection: isRTL ? 'row-reverse' : 'row' },
     role: { fontSize: sz.body, fontWeight: '700', color: '#111', flex: 1 },
     date: { fontSize: sz.meta, color: '#fff', backgroundColor: accent, padding: '1pt 7pt', borderRadius: '10pt', whiteSpace: 'nowrap', flexShrink: 0 },

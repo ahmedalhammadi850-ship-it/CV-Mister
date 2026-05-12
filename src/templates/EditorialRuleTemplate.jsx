@@ -36,8 +36,10 @@ const EditorialRuleTemplate = ({
   visibleSections = {}, visiblePersonalFields = {},
   sectionOrder = DEFAULT_ORDER,
 }) => {
-  const accent = theme?.primaryColor || '#2c3e50';
-  const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
+  const accent       = theme?.primaryColor || '#2c3e50';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
+  const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
 
@@ -54,29 +56,33 @@ const EditorialRuleTemplate = ({
 
   const BOTTOM_SECTIONS = new Set(['skills', 'languages', 'interests', 'certificates', 'courses', 'awards', 'organisations']);
 
+  const nameJustify = headerAlign === 'center' ? 'center' : headerAlign === 'right' ? (isRTL ? 'flex-start' : 'flex-end') : (isRTL ? 'flex-end' : 'flex-start');
+
   const s = {
     page: {
       fontFamily: font, fontSize: sz.body, color: '#1a1a1a',
       backgroundColor: '#ffffff',
-      padding: '36pt 44pt',
+      padding,
       width: '794px', minHeight: '1122px',
       boxSizing: 'border-box', direction: dir,
     },
     nameRow: {
       display: 'flex',
-      justifyContent: 'space-between',
+      justifyContent: headerAlign === 'center' ? 'center' : 'space-between',
       alignItems: 'flex-end',
       marginBottom: '4pt',
       flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexWrap: 'wrap', gap: '4pt',
     },
-    name: { fontSize: '26pt', fontWeight: '700', color: '#111', lineHeight: 1.1, letterSpacing: '-0.02em' },
-    jobTitle: { fontSize: sz.body, color: '#666', textAlign: isRTL ? 'left' : 'right', fontStyle: 'italic', paddingBottom: '4pt' },
+    name: { fontSize: sz.name, fontWeight: '700', color: '#111', lineHeight: 1.1, letterSpacing: '-0.02em', textAlign: headerAlign },
+    jobTitle: { fontSize: sz.body, color: '#666', fontStyle: 'italic', paddingBottom: '4pt', textAlign: headerAlign },
     mainRule: { borderTop: `3px solid ${accent}`, marginBottom: '4pt' },
     thinRule: { borderTop: '1px solid #ddd', marginBottom: '8pt' },
     contactRow: {
       display: 'flex', flexWrap: 'wrap', gap: '4pt 0',
       fontSize: sz.meta, color: '#555',
       marginBottom: '20pt',
+      justifyContent: headerAlign === 'center' ? 'center' : (isRTL ? 'flex-end' : 'flex-start'),
       flexDirection: isRTL ? 'row-reverse' : 'row',
     },
     contactSep: { padding: '0 8pt', color: '#bbb' },
@@ -84,7 +90,7 @@ const EditorialRuleTemplate = ({
       fontSize: sz.heading, fontWeight: '700', color: accent,
       textTransform: 'uppercase', letterSpacing: '0.10em',
       marginTop: sectionMt, marginBottom: '4pt',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: headingAlign,
       ...BREAK_HEADING,
     },
     headingRule: { borderTop: `2px solid ${accent}`, marginBottom: '8pt' },

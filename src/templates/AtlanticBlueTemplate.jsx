@@ -40,7 +40,9 @@ const AtlanticBlueTemplate = ({
   visibleSections = {}, visiblePersonalFields = {},
   sectionOrder = DEFAULT_ORDER,
 }) => {
-  const accent = theme?.primaryColor || '#1e3d6e';
+  const accent       = theme?.primaryColor || '#1e3d6e';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -65,8 +67,8 @@ const AtlanticBlueTemplate = ({
       direction: dir,
       color: '#fff',
     },
-    name: { fontSize: '15pt', fontWeight: '700', color: '#fff', marginBottom: '3pt', lineHeight: 1.2 },
-    jobTitle: { fontSize: sz.meta, color: 'rgba(255,255,255,0.72)', marginBottom: '20pt', fontStyle: 'italic' },
+    name: { fontSize: sz.name, fontWeight: '700', color: '#fff', marginBottom: '3pt', lineHeight: 1.2, textAlign: headerAlign },
+    jobTitle: { fontSize: sz.meta, color: 'rgba(255,255,255,0.72)', marginBottom: '20pt', fontStyle: 'italic', textAlign: headerAlign },
     divider: { borderTop: '1px solid rgba(255,255,255,0.25)', margin: '14pt 0 10pt' },
     sectionLabel: {
       fontSize: '8pt', fontWeight: '700', color: 'rgba(255,255,255,0.5)',
@@ -90,7 +92,7 @@ const AtlanticBlueTemplate = ({
       textTransform: 'uppercase', letterSpacing: '0.08em',
       marginTop: sectionMt, marginBottom: '8pt',
       borderBottom: `2px solid ${accent}`, paddingBottom: '3pt',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: headingAlign,
       ...BREAK_HEADING,
     },
     row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8pt', flexDirection: isRTL ? 'row-reverse' : 'row' },

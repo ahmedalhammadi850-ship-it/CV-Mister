@@ -29,8 +29,10 @@ const ClassicSerifTemplate = ({
   visibleSections = {}, visiblePersonalFields = {},
   sectionOrder = DEFAULT_ORDER,
 }) => {
-  const accent = theme?.primaryColor || '#1e3a5f';
-  const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
+  const accent       = theme?.primaryColor || '#1e3a5f';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
+  const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
 
@@ -51,13 +53,13 @@ const ClassicSerifTemplate = ({
       padding: '28pt 18pt', boxSizing: 'border-box', direction: dir,
     },
     name: {
-      fontSize: '15pt', fontWeight: '700', color: accent,
+      fontSize: sz.name, fontWeight: '700', color: accent,
       marginBottom: '3pt', lineHeight: 1.2,
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: headerAlign,
     },
     jobTitle: {
       fontSize: sz.meta, color: '#666', marginBottom: '14pt',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: headerAlign,
     },
     divider: { borderTop: `2px solid ${accent}`, marginBottom: '12pt' },
     sectionLabel: {
@@ -92,7 +94,7 @@ const ClassicSerifTemplate = ({
       fontSize: sz.heading, fontWeight: '700', color: accent,
       marginTop: sectionMt, marginBottom: '6pt',
       borderBottom: `1.5px solid ${accent}`, paddingBottom: '3pt',
-      textAlign: isRTL ? 'right' : 'left',
+      textAlign: headingAlign,
       ...BREAK_HEADING,
     },
     row: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8pt', flexDirection: isRTL ? 'row-reverse' : 'row' },
