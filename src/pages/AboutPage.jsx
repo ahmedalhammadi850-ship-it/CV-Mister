@@ -139,31 +139,171 @@ export default function AboutPage() {
       </div>
 
       {/* ─── Hero ─────────────────────────────────────────────────────── */}
-      <section className="relative py-32 flex items-center justify-center text-center overflow-hidden" style={{ zIndex: 1 }}>
-        <div className="orb absolute w-[500px] h-[500px] opacity-50 -top-32 -start-24"
-          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.5), transparent)' }} />
-        <div className="orb absolute w-[400px] h-[400px] opacity-35 -bottom-20 -end-20"
-          style={{ background: 'radial-gradient(circle, rgba(168,85,247,0.45), transparent)', animationDelay: '3s' }} />
+      <section className="relative min-h-[92vh] flex items-center justify-center text-center overflow-hidden"
+        style={{ zIndex: 1, background: 'linear-gradient(160deg, #06040f 0%, #0e0822 40%, #160d30 70%, #06040f 100%)' }}>
 
-        {/* Floating shapes */}
-        <div className="absolute top-[20%] left-[6%] w-14 h-14 border border-indigo-500/20 rounded-xl rotate-12 animate-float" style={{ animationDelay: '0s' }} />
-        <div className="absolute bottom-[20%] right-[8%] w-10 h-10 border border-purple-500/25 rounded-full animate-float" style={{ animationDelay: '2s' }} />
-        <div className="absolute top-[50%] right-[5%] w-6 h-6 bg-pink-500/20 rounded-full animate-float" style={{ animationDelay: '1s' }} />
-
-        <div className="relative z-10 max-w-3xl mx-auto px-6">
-          <div className="animate-fade-in flex justify-center mb-6">
-            <SectionTag>{t.hero.tag}</SectionTag>
+        {/* Deep aurora layers */}
+        <div className="absolute inset-0 pointer-events-none">
+          {/* Primary spotlight — top left indigo */}
+          <div className="absolute" style={{
+            top: '-10%', left: '-5%', width: '70vw', height: '70vw', maxWidth: 900, maxHeight: 900,
+            background: 'radial-gradient(ellipse, rgba(79,70,229,0.55) 0%, rgba(99,102,241,0.2) 35%, transparent 70%)',
+            filter: 'blur(40px)',
+          }} />
+          {/* Secondary spotlight — bottom right violet */}
+          <div className="absolute" style={{
+            bottom: '-15%', right: '-5%', width: '65vw', height: '65vw', maxWidth: 850, maxHeight: 850,
+            background: 'radial-gradient(ellipse, rgba(139,92,246,0.5) 0%, rgba(168,85,247,0.18) 40%, transparent 70%)',
+            filter: 'blur(50px)',
+            animationDelay: '3s',
+          }} />
+          {/* Center cyan glow */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div style={{
+              width: '50vw', height: '30vw', maxWidth: 600, maxHeight: 360,
+              background: 'radial-gradient(ellipse, rgba(56,189,248,0.12) 0%, transparent 70%)',
+              filter: 'blur(30px)',
+            }} />
           </div>
+          {/* Pink accent — mid left */}
+          <div className="absolute" style={{
+            top: '40%', left: '10%', width: 300, height: 300,
+            background: 'radial-gradient(circle, rgba(236,72,153,0.18) 0%, transparent 70%)',
+            filter: 'blur(25px)',
+            animationDelay: '5s',
+          }} />
+
+          {/* Aurora streak lines */}
+          <div className="absolute inset-0" style={{
+            background: `
+              linear-gradient(105deg, transparent 30%, rgba(99,102,241,0.07) 50%, transparent 70%),
+              linear-gradient(75deg,  transparent 20%, rgba(139,92,246,0.06) 45%, transparent 65%)
+            `,
+          }} />
+
+          {/* Fine grid */}
+          <div className="absolute inset-0" style={{
+            backgroundImage: `
+              linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px)
+            `,
+            backgroundSize: '50px 50px',
+          }} />
+
+          {/* Dot matrix */}
+          <div className="absolute inset-0" style={{
+            backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.14) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+          }} />
+
+          {/* Glowing ring behind heading */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{
+            width: 520, height: 520,
+            border: '1px solid rgba(139,92,246,0.15)',
+            borderRadius: '50%',
+            boxShadow: '0 0 80px 10px rgba(99,102,241,0.1)',
+          }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{
+            width: 750, height: 750,
+            border: '1px solid rgba(139,92,246,0.07)',
+            borderRadius: '50%',
+          }} />
+
+          {/* Floating geometric shapes */}
+          <div className="animate-float absolute top-[14%] left-[7%] w-16 h-16 rounded-2xl rotate-12"
+            style={{ border: '1px solid rgba(99,102,241,0.3)', background: 'rgba(99,102,241,0.06)', animationDelay: '0s' }} />
+          <div className="animate-float absolute top-[20%] right-[9%] w-10 h-10 rounded-full"
+            style={{ border: '1px solid rgba(168,85,247,0.35)', background: 'rgba(168,85,247,0.08)', animationDelay: '1.5s' }} />
+          <div className="animate-float absolute bottom-[22%] left-[12%] w-8 h-8 rounded-xl -rotate-6"
+            style={{ border: '1px solid rgba(56,189,248,0.25)', background: 'rgba(56,189,248,0.07)', animationDelay: '3s' }} />
+          <div className="animate-float absolute bottom-[28%] right-[11%] w-14 h-14 rounded-2xl rotate-45"
+            style={{ border: '1px solid rgba(236,72,153,0.25)', background: 'rgba(236,72,153,0.06)', animationDelay: '2s' }} />
+          <div className="animate-float absolute top-[55%] left-[4%] w-5 h-5 rounded-full"
+            style={{ background: 'rgba(99,102,241,0.4)', animationDelay: '4s' }} />
+          <div className="animate-float absolute top-[35%] right-[4%] w-4 h-4 rounded-full"
+            style={{ background: 'rgba(168,85,247,0.4)', animationDelay: '1s' }} />
+          <div className="animate-float absolute top-[72%] right-[18%] w-6 h-6 rounded-lg rotate-12"
+            style={{ border: '1px solid rgba(56,189,248,0.3)', animationDelay: '2.5s' }} />
+
+          {/* Horizontal glow line */}
+          <div className="absolute left-0 right-0" style={{
+            top: '50%',
+            height: '1px',
+            background: 'linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.25) 20%, rgba(168,85,247,0.45) 50%, rgba(99,102,241,0.25) 80%, transparent 100%)',
+            transform: 'translateY(-80px)',
+          }} />
+
+          {/* Bottom gradient fade */}
+          <div className="absolute bottom-0 left-0 right-0 h-32" style={{
+            background: 'linear-gradient(to top, rgba(6,4,15,0.8) 0%, transparent 100%)',
+          }} />
+        </div>
+
+        {/* Content */}
+        <div className="relative z-10 max-w-4xl mx-auto px-6">
+
+          {/* Badge */}
+          <div className="animate-fade-in flex justify-center mb-8">
+            <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold"
+              style={{
+                background: 'rgba(99,102,241,0.15)',
+                border: '1px solid rgba(99,102,241,0.35)',
+                color: '#a5b4fc',
+                backdropFilter: 'blur(10px)',
+                boxShadow: '0 0 20px rgba(99,102,241,0.2)',
+              }}>
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-400" />
+              </span>
+              {t.hero.tag}
+            </span>
+          </div>
+
+          {/* Headline — Syne font */}
           <h1
-            className="font-heading font-extrabold text-white mb-6 leading-tight animate-slide-up"
-            style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', animationDelay: '0.1s' }}
+            className="font-extrabold text-white mb-6 leading-[1.08] animate-slide-up"
+            style={{
+              fontFamily: "'Syne', 'Cairo', sans-serif",
+              fontSize: 'clamp(2.6rem, 6.5vw, 5.2rem)',
+              animationDelay: '0.1s',
+              letterSpacing: isRTL ? '0' : '-0.02em',
+              textShadow: '0 0 80px rgba(139,92,246,0.4)',
+            }}
           >
-            {t.hero.title}
+            {isRTL ? (
+              <>
+                نحن نبني{' '}
+                <span style={{
+                  background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #f472b6 100%)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                }}>مستقبل التوظيف</span>
+              </>
+            ) : (
+              <>
+                Building the{' '}
+                <span style={{
+                  background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 40%, #f472b6 100%)',
+                  WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text',
+                }}>future</span>
+                <br />of hiring
+              </>
+            )}
           </h1>
-          <p className="text-lg leading-relaxed animate-slide-up max-w-2xl mx-auto"
-            style={{ animationDelay: '0.2s', color: 'rgba(203,213,225,0.85)' }}>
+
+          {/* Subtitle */}
+          <p className="text-lg md:text-xl leading-relaxed animate-slide-up max-w-2xl mx-auto mb-12"
+            style={{ animationDelay: '0.2s', color: 'rgba(203,213,225,0.8)', fontFamily: "'Space Grotesk', 'Tajawal', sans-serif" }}>
             {t.hero.subtitle}
           </p>
+
+          {/* Scroll hint */}
+          <div className="animate-fade-in flex flex-col items-center gap-2" style={{ animationDelay: '0.5s' }}>
+            <span className="text-xs tracking-widest uppercase" style={{ color: 'rgba(148,163,184,0.6)', fontFamily: "'Syne', sans-serif" }}>
+              {isRTL ? 'اكتشف المزيد' : 'Discover more'}
+            </span>
+            <div className="w-px h-10 rounded-full" style={{ background: 'linear-gradient(to bottom, rgba(139,92,246,0.7), transparent)' }} />
+          </div>
         </div>
       </section>
 
