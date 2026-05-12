@@ -16,62 +16,37 @@ const Hero = () => {
 
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden pt-6 pb-24"
-      style={{ background: 'linear-gradient(135deg, #3b1a0a 0%, #5c2d0e 30%, #7c3a12 60%, #3b1a0a 100%)' }}>
+      style={{ background: '#0a0a0a' }}>
 
-      {/* ── Stunning Background ── */}
+      {/* ── Background Image ── */}
       <div className="absolute inset-0" style={{ zIndex: 0 }}>
-
-        {/* Brown warm glow layers */}
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 100% 70% at 15% 20%, rgba(161,91,15,0.5) 0%, transparent 55%)',
-        }} />
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 80% 60% at 85% 80%, rgba(120,53,15,0.45) 0%, transparent 50%)',
-        }} />
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 70% 50% at 50% 50%, rgba(180,83,9,0.2) 0%, transparent 60%)',
-        }} />
-
-        {/* Brown orbs */}
-        <div className="orb absolute w-[800px] h-[800px] -top-60 -left-40" style={{
-          background: 'radial-gradient(circle, rgba(146,64,14,0.55) 0%, rgba(120,53,15,0.25) 35%, transparent 70%)',
-          animationDelay: '0s',
-          opacity: 0.7,
-        }} />
-        <div className="orb absolute w-[700px] h-[700px] -bottom-40 -right-20" style={{
-          background: 'radial-gradient(circle, rgba(180,83,9,0.45) 0%, rgba(161,91,15,0.2) 35%, transparent 70%)',
-          animationDelay: '5s',
-          opacity: 0.6,
-        }} />
-        <div className="orb absolute w-[500px] h-[500px] top-1/3 left-1/2 -translate-x-1/2" style={{
-          background: 'radial-gradient(circle, rgba(120,53,15,0.3) 0%, transparent 70%)',
-          animationDelay: '2.5s',
-          opacity: 0.5,
-        }} />
+        <img
+          src="/hero-bg.png"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          style={{ opacity: 1 }}
+        />
+        {/* Dark overlay to keep text readable */}
+        <div className="absolute inset-0" style={{ background: 'rgba(0,0,0,0.45)' }} />
 
         {/* Mesh grid */}
         <div className="absolute inset-0" style={{
           backgroundImage: `
-            linear-gradient(rgba(255,200,100,0.05) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255,200,100,0.05) 1px, transparent 1px)
+            linear-gradient(rgba(255,200,100,0.03) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,200,100,0.03) 1px, transparent 1px)
           `,
           backgroundSize: '64px 64px',
         }} />
 
         {/* Fine dot grid */}
         <div className="absolute inset-0" style={{
-          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.07) 1px, transparent 1px)',
+          backgroundImage: 'radial-gradient(circle, rgba(255,255,255,0.05) 1px, transparent 1px)',
           backgroundSize: '28px 28px',
-        }} />
-
-        {/* Center warm spotlight */}
-        <div className="absolute inset-0" style={{
-          background: 'radial-gradient(ellipse 60% 50% at 50% 50%, rgba(180,83,9,0.1) 0%, transparent 70%)',
         }} />
 
         {/* Top header fade */}
         <div className="absolute top-0 left-0 right-0 h-28" style={{
-          background: 'linear-gradient(to bottom, rgba(40,15,5,0.6) 0%, transparent 100%)',
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, transparent 100%)',
         }} />
 
         {/* Glowing arc line */}
