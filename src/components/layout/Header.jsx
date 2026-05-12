@@ -1,14 +1,15 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 
 const Header = () => {
-  const { isRTL, toggleRTL, currentUser } = useAuth();
+  const { isRTL, toggleRTL, currentUser, signOutUser } = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const userMenuRef = useRef(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -29,6 +30,12 @@ const Header = () => {
     document.addEventListener('mousedown', handleClick);
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
+
+  const handleSignOut = async () => {
+    setUserMenuOpen(false);
+    await signOutUser();
+    navigate('/login');
+  };
 
   const navLinks = [
     { to: '/',          label: isRTL ? 'الرئيسية' : 'Home'      },
@@ -127,6 +134,9 @@ const Header = () => {
                     <div className="px-4 py-3 border-b border-slate-100">
                       <p className="text-xs text-slate-400">{isRTL ? 'مسجّل دخول بـ' : 'Signed in as'}</p>
                       <p className="text-sm font-semibold text-slate-800 truncate">{currentUser.displayName}</p>
+                      {currentUser.email && (
+                        <p className="text-xs text-slate-400 truncate mt-0.5">{currentUser.email}</p>
+                      )}
                     </div>
                     <div className="py-1">
                       <Link
@@ -151,15 +161,15 @@ const Header = () => {
                       </Link>
                     </div>
                     <div className="border-t border-slate-100 py-1">
-                      <a
-                        href="/api/logout"
-                        className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                      <button
+                        onClick={handleSignOut}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors"
                       >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                         </svg>
                         {isRTL ? 'تسجيل الخروج' : 'Sign out'}
-                      </a>
+                      </button>
                     </div>
                   </div>
                 )}
@@ -172,7 +182,11 @@ const Header = () => {
                 >
                   {isRTL ? 'تسجيل الدخول' : 'Log in'}
                 </Link>
-                <Link to="/signup" className="btn-primary text-sm py-2 px-5">
+                <Link
+                  to="/signup"
+                  className="text-sm py-2 px-5 rounded-xl text-white font-semibold transition-all"
+                  style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}
+                >
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
                 </Link>
               </div>
@@ -230,7 +244,16 @@ const Header = () => {
               {isRTL ? 'Switch to English' : 'التبديل للعربية'}
             </button>
 
-            {!currentUser && (
+            {currentUser ? (
+              <div className="pt-3 mt-3 border-t border-slate-100">
+                <button
+                  onClick={handleSignOut}
+                  className="w-full text-start block px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all"
+                >
+                  {isRTL ? 'تسجيل الخروج' : 'Sign out'}
+                </button>
+              </div>
+            ) : (
               <div className="pt-3 mt-3 border-t border-slate-100 flex flex-col gap-2">
                 <Link
                   to="/login"
@@ -241,7 +264,7 @@ const Header = () => {
                 <Link
                   to="/signup"
                   className="w-full text-center py-2.5 px-4 rounded-xl text-sm font-semibold text-white transition-all"
-                  style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)' }}
+                  style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}
                 >
                   {isRTL ? 'ابدأ مجاناً' : 'Get started free'}
                 </Link>

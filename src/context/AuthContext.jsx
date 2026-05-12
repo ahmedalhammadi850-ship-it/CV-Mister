@@ -1,4 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+  sendPasswordResetEmail,
+  updateProfile,
+} from 'firebase/auth';
+import { auth } from '../firebase/config';
 
 const AuthContext = createContext();
 
@@ -12,26 +21,38 @@ export function AuthProvider({ children }) {
   const [isRTL, setIsRTL] = useState(false);
 
   useEffect(() => {
-    fetch('/__replauthuser', { credentials: 'include' })
-      .then(res => {
-        if (res.ok) return res.json();
-        return null;
-      })
-      .then(data => {
-        if (data && data.id) {
-          setCurrentUser({
-            uid: data.id,
-            name: data.name,
-            displayName: data.name,
-            profileImage: data.profileImage,
-          });
-        } else {
-          setCurrentUser(null);
-        }
-      })
-      .catch(() => setCurrentUser(null))
-      .finally(() => setLoading(false));
+    const unsub = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setCurrentUser({
+          uid: user.uid,
+          name: user.displayName || user.email,
+          displayName: user.displayName || user.email?.split('@')[0],
+          profileImage: user.photoURL || null,
+          email: user.email,
+        });
+      } else {
+        setCurrentUser(null);
+      }
+      setLoading(false);
+    });
+    return unsub;
   }, []);
+
+  const signIn = (email, password) =>
+    signInWithEmailAndPassword(auth, email, password);
+
+  const signUp = async (email, password, name) => {
+    const cred = await createUserWithEmailAndPassword(auth, email, password);
+    if (name) {
+      await updateProfile(cred.user, { displayName: name });
+      setCurrentUser(prev => ({ ...prev, displayName: name, name }));
+    }
+    return cred;
+  };
+
+  const signOutUser = () => signOut(auth);
+
+  const sendPasswordReset = (email) => sendPasswordResetEmail(auth, email);
 
   const toggleRTL = () => {
     setIsRTL(prev => {
@@ -46,6 +67,10 @@ export function AuthProvider({ children }) {
     loading,
     isRTL,
     toggleRTL,
+    signIn,
+    signUp,
+    signOutUser,
+    sendPasswordReset,
   };
 
   return (

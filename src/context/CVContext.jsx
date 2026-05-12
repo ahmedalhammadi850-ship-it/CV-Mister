@@ -1,6 +1,11 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { sampleData } from '../utils/sampleData';
-import { saveCV, getCVById, getSavedCVs } from '../utils/cvStorage';
+import { saveCV, getCVById, getSavedCVs, deleteCV as deleteCVLocal } from '../utils/cvStorage';
+import { auth, db } from '../firebase/config';
+import { onAuthStateChanged } from 'firebase/auth';
+import {
+  collection, doc, setDoc, getDocs, deleteDoc, query, orderBy,
+} from 'firebase/firestore';
 
 const CVContext = createContext();
 
@@ -9,6 +14,32 @@ export function useCV() {
 }
 
 const DEFAULT_SECTION_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
+
+async function fetchFirestoreCVs(uid) {
+  try {
+    const q = query(collection(db, 'users', uid, 'cvs'), orderBy('lastModified', 'desc'));
+    const snap = await getDocs(q);
+    return snap.docs.map(d => d.data());
+  } catch {
+    return [];
+  }
+}
+
+async function saveFirestoreCV(uid, entry) {
+  try {
+    await setDoc(doc(db, 'users', uid, 'cvs', entry.id), entry);
+  } catch (e) {
+    console.error('Firestore save failed', e);
+  }
+}
+
+async function deleteFirestoreCV(uid, id) {
+  try {
+    await deleteDoc(doc(db, 'users', uid, 'cvs', id));
+  } catch (e) {
+    console.error('Firestore delete failed', e);
+  }
+}
 
 export function CVProvider({ children }) {
   const [cvData, setCvData] = useState(sampleData);
@@ -44,6 +75,19 @@ export function CVProvider({ children }) {
     linkedin: true,
     portfolio: true,
   });
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const firestoreCVs = await fetchFirestoreCVs(user.uid);
+        if (firestoreCVs.length > 0) {
+          firestoreCVs.forEach(cv => saveCV(cv));
+          setSavedCVs(getSavedCVs());
+        }
+      }
+    });
+    return unsub;
+  }, []);
 
   const updateSection = (section, data) => {
     setCvData(prev => ({ ...prev, [section]: data }));
@@ -81,6 +125,12 @@ export function CVProvider({ children }) {
     setCurrentCVName(cvName);
     setSavedCVs(getSavedCVs());
     window.dispatchEvent(new Event('cv_saved'));
+
+    const user = auth.currentUser;
+    if (user) {
+      saveFirestoreCV(user.uid, entry);
+    }
+
     return entry;
   };
 
@@ -93,6 +143,15 @@ export function CVProvider({ children }) {
     setCurrentCVId(cv.id);
     setCurrentCVName(cv.name);
     return true;
+  };
+
+  const deleteCV = (id) => {
+    deleteCVLocal(id);
+    setSavedCVs(getSavedCVs());
+    const user = auth.currentUser;
+    if (user) {
+      deleteFirestoreCV(user.uid, id);
+    }
   };
 
   const startNewCV = () => {
@@ -130,6 +189,7 @@ export function CVProvider({ children }) {
     savedCVs,
     saveCurrentCV,
     loadCVById,
+    deleteCV,
     startNewCV,
   };
 
