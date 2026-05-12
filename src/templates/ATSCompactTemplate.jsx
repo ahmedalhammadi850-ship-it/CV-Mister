@@ -34,14 +34,31 @@ const ATSCompactTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#1b4f72';
-  const { sz, font } = resolveTheme(theme, isRTL);
+  const { font } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
+
+  /*
+   * ATS-optimal fixed font sizes (independent of theme size slider):
+   *   Name        : 16pt  — readable, not overwhelming for ATS parsers
+   *   Job title   : 11pt  — standard body-level, clearly subordinate
+   *   Contact/meta: 10pt  — minimum comfortable reading size
+   *   Body text   : 10.5pt — ATS sweet-spot (10–11pt range)
+   *   Section head: 11pt  — ATS reads headings as plain text; bold = enough
+   */
+  const ATS = {
+    name:    '16pt',
+    title:   '11pt',
+    contact: '10pt',
+    heading: '11pt',
+    body:    '10.5pt',
+    meta:    '10pt',
+  };
 
   const s = {
     page: {
       fontFamily: font,
-      fontSize: sz.body,
+      fontSize: ATS.body,
       color: '#111',
       backgroundColor: '#ffffff',
       padding: '30pt 36pt',
@@ -61,20 +78,20 @@ const ATSCompactTemplate = ({
       ...BREAK_ITEM,
     },
     name: {
-      fontSize: sz.name,
+      fontSize: ATS.name,
       fontWeight: '800',
       color: '#000',
       letterSpacing: '0.01em',
       marginBottom: '2pt',
     },
     jobTitle: {
-      fontSize: '10.5pt',
+      fontSize: ATS.title,
       color: accent,
       fontWeight: '600',
       marginBottom: '4pt',
     },
     contact: {
-      fontSize: sz.meta,
+      fontSize: ATS.contact,
       color: '#333',
     },
 
@@ -85,11 +102,11 @@ const ATSCompactTemplate = ({
       ...BREAK_HEADING,
     },
     headingText: {
-      fontSize: '8pt',
+      fontSize: ATS.heading,
       fontWeight: '800',
       color: '#000',
       textTransform: 'uppercase',
-      letterSpacing: '0.12em',
+      letterSpacing: '0.08em',
       marginBottom: '2pt',
     },
     headingRule: {
@@ -106,26 +123,26 @@ const ATSCompactTemplate = ({
       marginTop: '5pt',
     },
     role: {
-      fontSize: sz.body,
+      fontSize: ATS.body,
       fontWeight: '700',
       color: '#000',
       flex: 1,
       minWidth: 0,
     },
     date: {
-      fontSize: sz.meta,
+      fontSize: ATS.meta,
       color: '#444',
       whiteSpace: 'nowrap',
       flexShrink: 0,
     },
     company: {
-      fontSize: sz.meta,
+      fontSize: ATS.meta,
       color: '#444',
       fontStyle: 'italic',
       marginBottom: '2pt',
     },
     body: {
-      fontSize: sz.body,
+      fontSize: ATS.body,
       color: '#222',
       lineHeight: '1.38',
       whiteSpace: 'pre-line',
@@ -133,7 +150,7 @@ const ATSCompactTemplate = ({
     item: { marginBottom: '7pt', ...BREAK_ITEM },
     itemSm: { marginBottom: '5pt', ...BREAK_ITEM },
     skillsText: {
-      fontSize: sz.body,
+      fontSize: ATS.body,
       color: '#222',
       lineHeight: '1.5',
       marginTop: '3pt',
