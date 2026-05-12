@@ -27,6 +27,7 @@ const ClassicTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#1e3a5f';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
 
@@ -38,7 +39,7 @@ const ClassicTemplate = ({
       padding, lineHeight, width: '794px', minHeight: '1122px',
       boxSizing: 'border-box', direction: dir, textAlign: isRTL ? 'right' : 'left',
     },
-    header:  { textAlign: 'center', borderBottom: `2px solid ${accent}`, paddingBottom: '10pt', marginBottom: '12pt', ...BREAK_ITEM },
+    header:  { textAlign: headerAlign, borderBottom: `2px solid ${accent}`, paddingBottom: '10pt', marginBottom: '12pt', ...BREAK_ITEM },
     name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '3pt' },
     jobTitle:{ fontSize: sz.body,    color: '#555', marginBottom: '5pt' },
     contact: { fontSize: sz.meta,    color: '#444' },

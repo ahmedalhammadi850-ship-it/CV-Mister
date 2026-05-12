@@ -37,6 +37,7 @@ const ATSProTemplate = ({
   const accent = theme?.primaryColor || '#0f4c75';
   const accentLight = accent + '18';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const justifyHeading = headingAlign === 'center' ? 'center' : ((headingAlign === 'right') !== isRTL) ? 'flex-end' : 'flex-start';
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
@@ -62,6 +63,7 @@ const ATSProTemplate = ({
       borderRight: isRTL ? `5px solid ${accent}` : 'none',
       padding: '14pt 16pt',
       marginBottom: '14pt',
+      textAlign: headerAlign,
       ...BREAK_ITEM,
     },
     name: {

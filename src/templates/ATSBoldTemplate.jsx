@@ -35,6 +35,7 @@ const ATSBoldTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#155e75';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -57,6 +58,7 @@ const ATSBoldTemplate = ({
       marginBottom: '12pt',
       paddingBottom: '10pt',
       borderBottom: `1px solid #ddd`,
+      textAlign: headerAlign,
       ...BREAK_ITEM,
     },
     name: {

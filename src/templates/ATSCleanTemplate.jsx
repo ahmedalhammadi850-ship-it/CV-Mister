@@ -36,6 +36,7 @@ const ATSCleanTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#1a56a0';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -60,12 +61,14 @@ const ATSCleanTemplate = ({
       color: '#0d0d0d',
       marginBottom: '2pt',
       letterSpacing: '-0.01em',
+      textAlign: headerAlign,
     },
     jobTitle: {
       fontSize: '11pt',
       color: accent,
       fontWeight: '600',
       marginBottom: '6pt',
+      textAlign: headerAlign,
     },
     contact: {
       fontSize: sz.meta,
@@ -73,6 +76,7 @@ const ATSCleanTemplate = ({
       marginBottom: '10pt',
       paddingBottom: '10pt',
       borderBottom: `2px solid ${accent}`,
+      textAlign: headerAlign,
     },
     heading: {
       textAlign: headingAlign,

@@ -28,6 +28,7 @@ const ExecutiveTemplate = ({
   const accent = theme?.primaryColor || '#0f2942';
   const gold = '#c9a84c';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
 
@@ -39,9 +40,9 @@ const ExecutiveTemplate = ({
       padding, lineHeight, width: '794px', minHeight: '1122px',
       boxSizing: 'border-box', direction: dir, textAlign: isRTL ? 'right' : 'left',
     },
-    name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '2pt', textTransform: 'uppercase', letterSpacing: '0.04em' },
-    jobTitle:{ fontSize: sz.body,    color: '#555', marginBottom: '6pt', letterSpacing: '0.06em', textTransform: 'uppercase' },
-    contact: { fontSize: sz.meta,    color: '#444', marginBottom: '10pt' },
+    name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '2pt', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: headerAlign },
+    jobTitle:{ fontSize: sz.body,    color: '#555', marginBottom: '6pt', letterSpacing: '0.06em', textTransform: 'uppercase', textAlign: headerAlign },
+    contact: { fontSize: sz.meta,    color: '#444', marginBottom: '10pt', textAlign: headerAlign },
     hdivider:{ borderBottom: `3px double ${accent}`, marginBottom: '14pt' },
     meta:    { fontSize: sz.meta,    color: '#555', marginBottom: '4pt' },
     body:    { fontSize: sz.body,    color: '#222', lineHeight, whiteSpace: 'pre-line' },

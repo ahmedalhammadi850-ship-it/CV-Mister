@@ -28,6 +28,7 @@ const ModernTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#4f46e5';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
 
@@ -39,9 +40,9 @@ const ModernTemplate = ({
       padding, lineHeight, width: '794px', minHeight: '1122px',
       boxSizing: 'border-box', direction: dir, textAlign: isRTL ? 'right' : 'left',
     },
-    name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '3pt', lineHeight: 1.2 },
-    jobTitle:{ fontSize: sz.body,    color: '#555', marginBottom: '6pt' },
-    contact: { fontSize: sz.meta,    color: '#444', marginBottom: '14pt', borderBottom: `2px solid ${accent}`, paddingBottom: '8pt' },
+    name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '3pt', lineHeight: 1.2, textAlign: headerAlign },
+    jobTitle:{ fontSize: sz.body,    color: '#555', marginBottom: '6pt', textAlign: headerAlign },
+    contact: { fontSize: sz.meta,    color: '#444', marginBottom: '14pt', borderBottom: `2px solid ${accent}`, paddingBottom: '8pt', textAlign: headerAlign },
     heading: { fontSize: sz.heading, fontWeight: '700', color: accent, marginTop: sectionMt, marginBottom: '6pt', borderBottom: `1px solid ${accent}`, paddingBottom: '2pt', textAlign: headingAlign, ...BREAK_HEADING },
     meta:    { fontSize: sz.meta,    color: '#555', marginBottom: '4pt' },
     body:    { fontSize: sz.body,    color: '#222', lineHeight, whiteSpace: 'pre-line' },

@@ -35,6 +35,7 @@ const ATSCompactTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#1b4f72';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -73,7 +74,7 @@ const ATSCompactTemplate = ({
 
     /* ── Header ── */
     header: {
-      textAlign: 'center',
+      textAlign: headerAlign,
       paddingBottom: '8pt',
       marginBottom: '4pt',
       ...BREAK_ITEM,

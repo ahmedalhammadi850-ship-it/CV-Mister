@@ -27,6 +27,7 @@ const CreativeTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#7c3aed';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const borderSide = isRTL ? 'borderRight' : 'borderLeft';
@@ -40,9 +41,9 @@ const CreativeTemplate = ({
       boxSizing: 'border-box', direction: dir, textAlign: isRTL ? 'right' : 'left',
     },
     bar:     { width: '48pt', height: '3pt', backgroundColor: accent, marginBottom: '8pt', marginLeft: isRTL ? 'auto' : 0, marginRight: isRTL ? 0 : 'auto' },
-    name:    { fontSize: sz.name,    fontWeight: '700', color: '#1a1a1a', marginBottom: '2pt', lineHeight: 1.2 },
-    jobTitle:{ fontSize: sz.body,    color: accent, fontWeight: '600', marginBottom: '6pt' },
-    contact: { fontSize: sz.meta,    color: '#444', marginBottom: '14pt' },
+    name:    { fontSize: sz.name,    fontWeight: '700', color: '#1a1a1a', marginBottom: '2pt', lineHeight: 1.2, textAlign: headerAlign },
+    jobTitle:{ fontSize: sz.body,    color: accent, fontWeight: '600', marginBottom: '6pt', textAlign: headerAlign },
+    contact: { fontSize: sz.meta,    color: '#444', marginBottom: '14pt', textAlign: headerAlign },
     heading: {
       fontSize: sz.heading, fontWeight: '700', color: '#1a1a1a', marginTop: sectionMt, marginBottom: '4pt',
       paddingLeft: isRTL ? 0 : '8pt', paddingRight: isRTL ? '8pt' : 0,

@@ -36,6 +36,7 @@ const ATSSimpleTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#2d6a9f';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const justifyHeading = headingAlign === 'center' ? 'center' : ((headingAlign === 'right') !== isRTL) ? 'flex-end' : 'flex-start';
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
@@ -56,7 +57,7 @@ const ATSSimpleTemplate = ({
       textAlign: isRTL ? 'right' : 'left',
     },
     headerCenter: {
-      textAlign: 'center',
+      textAlign: headerAlign,
       borderBottom: `3px double ${accent}`,
       paddingBottom: '10pt',
       marginBottom: '10pt',

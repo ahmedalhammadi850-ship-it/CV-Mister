@@ -36,6 +36,7 @@ const ATSModernTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#0d4f6e';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -53,7 +54,7 @@ const ATSModernTemplate = ({
       direction: dir,
       textAlign: isRTL ? 'right' : 'left',
     },
-    stripe: {
+    stripe: { textAlign: headerAlign,
       backgroundColor: accent,
       padding: `22pt ${padding.split(' ')[1] || '32pt'} 18pt`,
       ...BREAK_ITEM,
