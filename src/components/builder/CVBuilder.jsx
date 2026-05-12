@@ -119,46 +119,11 @@ const CVBuilder = () => {
     }
   };
 
-  const flattenOklchColors = (root) => {
-    const COLOR_PROPS = [
-      'color', 'backgroundColor', 'borderColor',
-      'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
-      'outlineColor', 'textDecorationColor', 'columnRuleColor',
-    ];
-    const snapshots = [];
-    const all = [root, ...root.querySelectorAll('*')];
-    for (const el of all) {
-      const computed = window.getComputedStyle(el);
-      const overrides = {};
-      for (const prop of COLOR_PROPS) {
-        const val = computed[prop];
-        if (val && val.includes('oklch')) {
-          overrides[prop] = val;
-        }
-      }
-      if (Object.keys(overrides).length > 0) {
-        const prev = {};
-        for (const prop of Object.keys(overrides)) {
-          prev[prop] = el.style[prop];
-          el.style[prop] = overrides[prop];
-        }
-        snapshots.push({ el, prev });
-      }
-    }
-    return () => {
-      for (const { el, prev } of snapshots) {
-        for (const [prop, val] of Object.entries(prev)) {
-          el.style[prop] = val;
-        }
-      }
-    };
-  };
-
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
-        import('html2canvas'),
+      const [{ toJpeg }, { jsPDF }] = await Promise.all([
+        import('html-to-image'),
         import('jspdf'),
       ]);
 
@@ -169,47 +134,41 @@ const CVBuilder = () => {
       printRoot.style.cssText =
         'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
 
-      const restoreColors = flattenOklchColors(element);
-
-      const canvas = await html2canvas(element, {
-        scale: 2,
-        useCORS: true,
-        allowTaint: true,
+      const dataUrl = await toJpeg(element, {
+        quality: 0.95,
         backgroundColor: '#ffffff',
         width: 794,
-        windowWidth: 794,
-        scrollX: 0,
-        scrollY: 0,
-        x: 0,
-        y: 0,
+        pixelRatio: 2,
       });
-
-      restoreColors();
 
       printRoot.setAttribute('style', savedStyle);
 
-      const A4_W_MM  = 210;
-      const A4_H_MM  = 297;
-      const canvasW  = canvas.width;
-      const pageSliceH = Math.round((A4_H_MM / A4_W_MM) * canvasW);
+      const img = new Image();
+      await new Promise((resolve) => { img.onload = resolve; img.src = dataUrl; });
+
+      const A4_W_MM = 210;
+      const A4_H_MM = 297;
+      const imgW = img.naturalWidth;
+      const imgH = img.naturalHeight;
+      const pageSliceH = Math.round((A4_H_MM / A4_W_MM) * imgW);
 
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
       let pageTop = 0;
-      let pageNum  = 0;
+      let pageNum = 0;
 
-      while (pageTop < canvas.height) {
+      while (pageTop < imgH) {
         if (pageNum > 0) pdf.addPage();
 
-        const sliceH    = Math.min(pageSliceH, canvas.height - pageTop);
+        const sliceH = Math.min(pageSliceH, imgH - pageTop);
         const pageCanvas = document.createElement('canvas');
-        pageCanvas.width  = canvasW;
+        pageCanvas.width = imgW;
         pageCanvas.height = pageSliceH;
 
         const ctx = pageCanvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvasW, pageSliceH);
-        ctx.drawImage(canvas, 0, pageTop, canvasW, sliceH, 0, 0, canvasW, sliceH);
+        ctx.fillRect(0, 0, imgW, pageSliceH);
+        ctx.drawImage(img, 0, pageTop, imgW, sliceH, 0, 0, imgW, sliceH);
 
         pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
 
