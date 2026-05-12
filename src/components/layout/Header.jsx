@@ -39,7 +39,6 @@ const Header = () => {
   const navLinks = [
     { to: '/',          label: isRTL ? 'الرئيسية' : 'Home'      },
     { to: '/templates', label: isRTL ? 'القوالب'  : 'Templates'  },
-    { to: '/builder',   label: isRTL ? 'المنشئ'   : 'Builder'    },
     { to: '/about',     label: isRTL ? 'من نحن'   : 'About'      },
   ];
 
