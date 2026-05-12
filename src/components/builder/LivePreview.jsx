@@ -152,6 +152,21 @@ const LivePreview = () => {
                   }}
                 />
               )}
+
+              {/* White bottom-margin overlay for all pages except the last */}
+              {pageIndex < numPages - 1 && (
+                <div
+                  style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    height: PAGE_TOP_MARGIN * scale,
+                    background: '#ffffff',
+                    zIndex: 5,
+                  }}
+                />
+              )}
             </div>
           </div>
         );
