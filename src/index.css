@@ -234,20 +234,80 @@
 
 /* Print Styles */
 @media print {
-  body { @apply bg-white; }
+  @page {
+    size: A4;
+    margin: 0;
+  }
+  html, body {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: white !important;
+  }
+  body > *:not(#cv-print-root) {
+    display: none !important;
+  }
+  #cv-print-root {
+    display: block !important;
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+  }
+  #cv-print-root > div {
+    transform: none !important;
+    box-shadow: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 210mm !important;
+  }
   .no-print { display: none !important; }
-  .page-break { page-break-before: always; }
+  .cv-page-separator { display: none !important; }
   * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
 }
 
 /* Resume Templates Base Styles */
 .resume-page {
-  @apply bg-white shadow-xl mx-auto overflow-hidden relative;
+  @apply bg-white shadow-xl mx-auto relative;
   width: 210mm;
   min-height: 297mm;
 }
 
 .resume-scale-wrapper {
-  transform-origin: top center;
+  transform-origin: top left;
   transition: transform 0.2s ease;
+}
+
+/* CV Section print rules */
+.cv-section {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cv-heading {
+  break-after: avoid;
+  page-break-after: avoid;
+}
+.cv-item {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+.cv-page-separator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #94a3b8;
+  z-index: 10;
+  pointer-events: none;
+}
+.cv-page-badge {
+  position: absolute;
+  right: 8px;
+  top: -20px;
+  font-size: 11px;
+  color: #64748b;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px 6px 0 0;
+  padding: 2px 8px;
+  font-family: 'Inter', sans-serif;
 }

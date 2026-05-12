@@ -1,4 +1,4 @@
-import { resolveTheme, buildContact } from './templateUtils';
+import { resolveTheme, buildContact, BREAK_ITEM, BREAK_HEADING } from './templateUtils';
 
 const labels = {
   summary:       { en: 'Professional Summary',  ar: 'الملخص المهني'        },
@@ -46,6 +46,7 @@ const CreativeTemplate = ({
       fontSize: sz.heading, fontWeight: '700', color: '#1a1a1a', marginTop: sectionMt, marginBottom: '4pt',
       paddingLeft: isRTL ? 0 : '8pt', paddingRight: isRTL ? '8pt' : 0,
       [borderSide]: `3pt solid ${accent}`,
+      ...BREAK_HEADING,
     },
     role:    { fontSize: sz.body,    fontWeight: '700', marginBottom: '1pt' },
     meta:    { fontSize: sz.meta,    color: '#555', marginBottom: '4pt' },
@@ -53,6 +54,8 @@ const CreativeTemplate = ({
     row:     { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isRTL ? 'row-reverse' : 'row' },
     date:    { fontSize: sz.meta, color: '#666', whiteSpace: 'nowrap', marginLeft: isRTL ? 0 : '12pt', marginRight: isRTL ? '12pt' : 0 },
     tag:     { display: 'inline-block', background: accent + '18', color: accent, borderRadius: '4pt', padding: '2pt 7pt', fontSize: sz.meta, marginRight: '4pt', marginBottom: '4pt', fontWeight: '500' },
+    item:    { marginTop: '8pt', marginBottom: '6pt', ...BREAK_ITEM },
+    itemSm:  { marginTop: '6pt', ...BREAK_ITEM },
   };
 
   const contact = buildContact(data.personalInfo, visiblePersonalFields, isRTL);
@@ -62,7 +65,7 @@ const CreativeTemplate = ({
     switch (key) {
       case 'summary':
         return data.personalInfo?.summary ? (
-          <div key="summary">
+          <div key="summary" style={BREAK_ITEM}>
             <div style={s.heading}>{tr('summary', isRTL)}</div>
             <div style={{ ...s.body, marginTop: '6pt' }}>{data.personalInfo.summary}</div>
           </div>
@@ -72,7 +75,7 @@ const CreativeTemplate = ({
           <div key="experience">
             <div style={s.heading}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
-              <div key={i} style={{ marginTop: '8pt', marginBottom: '6pt' }}>
+              <div key={i} style={s.item}>
                 <div style={s.row}>
                   <div style={s.role}>{e.jobTitle}</div>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -88,7 +91,7 @@ const CreativeTemplate = ({
           <div key="education">
             <div style={s.heading}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
-              <div key={i} style={{ marginTop: '8pt', marginBottom: '6pt' }}>
+              <div key={i} style={s.item}>
                 <div style={s.row}>
                   <div style={s.role}>{e.degree}</div>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -101,14 +104,14 @@ const CreativeTemplate = ({
         ) : null;
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills">
+          <div key="skills" style={BREAK_ITEM}>
             <div style={s.heading}>{tr('skills', isRTL)}</div>
             <div style={{ ...s.body, marginTop: '6pt' }}>{data.skills.join(' | ')}</div>
           </div>
         ) : null;
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages">
+          <div key="languages" style={BREAK_ITEM}>
             <div style={s.heading}>{tr('languages', isRTL)}</div>
             <div style={{ ...s.body, marginTop: '6pt' }}>{data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}</div>
           </div>
@@ -118,7 +121,7 @@ const CreativeTemplate = ({
           <div key="projects">
             <div style={s.heading}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
-              <div key={i} style={{ marginTop: '6pt' }}>
+              <div key={i} style={s.itemSm}>
                 <div style={s.role}>{p.title}</div>
                 {p.link && <div style={{ ...s.meta, color: accent }}>{p.link}</div>}
                 <div style={s.body}>{p.description}</div>
@@ -131,7 +134,7 @@ const CreativeTemplate = ({
           <div key="certificates">
             <div style={s.heading}>{tr('certificates', isRTL)}</div>
             {data.certificates.map((c, i) => (
-              <div key={i} style={{ marginTop: '6pt' }}>
+              <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{c.name}</div>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -144,7 +147,7 @@ const CreativeTemplate = ({
         ) : null;
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests">
+          <div key="interests" style={BREAK_ITEM}>
             <div style={s.heading}>{tr('interests', isRTL)}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt', marginTop: '6pt' }}>
               {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
@@ -156,7 +159,7 @@ const CreativeTemplate = ({
           <div key="courses">
             <div style={s.heading}>{tr('courses', isRTL)}</div>
             {data.courses.map((c, i) => (
-              <div key={i} style={{ marginTop: '6pt' }}>
+              <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{c.name}</div>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -171,7 +174,7 @@ const CreativeTemplate = ({
           <div key="awards">
             <div style={s.heading}>{tr('awards', isRTL)}</div>
             {data.awards.map((a, i) => (
-              <div key={i} style={{ marginTop: '6pt' }}>
+              <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{a.title}</div>
                   {a.date && <div style={s.date}>{a.date}</div>}
@@ -187,7 +190,7 @@ const CreativeTemplate = ({
           <div key="organisations">
             <div style={s.heading}>{tr('organisations', isRTL)}</div>
             {data.organisations.map((o, i) => (
-              <div key={i} style={{ marginTop: '6pt' }}>
+              <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{o.name}</div>
                   {o.date && <div style={s.date}>{o.date}</div>}
@@ -202,7 +205,7 @@ const CreativeTemplate = ({
           <div key="publications">
             <div style={s.heading}>{tr('publications', isRTL)}</div>
             {data.publications.map((p, i) => (
-              <div key={i} style={{ marginTop: '6pt' }}>
+              <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{p.title}</div>
                   {p.date && <div style={s.date}>{p.date}</div>}
@@ -218,7 +221,7 @@ const CreativeTemplate = ({
           <div key="references">
             <div style={s.heading}>{tr('references', isRTL)}</div>
             {data.references.map((r, i) => (
-              <div key={i} style={{ marginTop: '6pt' }}>
+              <div key={i} style={s.itemSm}>
                 <div style={s.role}>{r.name}</div>
                 {(r.title || r.company) && <div style={{ ...s.meta, color: accent }}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
@@ -232,10 +235,12 @@ const CreativeTemplate = ({
 
   return (
     <div style={s.page}>
-      <div style={s.bar} />
-      <div style={s.name}>{data.personalInfo.fullName}</div>
-      <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
-      {contact && <div style={s.contact}>{contact}</div>}
+      <div style={BREAK_ITEM}>
+        <div style={s.bar} />
+        <div style={s.name}>{data.personalInfo.fullName}</div>
+        <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
+        {contact && <div style={s.contact}>{contact}</div>}
+      </div>
       {sectionOrder.map(key => renderSection(key))}
     </div>
   );

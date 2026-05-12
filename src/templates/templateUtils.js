@@ -85,3 +85,7 @@ export function buildContact(info, visible, isRTL) {
     vis.portfolio !== false && info?.portfolio && `${L('portfolio')}: ${info.portfolio}`,
   ].filter(Boolean).join('   |   ');
 }
+
+/* ── Print break helpers (use as inline styles) ── */
+export const BREAK_ITEM    = { breakInside: 'avoid', pageBreakInside: 'avoid' };
+export const BREAK_HEADING = { breakAfter:  'avoid', pageBreakAfter:  'avoid' };

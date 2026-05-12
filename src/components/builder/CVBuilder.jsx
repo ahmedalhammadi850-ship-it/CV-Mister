@@ -1,10 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../../context/CVContext';
 import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
+import ModernTemplate from '../../templates/ModernTemplate';
+import ClassicTemplate from '../../templates/ClassicTemplate';
+import CreativeTemplate from '../../templates/CreativeTemplate';
+import MinimalTemplate from '../../templates/MinimalTemplate';
+import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -54,16 +59,10 @@ const SaveModal = ({ isRTL, defaultName, onSave, onClose }) => {
           placeholder={isRTL ? 'مثال: سيرتي الذاتية' : 'e.g. Software Engineer CV'}
         />
         <div className="flex gap-2">
-          <button
-            onClick={() => onSave(name)}
-            className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors text-sm"
-          >
+          <button onClick={() => onSave(name)} className="flex-1 py-2.5 bg-indigo-600 text-white rounded-xl font-medium hover:bg-indigo-700 transition-colors text-sm">
             {isRTL ? 'حفظ' : 'Save'}
           </button>
-          <button
-            onClick={onClose}
-            className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition-colors text-sm"
-          >
+          <button onClick={onClose} className="flex-1 py-2.5 bg-slate-100 text-slate-700 rounded-xl font-medium hover:bg-slate-200 transition-colors text-sm">
             {isRTL ? 'إلغاء' : 'Cancel'}
           </button>
         </div>
@@ -72,14 +71,38 @@ const SaveModal = ({ isRTL, defaultName, onSave, onClose }) => {
   );
 };
 
+/* ── Print Layer: full-size CV rendered off-screen for PDF ── */
+const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder, isRTL }) => {
+  const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder };
+  const renderTemplate = () => {
+    switch (selectedTemplate) {
+      case 'classic':   return <ClassicTemplate   {...props} />;
+      case 'creative':  return <CreativeTemplate  {...props} />;
+      case 'minimal':   return <MinimalTemplate   {...props} />;
+      case 'executive': return <ExecutiveTemplate {...props} />;
+      default:          return <ModernTemplate    {...props} />;
+    }
+  };
+  return (
+    <div
+      id="cv-print-root"
+      aria-hidden="true"
+      style={{ position: 'fixed', top: '-9999px', left: '-9999px', zIndex: -1, pointerEvents: 'none' }}
+    >
+      <div>{renderTemplate()}</div>
+    </div>
+  );
+};
+
 const CVBuilder = () => {
-  const { selectedTemplate, cvData, theme, visibleSections, saveCurrentCV, currentCVId, currentCVName } = useCV();
+  const { selectedTemplate, cvData, theme, visibleSections, visiblePersonalFields, sectionOrder, saveCurrentCV, currentCVId, currentCVName } = useCV();
   const { isRTL } = useAuth();
   const navigate = useNavigate();
   const [mobileTab, setMobileTab] = useState('editor');
   const [panelTab, setPanelTab] = useState('content');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
+  const [isPrinting, setIsPrinting] = useState(false);
 
   const handleSave = (name) => {
     saveCurrentCV(name);
@@ -96,11 +119,35 @@ const CVBuilder = () => {
     }
   };
 
+  const handleDownloadPDF = () => {
+    const originalTitle = document.title;
+    document.title = `${cvData.personalInfo.fullName || 'Resume'} - CV`;
+    setIsPrinting(true);
+    setTimeout(() => {
+      window.print();
+      setTimeout(() => {
+        document.title = originalTitle;
+        setIsPrinting(false);
+      }, 1000);
+    }, 150);
+  };
+
   return (
     <div
       className="flex flex-col md:flex-row h-[calc(100vh-80px)] overflow-hidden bg-slate-100"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
+      {/* Hidden print layer */}
+      <PrintLayer
+        cvData={cvData}
+        selectedTemplate={selectedTemplate}
+        theme={theme}
+        visibleSections={visibleSections}
+        visiblePersonalFields={visiblePersonalFields}
+        sectionOrder={sectionOrder}
+        isRTL={isRTL}
+      />
+
       {showSaveModal && (
         <SaveModal
           isRTL={isRTL}
@@ -111,7 +158,7 @@ const CVBuilder = () => {
       )}
 
       {saveToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-medium flex items-center gap-2 animate-fade-in">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 bg-emerald-600 text-white px-5 py-3 rounded-2xl shadow-xl text-sm font-medium flex items-center gap-2 animate-fade-in no-print">
           <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
@@ -120,36 +167,24 @@ const CVBuilder = () => {
       )}
 
       {/* Mobile top tabs */}
-      <div className="md:hidden flex bg-white border-b border-slate-200 sticky top-0 z-10">
-        <button
-          onClick={() => setMobileTab('editor')}
-          className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'editor' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}
-        >
+      <div className="md:hidden flex bg-white border-b border-slate-200 sticky top-0 z-10 no-print">
+        <button onClick={() => setMobileTab('editor')} className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'editor' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>
           {isRTL ? 'تعديل' : 'Edit'}
         </button>
-        <button
-          onClick={() => setMobileTab('preview')}
-          className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'preview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}
-        >
+        <button onClick={() => setMobileTab('preview')} className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'preview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>
           {isRTL ? 'المعاينة' : 'Preview'}
         </button>
       </div>
 
       {/* ── Editor Sidebar ── */}
-      <div className={`w-full md:w-[420px] lg:w-[460px] flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden ${mobileTab === 'editor' ? 'flex' : 'hidden md:flex'}`}>
-
-        {/* Panel tab bar */}
+      <div className={`w-full md:w-[420px] lg:w-[460px] flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden no-print ${mobileTab === 'editor' ? 'flex' : 'hidden md:flex'}`}>
         <div className="flex border-b border-slate-100 bg-white sticky top-0 z-10 flex-shrink-0">
           {PANEL_TABS.map(({ key, enLabel, arLabel, Icon }) => {
             const active = panelTab === key;
             return (
-              <button
-                key={key}
-                onClick={() => setPanelTab(key)}
+              <button key={key} onClick={() => setPanelTab(key)}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-3.5 text-sm font-medium transition-colors border-b-2 ${
-                  active
-                    ? 'text-indigo-600 border-indigo-600 bg-indigo-50/50'
-                    : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-50'
+                  active ? 'text-indigo-600 border-indigo-600 bg-indigo-50/50' : 'text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <Icon />
@@ -158,8 +193,6 @@ const CVBuilder = () => {
             );
           })}
         </div>
-
-        {/* Panel content */}
         <div className="overflow-y-auto flex-1">
           {panelTab === 'overview'  && <OverviewPanel cvData={cvData} theme={theme} selectedTemplate={selectedTemplate} visibleSections={visibleSections} isRTL={isRTL} setPanelTab={setPanelTab} />}
           {panelTab === 'content'   && <EditorPanel />}
@@ -169,12 +202,12 @@ const CVBuilder = () => {
 
       {/* ── Live Preview ── */}
       <div className={`flex-1 bg-slate-100 overflow-y-auto ${mobileTab === 'preview' ? 'block' : 'hidden md:block'}`}>
-        <div className="sticky top-0 right-0 p-4 flex justify-end gap-3 z-10 pointer-events-none">
+
+        {/* Top action bar */}
+        <div className="sticky top-0 right-0 p-4 flex justify-end gap-3 z-10 pointer-events-none no-print">
           <div className="pointer-events-auto">
-            <button
-              onClick={() => navigate('/dashboard')}
-              className="bg-white border border-slate-200 text-slate-600 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm"
-            >
+            <button onClick={() => navigate('/dashboard')}
+              className="bg-white border border-slate-200 text-slate-600 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
@@ -182,10 +215,8 @@ const CVBuilder = () => {
             </button>
           </div>
           <div className="pointer-events-auto">
-            <button
-              onClick={handleSaveClick}
-              className="bg-white border border-slate-200 text-slate-700 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm"
-            >
+            <button onClick={handleSaveClick}
+              className="bg-white border border-slate-200 text-slate-700 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
               <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
@@ -193,11 +224,26 @@ const CVBuilder = () => {
             </button>
           </div>
           <div className="pointer-events-auto">
-            <button className="bg-indigo-600 text-white shadow-md px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 text-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-              </svg>
-              {isRTL ? 'تنزيل PDF' : 'Download PDF'}
+            <button
+              onClick={handleDownloadPDF}
+              disabled={isPrinting}
+              className="bg-indigo-600 text-white shadow-md px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 text-sm disabled:opacity-70"
+            >
+              {isPrinting ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  {isRTL ? 'جاري...' : 'Loading...'}
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  {isRTL ? 'تنزيل PDF' : 'Download PDF'}
+                </>
+              )}
             </button>
           </div>
         </div>
@@ -212,12 +258,19 @@ const CVBuilder = () => {
 
 /* ── Overview Panel ── */
 const SECTION_LABELS = {
-  summary:    { en: 'Summary',    ar: 'الملخص'    },
-  experience: { en: 'Experience', ar: 'الخبرة'    },
-  education:  { en: 'Education',  ar: 'التعليم'   },
-  skills:     { en: 'Skills',     ar: 'المهارات'  },
-  projects:   { en: 'Projects',   ar: 'المشاريع'  },
-  languages:  { en: 'Languages',  ar: 'اللغات'    },
+  summary:       { en: 'Summary',       ar: 'الملخص'      },
+  experience:    { en: 'Experience',    ar: 'الخبرة'       },
+  education:     { en: 'Education',     ar: 'التعليم'      },
+  skills:        { en: 'Skills',        ar: 'المهارات'     },
+  projects:      { en: 'Projects',      ar: 'المشاريع'     },
+  languages:     { en: 'Languages',     ar: 'اللغات'       },
+  certificates:  { en: 'Certificates',  ar: 'الشهادات'     },
+  interests:     { en: 'Interests',     ar: 'الاهتمامات'   },
+  courses:       { en: 'Courses',       ar: 'الدورات'      },
+  awards:        { en: 'Awards',        ar: 'الجوائز'      },
+  organisations: { en: 'Organisations', ar: 'المنظمات'     },
+  publications:  { en: 'Publications',  ar: 'المنشورات'    },
+  references:    { en: 'References',    ar: 'المراجع'      },
 };
 
 const OverviewPanel = ({ cvData, theme, selectedTemplate, visibleSections, isRTL, setPanelTab }) => {
