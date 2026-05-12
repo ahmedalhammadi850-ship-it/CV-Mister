@@ -1,15 +1,22 @@
 import { resolveTheme, buildContact } from './templateUtils';
 
 const labels = {
-  execSummary: { en: 'Executive Summary',      ar: 'الملخص التنفيذي'   },
-  experience:  { en: 'Professional Experience', ar: 'الخبرة المهنية'   },
-  education:   { en: 'Education',               ar: 'التعليم'           },
-  skills:      { en: 'Core Competencies',       ar: 'الكفاءات الأساسية' },
-  languages:   { en: 'Languages',               ar: 'اللغات'            },
-  projects:    { en: 'Projects',                ar: 'المشاريع'          },
-  present:     { en: 'Present',                 ar: 'حتى الآن'          },
+  execSummary:   { en: 'Executive Summary',      ar: 'الملخص التنفيذي'     },
+  experience:    { en: 'Professional Experience', ar: 'الخبرة المهنية'     },
+  education:     { en: 'Education',               ar: 'التعليم'             },
+  skills:        { en: 'Core Competencies',       ar: 'الكفاءات الأساسية'  },
+  languages:     { en: 'Languages',               ar: 'اللغات'              },
+  projects:      { en: 'Projects',                ar: 'المشاريع'            },
+  certificates:  { en: 'Certificates',            ar: 'الشهادات والاعتمادات'},
+  interests:     { en: 'Interests & Hobbies',     ar: 'الاهتمامات والهوايات'},
+  courses:       { en: 'Courses & Training',      ar: 'الدورات والتدريب'   },
+  awards:        { en: 'Awards & Honours',        ar: 'الجوائز والتكريمات' },
+  organisations: { en: 'Organisations',           ar: 'المنظمات والجمعيات' },
+  publications:  { en: 'Publications',            ar: 'المنشورات والأبحاث' },
+  references:    { en: 'References',              ar: 'المراجع والتزكيات'  },
+  present:       { en: 'Present',                 ar: 'حتى الآن'            },
 };
-const tr = (key, isRTL) => labels[key][isRTL ? 'ar' : 'en'];
+const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
 
@@ -40,6 +47,7 @@ const ExecutiveTemplate = ({
     body:    { fontSize: sz.body,    color: '#222', lineHeight, whiteSpace: 'pre-line' },
     row:     { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isRTL ? 'row-reverse' : 'row' },
     date:    { fontSize: sz.meta, color: '#555', whiteSpace: 'nowrap', marginLeft: isRTL ? 0 : '12pt', marginRight: isRTL ? '12pt' : 0 },
+    tag:     { display: 'inline-block', border: `1px solid ${gold}`, color: accent, borderRadius: '3pt', padding: '1pt 6pt', fontSize: sz.meta, marginRight: '4pt', marginBottom: '3pt' },
   };
 
   const SectionHeading = ({ labelKey }) => (
@@ -57,7 +65,7 @@ const ExecutiveTemplate = ({
     if (!show(key)) return null;
     switch (key) {
       case 'summary':
-        return data.personalInfo.summary ? (
+        return data.personalInfo?.summary ? (
           <div key="summary">
             <SectionHeading labelKey="execSummary" />
             <div style={{ ...s.body, fontStyle: 'italic' }}>{data.personalInfo.summary}</div>
@@ -116,7 +124,108 @@ const ExecutiveTemplate = ({
             {data.projects.map((p, i) => (
               <div key={i} style={{ marginBottom: '8pt' }}>
                 <div style={s.role}>{p.title}</div>
+                {p.link && <div style={{ ...s.meta, color: gold }}>{p.link}</div>}
                 <div style={s.body}>{p.description}</div>
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'certificates':
+        return data.certificates?.length > 0 ? (
+          <div key="certificates">
+            <SectionHeading labelKey="certificates" />
+            {data.certificates.map((c, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{c.name}</div>
+                  {c.date && <div style={s.date}>{c.date}</div>}
+                </div>
+                {c.issuer && <div style={{ ...s.meta, fontWeight: '600' }}>{c.issuer}</div>}
+                {c.description && <div style={s.body}>{c.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'interests':
+        return data.interests?.length > 0 ? (
+          <div key="interests">
+            <SectionHeading labelKey="interests" />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt' }}>
+              {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
+            </div>
+          </div>
+        ) : null;
+      case 'courses':
+        return data.courses?.length > 0 ? (
+          <div key="courses">
+            <SectionHeading labelKey="courses" />
+            {data.courses.map((c, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{c.name}</div>
+                  {c.date && <div style={s.date}>{c.date}</div>}
+                </div>
+                {c.institution && <div style={{ ...s.meta, fontWeight: '600' }}>{c.institution}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'awards':
+        return data.awards?.length > 0 ? (
+          <div key="awards">
+            <SectionHeading labelKey="awards" />
+            {data.awards.map((a, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{a.title}</div>
+                  {a.date && <div style={s.date}>{a.date}</div>}
+                </div>
+                {a.issuer && <div style={{ ...s.meta, fontWeight: '600' }}>{a.issuer}</div>}
+                {a.description && <div style={s.body}>{a.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'organisations':
+        return data.organisations?.length > 0 ? (
+          <div key="organisations">
+            <SectionHeading labelKey="organisations" />
+            {data.organisations.map((o, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{o.name}</div>
+                  {o.date && <div style={s.date}>{o.date}</div>}
+                </div>
+                {o.role && <div style={{ ...s.meta, fontWeight: '600' }}>{o.role}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'publications':
+        return data.publications?.length > 0 ? (
+          <div key="publications">
+            <SectionHeading labelKey="publications" />
+            {data.publications.map((p, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{p.title}</div>
+                  {p.date && <div style={s.date}>{p.date}</div>}
+                </div>
+                {p.publisher && <div style={{ ...s.meta, fontWeight: '600' }}>{p.publisher}</div>}
+                {p.description && <div style={s.body}>{p.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'references':
+        return data.references?.length > 0 ? (
+          <div key="references">
+            <SectionHeading labelKey="references" />
+            {data.references.map((r, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.role}>{r.name}</div>
+                {(r.title || r.company) && <div style={{ ...s.meta, fontWeight: '600' }}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
+                {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
           </div>

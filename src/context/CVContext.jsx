@@ -15,6 +15,11 @@ export function useCV() {
 
 const DEFAULT_SECTION_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
 
+const ALL_POSSIBLE_SECTIONS = [
+  'summary', 'experience', 'education', 'skills', 'projects', 'languages',
+  'certificates', 'interests', 'courses', 'awards', 'organisations', 'publications', 'references',
+];
+
 async function fetchFirestoreCVs(uid) {
   try {
     const q = query(collection(db, 'users', uid, 'cvs'), orderBy('lastModified', 'desc'));
@@ -66,6 +71,13 @@ export function CVProvider({ children }) {
     skills: true,
     projects: true,
     languages: true,
+    certificates: true,
+    interests: true,
+    courses: true,
+    awards: true,
+    organisations: true,
+    publications: true,
+    references: true,
   });
 
   const [visiblePersonalFields, setVisiblePersonalFields] = useState({
@@ -108,6 +120,17 @@ export function CVProvider({ children }) {
       next.splice(toIndex, 0, moved);
       return next;
     });
+  };
+
+  const addSection = (key) => {
+    setSectionOrder(prev => {
+      if (prev.includes(key)) return prev;
+      return [...prev, key];
+    });
+    setVisibleSections(prev => ({ ...prev, [key]: true }));
+    if (!cvData[key]) {
+      setCvData(prev => ({ ...prev, [key]: [] }));
+    }
   };
 
   const saveCurrentCV = (name) => {
@@ -165,6 +188,7 @@ export function CVProvider({ children }) {
       pagePadding: 'medium',
       sectionSpacing: 'medium',
     });
+    setSectionOrder(DEFAULT_SECTION_ORDER);
     setCurrentCVId(null);
     setCurrentCVName('My Resume');
   };
@@ -179,6 +203,7 @@ export function CVProvider({ children }) {
     setTheme,
     sectionOrder,
     reorderSections,
+    addSection,
     visibleSections,
     toggleSection,
     visiblePersonalFields,

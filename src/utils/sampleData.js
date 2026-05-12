@@ -65,5 +65,12 @@ export const sampleData = {
   languages: [
     { id: "lang-1", name: "English", level: "Native" },
     { id: "lang-2", name: "Spanish", level: "Intermediate" }
-  ]
+  ],
+  certificates: [],
+  interests: [],
+  courses: [],
+  awards: [],
+  organisations: [],
+  publications: [],
+  references: [],
 };

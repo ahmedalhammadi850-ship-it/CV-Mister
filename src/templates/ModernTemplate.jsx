@@ -1,16 +1,23 @@
 import { resolveTheme, buildContact } from './templateUtils';
 
 const labels = {
-  summary:    { en: 'Professional Summary',  ar: 'الملخص المهني'     },
-  experience: { en: 'Work Experience',       ar: 'الخبرة العملية'    },
-  education:  { en: 'Education',             ar: 'التعليم'           },
-  skills:     { en: 'Skills',                ar: 'المهارات'          },
-  languages:  { en: 'Languages',             ar: 'اللغات'            },
-  projects:   { en: 'Projects',              ar: 'المشاريع'          },
-  present:    { en: 'Present',               ar: 'حتى الآن'          },
-  to:         { en: 'to',                    ar: 'إلى'               },
+  summary:       { en: 'Professional Summary',  ar: 'الملخص المهني'        },
+  experience:    { en: 'Work Experience',       ar: 'الخبرة العملية'       },
+  education:     { en: 'Education',             ar: 'التعليم'              },
+  skills:        { en: 'Skills',                ar: 'المهارات'             },
+  languages:     { en: 'Languages',             ar: 'اللغات'               },
+  projects:      { en: 'Projects',              ar: 'المشاريع'             },
+  certificates:  { en: 'Certificates',          ar: 'الشهادات والاعتمادات'  },
+  interests:     { en: 'Interests & Hobbies',   ar: 'الاهتمامات والهوايات' },
+  courses:       { en: 'Courses & Training',    ar: 'الدورات والتدريب'     },
+  awards:        { en: 'Awards & Honours',      ar: 'الجوائز والتكريمات'   },
+  organisations: { en: 'Organisations',         ar: 'المنظمات والجمعيات'   },
+  publications:  { en: 'Publications',          ar: 'المنشورات والأبحاث'   },
+  references:    { en: 'References',            ar: 'المراجع والتزكيات'    },
+  present:       { en: 'Present',               ar: 'حتى الآن'             },
+  to:            { en: 'to',                    ar: 'إلى'                  },
 };
-const tr = (key, isRTL) => labels[key][isRTL ? 'ar' : 'en'];
+const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
 
@@ -40,6 +47,7 @@ const ModernTemplate = ({
     body:    { fontSize: sz.body,    color: '#222', lineHeight, whiteSpace: 'pre-line' },
     row:     { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: isRTL ? 'row-reverse' : 'row' },
     date:    { fontSize: sz.meta, color: '#666', whiteSpace: 'nowrap', marginLeft: isRTL ? 0 : '12pt', marginRight: isRTL ? '12pt' : 0 },
+    tag:     { display: 'inline-block', background: accent + '18', color: accent, borderRadius: '4pt', padding: '1pt 6pt', fontSize: sz.meta, marginRight: '4pt', marginBottom: '3pt' },
   };
 
   const contact = buildContact(data.personalInfo, visiblePersonalFields, isRTL);
@@ -48,7 +56,7 @@ const ModernTemplate = ({
     if (!show(key)) return null;
     switch (key) {
       case 'summary':
-        return data.personalInfo.summary ? (
+        return data.personalInfo?.summary ? (
           <div key="summary">
             <div style={s.heading}>{tr('summary', isRTL)}</div>
             <div style={s.body}>{data.personalInfo.summary}</div>
@@ -107,7 +115,110 @@ const ModernTemplate = ({
             {data.projects.map((p, i) => (
               <div key={i} style={{ marginBottom: '8pt' }}>
                 <div style={s.role}>{p.title}</div>
+                {p.link && <div style={{ ...s.meta, color: accent }}>{p.link}</div>}
                 <div style={s.body}>{p.description}</div>
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'certificates':
+        return data.certificates?.length > 0 ? (
+          <div key="certificates">
+            <div style={s.heading}>{tr('certificates', isRTL)}</div>
+            {data.certificates.map((c, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{c.name}</div>
+                  {c.date && <div style={s.date}>{c.date}</div>}
+                </div>
+                {c.issuer && <div style={s.meta}>{c.issuer}</div>}
+                {c.description && <div style={s.body}>{c.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'interests':
+        return data.interests?.length > 0 ? (
+          <div key="interests">
+            <div style={s.heading}>{tr('interests', isRTL)}</div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt', marginTop: '4pt' }}>
+              {data.interests.map((item, i) => (
+                <span key={i} style={s.tag}>{item.name || item}</span>
+              ))}
+            </div>
+          </div>
+        ) : null;
+      case 'courses':
+        return data.courses?.length > 0 ? (
+          <div key="courses">
+            <div style={s.heading}>{tr('courses', isRTL)}</div>
+            {data.courses.map((c, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{c.name}</div>
+                  {c.date && <div style={s.date}>{c.date}</div>}
+                </div>
+                {c.institution && <div style={s.meta}>{c.institution}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'awards':
+        return data.awards?.length > 0 ? (
+          <div key="awards">
+            <div style={s.heading}>{tr('awards', isRTL)}</div>
+            {data.awards.map((a, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{a.title}</div>
+                  {a.date && <div style={s.date}>{a.date}</div>}
+                </div>
+                {a.issuer && <div style={s.meta}>{a.issuer}</div>}
+                {a.description && <div style={s.body}>{a.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'organisations':
+        return data.organisations?.length > 0 ? (
+          <div key="organisations">
+            <div style={s.heading}>{tr('organisations', isRTL)}</div>
+            {data.organisations.map((o, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{o.name}</div>
+                  {o.date && <div style={s.date}>{o.date}</div>}
+                </div>
+                {o.role && <div style={s.meta}>{o.role}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'publications':
+        return data.publications?.length > 0 ? (
+          <div key="publications">
+            <div style={s.heading}>{tr('publications', isRTL)}</div>
+            {data.publications.map((p, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.row}>
+                  <div style={s.role}>{p.title}</div>
+                  {p.date && <div style={s.date}>{p.date}</div>}
+                </div>
+                {p.publisher && <div style={s.meta}>{p.publisher}</div>}
+                {p.description && <div style={s.body}>{p.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+      case 'references':
+        return data.references?.length > 0 ? (
+          <div key="references">
+            <div style={s.heading}>{tr('references', isRTL)}</div>
+            {data.references.map((r, i) => (
+              <div key={i} style={{ marginBottom: '6pt' }}>
+                <div style={s.role}>{r.name}</div>
+                {(r.title || r.company) && <div style={s.meta}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
+                {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
           </div>
