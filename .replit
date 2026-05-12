@@ -43,3 +43,8 @@ externalPort = 3001
 deploymentTarget = "static"
 build = ["npm", "run", "build"]
 publicDir = "dist"
+
+[userenv]
+
+[userenv.shared]
+VITE_FIREBASE_API_KEY = "AIzaSyAWOigTY6lsunLk6tTgeoXTm4JmwWUR4No"

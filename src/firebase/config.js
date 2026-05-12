@@ -3,7 +3,7 @@ import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-  apiKey: __FIREBASE_API_KEY__,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: 'cv-mister-e4bbc.firebaseapp.com',
   projectId: 'cv-mister-e4bbc',
   storageBucket: 'cv-mister-e4bbc.firebasestorage.app',
