@@ -3,6 +3,8 @@ import { useAuth } from '../../context/AuthContext';
 import { useState } from 'react';
 import ExperienceCard from './ExperienceCard';
 import EducationCard from './EducationCard';
+import SkillsEditor from './SkillsEditor';
+import LanguagesEditor from './LanguagesEditor';
 
 const ui = {
   personalInfo:  { en: 'Personal Information',  ar: 'المعلومات الشخصية' },
@@ -283,36 +285,25 @@ const EditorPanel = () => {
       <div>
         <AccordionHeader titleKey="skills" section="skills" />
         {openSection === 'skills' && (
-          <div className="p-4 bg-slate-50/50 border-b border-slate-100">
-            <div className="flex flex-wrap gap-2">
-              {cvData.skills.map((skill, index) => (
-                <div key={index} className="bg-white border border-slate-200 px-3 py-1 rounded-full text-sm text-slate-700 flex items-center gap-1">
-                  {skill}
-                  <button className="text-slate-400 hover:text-red-500">&times;</button>
-                </div>
-              ))}
-              <button className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-sm hover:bg-slate-200">+</button>
-            </div>
-          </div>
+          <SkillsEditor
+            skills={cvData.skills}
+            isRTL={isRTL}
+            updateSection={updateSection}
+          />
         )}
       </div>
 
       {/* ── Languages ── */}
-      {cvData.languages?.length > 0 && (
-        <div>
-          <AccordionHeader titleKey="languages" section="languages" />
-          {openSection === 'languages' && (
-            <div className="p-4 space-y-2 bg-slate-50/50 border-b border-slate-100">
-              {cvData.languages.map((lang, i) => (
-                <div key={i} className="border border-slate-200 bg-white rounded-lg p-3">
-                  <div className="font-medium text-slate-800">{lang.name}</div>
-                  <div className="text-sm text-slate-500">{lang.level}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
+      <div>
+        <AccordionHeader titleKey="languages" section="languages" />
+        {openSection === 'languages' && (
+          <LanguagesEditor
+            languages={cvData.languages}
+            isRTL={isRTL}
+            updateSection={updateSection}
+          />
+        )}
+      </div>
 
     </div>
   );
