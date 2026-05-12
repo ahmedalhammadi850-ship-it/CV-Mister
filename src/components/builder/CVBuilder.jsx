@@ -122,7 +122,7 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      const [{ toJpeg }, { jsPDF }] = await Promise.all([
+      const [{ toPng }, { jsPDF }] = await Promise.all([
         import('html-to-image'),
         import('jspdf'),
       ]);
@@ -134,15 +134,26 @@ const CVBuilder = () => {
       printRoot.style.cssText =
         'position:absolute;top:0;left:-9999px;z-index:-1;pointer-events:none;width:794px;';
 
-      const dataUrl = await toJpeg(element, {
-        quality: 0.95,
-        backgroundColor: '#ffffff',
-        width: 794,
-        pixelRatio: 2,
-        skipFonts: true,
-      });
+      // Temporarily remove Google Fonts <link> tags so html-to-image won't
+      // try to fetch them (CORS blocked). The browser already has them cached
+      // and applied, so the rendered pixels are still correct.
+      const gFontLinks = Array.from(
+        document.querySelectorAll('link[href*="fonts.googleapis.com"], link[href*="fonts.gstatic.com"]')
+      );
+      gFontLinks.forEach(l => l.remove());
 
-      printRoot.setAttribute('style', savedStyle);
+      let dataUrl;
+      try {
+        dataUrl = await toPng(element, {
+          backgroundColor: '#ffffff',
+          width: 794,
+          pixelRatio: 3,
+        });
+      } finally {
+        // Always restore the font links
+        gFontLinks.forEach(l => document.head.appendChild(l));
+        printRoot.setAttribute('style', savedStyle);
+      }
 
       const img = new Image();
       await new Promise((resolve) => { img.onload = resolve; img.src = dataUrl; });
@@ -171,7 +182,8 @@ const CVBuilder = () => {
         ctx.fillRect(0, 0, imgW, pageSliceH);
         ctx.drawImage(img, 0, pageTop, imgW, sliceH, 0, 0, imgW, sliceH);
 
-        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+        // PNG is lossless — no compression artifacts on text
+        pdf.addImage(pageCanvas.toDataURL('image/png'), 'PNG', 0, 0, A4_W_MM, A4_H_MM);
 
         pageTop += pageSliceH;
         pageNum++;
@@ -181,6 +193,7 @@ const CVBuilder = () => {
       pdf.save(`${name} - CV.pdf`);
     } catch (err) {
       console.error('PDF export failed:', err);
+      alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');
     } finally {
       setIsPrinting(false);
     }
