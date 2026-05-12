@@ -382,7 +382,6 @@ const Hero = () => {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  filter: 'drop-shadow(0 0 30px rgba(167,139,250,0.4))',
                 }}>واحصل على وظيفة أحلامك</span>
               </>
             ) : (
@@ -393,7 +392,6 @@ const Hero = () => {
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
                   backgroundClip: 'text',
-                  filter: 'drop-shadow(0 0 30px rgba(167,139,250,0.4))',
                 }}>with a stunning CV</span>
               </>
             )}
