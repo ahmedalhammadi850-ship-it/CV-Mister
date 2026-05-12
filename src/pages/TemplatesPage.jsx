@@ -22,6 +22,9 @@ import AtlanticBlueTemplate from '../templates/AtlanticBlueTemplate';
 import MercuryFlowTemplate from '../templates/MercuryFlowTemplate';
 import EditorialRuleTemplate from '../templates/EditorialRuleTemplate';
 import SidebarLightTemplate from '../templates/SidebarLightTemplate';
+import ArabicNavyTemplate from '../templates/ArabicNavyTemplate';
+import ArabicModernTemplate from '../templates/ArabicModernTemplate';
+import ArabicCardTemplate from '../templates/ArabicCardTemplate';
 import TealProTemplate from '../templates/TealProTemplate';
 import RoseElegantTemplate from '../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
@@ -224,6 +227,33 @@ const templates = [
     arabicDesc: 'هيدر بنفسجي داكن كامل العرض، وجسم بعمودين مع شريط جانبي بتقييم نقطي.',
     color: '#4a1f6e',
     component: DarkHeaderTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabicnavy',
+    name: 'Arabic Navy',     arabicName: 'نيفي عربي',
+    desc: 'Dark navy sidebar on the right with white main content — bold RTL Arabic design.',
+    arabicDesc: 'شريط جانبي كحلي داكن على اليمين مع محتوى أبيض — تصميم عربي RTL احترافي.',
+    color: '#1a2744',
+    component: ArabicNavyTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabicmodern',
+    name: 'Arabic Modern',   arabicName: 'عصري عربي',
+    desc: 'Teal branded header with centered photo and name, clean single-column RTL layout.',
+    arabicDesc: 'هيدر بلون الزمرد مع صورة واسم في المنتصف، تخطيط RTL أحادي العمود.',
+    color: '#2a7d6e',
+    component: ArabicModernTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabiccard',
+    name: 'Arabic Card',     arabicName: 'بطاقة عربية',
+    desc: 'Light gray sidebar on right with teal card-style section headers, two-column RTL.',
+    arabicDesc: 'شريط جانبي فاتح على اليمين مع عناوين بطاقات زمردية، تخطيط بعمودين RTL.',
+    color: '#2d6a8a',
+    component: ArabicCardTemplate,
     atsScore: null,
   },
   {

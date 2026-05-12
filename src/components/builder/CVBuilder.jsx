@@ -25,6 +25,9 @@ import AtlanticBlueTemplate from '../../templates/AtlanticBlueTemplate';
 import MercuryFlowTemplate from '../../templates/MercuryFlowTemplate';
 import EditorialRuleTemplate from '../../templates/EditorialRuleTemplate';
 import SidebarLightTemplate from '../../templates/SidebarLightTemplate';
+import ArabicNavyTemplate from '../../templates/ArabicNavyTemplate';
+import ArabicModernTemplate from '../../templates/ArabicModernTemplate';
+import ArabicCardTemplate from '../../templates/ArabicCardTemplate';
 import TealProTemplate from '../../templates/TealProTemplate';
 import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
@@ -116,6 +119,9 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'tealpro':       return <TealProTemplate       {...props} />;
       case 'roseelegant':   return <RoseElegantTemplate   {...props} />;
       case 'darkheader':    return <DarkHeaderTemplate    {...props} />;
+      case 'arabicnavy':    return <ArabicNavyTemplate    {...props} />;
+      case 'arabicmodern':  return <ArabicModernTemplate  {...props} />;
+      case 'arabiccard':    return <ArabicCardTemplate    {...props} />;
       default:              return <ModernTemplate        {...props} />;
     }
   };
