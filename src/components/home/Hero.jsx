@@ -215,37 +215,6 @@ const Hero = () => {
           {/* ── Right / Resume Card ── */}
           <div className="flex-1 w-full max-w-[360px] mx-auto lg:mx-0 animate-slide-up relative" style={{ animationDelay: '0.4s' }}>
 
-            {/* ATS badge */}
-            <div
-              className="absolute -top-5 -left-5 z-20 bg-white rounded-2xl shadow-xl px-3.5 py-2.5 flex items-center gap-2.5 border border-slate-100 animate-float"
-              style={{ animationDelay: '0s' }}
-            >
-              <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
-                <svg className="w-4.5 h-4.5 text-emerald-600" viewBox="0 0 20 20" fill="currentColor" style={{ width: 18, height: 18 }}>
-                  <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-800 leading-none mb-0.5">ATS Approved</div>
-                <div className="text-[10px] text-slate-400 font-medium">98% pass rate</div>
-              </div>
-            </div>
-
-            {/* AI badge */}
-            <div
-              className="absolute -bottom-5 -right-5 z-20 bg-white rounded-2xl shadow-xl px-3.5 py-2.5 flex items-center gap-2.5 border border-slate-100"
-              style={{ animation: 'float 6s ease-in-out 2s infinite' }}
-            >
-              <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #4f46e5, #c026d3)' }}>
-                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div>
-                <div className="text-xs font-bold text-slate-800 leading-none mb-0.5">AI Optimized</div>
-                <div className="text-[10px] text-slate-400 font-medium">Instant results</div>
-              </div>
-            </div>
 
             {/* Glow behind card */}
             <div
