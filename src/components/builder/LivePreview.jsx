@@ -8,6 +8,7 @@ import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122; // A4 at 96 dpi
+const PAGE_W = 794;
 
 const LivePreview = () => {
   const { cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder } = useCV();
@@ -20,7 +21,7 @@ const LivePreview = () => {
   const calcScale = useCallback(() => {
     if (wrapperRef.current) {
       const avail = wrapperRef.current.clientWidth - 32;
-      setScale(Math.min(1, avail / 794));
+      setScale(Math.min(1, avail / PAGE_W));
     }
   }, []);
 
@@ -56,11 +57,10 @@ const LivePreview = () => {
   };
 
   const numPages = Math.max(1, Math.ceil(contentHeight / PAGE_H));
-  const scaledH  = contentHeight * scale;
-  const scaledW  = 794 * scale;
+  const scaledW  = PAGE_W * scale;
 
   return (
-    <div ref={wrapperRef} className="w-full flex flex-col items-center">
+    <div ref={wrapperRef} className="w-full flex flex-col items-center gap-0">
 
       {/* Page count badge */}
       {numPages > 1 && (
@@ -72,31 +72,64 @@ const LivePreview = () => {
         </div>
       )}
 
-      {/* CV + page separators */}
-      <div className="relative shadow-2xl" style={{ width: scaledW, height: scaledH }}>
-
-        {/* Scaled CV content */}
-        <div
-          ref={contentRef}
-          className="resume-scale-wrapper"
-          style={{ transform: `scale(${scale})`, transformOrigin: 'top left', width: 794 }}
-        >
-          {renderTemplate()}
-        </div>
-
-        {/* Page separator lines */}
-        {numPages > 1 && Array.from({ length: numPages - 1 }, (_, i) => (
-          <div
-            key={i}
-            className="cv-page-separator"
-            style={{ top: (i + 1) * PAGE_H * scale - 1 }}
-          >
-            <span className="cv-page-badge">
-              {isRTL ? `صفحة ${i + 2}` : `Page ${i + 2}`}
-            </span>
-          </div>
-        ))}
+      {/* Hidden full-size content used only for measurement */}
+      <div
+        ref={contentRef}
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          top: '-9999px',
+          left: '-9999px',
+          width: PAGE_W,
+          pointerEvents: 'none',
+          zIndex: -1,
+        }}
+      >
+        {renderTemplate()}
       </div>
+
+      {/* Render each page as a clipped window into the full CV */}
+      {Array.from({ length: numPages }, (_, pageIndex) => {
+        const offsetY = pageIndex * PAGE_H;
+        return (
+          <div key={pageIndex} className="flex flex-col items-center w-full">
+
+            {/* Page label (above page 2+) */}
+            {pageIndex > 0 && (
+              <div className="flex items-center gap-3 my-3" style={{ width: scaledW }}>
+                <div className="flex-1 h-px bg-slate-300" />
+                <span className="text-xs text-slate-400 font-medium px-2 py-0.5 bg-slate-100 border border-slate-200 rounded-full">
+                  {isRTL ? `صفحة ${pageIndex + 1}` : `Page ${pageIndex + 1}`}
+                </span>
+                <div className="flex-1 h-px bg-slate-300" />
+              </div>
+            )}
+
+            {/* Page frame */}
+            <div
+              className="shadow-2xl overflow-hidden bg-white relative"
+              style={{
+                width: scaledW,
+                height: PAGE_H * scale,
+              }}
+            >
+              {/* Scaled and offset CV content */}
+              <div
+                style={{
+                  transform: `scale(${scale})`,
+                  transformOrigin: 'top left',
+                  width: PAGE_W,
+                  position: 'absolute',
+                  top: -offsetY * scale,
+                  left: 0,
+                }}
+              >
+                {renderTemplate()}
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 };
