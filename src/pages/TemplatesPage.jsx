@@ -30,6 +30,8 @@ import ArabicModernTemplate from '../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../templates/ArabicCardTemplate';
 import ArabicEliteTemplate from '../templates/ArabicEliteTemplate';
 import ArabicWaveTemplate from '../templates/ArabicWaveTemplate';
+import ArabicLuxeTemplate from '../templates/ArabicLuxeTemplate';
+import EnglishHorizonTemplate from '../templates/EnglishHorizonTemplate';
 import TealProTemplate from '../templates/TealProTemplate';
 import RoseElegantTemplate from '../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
@@ -308,6 +310,28 @@ const templates = [
     component: ArabicWaveTemplate,
     previewData: arabicSampleData,
     previewIsRTL: true,
+    atsScore: null,
+  },
+  {
+    id: 'arabicluxe',
+    name: 'Arabic Luxe',     arabicName: 'الفاخر العربي',
+    desc: 'Premium dark navy sidebar with gold diamond-skill bars, circular language gauges, and gradient gold accents throughout.',
+    arabicDesc: 'شريط جانبي كحلي فاخر مع أشرطة مهارات ماسية ذهبية، مقاييس لغات دائرية، وتدرجات ذهبية راقية.',
+    color: '#b8892a',
+    component: ArabicLuxeTemplate,
+    previewData: arabicSampleData,
+    previewIsRTL: true,
+    atsScore: null,
+  },
+  {
+    id: 'englishhorizon',
+    name: 'English Horizon',  arabicName: 'أفق إنجليزي',
+    desc: 'Bold gradient teal header with split name typography, timeline-style experience, sidebar with progress-bar skills.',
+    arabicDesc: 'هيدر متدرج زمردي جريء مع طباعة اسم مقسومة، تجربة بنمط التايملاين، وشريط جانبي بأشرطة تقدم المهارات.',
+    color: '#0e5f6e',
+    component: EnglishHorizonTemplate,
+    previewData: sampleData,
+    previewIsRTL: false,
     atsScore: null,
   },
   {
