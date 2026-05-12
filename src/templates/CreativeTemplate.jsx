@@ -229,7 +229,24 @@ const CreativeTemplate = ({
             ))}
           </div>
         ) : null;
-      default: return null;
+      default:
+        if (key.startsWith('csec-') && data.customSections) {
+          const sec = data.customSections.find(s => s.id === key);
+          if (!sec || !sec.items?.length) return null;
+          return (
+            <div key={key}>
+              <div style={s.heading}>{sec.title}</div>
+              {sec.items.map((item, i) => (
+                <div key={i} style={s.itemSm}>
+                  {item.title && <div style={s.role}>{item.title}</div>}
+                  {item.subtitle && <div style={s.meta}>{item.subtitle}</div>}
+                  {item.description && <div style={s.body}>{item.description}</div>}
+                </div>
+              ))}
+            </div>
+          );
+        }
+        return null;
     }
   };
 

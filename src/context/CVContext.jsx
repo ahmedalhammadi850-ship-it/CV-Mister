@@ -152,6 +152,38 @@ export function CVProvider({ children }) {
     }
   };
 
+  const addCustomSection = (title) => {
+    const id = `csec-${Date.now()}`;
+    const newSection = { id, title, items: [] };
+    setCvData(prev => ({
+      ...prev,
+      customSections: [...(prev.customSections || []), newSection],
+    }));
+    setSectionOrder(prev => [...prev, id]);
+    setVisibleSections(prev => ({ ...prev, [id]: true }));
+    return id;
+  };
+
+  const updateCustomSection = (id, updated) => {
+    setCvData(prev => ({
+      ...prev,
+      customSections: (prev.customSections || []).map(s => s.id === id ? updated : s),
+    }));
+  };
+
+  const deleteCustomSection = (id) => {
+    setCvData(prev => ({
+      ...prev,
+      customSections: (prev.customSections || []).filter(s => s.id !== id),
+    }));
+    setSectionOrder(prev => prev.filter(k => k !== id));
+    setVisibleSections(prev => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+  };
+
   const saveCurrentCV = (name) => {
     const id = currentCVId || `cv-${Date.now()}`;
     const cvName = name || currentCVName;
@@ -262,6 +294,9 @@ export function CVProvider({ children }) {
     duplicateCV,
     startNewCV,
     previewTemplate,
+    addCustomSection,
+    updateCustomSection,
+    deleteCustomSection,
   };
 
   return (

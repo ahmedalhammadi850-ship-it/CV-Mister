@@ -21,6 +21,7 @@ export const blankData = {
   organisations: [],
   publications: [],
   references: [],
+  customSections: [],
 };
 
 export const sampleData = {
@@ -98,4 +99,5 @@ export const sampleData = {
   organisations: [],
   publications: [],
   references: [],
+  customSections: [],
 };

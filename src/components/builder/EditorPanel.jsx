@@ -6,6 +6,12 @@ import EducationCard from './EducationCard';
 import SkillsEditor from './SkillsEditor';
 import LanguagesEditor from './LanguagesEditor';
 
+const PuzzleIcon = () => (
+  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+    <path d="M13.5 3A1.5 1.5 0 0015 4.5V5h1a2 2 0 012 2v2.5a1.5 1.5 0 000 3V15a2 2 0 01-2 2H4a2 2 0 01-2-2v-2.5a1.5 1.5 0 000-3V7a2 2 0 012-2h1v-.5A1.5 1.5 0 016.5 3h1A1.5 1.5 0 019 4.5V5h2v-.5A1.5 1.5 0 0112.5 3h1z" />
+  </svg>
+);
+
 const t = (en, ar, isRTL) => isRTL ? ar : en;
 
 const COLORS = [
@@ -127,6 +133,13 @@ const ALL_SECTIONS = [
     ar: { title: 'التصميم والأسلوب', desc: 'الألوان والخطوط والتخصيص البصري.' },
     color: '#b45309',
   },
+  {
+    key: 'custom',
+    icon: <PuzzleIcon />,
+    en: { title: 'Custom', desc: 'Add a custom section for anything else, or combine sections cleanly.' },
+    ar: { title: 'مخصص', desc: 'أضف قسمًا مخصصًا لأي شيء آخر أو لدمج أقسام بشكل أنيق.' },
+    color: '#374151',
+  },
 ];
 
 const AddContentModal = ({ isRTL, onClose, onSelect, sectionOrder }) => {
@@ -161,7 +174,7 @@ const AddContentModal = ({ isRTL, onClose, onSelect, sectionOrder }) => {
         <div className="overflow-y-auto flex-1 p-4">
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
             {ALL_SECTIONS.map((section) => {
-              const alreadyAdded = sectionOrder.includes(section.key) || section.key === 'design' || section.key === 'personalInfo' || section.key === 'summary';
+              const alreadyAdded = section.key !== 'custom' && (sectionOrder.includes(section.key) || section.key === 'design' || section.key === 'personalInfo' || section.key === 'summary');
               return (
                 <button
                   key={section.key}
@@ -183,6 +196,55 @@ const AddContentModal = ({ isRTL, onClose, onSelect, sectionOrder }) => {
               );
             })}
           </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CustomSectionNameModal = ({ isRTL, onConfirm, onClose }) => {
+  const [title, setTitle] = useState('');
+  const overlayRef = useRef(null);
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const handleConfirm = () => {
+    const trimmed = title.trim();
+    if (trimmed) onConfirm(trimmed);
+  };
+  return (
+    <div
+      ref={overlayRef}
+      onClick={(e) => { if (e.target === overlayRef.current) onClose(); }}
+      className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(4px)' }}
+    >
+      <div className="bg-white rounded-2xl shadow-2xl p-6 w-full max-w-sm" dir={isRTL ? 'rtl' : 'ltr'}>
+        <h3 className="text-lg font-bold text-slate-800 mb-1">{t('Name Your Section', 'اسم القسم المخصص', isRTL)}</h3>
+        <p className="text-sm text-slate-400 mb-4">{t('Give this custom section a title', 'أدخل عنواناً لهذا القسم المخصص', isRTL)}</p>
+        <input
+          type="text"
+          autoFocus
+          value={title}
+          onChange={e => setTitle(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter') handleConfirm(); }}
+          placeholder={t('e.g. Volunteer Work, Achievements...', 'مثال: العمل التطوعي، الإنجازات...', isRTL)}
+          className="input-field py-2 text-sm w-full mb-4"
+        />
+        <div className="flex gap-2" style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+          <button onClick={onClose} className="flex-1 py-2 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors">
+            {t('Cancel', 'إلغاء', isRTL)}
+          </button>
+          <button
+            onClick={handleConfirm}
+            disabled={!title.trim()}
+            className="flex-1 py-2 rounded-xl text-white text-sm font-medium transition-all disabled:opacity-40"
+            style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)' }}
+          >
+            {t('Add Section', 'إضافة القسم', isRTL)}
+          </button>
         </div>
       </div>
     </div>
@@ -226,10 +288,11 @@ const CardWrapper = ({ children, onDelete }) => (
 );
 
 const EditorPanel = () => {
-  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder } = useCV();
+  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection } = useCV();
   const { isRTL } = useAuth();
   const [openSection, setOpenSection] = useState('personalInfo');
   const [showAddContent, setShowAddContent] = useState(false);
+  const [showCustomNameModal, setShowCustomNameModal] = useState(false);
 
   const handlePersonalInfoChange = (e) => {
     const { name, value } = e.target;
@@ -240,10 +303,20 @@ const EditorPanel = () => {
 
   const handleAddContentSelect = (key) => {
     setShowAddContent(false);
+    if (key === 'custom') {
+      setShowCustomNameModal(true);
+      return;
+    }
     if (key !== 'design' && key !== 'personalInfo' && key !== 'summary') {
       addSection(key);
     }
     setOpenSection(key === 'summary' ? 'personalInfo' : key);
+  };
+
+  const handleCustomSectionCreate = (title) => {
+    setShowCustomNameModal(false);
+    const id = addCustomSection(title);
+    setOpenSection(id);
   };
 
   const lbl = 'block text-xs font-medium text-slate-500 mb-1';
@@ -257,6 +330,13 @@ const EditorPanel = () => {
           onClose={() => setShowAddContent(false)}
           onSelect={handleAddContentSelect}
           sectionOrder={sectionOrder}
+        />
+      )}
+      {showCustomNameModal && (
+        <CustomSectionNameModal
+          isRTL={isRTL}
+          onConfirm={handleCustomSectionCreate}
+          onClose={() => setShowCustomNameModal(false)}
         />
       )}
 
@@ -537,6 +617,57 @@ const EditorPanel = () => {
             )}
           </div>
         )}
+
+        {/* Custom Sections */}
+        {(cvData.customSections || []).filter(sec => sectionOrder.includes(sec.id)).map(sec => (
+          <div key={sec.id}>
+            <div
+              className="flex justify-between items-center p-4 bg-white border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors"
+              onClick={() => toggle(sec.id)}
+              style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
+            >
+              <div className="flex items-center gap-2" style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+                <span className="text-slate-400"><PuzzleIcon /></span>
+                <h3 className="font-medium text-slate-800">{sec.title}</h3>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={(e) => { e.stopPropagation(); deleteCustomSection(sec.id); }}
+                  className="text-red-400 hover:text-red-600 transition-colors p-1 rounded"
+                  title={t('Delete section', 'حذف القسم', isRTL)}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                </button>
+                <svg className={`w-5 h-5 text-slate-400 transform transition-transform ${openSection === sec.id ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+            </div>
+            {openSection === sec.id && (
+              <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
+                <div>
+                  <label className={lbl}>{t('Section Title', 'عنوان القسم', isRTL)}</label>
+                  <input
+                    className={inp}
+                    value={sec.title}
+                    onChange={e => updateCustomSection(sec.id, { ...sec, title: e.target.value })}
+                  />
+                </div>
+                {sec.items.map(item => (
+                  <CardWrapper key={item.id} onDelete={() => updateCustomSection(sec.id, { ...sec, items: sec.items.filter(i => i.id !== item.id) })}>
+                    <div><label className={lbl}>{t('Title', 'العنوان', isRTL)}</label><input className={inp} value={item.title || ''} onChange={e => updateCustomSection(sec.id, { ...sec, items: sec.items.map(i => i.id === item.id ? { ...i, title: e.target.value } : i) })} /></div>
+                    <div><label className={lbl}>{t('Subtitle / Date', 'العنوان الفرعي / التاريخ', isRTL)}</label><input className={inp} value={item.subtitle || ''} onChange={e => updateCustomSection(sec.id, { ...sec, items: sec.items.map(i => i.id === item.id ? { ...i, subtitle: e.target.value } : i) })} /></div>
+                    <div><label className={lbl}>{t('Description', 'الوصف', isRTL)}</label><textarea className={`${inp} resize-none`} rows={3} value={item.description || ''} onChange={e => updateCustomSection(sec.id, { ...sec, items: sec.items.map(i => i.id === item.id ? { ...i, description: e.target.value } : i) })} /></div>
+                  </CardWrapper>
+                ))}
+                <AddBtn
+                  onClick={() => updateCustomSection(sec.id, { ...sec, items: [...sec.items, { id: `ci-${Date.now()}`, title: '', subtitle: '', description: '' }] })}
+                  label={t('+ Add Item', '+ إضافة عنصر', isRTL)}
+                />
+              </div>
+            )}
+          </div>
+        ))}
 
         {/* Add Content Button */}
         <div className="p-4 mt-2">
