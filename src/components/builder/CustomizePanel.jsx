@@ -58,9 +58,13 @@ const ui = {
   fontFamily:       { en: 'Font Family',      ar: 'نوع الخط'          },
   accentColor:      { en: 'Accent Color',     ar: 'اللون الرئيسي'     },
   fontSize:         { en: 'Font Size',        ar: 'حجم الخط'          },
-  lineHeight:       { en: 'Line Height',      ar: 'ارتفاع السطر'      },
-  pagePadding:      { en: 'Page Margins',     ar: 'هوامش الصفحة'      },
-  sectionSpacing:   { en: 'Section Spacing',  ar: 'مسافة بين الأقسام' },
+  lineHeight:       { en: 'Line Height',       ar: 'ارتفاع السطر'       },
+  pagePadding:      { en: 'Page Margins',      ar: 'هوامش الصفحة'       },
+  sectionSpacing:   { en: 'Section Spacing',   ar: 'مسافة بين الأقسام'  },
+  headingAlign:     { en: 'Heading Alignment', ar: 'محاذاة العناوين'     },
+  alignLeft:        { en: 'Left',              ar: 'يسار'               },
+  alignCenter:      { en: 'Center',            ar: 'وسط'                },
+  alignRight:       { en: 'Right',             ar: 'يمين'               },
   small:            { en: 'Small',            ar: 'صغير'              },
   medium:           { en: 'Medium',           ar: 'متوسط'             },
   large:            { en: 'Large',            ar: 'كبير'              },
@@ -349,6 +353,43 @@ const CustomizePanel = () => {
               { value: 'relaxed', labelKey: 'relaxed' },
             ]}
           />
+        </div>
+
+        <div>
+          <label className={labelClass}>{t('headingAlign', isRTL)}</label>
+          <div className="flex gap-1.5" style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+            {[
+              { value: 'left', icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h10M4 14h16M4 18h10" />
+                </svg>
+              ), label: t('alignLeft', isRTL) },
+              { value: 'center', icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M7 10h10M4 14h16M7 18h10" />
+                </svg>
+              ), label: t('alignCenter', isRTL) },
+              { value: 'right', icon: (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M10 10h10M4 14h16M10 18h10" />
+                </svg>
+              ), label: t('alignRight', isRTL) },
+            ].map(opt => (
+              <button
+                key={opt.value}
+                onClick={() => setTheme({ ...theme, headingAlign: opt.value })}
+                title={opt.label}
+                className={`flex-1 flex flex-col items-center gap-1 py-2.5 px-1 rounded-lg border text-xs font-medium transition-all ${
+                  theme.headingAlign === opt.value
+                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                    : 'bg-white text-slate-600 border-slate-200 hover:border-indigo-300'
+                }`}
+              >
+                {opt.icon}
+                <span>{opt.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </AccordionSection>
 

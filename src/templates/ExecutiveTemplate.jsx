@@ -27,6 +27,7 @@ const ExecutiveTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#0f2942';
   const gold = '#c9a84c';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
 
@@ -52,8 +53,9 @@ const ExecutiveTemplate = ({
     itemSm:  { marginBottom: '6pt',  ...BREAK_ITEM },
   };
 
+  const justifyHeading = headingAlign === 'center' ? 'center' : ((headingAlign === 'right') !== isRTL) ? 'flex-end' : 'flex-start';
   const SectionHeading = ({ labelKey }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8pt', marginTop: sectionMt, marginBottom: '8pt', flexDirection: isRTL ? 'row-reverse' : 'row', ...BREAK_HEADING }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8pt', marginTop: sectionMt, marginBottom: '8pt', flexDirection: headingAlign === 'right' ? (isRTL ? 'row' : 'row-reverse') : (isRTL ? 'row-reverse' : 'row'), justifyContent: justifyHeading, ...BREAK_HEADING }}>
       <div style={{ fontSize: sz.heading, fontWeight: '700', color: accent, whiteSpace: 'nowrap', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
         {tr(labelKey, isRTL)}
       </div>

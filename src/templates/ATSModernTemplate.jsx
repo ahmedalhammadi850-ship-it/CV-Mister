@@ -35,6 +35,7 @@ const ATSModernTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#0d4f6e';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -87,6 +88,7 @@ const ATSModernTemplate = ({
       marginBottom: '2pt',
       paddingBottom: '3pt',
       borderBottom: `2px solid ${accent}`,
+      textAlign: headingAlign,
       ...BREAK_HEADING,
     },
     spacer: { marginBottom: '7pt' },

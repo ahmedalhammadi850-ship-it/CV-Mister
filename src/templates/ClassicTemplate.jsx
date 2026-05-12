@@ -26,6 +26,7 @@ const ClassicTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#1e3a5f';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
 
@@ -41,7 +42,7 @@ const ClassicTemplate = ({
     name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '3pt' },
     jobTitle:{ fontSize: sz.body,    color: '#555', marginBottom: '5pt' },
     contact: { fontSize: sz.meta,    color: '#444' },
-    heading: { fontSize: sz.heading, fontWeight: '700', color: accent, marginTop: sectionMt, marginBottom: '5pt', textTransform: 'uppercase', letterSpacing: '0.04em', ...BREAK_HEADING },
+    heading: { fontSize: sz.heading, fontWeight: '700', color: accent, marginTop: sectionMt, marginBottom: '5pt', textTransform: 'uppercase', letterSpacing: '0.04em', textAlign: headingAlign, ...BREAK_HEADING },
     divider: { borderBottom: `1px solid ${accent}`, marginBottom: '7pt' },
     meta:    { fontSize: sz.meta,    color: '#555', fontStyle: 'italic', marginBottom: '4pt' },
     body:    { fontSize: sz.body,    color: '#222', lineHeight, whiteSpace: 'pre-line' },

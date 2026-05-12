@@ -36,6 +36,7 @@ const ATSHarvardTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#1a3a5c';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -92,6 +93,7 @@ const ATSHarvardTemplate = ({
       textTransform: 'uppercase',
       letterSpacing: '0.06em',
       marginBottom: '6pt',
+      textAlign: headingAlign,
     },
     roleRow: {
       display: 'flex',

@@ -35,6 +35,7 @@ const ATSCleanTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#1a56a0';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -74,6 +75,7 @@ const ATSCleanTemplate = ({
       borderBottom: `2px solid ${accent}`,
     },
     heading: {
+      textAlign: headingAlign,
       fontSize: sz.heading,
       fontWeight: '800',
       color: '#0d0d0d',

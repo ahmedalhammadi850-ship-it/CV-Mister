@@ -35,6 +35,8 @@ const ATSSimpleTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#2d6a9f';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const justifyHeading = headingAlign === 'center' ? 'center' : ((headingAlign === 'right') !== isRTL) ? 'flex-end' : 'flex-start';
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -83,6 +85,8 @@ const ATSSimpleTemplate = ({
       gap: '8pt',
       marginTop: sectionMt,
       marginBottom: '1pt',
+      flexDirection: headingAlign === 'right' ? (isRTL ? 'row' : 'row-reverse') : (isRTL ? 'row-reverse' : 'row'),
+      justifyContent: justifyHeading,
       ...BREAK_HEADING,
     },
     headingText: {

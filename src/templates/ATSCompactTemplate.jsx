@@ -34,6 +34,7 @@ const ATSCompactTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#1b4f72';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -108,6 +109,7 @@ const ATSCompactTemplate = ({
       textTransform: 'uppercase',
       letterSpacing: '0.08em',
       marginBottom: '2pt',
+      textAlign: headingAlign,
     },
     headingRule: {
       borderBottom: `1.5px solid ${accent}`,

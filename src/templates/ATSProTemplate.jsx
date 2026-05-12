@@ -36,6 +36,8 @@ const ATSProTemplate = ({
 }) => {
   const accent = theme?.primaryColor || '#0f4c75';
   const accentLight = accent + '18';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
+  const justifyHeading = headingAlign === 'center' ? 'center' : ((headingAlign === 'right') !== isRTL) ? 'flex-end' : 'flex-start';
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -85,6 +87,7 @@ const ATSProTemplate = ({
       gap: '8pt',
       marginTop: sectionMt,
       marginBottom: '6pt',
+      justifyContent: justifyHeading,
       ...BREAK_HEADING,
     },
     headingBar: {

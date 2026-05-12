@@ -34,6 +34,7 @@ const ATSBoldTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#155e75';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
@@ -85,6 +86,7 @@ const ATSBoldTemplate = ({
       padding: '3pt 8pt',
       marginTop: sectionMt,
       marginBottom: '8pt',
+      textAlign: headingAlign,
       ...BREAK_HEADING,
     },
     roleRow: {

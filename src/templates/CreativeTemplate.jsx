@@ -26,6 +26,7 @@ const CreativeTemplate = ({
   sectionOrder = DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || '#7c3aed';
+  const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const borderSide = isRTL ? 'borderRight' : 'borderLeft';
@@ -46,6 +47,7 @@ const CreativeTemplate = ({
       fontSize: sz.heading, fontWeight: '700', color: '#1a1a1a', marginTop: sectionMt, marginBottom: '4pt',
       paddingLeft: isRTL ? 0 : '8pt', paddingRight: isRTL ? '8pt' : 0,
       [borderSide]: `3pt solid ${accent}`,
+      textAlign: headingAlign,
       ...BREAK_HEADING,
     },
     meta:    { fontSize: sz.meta,    color: '#555', marginBottom: '4pt' },

@@ -74,6 +74,7 @@ export function CVProvider({ children }) {
     lineHeight: 'normal',
     pagePadding: 'medium',
     sectionSpacing: 'medium',
+    headingAlign: 'left',
   });
 
   const [sectionOrder, setSectionOrder] = useState(DEFAULT_SECTION_ORDER);
@@ -246,6 +247,7 @@ export function CVProvider({ children }) {
       lineHeight: 'normal',
       pagePadding: 'medium',
       sectionSpacing: 'medium',
+      headingAlign: 'left',
     });
     setSectionOrder(DEFAULT_SECTION_ORDER);
     setCurrentCVId(null);
@@ -262,6 +264,7 @@ export function CVProvider({ children }) {
       lineHeight: 'normal',
       pagePadding: 'medium',
       sectionSpacing: 'medium',
+      headingAlign: 'left',
     });
     setSectionOrder(DEFAULT_SECTION_ORDER);
     setCurrentCVId(null);
