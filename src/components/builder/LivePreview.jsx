@@ -5,6 +5,8 @@ import ClassicTemplate from '../../templates/ClassicTemplate';
 import CreativeTemplate from '../../templates/CreativeTemplate';
 import MinimalTemplate from '../../templates/MinimalTemplate';
 import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
+import ATSCleanTemplate from '../../templates/ATSCleanTemplate';
+import ATSProTemplate from '../../templates/ATSProTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
@@ -207,6 +209,8 @@ const LivePreview = ({ breakDataRef }) => {
       case 'creative':  return <CreativeTemplate  {...props} />;
       case 'minimal':   return <MinimalTemplate   {...props} />;
       case 'executive': return <ExecutiveTemplate {...props} />;
+      case 'atsclean':  return <ATSCleanTemplate  {...props} />;
+      case 'atspro':    return <ATSProTemplate    {...props} />;
       default:          return <ModernTemplate    {...props} />;
     }
   };

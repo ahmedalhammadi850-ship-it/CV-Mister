@@ -33,11 +33,13 @@ const FONTS_AR = [
 ];
 
 const TEMPLATES = [
-  { value: 'modern',    en: 'Modern',    ar: 'عصري'    },
-  { value: 'classic',   en: 'Classic',   ar: 'كلاسيكي' },
-  { value: 'creative',  en: 'Creative',  ar: 'إبداعي'  },
-  { value: 'minimal',   en: 'Minimal',   ar: 'بسيط'    },
-  { value: 'executive', en: 'Executive', ar: 'تنفيذي'  },
+  { value: 'modern',    en: 'Modern',    ar: 'عصري'        },
+  { value: 'classic',   en: 'Classic',   ar: 'كلاسيكي'     },
+  { value: 'creative',  en: 'Creative',  ar: 'إبداعي'      },
+  { value: 'minimal',   en: 'Minimal',   ar: 'بسيط'        },
+  { value: 'executive', en: 'Executive', ar: 'تنفيذي'      },
+  { value: 'atsclean',  en: 'ATS Clean', ar: 'ATS نظيف'   },
+  { value: 'atspro',    en: 'ATS Pro',   ar: 'ATS احترافي' },
 ];
 
 const ui = {

@@ -10,6 +10,8 @@ import ClassicTemplate from '../../templates/ClassicTemplate';
 import CreativeTemplate from '../../templates/CreativeTemplate';
 import MinimalTemplate from '../../templates/MinimalTemplate';
 import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
+import ATSCleanTemplate from '../../templates/ATSCleanTemplate';
+import ATSProTemplate from '../../templates/ATSProTemplate';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -80,6 +82,8 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'creative':  return <CreativeTemplate  {...props} />;
       case 'minimal':   return <MinimalTemplate   {...props} />;
       case 'executive': return <ExecutiveTemplate {...props} />;
+      case 'atsclean':  return <ATSCleanTemplate  {...props} />;
+      case 'atspro':    return <ATSProTemplate    {...props} />;
       default:          return <ModernTemplate    {...props} />;
     }
   };

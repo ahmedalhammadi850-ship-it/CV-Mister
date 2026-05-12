@@ -6,6 +6,8 @@ import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeTemplate from '../templates/CreativeTemplate';
 import MinimalTemplate from '../templates/MinimalTemplate';
 import ExecutiveTemplate from '../templates/ExecutiveTemplate';
+import ATSCleanTemplate from '../templates/ATSCleanTemplate';
+import ATSProTemplate from '../templates/ATSProTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -16,6 +18,7 @@ const templates = [
     arabicDesc: 'تصميم بسيط مع تمييز لوني قوي على الاسم وعناوين الأقسام.',
     color: '#4f46e5',
     component: ModernTemplate,
+    atsScore: null,
   },
   {
     id: 'classic',
@@ -24,6 +27,7 @@ const templates = [
     arabicDesc: 'رأسية مركزية، فواصل أنيقة، تصميم تقليدي بعمود واحد.',
     color: '#1e3a5f',
     component: ClassicTemplate,
+    atsScore: null,
   },
   {
     id: 'creative',
@@ -32,6 +36,7 @@ const templates = [
     arabicDesc: 'شريط لوني جانبي مع أسماء شركات ملوّنة وإحساس عصري.',
     color: '#7c3aed',
     component: CreativeTemplate,
+    atsScore: null,
   },
   {
     id: 'minimal',
@@ -40,6 +45,7 @@ const templates = [
     arabicDesc: 'مساحة بيضاء واسعة، فواصل رمادية خفيفة، طباعة نظيفة.',
     color: '#374151',
     component: MinimalTemplate,
+    atsScore: null,
   },
   {
     id: 'executive',
@@ -48,6 +54,25 @@ const templates = [
     arabicDesc: 'اسم بأحرف كبيرة، خط مزدوج فاصل، خطوط ذهبية للأقسام.',
     color: '#0f2942',
     component: ExecutiveTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'atsclean',
+    name: 'ATS Clean',      arabicName: 'ATS نظيف',
+    desc: 'Ultra-clean single-column layout engineered for maximum ATS parse rate.',
+    arabicDesc: 'تصميم نظيف أحادي العمود مُهندس لأعلى معدل قراءة من أنظمة ATS.',
+    color: '#1a56a0',
+    component: ATSCleanTemplate,
+    atsScore: 99,
+  },
+  {
+    id: 'atspro',
+    name: 'ATS Pro',         arabicName: 'ATS احترافي',
+    desc: 'Professional look with accent header block and skill pills — fully ATS-safe.',
+    arabicDesc: 'مظهر احترافي بكتلة رأسية مميزة وبطاقات مهارات — متوافق بالكامل مع ATS.',
+    color: '#0f4c75',
+    component: ATSProTemplate,
+    atsScore: 98,
   },
 ];
 
@@ -80,6 +105,14 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse }) => {
         >
           <Component data={sampleData} theme={previewTheme} isRTL={isRTL} />
         </div>
+
+        {/* ATS badge */}
+        {template.atsScore && (
+          <div className="absolute top-3 left-3 flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold z-10"
+            style={{ background: '#16a34a', color: '#fff', boxShadow: '0 1px 6px rgba(22,163,74,0.4)' }}>
+            ✓ ATS {template.atsScore}%
+          </div>
+        )}
 
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
