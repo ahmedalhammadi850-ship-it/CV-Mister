@@ -14,6 +14,8 @@ import ATSCleanTemplate from '../../templates/ATSCleanTemplate';
 import ATSProTemplate from '../../templates/ATSProTemplate';
 import ATSSimpleTemplate from '../../templates/ATSSimpleTemplate';
 import ATSBoldTemplate from '../../templates/ATSBoldTemplate';
+import ATSCompactTemplate from '../../templates/ATSCompactTemplate';
+import ATSModernTemplate from '../../templates/ATSModernTemplate';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,9 +88,11 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'executive': return <ExecutiveTemplate {...props} />;
       case 'atsclean':  return <ATSCleanTemplate  {...props} />;
       case 'atspro':    return <ATSProTemplate    {...props} />;
-      case 'atssimple': return <ATSSimpleTemplate {...props} />;
-      case 'atsbold':   return <ATSBoldTemplate   {...props} />;
-      default:          return <ModernTemplate    {...props} />;
+      case 'atssimple':  return <ATSSimpleTemplate  {...props} />;
+      case 'atsbold':    return <ATSBoldTemplate    {...props} />;
+      case 'atscompact': return <ATSCompactTemplate {...props} />;
+      case 'atsmodern':  return <ATSModernTemplate  {...props} />;
+      default:           return <ModernTemplate     {...props} />;
     }
   };
   return (

@@ -10,6 +10,8 @@ import ATSCleanTemplate from '../templates/ATSCleanTemplate';
 import ATSProTemplate from '../templates/ATSProTemplate';
 import ATSSimpleTemplate from '../templates/ATSSimpleTemplate';
 import ATSBoldTemplate from '../templates/ATSBoldTemplate';
+import ATSCompactTemplate from '../templates/ATSCompactTemplate';
+import ATSModernTemplate from '../templates/ATSModernTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -93,6 +95,24 @@ const templates = [
     color: '#155e75',
     component: ATSBoldTemplate,
     atsScore: 97,
+  },
+  {
+    id: 'atscompact',
+    name: 'ATS Compact',     arabicName: 'ATS مضغوط',
+    desc: 'Dense layout with tighter spacing — ideal for experienced candidates with lots of content.',
+    arabicDesc: 'تخطيط مضغوط بمسافات أصغر — مثالي للمرشحين ذوي الخبرة الواسعة.',
+    color: '#1b4f72',
+    component: ATSCompactTemplate,
+    atsScore: 99,
+  },
+  {
+    id: 'atsmodern',
+    name: 'ATS Modern',      arabicName: 'ATS عصري',
+    desc: 'Solid accent header stripe, colored section underlines, 3-column skills grid.',
+    arabicDesc: 'شريط رأسي ملون، تسطير ملون للأقسام، شبكة مهارات ثلاثية الأعمدة.',
+    color: '#0d4f6e',
+    component: ATSModernTemplate,
+    atsScore: 98,
   },
 ];
 
