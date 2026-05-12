@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { sampleData } from '../utils/sampleData';
+import { sampleData, blankData } from '../utils/sampleData';
 import { saveCV, getCVById, getSavedCVs, deleteCV as deleteCVLocal, duplicateCV as duplicateCVLocal } from '../utils/cvStorage';
 import { useAuth } from './AuthContext';
 
@@ -209,7 +209,7 @@ export function CVProvider({ children }) {
   };
 
   const startNewCV = () => {
-    setCvData(sampleData);
+    setCvData(blankData);
     setSelectedTemplate('modern');
     setTheme({
       primaryColor: '#4f46e5',

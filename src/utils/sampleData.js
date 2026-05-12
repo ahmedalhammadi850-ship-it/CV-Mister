@@ -1,3 +1,28 @@
+export const blankData = {
+  personalInfo: {
+    fullName: '',
+    jobTitle: '',
+    email: '',
+    phone: '',
+    location: '',
+    linkedin: '',
+    portfolio: '',
+    summary: '',
+  },
+  experience: [],
+  education: [],
+  skills: [],
+  projects: [],
+  languages: [],
+  certificates: [],
+  interests: [],
+  courses: [],
+  awards: [],
+  organisations: [],
+  publications: [],
+  references: [],
+};
+
 export const sampleData = {
   personalInfo: {
     fullName: "John Doe",
