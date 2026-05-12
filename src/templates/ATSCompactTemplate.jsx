@@ -161,7 +161,7 @@ const ATSCompactTemplate = ({
       color: '#333',
       borderRadius: '2pt',
       padding: '0pt 4pt',
-      fontSize: sz.meta,
+      fontSize: ATS.meta,
       marginRight: '3pt',
       marginBottom: '2pt',
     },
