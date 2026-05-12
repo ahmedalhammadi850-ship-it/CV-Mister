@@ -19,6 +19,10 @@ import ClassicSerifTemplate from '../../templates/ClassicSerifTemplate';
 import AtlanticBlueTemplate from '../../templates/AtlanticBlueTemplate';
 import MercuryFlowTemplate from '../../templates/MercuryFlowTemplate';
 import EditorialRuleTemplate from '../../templates/EditorialRuleTemplate';
+import SidebarLightTemplate from '../../templates/SidebarLightTemplate';
+import TealProTemplate from '../../templates/TealProTemplate';
+import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
+import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
@@ -235,6 +239,10 @@ const LivePreview = ({ breakDataRef }) => {
       case 'atlanticblue':  return <AtlanticBlueTemplate  {...props} />;
       case 'mercuryflow':   return <MercuryFlowTemplate   {...props} />;
       case 'editorialrule': return <EditorialRuleTemplate {...props} />;
+      case 'sidebarlight':  return <SidebarLightTemplate  {...props} />;
+      case 'tealpro':       return <TealProTemplate       {...props} />;
+      case 'roseelegant':   return <RoseElegantTemplate   {...props} />;
+      case 'darkheader':    return <DarkHeaderTemplate    {...props} />;
       default:              return <ModernTemplate         {...props} />;
     }
   };

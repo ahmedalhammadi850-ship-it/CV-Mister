@@ -52,6 +52,10 @@ const TEMPLATES = [
   { value: 'atlanticblue',  en: 'Atlantic Blue',   ar: 'أتلانتيك بلو'     },
   { value: 'mercuryflow',   en: 'Mercury Flow',    ar: 'ميركوري فلو'      },
   { value: 'editorialrule', en: 'Editorial Rule',  ar: 'إديتوريال رول'    },
+  { value: 'sidebarlight', en: 'Sidebar Light',   ar: 'شريط جانبي فاتح'  },
+  { value: 'tealpro',      en: 'Teal Pro',        ar: 'تيل برو'          },
+  { value: 'roseelegant',  en: 'Rose Elegant',    ar: 'روز إيليغانت'     },
+  { value: 'darkheader',   en: 'Dark Header',     ar: 'هيدر داكن'        },
 ];
 
 const ui = {

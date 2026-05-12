@@ -17,6 +17,17 @@ import ATSBoldTemplate from '../../templates/ATSBoldTemplate';
 import ATSCompactTemplate from '../../templates/ATSCompactTemplate';
 import ATSModernTemplate from '../../templates/ATSModernTemplate';
 import ATSHarvardTemplate from '../../templates/ATSHarvardTemplate';
+import ATSCenterTemplate from '../../templates/ATSCenterTemplate';
+import ATSElegantTemplate from '../../templates/ATSElegantTemplate';
+import PrestigeTemplate from '../../templates/PrestigeTemplate';
+import ClassicSerifTemplate from '../../templates/ClassicSerifTemplate';
+import AtlanticBlueTemplate from '../../templates/AtlanticBlueTemplate';
+import MercuryFlowTemplate from '../../templates/MercuryFlowTemplate';
+import EditorialRuleTemplate from '../../templates/EditorialRuleTemplate';
+import SidebarLightTemplate from '../../templates/SidebarLightTemplate';
+import TealProTemplate from '../../templates/TealProTemplate';
+import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
+import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -93,8 +104,19 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'atsbold':    return <ATSBoldTemplate    {...props} />;
       case 'atscompact':  return <ATSCompactTemplate  {...props} />;
       case 'atsmodern':   return <ATSModernTemplate   {...props} />;
-      case 'atsharvard':  return <ATSHarvardTemplate  {...props} />;
-      default:            return <ModernTemplate      {...props} />;
+      case 'atsharvard':    return <ATSHarvardTemplate   {...props} />;
+      case 'atscenter':     return <ATSCenterTemplate    {...props} />;
+      case 'atselegant':    return <ATSElegantTemplate   {...props} />;
+      case 'prestige':      return <PrestigeTemplate      {...props} />;
+      case 'classicserif':  return <ClassicSerifTemplate  {...props} />;
+      case 'atlanticblue':  return <AtlanticBlueTemplate  {...props} />;
+      case 'mercuryflow':   return <MercuryFlowTemplate   {...props} />;
+      case 'editorialrule': return <EditorialRuleTemplate {...props} />;
+      case 'sidebarlight':  return <SidebarLightTemplate  {...props} />;
+      case 'tealpro':       return <TealProTemplate       {...props} />;
+      case 'roseelegant':   return <RoseElegantTemplate   {...props} />;
+      case 'darkheader':    return <DarkHeaderTemplate    {...props} />;
+      default:              return <ModernTemplate        {...props} />;
     }
   };
   return (

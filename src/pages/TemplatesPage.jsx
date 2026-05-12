@@ -21,6 +21,10 @@ import ClassicSerifTemplate from '../templates/ClassicSerifTemplate';
 import AtlanticBlueTemplate from '../templates/AtlanticBlueTemplate';
 import MercuryFlowTemplate from '../templates/MercuryFlowTemplate';
 import EditorialRuleTemplate from '../templates/EditorialRuleTemplate';
+import SidebarLightTemplate from '../templates/SidebarLightTemplate';
+import TealProTemplate from '../templates/TealProTemplate';
+import RoseElegantTemplate from '../templates/RoseElegantTemplate';
+import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
 import { sampleData } from '../utils/sampleData';
 
 const templates = [
@@ -184,6 +188,42 @@ const templates = [
     arabicDesc: 'اسم بارز بحجم كبير، فواصل أقسام بخطوط، وشبكة سفلية بعمودين مع تقييمات بالنقاط.',
     color: '#2c3e50',
     component: EditorialRuleTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'sidebarlight',
+    name: 'Sidebar Light',   arabicName: 'شريط جانبي فاتح',
+    desc: 'Light grey sidebar with photo, dot-rated skills and education, clean white main column.',
+    arabicDesc: 'شريط جانبي فاتح مع صورة، مهارات بتقييم نقطي، وعمود رئيسي أبيض نظيف.',
+    color: '#3d6b8e',
+    component: SidebarLightTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'tealpro',
+    name: 'Teal Pro',        arabicName: 'تيل برو',
+    desc: 'Italic script name in teal, centered contact strip, skill pills and language dots.',
+    arabicDesc: 'اسم مائل بلون تيل، شريط تواصل مركزي، بطاقات مهارات ونقاط اللغات.',
+    color: '#2a9d8f',
+    component: TealProTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'roseelegant',
+    name: 'Rose Elegant',    arabicName: 'روز إيليغانت',
+    desc: 'Rose-pink accented header with photo, pill-style contact info and elegant section dividers.',
+    arabicDesc: 'هيدر بلون وردي أنيق مع صورة، معلومات تواصل بشكل بيضاوي وفواصل أقسام أنيقة.',
+    color: '#c0395e',
+    component: RoseElegantTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'darkheader',
+    name: 'Dark Header',     arabicName: 'هيدر داكن',
+    desc: 'Bold dark purple full-width header, two-column body with dot-rated sidebar and clean main area.',
+    arabicDesc: 'هيدر بنفسجي داكن كامل العرض، وجسم بعمودين مع شريط جانبي بتقييم نقطي.',
+    color: '#4a1f6e',
+    component: DarkHeaderTemplate,
     atsScore: null,
   },
   {
