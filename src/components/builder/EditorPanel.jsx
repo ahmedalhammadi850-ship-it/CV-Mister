@@ -203,6 +203,28 @@ const AddBtn = ({ onClick, label }) => (
   </button>
 );
 
+const AccordionHeader = ({ en, ar, section, isRTL, openSection, onToggle }) => (
+  <div
+    className="flex justify-between items-center p-4 bg-white border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors"
+    onClick={() => onToggle(section)}
+    style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
+  >
+    <h3 className="font-medium text-slate-800">{t(en, ar, isRTL)}</h3>
+    <svg className={`w-5 h-5 text-slate-400 transform transition-transform ${openSection === section ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+    </svg>
+  </div>
+);
+
+const CardWrapper = ({ children, onDelete }) => (
+  <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 relative">
+    <div className="absolute top-2 right-2">
+      <DeleteBtn onClick={onDelete} />
+    </div>
+    {children}
+  </div>
+);
+
 const EditorPanel = () => {
   const { cvData, updateSection, theme, setTheme, addSection, sectionOrder } = useCV();
   const { isRTL } = useAuth();
@@ -227,28 +249,6 @@ const EditorPanel = () => {
   const lbl = 'block text-xs font-medium text-slate-500 mb-1';
   const inp = 'input-field py-2 text-sm';
 
-  const AccordionHeader = ({ en, ar, section }) => (
-    <div
-      className="flex justify-between items-center p-4 bg-white border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors"
-      onClick={() => toggle(section)}
-      style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
-    >
-      <h3 className="font-medium text-slate-800">{t(en, ar, isRTL)}</h3>
-      <svg className={`w-5 h-5 text-slate-400 transform transition-transform ${openSection === section ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-      </svg>
-    </div>
-  );
-
-  const CardWrapper = ({ children, onDelete }) => (
-    <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 relative">
-      <div className="absolute top-2 right-2">
-        <DeleteBtn onClick={onDelete} />
-      </div>
-      {children}
-    </div>
-  );
-
   return (
     <>
       {showAddContent && (
@@ -264,7 +264,7 @@ const EditorPanel = () => {
 
         {/* Design & Style */}
         <div>
-          <AccordionHeader en="Design & Style" ar="التصميم والأسلوب" section="design" />
+          <AccordionHeader en="Design & Style" ar="التصميم والأسلوب" section="design" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
           {openSection === 'design' && (
             <div className="p-4 space-y-5 bg-slate-50/50 border-b border-slate-100">
               <div>
@@ -300,7 +300,7 @@ const EditorPanel = () => {
 
         {/* Personal Info */}
         <div>
-          <AccordionHeader en="Personal Information" ar="المعلومات الشخصية" section="personalInfo" />
+          <AccordionHeader en="Personal Information" ar="المعلومات الشخصية" section="personalInfo" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
           {openSection === 'personalInfo' && (
             <div className="p-4 space-y-4 bg-slate-50/50 border-b border-slate-100">
               <div className="grid grid-cols-2 gap-4">
@@ -318,7 +318,7 @@ const EditorPanel = () => {
 
         {/* Experience */}
         <div>
-          <AccordionHeader en="Experience" ar="الخبرة العملية" section="experience" />
+          <AccordionHeader en="Experience" ar="الخبرة العملية" section="experience" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
           {openSection === 'experience' && (
             <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
               {cvData.experience.map((exp) => (
@@ -335,7 +335,7 @@ const EditorPanel = () => {
 
         {/* Education */}
         <div>
-          <AccordionHeader en="Education" ar="التعليم" section="education" />
+          <AccordionHeader en="Education" ar="التعليم" section="education" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
           {openSection === 'education' && (
             <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
               {cvData.education.map((edu) => (
@@ -352,20 +352,20 @@ const EditorPanel = () => {
 
         {/* Skills */}
         <div>
-          <AccordionHeader en="Skills" ar="المهارات" section="skills" />
+          <AccordionHeader en="Skills" ar="المهارات" section="skills" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
           {openSection === 'skills' && <SkillsEditor skills={cvData.skills} isRTL={isRTL} updateSection={updateSection} />}
         </div>
 
         {/* Languages */}
         <div>
-          <AccordionHeader en="Languages" ar="اللغات" section="languages" />
+          <AccordionHeader en="Languages" ar="اللغات" section="languages" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
           {openSection === 'languages' && <LanguagesEditor languages={cvData.languages} isRTL={isRTL} updateSection={updateSection} />}
         </div>
 
         {/* Projects */}
         {(sectionOrder.includes('projects') || cvData.projects?.length > 0) && (
           <div>
-            <AccordionHeader en="Projects" ar="المشاريع" section="projects" />
+            <AccordionHeader en="Projects" ar="المشاريع" section="projects" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'projects' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.projects || []).map((proj, i) => (
@@ -385,7 +385,7 @@ const EditorPanel = () => {
         {/* Certificates */}
         {sectionOrder.includes('certificates') && (
           <div>
-            <AccordionHeader en="Certificates" ar="الشهادات والاعتمادات" section="certificates" />
+            <AccordionHeader en="Certificates" ar="الشهادات والاعتمادات" section="certificates" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'certificates' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.certificates || []).map((cert) => (
@@ -408,7 +408,7 @@ const EditorPanel = () => {
         {/* Interests */}
         {sectionOrder.includes('interests') && (
           <div>
-            <AccordionHeader en="Interests & Hobbies" ar="الاهتمامات والهوايات" section="interests" />
+            <AccordionHeader en="Interests & Hobbies" ar="الاهتمامات والهوايات" section="interests" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'interests' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.interests || []).map((item) => (
@@ -427,7 +427,7 @@ const EditorPanel = () => {
         {/* Courses */}
         {sectionOrder.includes('courses') && (
           <div>
-            <AccordionHeader en="Courses & Training" ar="الدورات والتدريب" section="courses" />
+            <AccordionHeader en="Courses & Training" ar="الدورات والتدريب" section="courses" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'courses' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.courses || []).map((course) => (
@@ -449,7 +449,7 @@ const EditorPanel = () => {
         {/* Awards */}
         {sectionOrder.includes('awards') && (
           <div>
-            <AccordionHeader en="Awards & Honours" ar="الجوائز والتكريمات" section="awards" />
+            <AccordionHeader en="Awards & Honours" ar="الجوائز والتكريمات" section="awards" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'awards' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.awards || []).map((award) => (
@@ -472,7 +472,7 @@ const EditorPanel = () => {
         {/* Organisations */}
         {sectionOrder.includes('organisations') && (
           <div>
-            <AccordionHeader en="Organisations" ar="المنظمات والجمعيات" section="organisations" />
+            <AccordionHeader en="Organisations" ar="المنظمات والجمعيات" section="organisations" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'organisations' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.organisations || []).map((org) => (
@@ -494,7 +494,7 @@ const EditorPanel = () => {
         {/* Publications */}
         {sectionOrder.includes('publications') && (
           <div>
-            <AccordionHeader en="Publications" ar="المنشورات والأبحاث" section="publications" />
+            <AccordionHeader en="Publications" ar="المنشورات والأبحاث" section="publications" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'publications' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.publications || []).map((pub) => (
@@ -517,7 +517,7 @@ const EditorPanel = () => {
         {/* References */}
         {sectionOrder.includes('references') && (
           <div>
-            <AccordionHeader en="References" ar="المراجع والتزكيات" section="references" />
+            <AccordionHeader en="References" ar="المراجع والتزكيات" section="references" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
             {openSection === 'references' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.references || []).map((ref) => (
