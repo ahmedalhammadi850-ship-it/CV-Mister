@@ -383,6 +383,61 @@ const EditorPanel = () => {
           <AccordionHeader en="Personal Information" ar="المعلومات الشخصية" section="personalInfo" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
           {openSection === 'personalInfo' && (
             <div className="p-4 space-y-4 bg-slate-50/50 border-b border-slate-100">
+
+              {/* Photo Upload */}
+              <div>
+                <label className={lbl}>{t('Profile Photo', 'الصورة الشخصية', isRTL)}</label>
+                <div className="flex items-center gap-4 mt-2">
+                  {/* Preview circle */}
+                  <div className="w-20 h-20 rounded-full overflow-hidden flex-shrink-0 bg-primary-100 flex items-center justify-center border-2 border-dashed border-primary-300">
+                    {cvData.personalInfo.photo ? (
+                      <img src={cvData.personalInfo.photo} alt="profile" className="w-full h-full object-cover" />
+                    ) : (
+                      <svg className="w-8 h-8 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                      </svg>
+                    )}
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex flex-col gap-2">
+                    <label className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 bg-primary-600 text-white text-xs font-semibold rounded-lg hover:bg-primary-700 transition-colors">
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                      {t('Upload Photo', 'رفع صورة', isRTL)}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+                          const reader = new FileReader();
+                          reader.onload = (ev) => {
+                            updateSection('personalInfo', { ...cvData.personalInfo, photo: ev.target.result });
+                          };
+                          reader.readAsDataURL(file);
+                          e.target.value = '';
+                        }}
+                      />
+                    </label>
+                    {cvData.personalInfo.photo && (
+                      <button
+                        onClick={() => updateSection('personalInfo', { ...cvData.personalInfo, photo: '' })}
+                        className="inline-flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition-colors border border-red-200"
+                      >
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        {t('Remove', 'حذف الصورة', isRTL)}
+                      </button>
+                    )}
+                    <p className="text-xs text-slate-400">{t('JPG, PNG or WebP — max 5 MB', 'JPG أو PNG أو WebP — حجم أقصى 5 ميغابايت', isRTL)}</p>
+                  </div>
+                </div>
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 sm:col-span-1"><label className={lbl}>{t('Full Name','الاسم الكامل',isRTL)}</label><input type="text" name="fullName" value={cvData.personalInfo.fullName} onChange={handlePersonalInfoChange} className={inp} /></div>
                 <div className="col-span-2 sm:col-span-1"><label className={lbl}>{t('Job Title','المسمى الوظيفي',isRTL)}</label><input type="text" name="jobTitle" value={cvData.personalInfo.jobTitle} onChange={handlePersonalInfoChange} className={inp} /></div>

@@ -243,6 +243,12 @@ const AtlanticBlueTemplate = ({
     <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
       {/* Sidebar */}
       <div style={sb.wrapper}>
+        {/* Photo */}
+        {info.photo && (
+          <div style={{ width: '84pt', height: '84pt', borderRadius: '50%', overflow: 'hidden', margin: `0 auto 14pt`, border: '3px solid rgba(255,255,255,0.35)' }}>
+            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
         <div style={sb.name}>{info.fullName || 'Your Name'}</div>
         <div style={sb.jobTitle}>{info.jobTitle || ''}</div>
 
