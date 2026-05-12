@@ -23,6 +23,8 @@ import MercuryFlowTemplate from '../templates/MercuryFlowTemplate';
 import EditorialRuleTemplate from '../templates/EditorialRuleTemplate';
 import SidebarLightTemplate from '../templates/SidebarLightTemplate';
 import ArabicNavyTemplate from '../templates/ArabicNavyTemplate';
+import ArabicTealSidebarTemplate from '../templates/ArabicTealSidebarTemplate';
+import ArabicSlateSidebarTemplate from '../templates/ArabicSlateSidebarTemplate';
 import ArabicModernTemplate from '../templates/ArabicModernTemplate';
 import ArabicCardTemplate from '../templates/ArabicCardTemplate';
 import TealProTemplate from '../templates/TealProTemplate';
@@ -227,6 +229,24 @@ const templates = [
     arabicDesc: 'هيدر بنفسجي داكن كامل العرض، وجسم بعمودين مع شريط جانبي بتقييم نقطي.',
     color: '#4a1f6e',
     component: DarkHeaderTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabictealsidebar',
+    name: 'Arabic Teal Sidebar', arabicName: 'شريط زمردي عربي',
+    desc: 'Dark teal right sidebar with photo, contact, skills & languages. White main area with large bold name and teal-underlined section headings.',
+    arabicDesc: 'شريط جانبي زمردي داكن بالصورة والتواصل والمهارات واللغات. المحتوى الرئيسي أبيض مع اسم كبير وعناوين أقسام مسطّرة.',
+    color: '#2a7f8a',
+    component: ArabicTealSidebarTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabicslatesidebar',
+    name: 'Arabic Slate Sidebar', arabicName: 'شريط كحلي عربي',
+    desc: 'Deep navy gradient right sidebar with card-style section labels. Light name header bar and decorative line-style section headings in main.',
+    arabicDesc: 'شريط جانبي كحلي بتدرج وعناوين داخل بطاقات. هيدر فاتح للاسم وعناوين أقسام بنمط السطر في المحتوى الرئيسي.',
+    color: '#1f3c5c',
+    component: ArabicSlateSidebarTemplate,
     atsScore: null,
   },
   {
