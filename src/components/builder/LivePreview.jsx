@@ -7,19 +7,13 @@ import MinimalTemplate from '../../templates/MinimalTemplate';
 import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
-const PAGE_H   = 1122;  // A4 height at 96 dpi
-const PAGE_W   = 794;   // A4 width  at 96 dpi
-const MARGIN   = 48;    // top/bottom page margin (≈ 36pt)
+const PAGE_H = 1122;   // A4 height at 96 dpi
+const PAGE_W = 794;    // A4 width  at 96 dpi
+const MARGIN = 48;     // top/bottom page margin (≈ 36pt)
+const MIN_PAGE_CONTENT = 200; // minimum content pixels per page
 
-/**
- * Given a rendered container, compute smart page-break positions.
- * Moves each break point upward so it never cuts through a block element.
- */
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
-
-  // Collect all elements that must not be split across pages.
-  // Templates use inline breakInside / pageBreakInside styles.
   const candidates = Array.from(container.querySelectorAll('*')).filter(el => {
     const s = el.style;
     return (
@@ -34,20 +28,15 @@ function computeSmartBreaks(container, totalHeight) {
   let pageStart = 0;
 
   while (pageStart + PAGE_H < totalHeight) {
-    const rawBreak = pageStart + PAGE_H - MARGIN; // leave bottom margin
+    const rawBreak = pageStart + PAGE_H - MARGIN;
     let bestBreak = rawBreak;
 
-    // Find the topmost element that straddles rawBreak
     for (const el of candidates) {
       const rect  = el.getBoundingClientRect();
       const elTop = rect.top    - containerTop;
       const elBot = rect.bottom - containerTop;
-
-      if (elTop < rawBreak && elBot > rawBreak) {
-        // Element is being cut — move break to just before it
-        if (elTop > pageStart + MARGIN) {
-          bestBreak = Math.min(bestBreak, elTop);
-        }
+      if (elTop < rawBreak && elBot > rawBreak && elTop > pageStart + MARGIN) {
+        bestBreak = Math.min(bestBreak, elTop);
       }
     }
 
@@ -55,19 +44,102 @@ function computeSmartBreaks(container, totalHeight) {
     pageStart = bestBreak;
   }
 
-  return breaks; // array of y-positions where each page ends (content coords)
+  return breaks;
 }
 
+/* ── Draggable page-break handle ── */
+const DragHandle = ({ breakIndex, breakY, pageStart, nextPageEnd, scale, isRTL, onDrag, onReset }) => {
+  const dragging = useRef(false);
+  const startY   = useRef(0);
+  const startBreak = useRef(0);
+
+  const begin = (clientY) => {
+    dragging.current  = true;
+    startY.current    = clientY;
+    startBreak.current = breakY;
+  };
+
+  const move = useCallback((clientY) => {
+    if (!dragging.current) return;
+    const deltaContent = (clientY - startY.current) / scale;
+    const min = pageStart + MIN_PAGE_CONTENT;
+    const max = nextPageEnd - MIN_PAGE_CONTENT;
+    const clamped = Math.max(min, Math.min(max, startBreak.current + deltaContent));
+    onDrag(breakIndex, clamped);
+  }, [breakIndex, pageStart, nextPageEnd, scale, onDrag]);
+
+  const end = () => { dragging.current = false; };
+
+  useEffect(() => {
+    const onMove = (e) => move(e.clientY);
+    const onTouchMove = (e) => move(e.touches[0].clientY);
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', end);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
+    window.addEventListener('touchend', end);
+    return () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', end);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', end);
+    };
+  }, [move]);
+
+  return (
+    <div
+      className="group flex items-center gap-2 my-1 select-none"
+      style={{ width: PAGE_W * scale }}
+    >
+      {/* Left line */}
+      <div className="flex-1 h-0.5 bg-indigo-300 group-hover:bg-indigo-500 transition-colors rounded-full" />
+
+      {/* Drag pill */}
+      <div
+        onMouseDown={(e) => { e.preventDefault(); begin(e.clientY); }}
+        onTouchStart={(e) => begin(e.touches[0].clientY)}
+        className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white rounded-full text-xs font-medium shadow-lg cursor-ns-resize hover:bg-indigo-700 active:bg-indigo-800 transition-colors"
+        title={isRTL ? 'اسحب لتغيير نقطة كسر الصفحة' : 'Drag to adjust page break'}
+      >
+        {/* drag icon */}
+        <svg className="w-3 h-3 opacity-80" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M7 16V4m0 0L3 8m4-4l4 4M17 8v12m0 0l4-4m-4 4l-4-4" />
+        </svg>
+        <span>{isRTL ? `صفحة ${breakIndex + 2}` : `Page ${breakIndex + 2}`}</span>
+
+        {/* reset button */}
+        <button
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={(e) => { e.stopPropagation(); onReset(breakIndex); }}
+          className="ml-1 w-4 h-4 rounded-full bg-white/20 hover:bg-white/40 flex items-center justify-center transition-colors"
+          title={isRTL ? 'إعادة ضبط تلقائي' : 'Reset to auto'}
+        >
+          <svg className="w-2.5 h-2.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+        </button>
+      </div>
+
+      {/* Right line */}
+      <div className="flex-1 h-0.5 bg-indigo-300 group-hover:bg-indigo-500 transition-colors rounded-full" />
+    </div>
+  );
+};
+
+/* ── Main component ── */
 const LivePreview = () => {
   const { cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder } = useCV();
   const { isRTL } = useAuth();
-  const wrapperRef  = useRef(null);
-  const contentRef  = useRef(null);
-  const [scale, setScale]           = useState(1);
-  const [pageBreaks, setPageBreaks] = useState([]); // smart break y-positions
-  const [totalHeight, setTotalHeight] = useState(PAGE_H);
+  const wrapperRef = useRef(null);
+  const contentRef = useRef(null);
 
-  /* ── scale to fit preview width ── */
+  const [scale, setScale]               = useState(1);
+  const [autoBreaks, setAutoBreaks]     = useState([]);   // computed smart breaks
+  const [manualBreaks, setManualBreaks] = useState(null); // null = use auto
+  const [totalHeight, setTotalHeight]   = useState(PAGE_H);
+
+  const activeBreaks = manualBreaks ?? autoBreaks;
+
+  /* ── scale ── */
   const calcScale = useCallback(() => {
     if (wrapperRef.current) {
       const avail = wrapperRef.current.clientWidth - 32;
@@ -81,29 +153,46 @@ const LivePreview = () => {
     return () => window.removeEventListener('resize', calcScale);
   }, [calcScale]);
 
-  /* ── measure content & compute smart breaks ── */
+  /* ── measure + smart breaks ── */
   useEffect(() => {
+    setManualBreaks(null); // reset manual overrides when content changes
     const measure = () => {
       const el = contentRef.current;
       if (!el) return;
       const h = el.scrollHeight;
       setTotalHeight(h);
-      if (h <= PAGE_H) {
-        setPageBreaks([]);
-      } else {
-        setPageBreaks(computeSmartBreaks(el, h));
-      }
+      setAutoBreaks(h <= PAGE_H ? [] : computeSmartBreaks(el, h));
     };
-
-    // Small delay so the DOM has fully painted
     const t = setTimeout(measure, 80);
     const ro = new ResizeObserver(() => { clearTimeout(t); setTimeout(measure, 80); });
     if (contentRef.current) ro.observe(contentRef.current);
     return () => { clearTimeout(t); ro.disconnect(); };
   }, [cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder]);
 
-  const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder };
+  /* ── drag handlers ── */
+  const handleDrag = useCallback((breakIndex, newY) => {
+    setManualBreaks(prev => {
+      const base = prev ?? [...autoBreaks];
+      const next = [...base];
+      next[breakIndex] = newY;
+      return next;
+    });
+  }, [autoBreaks]);
 
+  const handleReset = useCallback((breakIndex) => {
+    setManualBreaks(prev => {
+      if (!prev) return null;
+      const next = [...prev];
+      next[breakIndex] = autoBreaks[breakIndex];
+      const allAuto = next.every((v, i) => v === autoBreaks[i]);
+      return allAuto ? null : next;
+    });
+  }, [autoBreaks]);
+
+  const handleResetAll = () => setManualBreaks(null);
+
+  /* ── template renderer ── */
+  const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder };
   const renderTemplate = () => {
     switch (selectedTemplate) {
       case 'modern':    return <ModernTemplate    {...props} />;
@@ -115,11 +204,11 @@ const LivePreview = () => {
     }
   };
 
-  // Build page start/end pairs from smart break points
+  /* ── page ranges ── */
   const pageRanges = (() => {
     const ranges = [];
     let start = 0;
-    for (const brk of pageBreaks) {
+    for (const brk of activeBreaks) {
       ranges.push({ start, end: brk });
       start = brk;
     }
@@ -127,77 +216,86 @@ const LivePreview = () => {
     return ranges;
   })();
 
-  const numPages = pageRanges.length;
-  const scaledW  = PAGE_W * scale;
+  const numPages  = pageRanges.length;
+  const scaledW   = PAGE_W * scale;
+  const hasManual = manualBreaks !== null;
 
   return (
     <div ref={wrapperRef} className="w-full flex flex-col items-center">
 
-      {/* Page count badge */}
-      {numPages > 1 && (
-        <div className="mb-3 px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs text-slate-500 font-medium shadow-sm flex items-center gap-1.5">
-          <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-          {isRTL ? `${numPages} صفحات` : `${numPages} page${numPages !== 1 ? 's' : ''}`}
-        </div>
-      )}
+      {/* Top badges */}
+      <div className="mb-3 flex items-center gap-2 flex-wrap justify-center">
+        {numPages > 1 && (
+          <div className="px-3 py-1.5 bg-white border border-slate-200 rounded-full text-xs text-slate-500 font-medium shadow-sm flex items-center gap-1.5">
+            <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+            {isRTL ? `${numPages} صفحات` : `${numPages} page${numPages !== 1 ? 's' : ''}`}
+          </div>
+        )}
 
-      {/* Hidden off-screen CV — used for measurement & break detection */}
+        {/* "Reset all" badge when manual breaks are active */}
+        {hasManual && (
+          <button
+            onClick={handleResetAll}
+            className="px-3 py-1.5 bg-amber-50 border border-amber-200 rounded-full text-xs text-amber-700 font-medium shadow-sm flex items-center gap-1.5 hover:bg-amber-100 transition-colors"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            {isRTL ? 'إعادة الضبط التلقائي' : 'Reset to auto'}
+          </button>
+        )}
+      </div>
+
+      {/* Hidden off-screen CV — measurement only */}
       <div
         ref={contentRef}
         aria-hidden="true"
         style={{
-          position: 'absolute',
-          top: '-9999px',
-          left: '-9999px',
-          width: PAGE_W,
-          pointerEvents: 'none',
-          zIndex: -1,
+          position: 'absolute', top: '-9999px', left: '-9999px',
+          width: PAGE_W, pointerEvents: 'none', zIndex: -1,
         }}
       >
         {renderTemplate()}
       </div>
 
-      {/* One A4 frame per page */}
+      {/* Pages */}
       {pageRanges.map(({ start, end }, pageIndex) => {
         const isFirst = pageIndex === 0;
         const isLast  = pageIndex === numPages - 1;
-
-        // Clip starts a bit before the page start (except page 1)
-        // so a white top-margin overlay can sit cleanly at the top.
         const clipStart = isFirst ? 0 : start - MARGIN;
-
-        // Visible content height for this page (in content coordinates)
         const contentSliceH = end - start;
 
         return (
           <div key={pageIndex} className="flex flex-col items-center w-full">
 
-            {/* Divider + label between pages */}
+            {/* Draggable break handle between pages */}
             {!isFirst && (
-              <div className="flex items-center gap-3 my-4" style={{ width: scaledW }}>
-                <div className="flex-1 h-px bg-slate-300" />
-                <span className="text-xs text-slate-400 font-medium px-3 py-1 bg-white border border-slate-200 rounded-full shadow-sm">
-                  {isRTL ? `صفحة ${pageIndex + 1}` : `Page ${pageIndex + 1}`}
-                </span>
-                <div className="flex-1 h-px bg-slate-300" />
-              </div>
+              <DragHandle
+                breakIndex={pageIndex - 1}
+                breakY={activeBreaks[pageIndex - 1]}
+                pageStart={pageRanges[pageIndex - 1].start}
+                nextPageEnd={end}
+                scale={scale}
+                isRTL={isRTL}
+                onDrag={handleDrag}
+                onReset={handleReset}
+              />
             )}
 
-            {/* Page frame — A4 size */}
+            {/* A4 page frame */}
             <div
               className="shadow-2xl overflow-hidden bg-white relative"
               style={{
                 width: scaledW,
-                // Last page height matches its actual content + margins; others are full A4
                 height: isLast
-                  ? Math.min(PAGE_H, (contentSliceH + (isFirst ? 0 : MARGIN) + MARGIN)) * scale
+                  ? Math.min(PAGE_H, contentSliceH + (isFirst ? 0 : MARGIN) + MARGIN) * scale
                   : PAGE_H * scale,
                 flexShrink: 0,
               }}
             >
-              {/* Scaled & shifted template */}
+              {/* Scaled template content */}
               <div
                 style={{
                   transform: `scale(${scale})`,
@@ -219,11 +317,8 @@ const LivePreview = () => {
                 }} />
               )}
 
-              {/* White bottom overlay (all pages except last):
-                  covers everything from the smart break point to the page bottom,
-                  so no content bleeds across the boundary */}
+              {/* White bottom overlay — covers from break point to page bottom */}
               {!isLast && (() => {
-                // How far into this page frame does the content reach?
                 const contentEndInFrame = (end - clipStart) * scale;
                 const overlayH = (PAGE_H * scale) - contentEndInFrame;
                 if (overlayH <= 0) return null;
