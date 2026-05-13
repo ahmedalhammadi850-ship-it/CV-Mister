@@ -303,8 +303,7 @@ const CustomizePanel = () => {
           )}
           <div className="grid grid-cols-2 gap-2">
             {TEMPLATES.map(tpl => {
-              const isPaid = !freeTemplates.has(tpl.value);
-              const isLocked = isFreeUser && isPaid;
+              const isLocked = isFreeUser && tpl.value !== 'minimal';
               const isActive = selectedTemplate === tpl.value;
               return (
                 <button

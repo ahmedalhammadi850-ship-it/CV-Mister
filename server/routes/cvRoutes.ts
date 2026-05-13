@@ -59,7 +59,7 @@ export function registerCVRoutes(app: Express) {
         // Enforce CV creation limits
         const [user] = await db.select().from(users).where(eq(users.id, userId));
         const plan = user?.plan || "free";
-        const limit = plan === "pro" ? PRO_LIMIT : FREE_LIMIT;
+        const limit = plan === "business" ? Infinity : plan === "pro" ? PRO_LIMIT : FREE_LIMIT;
         const currentCount = await db.select({ count: sql<number>`count(*)` }).from(cvs).where(eq(cvs.userId, userId));
         const count = Number(currentCount[0]?.count || 0);
 

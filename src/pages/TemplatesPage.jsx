@@ -624,8 +624,8 @@ const TemplatesPage = () => {
               isRTL={isRTL}
               onSelect={setSelectedTemplate}
               onUse={handleUse}
-              isFree={freeTemplates.has(template.id)}
-              isLocked={isFreeUser && !freeTemplates.has(template.id)}
+              isFree={template.id === 'minimal'}
+              isLocked={isFreeUser && template.id !== 'minimal'}
             />
           ))}
         </div>
