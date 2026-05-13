@@ -229,6 +229,34 @@ export default function AITextarea({
 
         {/* Action buttons */}
         <div className={`flex flex-wrap gap-1.5 items-center relative z-10 ${isRTL ? 'flex-row-reverse' : ''}`}>
+          {/* Robot AI icon */}
+          <div
+            className="flex items-center justify-center rounded-xl flex-shrink-0"
+            style={{
+              width: 34,
+              height: 34,
+              background: 'linear-gradient(135deg, #7c3aed 0%, #a855f7 100%)',
+              boxShadow: '0 2px 8px rgba(124,58,237,0.35)',
+            }}
+            title={isRTL ? 'مساعد الذكاء الاصطناعي' : 'AI Assistant'}
+          >
+            <svg viewBox="0 0 24 24" fill="none" className="w-5 h-5" stroke="white" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              {/* Head */}
+              <rect x="4" y="8" width="16" height="11" rx="3" fill="white" fillOpacity="0.15" stroke="white" strokeWidth="1.5"/>
+              {/* Antenna */}
+              <line x1="12" y1="8" x2="12" y2="5"/>
+              <circle cx="12" cy="4.5" r="1.2" fill="white"/>
+              {/* Eyes */}
+              <circle cx="9" cy="13" r="1.4" fill="white"/>
+              <circle cx="15" cy="13" r="1.4" fill="white"/>
+              {/* Mouth */}
+              <path d="M9.5 16.5h5" strokeWidth="1.8"/>
+              {/* Ears */}
+              <line x1="4" y1="12.5" x2="2.5" y2="12.5" strokeWidth="2"/>
+              <line x1="20" y1="12.5" x2="21.5" y2="12.5" strokeWidth="2"/>
+            </svg>
+          </div>
+
           {AI_ACTIONS.map(a => (
             <button
               key={a.key}
