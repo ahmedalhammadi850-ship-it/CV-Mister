@@ -39,6 +39,7 @@ import RoseElegantTemplate from '../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
 import VelvetTemplate from '../templates/VelvetTemplate';
 import AuroraTemplate from '../templates/AuroraTemplate';
+import ArabicGemTemplate from '../templates/ArabicGemTemplate';
 import { sampleData, arabicSampleData } from '../utils/sampleData';
 
 const templates = [
@@ -385,6 +386,17 @@ const templates = [
     arabicDesc: 'اسم كبير جريء، خط تدرّج لوني أسفل الاسم، عناوين أقسام بشريط جانبي وإدخالات بأسلوب الجدول الزمني.',
     color: '#059669',
     component: AuroraTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'arabicgem',
+    name: 'Arabic Gem',      arabicName: 'جوهرة عربية',
+    desc: 'Dark teal sidebar with geometric pattern, gold photo frame, skill bars and diamond section icons.',
+    arabicDesc: 'سيدبار بلون teal داكن مع نقش هندسي، إطار صورة ذهبي، أشرطة مهارات وأيقونات ماسية للأقسام.',
+    color: '#1a6464',
+    component: ArabicGemTemplate,
+    previewData: arabicSampleData,
+    previewIsRTL: true,
     atsScore: null,
   },
 ];
