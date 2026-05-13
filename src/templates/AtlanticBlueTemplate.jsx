@@ -281,7 +281,7 @@ const AtlanticBlueTemplate = ({
   const initials = (info.fullName || '').split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
   return (
-    <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+    <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', direction: 'ltr' }}>
       {/* Sidebar */}
       <div style={sb.wrapper}>
         {/* Photo / Initials circle */}

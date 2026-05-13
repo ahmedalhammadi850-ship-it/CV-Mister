@@ -324,7 +324,7 @@ const ArabicTealSidebarTemplate = ({
   const initials = (info.fullName||'').split(' ').map(w=>w[0]).slice(0,2).join('');
 
   return (
-    <div style={{ fontFamily:font, fontSize:sz.body, color:'#1a202c', backgroundColor:'#fff', width:'794px', minHeight:'1122px', boxSizing:'border-box', display:'flex', flexDirection:'row-reverse', direction:'rtl' }}>
+    <div style={{ fontFamily:font, fontSize:sz.body, color:'#1a202c', backgroundColor:'#fff', width:'794px', minHeight:'1122px', boxSizing:'border-box', display:'flex', flexDirection:'row', direction:'rtl' }}>
       {/* ── Sidebar RIGHT ── */}
       <div style={sb.wrap}>
         {/* Photo */}
