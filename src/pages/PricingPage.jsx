@@ -229,25 +229,6 @@ const PricingPage = () => {
 
       </section>
 
-      {/* ── Payment logos ── */}
-      <section className="bg-white border-t border-slate-100 py-10">
-        <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-sm text-slate-400 mb-6 font-medium">
-            {isRTL ? 'طرق الدفع المتاحة' : 'Accepted Payment Methods'}
-          </p>
-          <div className="flex items-center justify-center gap-6 flex-wrap">
-            {['Visa', 'Mastercard', 'Apple Pay', 'stcpay'].map((m) => (
-              <div
-                key={m}
-                className="px-5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-600"
-              >
-                {m}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── FAQ ── */}
       <section className="max-w-2xl mx-auto px-6 py-20">
         <h2 className="text-3xl font-bold text-slate-900 text-center mb-10">
