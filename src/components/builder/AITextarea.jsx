@@ -96,7 +96,7 @@ export default function AITextarea({
     }
     setLoading(key);
     try {
-      const res = await fetch('https://ahmed144.app.n8n.cloud/webhook/94834e1e-04b3-451b-9b48-26d58ae28623', {
+      const res = await fetch('/api/ai/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: value, action: key, language: isRTL ? 'ar' : 'en' }),
@@ -110,7 +110,6 @@ export default function AITextarea({
           else if (data?.result) result = data.result;
           else if (data?.output) result = data.output;
           else if (data?.text) result = data.text;
-          else if (data?.message) result = data.message;
           else if (Array.isArray(data) && data[0]?.result) result = data[0].result;
           else if (Array.isArray(data) && data[0]?.output) result = data[0].output;
         } catch { result = null; }
