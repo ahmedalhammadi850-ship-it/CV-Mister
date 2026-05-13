@@ -368,7 +368,7 @@ const ArabicCardTemplate = ({
     <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a202c', backgroundColor: '#fff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: 'row-reverse', direction: 'rtl' }}>
       {/* Sidebar (RIGHT in RTL) */}
       <div style={sb.wrapper}>
-        {info.photo ? (
+        {(vis.photo !== false && info.photo) ? (
           <div style={sb.photoWrap}>
             <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>

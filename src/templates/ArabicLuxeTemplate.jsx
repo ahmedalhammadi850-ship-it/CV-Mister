@@ -432,7 +432,7 @@ const ArabicLuxeTemplate = ({
             backgroundColor:'rgba(255,255,255,0.1)',
             display:'flex', alignItems:'center', justifyContent:'center',
           }}>
-            {info.photo
+            {(vis.photo !== false && info.photo)
               ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
               : <span style={{ fontSize:'22pt', fontWeight:'800', color:GOLD }}>{initials}</span>
             }

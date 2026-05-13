@@ -288,7 +288,7 @@ const CardWrapper = ({ children, onDelete }) => (
 );
 
 const EditorPanel = () => {
-  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection } = useCV();
+  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection, visiblePersonalFields, togglePersonalField } = useCV();
   const { isRTL } = useAuth();
   const [openSection, setOpenSection] = useState('personalInfo');
   const [showAddContent, setShowAddContent] = useState(false);
@@ -436,6 +436,20 @@ const EditorPanel = () => {
                     <p className="text-xs text-slate-400">{t('JPG, PNG or WebP — max 5 MB', 'JPG أو PNG أو WebP — حجم أقصى 5 ميغابايت', isRTL)}</p>
                   </div>
                 </div>
+
+                {/* Show/Hide photo toggle */}
+                {cvData.personalInfo.photo && (
+                  <div className="flex items-center justify-between mt-3 p-3 bg-white rounded-lg border border-slate-200">
+                    <span className="text-sm font-medium text-slate-700">{t('Show photo in CV', 'إظهار الصورة في السيرة الذاتية', isRTL)}</span>
+                    <button
+                      type="button"
+                      onClick={() => togglePersonalField('photo')}
+                      className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${visiblePersonalFields.photo !== false ? 'bg-primary-600' : 'bg-slate-300'}`}
+                    >
+                      <span className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${visiblePersonalFields.photo !== false ? (isRTL ? '-translate-x-6' : 'translate-x-6') : (isRTL ? '-translate-x-1' : 'translate-x-1')}`} />
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -372,7 +372,7 @@ const EnglishHorizonTemplate = ({
             backgroundColor:'rgba(255,255,255,0.15)',
             display:'flex', alignItems:'center', justifyContent:'center',
           }}>
-            {info.photo
+            {(vis.photo !== false && info.photo)
               ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
               : <span style={{ fontSize:'20pt', fontWeight:'800', color:'#fff' }}>{initials}</span>
             }

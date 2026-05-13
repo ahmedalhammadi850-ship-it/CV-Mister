@@ -351,7 +351,7 @@ const ArabicProTemplate = ({
           paddingBottom:'0', paddingTop:'10pt', paddingRight:'12pt',
           position:'relative',
         }}>
-          {info.photo ? (
+          {(vis.photo !== false && info.photo) ? (
             <div style={{ width:'80pt', height:'80pt', borderRadius:'50%', overflow:'hidden', border:'3px solid rgba(255,255,255,0.5)', backgroundColor:'rgba(255,255,255,0.15)', marginBottom:'-20pt', zIndex:2, position:'relative' }}>
               <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             </div>

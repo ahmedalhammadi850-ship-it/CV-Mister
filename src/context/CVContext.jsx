@@ -97,6 +97,7 @@ export function CVProvider({ children }) {
   });
 
   const [visiblePersonalFields, setVisiblePersonalFields] = useState({
+    photo: true,
     email: true,
     phone: true,
     location: true,

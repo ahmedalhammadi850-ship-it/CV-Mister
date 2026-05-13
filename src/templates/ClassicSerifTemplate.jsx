@@ -254,7 +254,7 @@ const ClassicSerifTemplate = ({
       {/* Sidebar */}
       <div style={sidebar.wrapper}>
         {/* Photo */}
-        {info.photo && (
+        {info.photo && vis.photo !== false && (
           <div style={{ width: '80pt', height: '80pt', borderRadius: '50%', overflow: 'hidden', margin: `0 auto 12pt`, border: `2px solid ${accent}` }}>
             <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>

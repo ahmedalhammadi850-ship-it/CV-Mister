@@ -359,7 +359,7 @@ const DarkHeaderTemplate = ({
       {/* Full-width dark header */}
       <div style={header.wrapper}>
         <div style={header.top}>
-          {info.photo && (
+          {info.photo && vis.photo !== false && (
             <div style={header.photoWrap}>
               <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
