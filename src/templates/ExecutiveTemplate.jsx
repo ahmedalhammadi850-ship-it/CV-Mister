@@ -73,7 +73,7 @@ const ExecutiveTemplate = ({
         return data.personalInfo?.summary ? (
           <div key="summary" style={BREAK_ITEM}>
             <SectionHeading labelKey="execSummary" />
-            <div style={{ ...s.body, fontStyle: 'italic' }}>{data.personalInfo.summary}</div>
+            <div style={ta({ ...s.body, fontStyle: 'italic' }, data.personalInfo?.summaryAlign)}>{data.personalInfo.summary}</div>
           </div>
         ) : null;
       case 'experience':

@@ -197,7 +197,7 @@ const PrestigeTemplate = ({
         return data.personalInfo?.summary ? (
           <div key="summary" style={BREAK_ITEM}>
             <SectionHead label={tr('summary', isRTL)} />
-            <div style={{ ...s.bodyText, textAlign: 'center', fontStyle: 'italic', color: '#444' }}>
+            <div style={ta({ ...s.bodyText, textAlign: 'center', fontStyle: 'italic', color: '#444' }, data.personalInfo?.summaryAlign)}>
               {data.personalInfo.summary}
             </div>
           </div>

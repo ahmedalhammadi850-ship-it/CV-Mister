@@ -336,7 +336,7 @@ const ArabicGemTemplate = ({
         return data.personalInfo?.summary ? (
           <div key="summary" style={BREAK_ITEM}>
             <SbHeading label={tr('summary', true)} icon="✦" />
-            <div style={sb.bodyText}>{data.personalInfo.summary}</div>
+            <div style={ta(sb.bodyText, data.personalInfo?.summaryAlign)}>{data.personalInfo.summary}</div>
           </div>
         ) : null;
 

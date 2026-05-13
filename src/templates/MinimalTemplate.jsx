@@ -64,7 +64,7 @@ const MinimalTemplate = ({
           <div key="summary" style={BREAK_ITEM}>
             <div style={s.heading}>{tr('summary', isRTL)}</div>
             <div style={s.divider} />
-            <div style={{ ...s.body, marginBottom: '4pt' }}>{data.personalInfo.summary}</div>
+            <div style={ta({ ...s.body, marginBottom: '4pt' }, data.personalInfo?.summaryAlign)}>{data.personalInfo.summary}</div>
           </div>
         ) : null;
       case 'experience':
