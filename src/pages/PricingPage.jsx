@@ -72,7 +72,7 @@ const plans = [
     periodEn: 'month',
     cta: 'تواصل معنا',
     ctaEn: 'Contact us',
-    ctaTo: '/about',
+    ctaTo: '/business-contact',
     popular: false,
     gradient: null,
     features: [

@@ -2,6 +2,7 @@ import type { Express, Request, Response } from "express";
 import { isAuthenticated } from "../replit_integrations/auth";
 import { db } from "../db";
 import { paymentRequests } from "@shared/models/cv";
+import { businessContacts } from "@shared/models/business";
 import { eq, desc } from "drizzle-orm";
 
 function getUserId(req: any): string {
@@ -54,6 +55,22 @@ export function registerPaymentRoutes(app: Express) {
       res.json(requests);
     } catch (err) {
       res.status(500).json({ message: "حدث خطأ" });
+    }
+  });
+
+  app.post("/api/business-contact", async (req: Request, res: Response) => {
+    try {
+      const { name, email, company, teamSize, message } = req.body;
+      if (!name || !email || !company) {
+        return res.status(400).json({ message: "يرجى ملء جميع الحقول المطلوبة" });
+      }
+      const userId = (req as any).session?.userId || (req as any).user?.claims?.sub || null;
+      const id = `biz-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+      await db.insert(businessContacts).values({ id, userId, name, email, company, teamSize, message });
+      res.status(201).json({ success: true });
+    } catch (err) {
+      console.error("Business contact error:", err);
+      res.status(500).json({ message: "حدث خطأ، حاول مجدداً" });
     }
   });
 }
