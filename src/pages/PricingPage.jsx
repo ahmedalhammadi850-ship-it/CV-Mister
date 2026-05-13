@@ -227,20 +227,6 @@ const PricingPage = () => {
           })}
         </div>
 
-        {/* ── Trust badges ── */}
-        <div className="mt-14 grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[
-            { icon: '🔒', label: isRTL ? 'دفع آمن 100%' : '100% Secure Payment' },
-            { icon: '↩️', label: isRTL ? 'إلغاء في أي وقت' : 'Cancel Anytime' },
-            { icon: '💳', label: isRTL ? 'بدون بطاقة للمجاني' : 'No Card for Free' },
-            { icon: '🌍', label: isRTL ? 'دعم عربي وإنجليزي' : 'Arabic & English' },
-          ].map((b) => (
-            <div key={b.label} className="bg-white rounded-2xl border border-slate-100 p-4 flex flex-col items-center gap-2 text-center shadow-sm">
-              <span className="text-2xl">{b.icon}</span>
-              <span className="text-xs font-medium text-slate-600 leading-tight">{b.label}</span>
-            </div>
-          ))}
-        </div>
       </section>
 
       {/* ── Payment logos ── */}
