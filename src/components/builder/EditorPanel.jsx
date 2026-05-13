@@ -568,7 +568,7 @@ const EditorPanel = () => {
                   <CardWrapper key={proj.id} onDelete={() => updateSection('projects', cvData.projects.filter(p => p.id !== proj.id))}>
                     <div><label className={lbl}>{t('Project Title','عنوان المشروع',isRTL)}</label><input className={inp} value={proj.title} onChange={e => updateSection('projects', cvData.projects.map(p => p.id === proj.id ? { ...p, title: e.target.value } : p))} /></div>
                     <div><label className={lbl}>{t('Link / URL','الرابط',isRTL)}</label><input className={inp} value={proj.link || ''} onChange={e => updateSection('projects', cvData.projects.map(p => p.id === proj.id ? { ...p, link: e.target.value } : p))} /></div>
-                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><textarea className={`${inp} resize-none`} rows={3} value={proj.description} onChange={e => updateSection('projects', cvData.projects.map(p => p.id === proj.id ? { ...p, description: e.target.value } : p))} /></div>
+                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><AITextarea className={`${inp} resize-none`} rows={3} value={proj.description} onChange={val => updateSection('projects', cvData.projects.map(p => p.id === proj.id ? { ...p, description: val } : p))} isRTL={isRTL} placeholder={isRTL ? 'صف المشروع...' : 'Describe the project...'} /></div>
                   </CardWrapper>
                 ))}
                 <AddBtn onClick={() => updateSection('projects', [...(cvData.projects||[]), { id: `proj-${Date.now()}`, title: '', link: '', description: '' }])}
@@ -591,7 +591,7 @@ const EditorPanel = () => {
                       <div><label className={lbl}>{t('Issuer','الجهة المانحة',isRTL)}</label><input className={inp} value={cert.issuer || ''} onChange={e => updateSection('certificates', cvData.certificates.map(c => c.id === cert.id ? { ...c, issuer: e.target.value } : c))} /></div>
                       <div><label className={lbl}>{t('Date','التاريخ',isRTL)}</label><input className={inp} value={cert.date || ''} onChange={e => updateSection('certificates', cvData.certificates.map(c => c.id === cert.id ? { ...c, date: e.target.value } : c))} /></div>
                     </div>
-                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><textarea className={`${inp} resize-none`} rows={2} value={cert.description || ''} onChange={e => updateSection('certificates', cvData.certificates.map(c => c.id === cert.id ? { ...c, description: e.target.value } : c))} /></div>
+                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><AITextarea className={`${inp} resize-none`} rows={2} value={cert.description || ''} onChange={val => updateSection('certificates', cvData.certificates.map(c => c.id === cert.id ? { ...c, description: val } : c))} isRTL={isRTL} placeholder={isRTL ? 'صف الشهادة...' : 'Describe the certificate...'} /></div>
                   </CardWrapper>
                 ))}
                 <AddBtn onClick={() => updateSection('certificates', [...(cvData.certificates||[]), { id: `cert-${Date.now()}`, name: '', issuer: '', date: '', description: '' }])}
@@ -655,7 +655,7 @@ const EditorPanel = () => {
                       <div><label className={lbl}>{t('Issuer','الجهة المانحة',isRTL)}</label><input className={inp} value={award.issuer || ''} onChange={e => updateSection('awards', cvData.awards.map(a => a.id === award.id ? { ...a, issuer: e.target.value } : a))} /></div>
                       <div><label className={lbl}>{t('Date','التاريخ',isRTL)}</label><input className={inp} value={award.date || ''} onChange={e => updateSection('awards', cvData.awards.map(a => a.id === award.id ? { ...a, date: e.target.value } : a))} /></div>
                     </div>
-                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><textarea className={`${inp} resize-none`} rows={2} value={award.description || ''} onChange={e => updateSection('awards', cvData.awards.map(a => a.id === award.id ? { ...a, description: e.target.value } : a))} /></div>
+                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><AITextarea className={`${inp} resize-none`} rows={2} value={award.description || ''} onChange={val => updateSection('awards', cvData.awards.map(a => a.id === award.id ? { ...a, description: val } : a))} isRTL={isRTL} placeholder={isRTL ? 'صف الجائزة...' : 'Describe the award...'} /></div>
                   </CardWrapper>
                 ))}
                 <AddBtn onClick={() => updateSection('awards', [...(cvData.awards||[]), { id: `awd-${Date.now()}`, title: '', issuer: '', date: '', description: '' }])}
@@ -700,7 +700,7 @@ const EditorPanel = () => {
                       <div><label className={lbl}>{t('Publisher','الناشر',isRTL)}</label><input className={inp} value={pub.publisher || ''} onChange={e => updateSection('publications', cvData.publications.map(p => p.id === pub.id ? { ...p, publisher: e.target.value } : p))} /></div>
                       <div><label className={lbl}>{t('Date','التاريخ',isRTL)}</label><input className={inp} value={pub.date || ''} onChange={e => updateSection('publications', cvData.publications.map(p => p.id === pub.id ? { ...p, date: e.target.value } : p))} /></div>
                     </div>
-                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><textarea className={`${inp} resize-none`} rows={2} value={pub.description || ''} onChange={e => updateSection('publications', cvData.publications.map(p => p.id === pub.id ? { ...p, description: e.target.value } : p))} /></div>
+                    <div><label className={lbl}>{t('Description','الوصف',isRTL)}</label><AITextarea className={`${inp} resize-none`} rows={2} value={pub.description || ''} onChange={val => updateSection('publications', cvData.publications.map(p => p.id === pub.id ? { ...p, description: val } : p))} isRTL={isRTL} placeholder={isRTL ? 'صف المنشور...' : 'Describe the publication...'} /></div>
                   </CardWrapper>
                 ))}
                 <AddBtn onClick={() => updateSection('publications', [...(cvData.publications||[]), { id: `pub-${Date.now()}`, title: '', publisher: '', date: '', description: '' }])}
@@ -773,7 +773,7 @@ const EditorPanel = () => {
                   <CardWrapper key={item.id} onDelete={() => updateCustomSection(sec.id, { ...sec, items: sec.items.filter(i => i.id !== item.id) })}>
                     <div><label className={lbl}>{t('Title', 'العنوان', isRTL)}</label><input className={inp} value={item.title || ''} onChange={e => updateCustomSection(sec.id, { ...sec, items: sec.items.map(i => i.id === item.id ? { ...i, title: e.target.value } : i) })} /></div>
                     <div><label className={lbl}>{t('Subtitle / Date', 'العنوان الفرعي / التاريخ', isRTL)}</label><input className={inp} value={item.subtitle || ''} onChange={e => updateCustomSection(sec.id, { ...sec, items: sec.items.map(i => i.id === item.id ? { ...i, subtitle: e.target.value } : i) })} /></div>
-                    <div><label className={lbl}>{t('Description', 'الوصف', isRTL)}</label><textarea className={`${inp} resize-none`} rows={3} value={item.description || ''} onChange={e => updateCustomSection(sec.id, { ...sec, items: sec.items.map(i => i.id === item.id ? { ...i, description: e.target.value } : i) })} /></div>
+                    <div><label className={lbl}>{t('Description', 'الوصف', isRTL)}</label><AITextarea className={`${inp} resize-none`} rows={3} value={item.description || ''} onChange={val => updateCustomSection(sec.id, { ...sec, items: sec.items.map(i => i.id === item.id ? { ...i, description: val } : i) })} isRTL={isRTL} placeholder={isRTL ? 'صف العنصر...' : 'Describe this item...'} /></div>
                   </CardWrapper>
                 ))}
                 <AddBtn

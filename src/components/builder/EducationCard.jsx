@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AITextarea from './AITextarea';
 
 const uiEdu = {
   degree:      { en: 'Degree',       ar: 'الدرجة العلمية'    },
@@ -89,11 +90,13 @@ export default function EducationCard({ edu, isRTL, labelClass, inputClass, onCh
             </div>
             <div className="col-span-2">
               <label className={labelClass}>{te('description', isRTL)}</label>
-              <textarea
+              <AITextarea
                 value={edu.description}
-                onChange={e => onChange('description', e.target.value)}
+                onChange={val => onChange('description', val)}
                 rows={3}
                 className={`${inputClass} resize-none`}
+                placeholder={isRTL ? 'صف مؤهلاتك وإنجازاتك...' : 'Describe your qualifications and achievements...'}
+                isRTL={isRTL}
               />
             </div>
           </div>
