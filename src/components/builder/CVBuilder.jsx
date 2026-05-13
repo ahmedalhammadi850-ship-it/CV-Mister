@@ -34,6 +34,8 @@ import ArabicCardTemplate from '../../templates/ArabicCardTemplate';
 import ArabicWaveTemplate from '../../templates/ArabicWaveTemplate';
 import ArabicLuxeTemplate from '../../templates/ArabicLuxeTemplate';
 import EnglishHorizonTemplate from '../../templates/EnglishHorizonTemplate';
+import ArabicZafirTemplate from '../../templates/ArabicZafirTemplate';
+import EnglishApexTemplate from '../../templates/EnglishApexTemplate';
 import TealProTemplate from '../../templates/TealProTemplate';
 import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
@@ -134,6 +136,8 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'arabicwave':         return <ArabicWaveTemplate         {...props} />;
       case 'arabicluxe':         return <ArabicLuxeTemplate         {...props} />;
       case 'englishhorizon':     return <EnglishHorizonTemplate     {...props} />;
+      case 'arabiczafir':        return <ArabicZafirTemplate        {...props} />;
+      case 'englishapex':        return <EnglishApexTemplate        {...props} />;
       default:              return <ModernTemplate        {...props} />;
     }
   };

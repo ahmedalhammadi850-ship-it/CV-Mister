@@ -32,6 +32,8 @@ import ArabicEliteTemplate from '../templates/ArabicEliteTemplate';
 import ArabicWaveTemplate from '../templates/ArabicWaveTemplate';
 import ArabicLuxeTemplate from '../templates/ArabicLuxeTemplate';
 import EnglishHorizonTemplate from '../templates/EnglishHorizonTemplate';
+import ArabicZafirTemplate from '../templates/ArabicZafirTemplate';
+import EnglishApexTemplate from '../templates/EnglishApexTemplate';
 import TealProTemplate from '../templates/TealProTemplate';
 import RoseElegantTemplate from '../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
@@ -310,6 +312,28 @@ const templates = [
     component: ArabicWaveTemplate,
     previewData: arabicSampleData,
     previewIsRTL: true,
+    atsScore: null,
+  },
+  {
+    id: 'arabiczafir',
+    name: 'Arabic Zafir',    arabicName: 'الزفير العربي',
+    desc: 'Rich dark plum header with a centered photo, copper-gold accents, diamond dividers, and a deep gradient sidebar.',
+    arabicDesc: 'هيدر بنفسجي داكن فاخر مع صورة مركزية، لكنات نحاسية ذهبية، فواصل ماسية، وشريط جانبي متدرج عميق.',
+    color: '#c07840',
+    component: ArabicZafirTemplate,
+    previewData: arabicSampleData,
+    previewIsRTL: true,
+    atsScore: null,
+  },
+  {
+    id: 'englishapex',
+    name: 'English Apex',    arabicName: 'أبيكس الإنجليزي',
+    desc: 'Bold dark navy sidebar with name and monogram inside, indigo accent, segmented skill bars, and a clean white main area.',
+    arabicDesc: 'شريط جانبي كحلي داكن مع الاسم والحرف الأول داخله، لكنة نيلية، أشرطة مهارات مقسمة، ومنطقة رئيسية بيضاء نظيفة.',
+    color: '#4f46e5',
+    component: EnglishApexTemplate,
+    previewData: sampleData,
+    previewIsRTL: false,
     atsScore: null,
   },
   {
