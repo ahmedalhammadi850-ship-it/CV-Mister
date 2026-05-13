@@ -27,15 +27,15 @@ const Footer = () => {
   ];
 
   return (
-    <footer style={{ background: '#0f0f1a', color: '#cbd5e1' }}>
+    <footer style={{ background: '#ffffff', color: '#475569' }}>
 
       {/* CTA Banner */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-16 pb-10">
         <div
           className="relative rounded-3xl p-10 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(99,102,241,0.18) 0%, rgba(139,92,246,0.14) 50%, rgba(192,38,211,0.12) 100%)',
-            border: '1px solid rgba(139,92,246,0.25)',
+            background: 'linear-gradient(135deg, #eef2ff 0%, #f5f3ff 50%, #fdf4ff 100%)',
+            border: '1px solid rgba(139,92,246,0.15)',
           }}
         >
           <div className="absolute -top-20 -start-20 w-72 h-72 rounded-full pointer-events-none" style={{
@@ -48,10 +48,10 @@ const Footer = () => {
           }} />
 
           <div className="relative z-10">
-            <h3 className="text-2xl md:text-3xl font-heading font-bold text-white mb-2">
+            <h3 className="text-2xl md:text-3xl font-heading font-bold text-slate-900 mb-2">
               {t('Ready to land your next role?', 'هل أنت مستعد للوظيفة التالية؟')}
             </h3>
-            <p className="text-slate-400">
+            <p className="text-slate-500">
               {t('Join 50,000+ professionals who built their resume with CV-Mister.', 'انضم لأكثر من 50,000 محترف بنوا سيرتهم الذاتية معنا.')}
             </p>
           </div>
@@ -73,7 +73,7 @@ const Footer = () => {
 
       {/* Divider */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div style={{ height: '1px', background: 'rgba(255,255,255,0.06)' }} />
+        <div style={{ height: '1px', background: '#e2e8f0' }} />
       </div>
 
       {/* Main Footer Grid */}
@@ -92,7 +92,7 @@ const Footer = () => {
               >
                 CV
               </div>
-              <span className="font-heading font-bold text-xl text-white">Mister</span>
+              <span className="font-heading font-bold text-xl text-slate-900">Mister</span>
             </Link>
 
             <p className="text-sm text-slate-400 leading-relaxed mb-8 max-w-xs">
