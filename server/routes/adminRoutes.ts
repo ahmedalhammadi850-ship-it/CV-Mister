@@ -212,6 +212,41 @@ export function registerAdminRoutes(app: Express) {
     }
   });
 
+  app.patch("/api/admin/business-contacts/:id", isAdminAuthenticated, async (req: Request, res: Response) => {
+    try {
+      const { status } = req.body;
+      if (!["approved", "rejected", "pending"].includes(status))
+        return res.status(400).json({ message: "حالة غير صحيحة" });
+
+      const result = await pool.query(
+        `UPDATE business_contacts SET status=$1 WHERE id=$2 RETURNING *`,
+        [status, req.params.id]
+      );
+      if (!result.rows.length)
+        return res.status(404).json({ message: "الطلب غير موجود" });
+
+      const row = result.rows[0];
+
+      if (status === "approved" && row.user_id) {
+        await pool.query(
+          `UPDATE users SET plan='business', updated_at=NOW() WHERE id=$1`,
+          [row.user_id]
+        );
+      }
+      if (status === "rejected" && row.user_id) {
+        await pool.query(
+          `UPDATE users SET plan='free', updated_at=NOW() WHERE id=$1`,
+          [row.user_id]
+        );
+      }
+
+      res.json(row);
+    } catch (err) {
+      console.error("Admin update business contact error:", err);
+      res.status(500).json({ message: "حدث خطأ" });
+    }
+  });
+
   app.patch("/api/admin/password", isAdminAuthenticated, async (req: Request, res: Response) => {
     try {
       const { currentPassword, newPassword } = req.body;

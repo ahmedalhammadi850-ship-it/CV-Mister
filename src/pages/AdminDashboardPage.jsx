@@ -230,6 +230,20 @@ const AdminDashboardPage = () => {
     } finally { setActionLoading(l => ({ ...l, [id]: false })); }
   };
 
+  const handleBizAction = async (id, status) => {
+    setActionLoading(l => ({ ...l, [id]: true }));
+    try {
+      const res = await fetch(`/api/admin/business-contacts/${id}`, {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status }),
+      });
+      if (res.ok) {
+        setBiz(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+      }
+    } finally { setActionLoading(l => ({ ...l, [id]: false })); }
+  };
+
   const handleDeleteUser = async (id) => {
     if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم وجميع بياناته؟')) return;
     try {
@@ -641,7 +655,7 @@ const AdminDashboardPage = () => {
                         <span>{fmt(b.createdAt)}</span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-wrap">
                       {b.receiptImage && (
                         <button onClick={() => setReceiptUrl(b.receiptImage)}
                           className="px-3 py-2 rounded-xl bg-slate-700 text-slate-300 text-xs hover:bg-slate-600 transition flex items-center gap-1.5">
@@ -652,6 +666,26 @@ const AdminDashboardPage = () => {
                       <span className={`px-2.5 py-1.5 rounded-full text-xs font-medium ${STATUS_COLORS[b.status]?.bg} ${STATUS_COLORS[b.status]?.text}`}>
                         {STATUS_COLORS[b.status]?.label || b.status}
                       </span>
+                      {b.status !== 'approved' && (
+                        <button
+                          onClick={() => handleBizAction(b.id, 'approved')}
+                          disabled={!!actionLoading[b.id]}
+                          className="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                          موافقة
+                        </button>
+                      )}
+                      {b.status !== 'rejected' && (
+                        <button
+                          onClick={() => handleBizAction(b.id, 'rejected')}
+                          disabled={!!actionLoading[b.id]}
+                          className="px-3 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-white text-xs font-semibold transition flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                          رفض
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
