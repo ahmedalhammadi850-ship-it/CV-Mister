@@ -100,35 +100,40 @@ export function registerAuthRoutes(app: Express): void {
     try {
       const sessionUserId = (req.session as any).userId;
 
+      const serializeUser = async (user: any) => {
+        let plan = user.plan || "free";
+        // Auto-downgrade business plan if expired
+        if (plan === "business" && user.planExpiresAt) {
+          const now = new Date();
+          const expires = new Date(user.planExpiresAt);
+          if (now > expires) {
+            plan = "free";
+            await db.update(users)
+              .set({ plan: "free", updatedAt: new Date() })
+              .where(eq(users.id, user.id));
+          }
+        }
+        return {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+          plan,
+          cvCount: user.cvCount || 0,
+          planExpiresAt: user.planExpiresAt || null,
+        };
+      };
+
       if (sessionUserId) {
         const [user] = await db.select().from(users).where(eq(users.id, sessionUserId));
-        if (user) {
-          return res.json({
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileImageUrl: user.profileImageUrl,
-            plan: user.plan || "free",
-            cvCount: user.cvCount || 0,
-          });
-        }
+        if (user) return res.json(await serializeUser(user));
       }
 
       if ((req as any).user?.claims?.sub) {
         const userId = (req as any).user.claims.sub;
         const [user] = await db.select().from(users).where(eq(users.id, userId));
-        if (user) {
-          return res.json({
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            profileImageUrl: user.profileImageUrl,
-            plan: user.plan || "free",
-            cvCount: user.cvCount || 0,
-          });
-        }
+        if (user) return res.json(await serializeUser(user));
       }
 
       return res.status(401).json({ message: "غير مصادق" });

@@ -24,6 +24,7 @@ export const users = pgTable("users", {
   passwordHash: varchar("password_hash"),
   plan: varchar("plan").notNull().default("free"),
   cvCount: integer("cv_count").notNull().default(0),
+  planExpiresAt: timestamp("plan_expires_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

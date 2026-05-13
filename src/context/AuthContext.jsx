@@ -11,16 +11,30 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isRTL, setIsRTL] = useState(false);
 
-  const buildUser = (user) => ({
-    uid: user.id,
-    id: user.id,
-    name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
-    displayName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email?.split('@')[0],
-    profileImage: user.profileImageUrl || null,
-    email: user.email,
-    plan: user.plan || 'free',
-    cvCount: user.cvCount || 0,
-  });
+  const buildUser = (user) => {
+    const planExpiresAt = user.planExpiresAt ? new Date(user.planExpiresAt) : null;
+    const now = new Date();
+    let daysLeft = null;
+    if (planExpiresAt && user.plan === 'business') {
+      const diff = planExpiresAt - now;
+      daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+    }
+    // Was on business plan but now expired (auto-downgraded to free)
+    const subscriptionExpired = user.plan === 'free' && planExpiresAt && planExpiresAt < now;
+    return {
+      uid: user.id,
+      id: user.id,
+      name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
+      displayName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email?.split('@')[0],
+      profileImage: user.profileImageUrl || null,
+      email: user.email,
+      plan: user.plan || 'free',
+      cvCount: user.cvCount || 0,
+      planExpiresAt,
+      daysLeft,
+      subscriptionExpired: !!subscriptionExpired,
+    };
+  };
 
   const fetchUser = () => {
     return fetch('/api/auth/user', { credentials: 'include' })

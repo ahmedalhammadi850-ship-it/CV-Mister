@@ -228,14 +228,16 @@ export function registerAdminRoutes(app: Express) {
       const row = result.rows[0];
 
       if (status === "approved" && row.user_id) {
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
         await pool.query(
-          `UPDATE users SET plan='business', updated_at=NOW() WHERE id=$1`,
-          [row.user_id]
+          `UPDATE users SET plan='business', plan_expires_at=$1, updated_at=NOW() WHERE id=$2`,
+          [expiresAt.toISOString(), row.user_id]
         );
       }
       if (status === "rejected" && row.user_id) {
         await pool.query(
-          `UPDATE users SET plan='free', updated_at=NOW() WHERE id=$1`,
+          `UPDATE users SET plan='free', plan_expires_at=NULL, updated_at=NOW() WHERE id=$1`,
           [row.user_id]
         );
       }

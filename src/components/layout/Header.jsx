@@ -100,6 +100,21 @@ const Header = () => {
 
             {currentUser ? (
               <div className="relative" ref={userMenuRef}>
+                {/* Business plan days remaining badge */}
+                {currentUser.plan === 'business' && currentUser.daysLeft !== null && (
+                  <span className={`mr-1 inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold ${
+                    currentUser.daysLeft <= 3
+                      ? 'bg-red-100 text-red-600'
+                      : currentUser.daysLeft <= 7
+                      ? 'bg-amber-100 text-amber-700'
+                      : 'bg-emerald-100 text-emerald-700'
+                  }`}>
+                    <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    {isRTL ? `${currentUser.daysLeft} يوم` : `${currentUser.daysLeft}d`}
+                  </span>
+                )}
                 <button
                   onClick={() => setUserMenuOpen(o => !o)}
                   className="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-xl hover:bg-slate-100 transition-all"
