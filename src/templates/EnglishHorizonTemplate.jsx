@@ -33,7 +33,7 @@ const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 /* ── Progress bar ───────────────────────────────────────────── */
 const ProgressBar = ({ level=3, accent }) => {
-  const pct = (Math.min(Math.max(level,1),5)/5)*100;
+  const pct = level > 5 ? Math.min(level, 100) : (Math.min(Math.max(level,1),5)/5)*100;
   return (
     <div style={{ height:'5pt', borderRadius:'3pt', backgroundColor:'#d0e8ec', overflow:'hidden', marginTop:'2pt' }}>
       <div style={{ width:`${pct}%`, height:'100%', background:`linear-gradient(to right, ${accent}, ${TEAL2})`, borderRadius:'3pt' }} />
@@ -43,7 +43,8 @@ const ProgressBar = ({ level=3, accent }) => {
 
 /* ── Dot rating ─────────────────────────────────────────────── */
 const DotRating = ({ level=3, accent }) => {
-  const n = Math.min(Math.max(Math.round(level),1),5);
+  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'2pt' }}>
       {[1,2,3,4,5].map(i=>(

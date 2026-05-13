@@ -44,7 +44,7 @@ const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>
 
 /* ── Skill fill bar ─────────────────────────────────────────── */
 const SkillBar = ({ level = 3, accent }) => {
-  const pct = (Math.min(Math.max(level, 1), 5) / 5) * 100;
+  const pct = level > 5 ? Math.min(level, 100) : (Math.min(Math.max(level, 1), 5) / 5) * 100;
   return (
     <div style={{ height:'5pt', borderRadius:'3pt', backgroundColor:'rgba(255,255,255,0.1)', marginTop:'3pt', overflow:'hidden' }}>
       <div style={{ width:`${pct}%`, height:'100%', background:`linear-gradient(to right, ${accent}, ${COPPER2})`, borderRadius:'3pt' }} />

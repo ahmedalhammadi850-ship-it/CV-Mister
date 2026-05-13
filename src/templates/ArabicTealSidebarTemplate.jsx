@@ -26,7 +26,8 @@ const MAIN_SECTIONS    = new Set(['summary','experience','education','projects',
 
 /* ── Bar rating (sidebar) ── */
 const Bar = ({ level = 3, filled, empty }) => {
-  const n = Math.min(Math.max(Math.round(level), 1), 5);
+  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'2pt' }}>
       {[1,2,3,4,5].map(i => (

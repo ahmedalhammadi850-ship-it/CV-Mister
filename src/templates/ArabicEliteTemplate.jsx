@@ -155,7 +155,8 @@ const ContactRow = ({ iconKey, text }) => (
 
 /* ─── Diamond rating ──────────────────────────────────────────── */
 const Stars = ({ level = 3 }) => {
-  const n = Math.min(Math.max(Math.round(level), 1), 5);
+  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '3pt', alignItems: 'center' }}>
       {[1,2,3,4,5].map(i => (

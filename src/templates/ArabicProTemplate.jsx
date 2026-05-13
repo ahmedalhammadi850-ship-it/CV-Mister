@@ -29,7 +29,7 @@ const MAIN_SECTIONS    = new Set(['summary','experience','education','projects',
 
 /* ── Skill bar with percentage label ── */
 const SkillBar = ({ level = 3, accent, bg }) => {
-  const pct = Math.round((Math.min(Math.max(level, 1), 5) / 5) * 100);
+  const pct = level > 5 ? Math.min(level, 100) : Math.round((Math.min(Math.max(level, 1), 5) / 5) * 100);
   return (
     <div style={{ position:'relative', height:'8pt', borderRadius:'4pt', backgroundColor: bg, overflow:'hidden', marginTop:'2pt' }}>
       <div style={{ position:'absolute', top:0, right:0, height:'100%', width:`${pct}%`, backgroundColor: accent, borderRadius:'4pt' }} />

@@ -25,7 +25,8 @@ const SIDEBAR_SECTIONS = new Set(['skills','languages','interests','courses','aw
 const MAIN_SECTIONS    = new Set(['summary','experience','education','projects','publications','references']);
 
 const Bar = ({ level=3, filled, empty }) => {
-  const n = Math.min(Math.max(Math.round(level),1),5);
+  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'3pt' }}>
       {[1,2,3,4,5].map(i=>(
@@ -36,7 +37,8 @@ const Bar = ({ level=3, filled, empty }) => {
 };
 
 const Dots = ({ level=3, filled, empty }) => {
-  const n = Math.min(Math.max(Math.round(level),1),5);
+  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
     <span style={{ display:'inline-flex', gap:'3pt', verticalAlign:'middle' }}>
       {[1,2,3,4,5].map(i=>(
