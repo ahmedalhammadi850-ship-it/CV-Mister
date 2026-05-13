@@ -9,6 +9,7 @@ import DashboardPage from './pages/DashboardPage';
 import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
+import PricingPage from './pages/PricingPage';
 
 function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -36,6 +37,7 @@ function App() {
         <Route path="/"          element={<Layout><HomePage /></Layout>} />
         <Route path="/templates" element={<Layout><TemplatesPage /></Layout>} />
         <Route path="/about"     element={<Layout><AboutPage /></Layout>} />
+        <Route path="/pricing"   element={<Layout><PricingPage /></Layout>} />
 
         <Route path="/dashboard"   element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
         <Route path="/builder"     element={<Layout><BuilderPage /></Layout>} />
