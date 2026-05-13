@@ -448,11 +448,12 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, is
         {/* Lock overlay for free users on paid templates */}
         {isLocked && (
           <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
-            <div className="bg-white/90 rounded-xl px-4 py-2 flex items-center gap-2 text-slate-700 font-semibold text-sm shadow">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-white text-sm font-bold shadow-lg"
+              style={{ background: 'linear-gradient(135deg,#6d28d9 0%,#a855f7 100%)', boxShadow: '0 4px 14px rgba(109,40,217,0.5)' }}>
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
-              {isRTL ? 'مدفوع' : 'Pro Only'}
+              Pro
             </div>
           </div>
         )}
