@@ -77,8 +77,11 @@ const RobotIcon = () => (
 
 export default function AITextarea({
   value, onChange, rows = 4, className = '', placeholder = '', isRTL = false,
+  align: alignProp, onAlignChange,
 }) {
-  const [align, setAlign]     = useState(isRTL ? 'right' : 'left');
+  const [alignLocal, setAlignLocal] = useState(isRTL ? 'right' : 'left');
+  const align    = alignProp !== undefined ? alignProp : alignLocal;
+  const setAlign = (v) => { setAlignLocal(v); onAlignChange?.(v); };
   const [bold, setBold]       = useState(false);
   const [italic, setItalic]   = useState(false);
   const [toast, setToast]     = useState('');

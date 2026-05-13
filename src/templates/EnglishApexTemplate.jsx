@@ -1,4 +1,4 @@
-import { resolveTheme, BREAK_ITEM, BREAK_HEADING } from './templateUtils';
+import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
 
 const L = {
   summary:       { en: 'Professional Summary', ar: 'الملخص المهني'      },

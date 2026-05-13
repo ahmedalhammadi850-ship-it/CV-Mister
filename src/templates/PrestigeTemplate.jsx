@@ -1,4 +1,4 @@
-import { resolveTheme, buildContact, BREAK_ITEM, BREAK_HEADING } from './templateUtils';
+import { resolveTheme, buildContact, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
 
 const labels = {
   summary:       { en: 'Profile',               ar: 'الملف الشخصي'         },

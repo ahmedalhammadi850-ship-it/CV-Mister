@@ -97,6 +97,8 @@ export default function EducationCard({ edu, isRTL, labelClass, inputClass, onCh
                 className={`${inputClass} resize-none`}
                 placeholder={isRTL ? 'صف مؤهلاتك وإنجازاتك...' : 'Describe your qualifications and achievements...'}
                 isRTL={isRTL}
+                align={edu.descriptionAlign}
+                onAlignChange={val => onChange('descriptionAlign', val)}
               />
             </div>
           </div>

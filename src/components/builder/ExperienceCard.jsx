@@ -122,6 +122,8 @@ export default function ExperienceCard({ exp, isRTL, labelClass, inputClass, onC
                 className={`${inputClass} resize-none`}
                 placeholder={isRTL ? 'صف مهامك ومسؤولياتك...' : 'Describe your duties and responsibilities...'}
                 isRTL={isRTL}
+                align={exp.descriptionAlign}
+                onAlignChange={val => onChange('descriptionAlign', val)}
               />
             </div>
           </div>

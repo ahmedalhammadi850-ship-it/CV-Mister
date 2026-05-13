@@ -89,3 +89,8 @@ export function buildContact(info, visible, isRTL) {
 /* ── Print break helpers (use as inline styles) ── */
 export const BREAK_ITEM    = { breakInside: 'avoid', pageBreakInside: 'avoid' };
 export const BREAK_HEADING = { breakAfter:  'avoid', pageBreakAfter:  'avoid' };
+
+/* ── Text-align helper: merges a stored align value into a style object ── */
+export function ta(style, align) {
+  return align ? { ...style, textAlign: align } : style;
+}

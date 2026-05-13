@@ -1,4 +1,4 @@
-import { resolveTheme, BREAK_ITEM, BREAK_HEADING } from './templateUtils';
+import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
 
 const labels = {
   summary:       { en: 'Profile',            ar: 'نبذة تعريفية'         },
@@ -122,7 +122,7 @@ const TealProTemplate = ({
                   </div>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
-                {e.description && <div style={s.body}>{e.description}</div>}
+                {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
               </div>
             ))}
           </div>
@@ -141,7 +141,7 @@ const TealProTemplate = ({
                   </div>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
-                {e.description && <div style={s.body}>{e.description}</div>}
+                {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
               </div>
             ))}
           </div>
@@ -178,7 +178,7 @@ const TealProTemplate = ({
               <div key={i} style={s.item}>
                 <div style={s.role}>{p.title || p.name}</div>
                 {p.link && <div style={{ ...s.meta, color: accent }}>{p.link}</div>}
-                {p.description && <div style={s.body}>{p.description}</div>}
+                {p.description && <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>}
               </div>
             ))}
           </div>
@@ -195,7 +195,7 @@ const TealProTemplate = ({
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
-                {c.description && <div style={s.body}>{c.description}</div>}
+                {c.description && <div style={ta(s.body, c.descriptionAlign)}>{c.description}</div>}
               </div>
             ))}
           </div>
@@ -212,7 +212,7 @@ const TealProTemplate = ({
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
-                {a.description && <div style={s.body}>{a.description}</div>}
+                {a.description && <div style={ta(s.body, a.descriptionAlign)}>{a.description}</div>}
               </div>
             ))}
           </div>
@@ -283,7 +283,7 @@ const TealProTemplate = ({
                 <div key={idx} style={s.item}>
                   {item.title && <div style={s.role}>{item.title}</div>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
-                  {item.description && <div style={s.body}>{item.description}</div>}
+                  {item.description && <div style={ta(s.body, item.descriptionAlign)}>{item.description}</div>}
                 </div>
               ))}
             </div>
