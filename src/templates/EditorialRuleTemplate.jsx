@@ -21,7 +21,8 @@ const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages', 'certificates', 'awards'];
 
 const DotsRating = ({ level = 3, accent }) => {
-  const filled = Math.min(Math.max(Math.round(level), 1), 5);
+  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>
       {[1,2,3,4,5].map(i => (
@@ -187,7 +188,7 @@ const EditorialRuleTemplate = ({
             {data.skills.map((sk, i) => (
               <div key={i} style={s.skillRow}>
                 <span style={s.skillName}>{sk.name || sk}</span>
-                <DotsRating level={sk.proficiency || 3} accent={accent} />
+                <DotsRating level={sk.level || 3} accent={accent} />
               </div>
             ))}
           </div>
