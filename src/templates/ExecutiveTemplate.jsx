@@ -112,7 +112,7 @@ const ExecutiveTemplate = ({
         return data.skills?.length > 0 ? (
           <div key="skills" style={BREAK_ITEM}>
             <SectionHeading labelKey="skills" />
-            <div style={s.body}>{data.skills.join(' | ')}</div>
+            <div style={s.body}>{data.skills.map(sk => sk.name || sk).join(' | ')}</div>
           </div>
         ) : null;
       case 'languages':

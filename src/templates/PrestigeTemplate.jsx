@@ -242,7 +242,7 @@ const PrestigeTemplate = ({
           <div key="skills" style={BREAK_ITEM}>
             <SectionHead label={tr('skills', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0' }}>
-              {data.skills.map((sk, i) => <span key={i} style={s.skillPill}>{sk}</span>)}
+              {data.skills.map((sk, i) => <span key={i} style={s.skillPill}>{sk.name || sk}</span>)}
             </div>
           </div>
         ) : null;

@@ -149,16 +149,16 @@ export const sampleData = {
     }
   ],
   skills: [
-    "JavaScript (ES6+)",
-    "TypeScript",
-    "React.js",
-    "Next.js",
-    "Tailwind CSS",
-    "HTML5/CSS3",
-    "Git/GitHub",
-    "RESTful APIs",
-    "GraphQL",
-    "Jest/Testing Library"
+    { name: "JavaScript (ES6+)", level: 90 },
+    { name: "TypeScript",        level: 80 },
+    { name: "React.js",          level: 90 },
+    { name: "Next.js",           level: 70 },
+    { name: "Tailwind CSS",      level: 80 },
+    { name: "HTML5/CSS3",        level: 90 },
+    { name: "Git/GitHub",        level: 80 },
+    { name: "RESTful APIs",      level: 70 },
+    { name: "GraphQL",           level: 60 },
+    { name: "Jest/Testing Library", level: 70 },
   ],
   projects: [
     {

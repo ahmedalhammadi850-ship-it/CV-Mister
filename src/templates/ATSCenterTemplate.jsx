@@ -208,7 +208,7 @@ const ATSCenterTemplate = ({
         return data.skills?.length > 0 ? (
           <div key="skills" style={BREAK_ITEM}>
             <SectionHead label={tr('skills', isRTL)} />
-            <div style={{ ...s.skillsText, textAlign: 'center' }}>{data.skills.join('  ·  ')}</div>
+            <div style={{ ...s.skillsText, textAlign: 'center' }}>{data.skills.map(sk => sk.name || sk).join('  ·  ')}</div>
           </div>
         ) : null;
 

@@ -200,7 +200,7 @@ const ATSCleanTemplate = ({
           <div key="skills" style={BREAK_ITEM}>
             <div style={s.heading}>{tr('skills', isRTL)}</div>
             <div style={s.rule} />
-            <div style={s.skillsText}>{data.skills.join('  ·  ')}</div>
+            <div style={s.skillsText}>{data.skills.map(sk => sk.name || sk).join('  ·  ')}</div>
           </div>
         ) : null;
 

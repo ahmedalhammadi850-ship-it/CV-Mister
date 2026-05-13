@@ -173,17 +173,41 @@ const ModernTemplate = ({
           </div>
         ) : null;
 
-      case 'skills':
+      case 'skills': {
+        const hasLevels = data.skills?.some(sk => (sk.level || 0) > 0);
         return data.skills?.length > 0 ? (
           <div key="skills" style={BREAK_ITEM}>
             <SectionHeading label={tr('skills', isRTL)} />
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0' }}>
-              {data.skills.map((sk, i) => (
-                <span key={i} style={s.tag}>{sk.name || sk}</span>
-              ))}
-            </div>
+            {hasLevels ? (
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5pt 12pt' }}>
+                {data.skills.map((sk, i) => {
+                  const name = sk.name || sk;
+                  const level = sk.level || 0;
+                  return (
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '2pt' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: sz.body, color: '#1a1a1a', fontWeight: '500' }}>{name}</span>
+                        {level > 0 && <span style={{ fontSize: '7pt', color: accent, fontWeight: '600' }}>{level}%</span>}
+                      </div>
+                      {level > 0 && (
+                        <div style={{ height: '3pt', width: '100%', background: '#e5e7eb', borderRadius: '2pt', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${level}%`, background: accent, borderRadius: '2pt' }} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0' }}>
+                {data.skills.map((sk, i) => (
+                  <span key={i} style={s.tag}>{sk.name || sk}</span>
+                ))}
+              </div>
+            )}
           </div>
         ) : null;
+      }
 
       case 'languages':
         return data.languages?.length > 0 ? (
