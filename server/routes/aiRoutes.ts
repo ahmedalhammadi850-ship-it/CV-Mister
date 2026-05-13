@@ -1,6 +1,11 @@
 import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
 
+const openai = new OpenAI({
+  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+});
+
 export function registerAIRoutes(app: Express) {
   app.post("/api/ai/rewrite", async (req: Request, res: Response) => {
     const { text, action, language } = req.body as {
@@ -11,10 +16,6 @@ export function registerAIRoutes(app: Express) {
 
     if (!text || !action) {
       return res.status(400).json({ message: "text and action are required" });
-    }
-
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(503).json({ message: "AI_NOT_CONFIGURED" });
     }
 
     const prompts: Record<typeof action, string> = {
@@ -33,7 +34,6 @@ export function registerAIRoutes(app: Express) {
     };
 
     try {
-      const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
       const completion = await openai.chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompts[action] }],

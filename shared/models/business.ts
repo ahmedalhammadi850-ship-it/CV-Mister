@@ -1,4 +1,12 @@
-import { pgTable, varchar, text, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, varchar, text, timestamp, integer, boolean } from "drizzle-orm/pg-core";
+
+export const templateConfig = pgTable("template_config", {
+  templateId: varchar("template_id").primaryKey(),
+  isFree: boolean("is_free").notNull().default(true),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export type TemplateConfig = typeof templateConfig.$inferSelect;
 
 export const businessContacts = pgTable("business_contacts", {
   id: varchar("id").primaryKey(),

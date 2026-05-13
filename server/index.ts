@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerCVRoutes } from "./routes/cvRoutes";
+import { registerAIRoutes } from "./routes/aiRoutes";
 import { registerPaymentRoutes } from "./routes/paymentRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
 import { registerTemplateRoutes } from "./routes/templateRoutes";
@@ -63,6 +64,7 @@ async function main() {
   await setupAuth(app);
   registerAuthRoutes(app);
   registerCVRoutes(app);
+  registerAIRoutes(app);
   registerPaymentRoutes(app);
   registerAdminRoutes(app);
   registerTemplateRoutes(app);
