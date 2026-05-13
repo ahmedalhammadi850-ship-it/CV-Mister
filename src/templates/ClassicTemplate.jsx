@@ -78,7 +78,7 @@ const ClassicTemplate = ({
     heading: {
       fontSize: sz.heading, fontWeight: '700', color: accent,
       textTransform: 'uppercase', letterSpacing: '0.08em',
-      textAlign: headingAlign,
+      textAlign: 'center',
     },
     headingBottom: { height: '1px', backgroundColor: accent + '44', marginTop: '3pt' },
     meta:    { fontSize: sz.meta, color: '#555', fontStyle: 'italic', marginBottom: '3pt' },

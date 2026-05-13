@@ -78,12 +78,12 @@ const ModernTemplate = ({
       ...BREAK_HEADING,
     },
     headingAccent: {
-      width: '4pt', height: '16pt', backgroundColor: accent,
-      borderRadius: '2pt', flexShrink: 0,
+      width: '6pt', height: '6pt', backgroundColor: accent,
+      borderRadius: '50%', flexShrink: 0,
     },
     heading: {
       fontSize: sz.heading, fontWeight: '700', color: '#111',
-      textAlign: headingAlign, flex: 1,
+      textAlign: 'center', whiteSpace: 'nowrap',
     },
     headingLine: {
       flex: 1, height: '1px', backgroundColor: '#e5e7eb',
@@ -121,8 +121,9 @@ const ModernTemplate = ({
 
   const SectionHeading = ({ label }) => (
     <div style={s.headingWrap}>
-      <div style={s.headingAccent} />
+      <div style={s.headingLine} />
       <div style={s.heading}>{label}</div>
+      <div style={s.headingAccent} />
       <div style={s.headingLine} />
     </div>
   );

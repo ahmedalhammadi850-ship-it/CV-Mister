@@ -83,7 +83,7 @@ const CreativeTemplate = ({
       backgroundColor: accent, color: '#fff',
       fontSize: sz.heading, fontWeight: '700',
       padding: '2pt 10pt', borderRadius: '4pt',
-      letterSpacing: '0.02em',
+      letterSpacing: '0.02em', flexShrink: 0,
     },
     headingLine: {
       flex: 1, height: '1.5px',
@@ -124,6 +124,7 @@ const CreativeTemplate = ({
 
   const SectionHeading = ({ label }) => (
     <div style={s.headingWrap}>
+      <div style={{ ...s.headingLine, background: `linear-gradient(${isRTL ? '90deg' : '270deg'}, ${accent}44, transparent)` }} />
       <div style={s.headingPill}>{label}</div>
       <div style={s.headingLine} />
     </div>
