@@ -40,21 +40,92 @@ const ModernTemplate = ({
       padding, lineHeight, width: '794px', minHeight: '1122px',
       boxSizing: 'border-box', direction: dir, textAlign: isRTL ? 'right' : 'left',
     },
-    name:    { fontSize: sz.name,    fontWeight: '700', color: accent, marginBottom: '3pt', lineHeight: 1.2, textAlign: headerAlign },
-    jobTitle:{ fontSize: sz.body,    color: '#555', marginBottom: '6pt', textAlign: headerAlign },
-    contact: { fontSize: sz.meta,    color: '#444', marginBottom: '14pt', borderBottom: `2px solid ${accent}`, paddingBottom: '8pt', textAlign: headerAlign },
-    heading: { fontSize: sz.heading, fontWeight: '700', color: accent, marginTop: sectionMt, marginBottom: '6pt', borderBottom: `1px solid ${accent}`, paddingBottom: '2pt', textAlign: headingAlign, ...BREAK_HEADING },
-    meta:    { fontSize: sz.meta,    color: '#555', marginBottom: '4pt' },
-    body:    { fontSize: sz.body,    color: '#222', lineHeight, whiteSpace: 'pre-line' },
-    row:     { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexDirection: 'row', gap: '12pt' },
-    role:    { fontSize: sz.body, fontWeight: '700', marginBottom: '1pt', flex: 1, minWidth: 0 },
-    date:    { fontSize: sz.meta, color: '#666', whiteSpace: 'nowrap', flexShrink: 0 },
-    tag:     { display: 'inline-block', background: accent + '18', color: accent, borderRadius: '4pt', padding: '1pt 6pt', fontSize: sz.meta, marginRight: '4pt', marginBottom: '3pt' },
-    item:    { marginBottom: '10pt', ...BREAK_ITEM },
-    itemSm:  { marginBottom: '6pt',  ...BREAK_ITEM },
+    headerBlock: {
+      marginBottom: '14pt',
+      paddingBottom: '10pt',
+      borderBottom: `3px solid ${accent}`,
+      ...BREAK_ITEM,
+    },
+    name: {
+      fontSize: sz.name, fontWeight: '800', color: '#111',
+      marginBottom: '2pt', lineHeight: 1.15, textAlign: headerAlign,
+      letterSpacing: '-0.3px',
+    },
+    jobTitle: {
+      fontSize: '11pt', color: accent, fontWeight: '600',
+      marginBottom: '7pt', textAlign: headerAlign,
+    },
+    contactRow: {
+      fontSize: sz.meta, color: '#555', textAlign: headerAlign,
+      display: 'flex', flexWrap: 'wrap', gap: '0',
+      justifyContent: headerAlign === 'center' ? 'center' : (isRTL ? 'flex-end' : 'flex-start'),
+    },
+    contactPart: {
+      display: 'inline-flex', alignItems: 'center', gap: '4pt',
+      paddingRight: isRTL ? '0' : '10pt', paddingLeft: isRTL ? '10pt' : '0',
+      borderRight: isRTL ? 'none' : '1px solid #ccc',
+      borderLeft: isRTL ? '1px solid #ccc' : 'none',
+      marginBottom: '2pt',
+    },
+    contactLast: {
+      display: 'inline-flex', alignItems: 'center', gap: '4pt',
+      marginBottom: '2pt',
+    },
+    headingWrap: {
+      display: 'flex', alignItems: 'center', gap: '8pt',
+      marginTop: sectionMt, marginBottom: '8pt',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+      ...BREAK_HEADING,
+    },
+    headingAccent: {
+      width: '4pt', height: '16pt', backgroundColor: accent,
+      borderRadius: '2pt', flexShrink: 0,
+    },
+    heading: {
+      fontSize: sz.heading, fontWeight: '700', color: '#111',
+      textAlign: headingAlign, flex: 1,
+    },
+    headingLine: {
+      flex: 1, height: '1px', backgroundColor: '#e5e7eb',
+    },
+    meta:    { fontSize: sz.meta, color: '#555', marginBottom: '3pt' },
+    company: { fontSize: sz.meta, color: accent, fontWeight: '600', marginBottom: '3pt' },
+    body:    { fontSize: sz.body, color: '#333', lineHeight, whiteSpace: 'pre-line', marginTop: '3pt' },
+    row: {
+      display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start',
+      flexDirection: isRTL ? 'row-reverse' : 'row', gap: '8pt',
+    },
+    role:    { fontSize: sz.body, fontWeight: '700', color: '#111', flex: 1, minWidth: 0 },
+    date:    { fontSize: sz.meta, color: '#fff', whiteSpace: 'nowrap', flexShrink: 0,
+               backgroundColor: accent, padding: '1pt 6pt', borderRadius: '10pt' },
+    tag: {
+      display: 'inline-block', background: '#f3f4f6', color: '#374151',
+      border: '1px solid #e5e7eb',
+      borderRadius: '4pt', padding: '2pt 7pt', fontSize: sz.meta,
+      marginRight: isRTL ? '0' : '4pt', marginLeft: isRTL ? '4pt' : '0',
+      marginBottom: '4pt', fontWeight: '500',
+    },
+    item:   { marginBottom: '11pt', ...BREAK_ITEM },
+    itemSm: { marginBottom: '7pt',  ...BREAK_ITEM },
+    bullet: {
+      display: 'flex', alignItems: 'flex-start', gap: '6pt', marginBottom: '3pt',
+      flexDirection: isRTL ? 'row-reverse' : 'row',
+    },
+    bulletDot: {
+      width: '5pt', height: '5pt', borderRadius: '50%', backgroundColor: accent,
+      flexShrink: 0, marginTop: '5pt',
+    },
   };
 
   const contact = buildContact(data.personalInfo, visiblePersonalFields, isRTL);
+
+  const SectionHeading = ({ label }) => (
+    <div style={s.headingWrap}>
+      <div style={s.headingAccent} />
+      <div style={s.heading}>{label}</div>
+      <div style={s.headingLine} />
+    </div>
+  );
 
   const renderSection = (key) => {
     if (!show(key)) return null;
@@ -62,180 +133,201 @@ const ModernTemplate = ({
       case 'summary':
         return data.personalInfo?.summary ? (
           <div key="summary" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('summary', isRTL)}</div>
+            <SectionHeading label={tr('summary', isRTL)} />
             <div style={s.body}>{data.personalInfo.summary}</div>
           </div>
         ) : null;
+
       case 'experience':
         return data.experience?.length > 0 ? (
           <div key="experience">
-            <div style={s.heading}>{tr('experience', isRTL)}</div>
+            <SectionHeading label={tr('experience', isRTL)} />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
                   <div style={s.role}>{e.jobTitle}</div>
-                  <div style={s.date}>{e.startDate} {tr('to', isRTL)} {e.current ? tr('present', isRTL) : e.endDate}</div>
+                  <div style={s.date}>{e.startDate}{e.startDate ? ' – ' : ''}{e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
-                <div style={s.meta}>{e.company}{e.location ? `، ${e.location}` : ''}</div>
-                <div style={s.body}>{e.description}</div>
-              </div>
-            ))}
-          </div>
-        ) : null;
-      case 'education':
-        return data.education?.length > 0 ? (
-          <div key="education">
-            <div style={s.heading}>{tr('education', isRTL)}</div>
-            {data.education.map((e, i) => (
-              <div key={i} style={{ ...s.itemSm }}>
-                <div style={s.row}>
-                  <div style={s.role}>{e.degree}</div>
-                  <div style={s.date}>{e.startDate} {tr('to', isRTL)} {e.endDate}</div>
-                </div>
-                <div style={s.meta}>{e.institution}</div>
+                <div style={s.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
                 {e.description && <div style={s.body}>{e.description}</div>}
               </div>
             ))}
           </div>
         ) : null;
-      case 'skills':
-        return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('skills', isRTL)}</div>
-            <div style={s.body}>{data.skills.join(' | ')}</div>
-          </div>
-        ) : null;
-      case 'languages':
-        return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('languages', isRTL)}</div>
-            <div style={s.body}>{data.languages.map(l => `${l.name} (${l.level})`).join(' | ')}</div>
-          </div>
-        ) : null;
-      case 'projects':
-        return data.projects?.length > 0 ? (
-          <div key="projects">
-            <div style={s.heading}>{tr('projects', isRTL)}</div>
-            {data.projects.map((p, i) => (
+
+      case 'education':
+        return data.education?.length > 0 ? (
+          <div key="education">
+            <SectionHeading label={tr('education', isRTL)} />
+            {data.education.map((e, i) => (
               <div key={i} style={s.itemSm}>
-                <div style={s.role}>{p.title}</div>
-                {p.link && <div style={{ ...s.meta, color: accent }}>{p.link}</div>}
-                <div style={s.body}>{p.description}</div>
+                <div style={s.row}>
+                  <div style={s.role}>{e.degree}</div>
+                  <div style={s.date}>{e.startDate}{e.startDate ? ' – ' : ''}{e.endDate}</div>
+                </div>
+                <div style={s.company}>{e.institution}</div>
+                {e.description && <div style={s.body}>{e.description}</div>}
               </div>
             ))}
           </div>
         ) : null;
+
+      case 'skills':
+        return data.skills?.length > 0 ? (
+          <div key="skills" style={BREAK_ITEM}>
+            <SectionHeading label={tr('skills', isRTL)} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0' }}>
+              {data.skills.map((sk, i) => (
+                <span key={i} style={s.tag}>{sk.name || sk}</span>
+              ))}
+            </div>
+          </div>
+        ) : null;
+
+      case 'languages':
+        return data.languages?.length > 0 ? (
+          <div key="languages" style={BREAK_ITEM}>
+            <SectionHeading label={tr('languages', isRTL)} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0' }}>
+              {data.languages.map((l, i) => (
+                <span key={i} style={s.tag}>{l.name}{l.level ? ` · ${l.level}` : ''}</span>
+              ))}
+            </div>
+          </div>
+        ) : null;
+
+      case 'projects':
+        return data.projects?.length > 0 ? (
+          <div key="projects">
+            <SectionHeading label={tr('projects', isRTL)} />
+            {data.projects.map((p, i) => (
+              <div key={i} style={s.itemSm}>
+                <div style={s.role}>{p.title}</div>
+                {p.link && <div style={{ ...s.meta, color: accent }}>{p.link}</div>}
+                {p.description && <div style={s.body}>{p.description}</div>}
+              </div>
+            ))}
+          </div>
+        ) : null;
+
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <div key="certificates">
-            <div style={s.heading}>{tr('certificates', isRTL)}</div>
+            <SectionHeading label={tr('certificates', isRTL)} />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{c.name}</div>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
-                {c.issuer && <div style={s.meta}>{c.issuer}</div>}
+                {c.issuer && <div style={s.company}>{c.issuer}</div>}
                 {c.description && <div style={s.body}>{c.description}</div>}
               </div>
             ))}
           </div>
         ) : null;
+
       case 'interests':
         return data.interests?.length > 0 ? (
           <div key="interests" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('interests', isRTL)}</div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt', marginTop: '4pt' }}>
+            <SectionHeading label={tr('interests', isRTL)} />
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0' }}>
               {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
             </div>
           </div>
         ) : null;
+
       case 'courses':
         return data.courses?.length > 0 ? (
           <div key="courses">
-            <div style={s.heading}>{tr('courses', isRTL)}</div>
+            <SectionHeading label={tr('courses', isRTL)} />
             {data.courses.map((c, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{c.name}</div>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
-                {c.institution && <div style={s.meta}>{c.institution}</div>}
+                {c.institution && <div style={s.company}>{c.institution}</div>}
               </div>
             ))}
           </div>
         ) : null;
+
       case 'awards':
         return data.awards?.length > 0 ? (
           <div key="awards">
-            <div style={s.heading}>{tr('awards', isRTL)}</div>
+            <SectionHeading label={tr('awards', isRTL)} />
             {data.awards.map((a, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{a.title}</div>
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
-                {a.issuer && <div style={s.meta}>{a.issuer}</div>}
+                {a.issuer && <div style={s.company}>{a.issuer}</div>}
                 {a.description && <div style={s.body}>{a.description}</div>}
               </div>
             ))}
           </div>
         ) : null;
+
       case 'organisations':
         return data.organisations?.length > 0 ? (
           <div key="organisations">
-            <div style={s.heading}>{tr('organisations', isRTL)}</div>
+            <SectionHeading label={tr('organisations', isRTL)} />
             {data.organisations.map((o, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{o.name}</div>
                   {o.date && <div style={s.date}>{o.date}</div>}
                 </div>
-                {o.role && <div style={s.meta}>{o.role}</div>}
+                {o.role && <div style={s.company}>{o.role}</div>}
               </div>
             ))}
           </div>
         ) : null;
+
       case 'publications':
         return data.publications?.length > 0 ? (
           <div key="publications">
-            <div style={s.heading}>{tr('publications', isRTL)}</div>
+            <SectionHeading label={tr('publications', isRTL)} />
             {data.publications.map((p, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.row}>
                   <div style={s.role}>{p.title}</div>
                   {p.date && <div style={s.date}>{p.date}</div>}
                 </div>
-                {p.publisher && <div style={s.meta}>{p.publisher}</div>}
+                {p.publisher && <div style={s.company}>{p.publisher}</div>}
                 {p.description && <div style={s.body}>{p.description}</div>}
               </div>
             ))}
           </div>
         ) : null;
+
       case 'references':
         return data.references?.length > 0 ? (
           <div key="references">
-            <div style={s.heading}>{tr('references', isRTL)}</div>
+            <SectionHeading label={tr('references', isRTL)} />
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.role}>{r.name}</div>
-                {(r.title || r.company) && <div style={s.meta}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
-                {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
+                {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
+                {(r.email || r.phone) && <div style={s.meta}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
           </div>
         ) : null;
+
       default:
         if (key.startsWith('csec-') && data.customSections) {
           const sec = data.customSections.find(s => s.id === key);
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <div style={s.heading}>{sec.title}</div>
+              <SectionHeading label={sec.title} />
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
                   {item.title && <div style={s.role}>{item.title}</div>}
-                  {item.subtitle && <div style={s.meta}>{item.subtitle}</div>}
+                  {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <div style={s.body}>{item.description}</div>}
                 </div>
               ))}
@@ -246,12 +338,22 @@ const ModernTemplate = ({
     }
   };
 
+  const contactParts = contact ? contact.split(' | ') : [];
+
   return (
     <div style={s.page}>
-      <div style={{ ...BREAK_ITEM }}>
+      <div style={s.headerBlock}>
         <div style={s.name}>{data.personalInfo.fullName}</div>
         <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
-        {contact && <div style={s.contact}>{contact}</div>}
+        {contactParts.length > 0 && (
+          <div style={s.contactRow}>
+            {contactParts.map((part, i) => (
+              <span key={i} style={i < contactParts.length - 1 ? s.contactPart : s.contactLast}>
+                {part.trim()}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
       {sectionOrder.map(key => renderSection(key))}
     </div>
