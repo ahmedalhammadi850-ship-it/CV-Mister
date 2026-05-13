@@ -2,28 +2,28 @@ import { resolveTheme, BREAK_ITEM, BREAK_HEADING } from './templateUtils';
 
 /* ── Labels ──────────────────────────────────────────────────── */
 const L = {
-  summary:       { ar: 'نبذة مهنية',       en: 'Professional Summary' },
-  experience:    { ar: 'الخبرة المهنية',   en: 'Work Experience'      },
-  education:     { ar: 'المؤهلات العلمية', en: 'Education'            },
-  skills:        { ar: 'المهارات',          en: 'Skills'               },
-  languages:     { ar: 'اللغات',            en: 'Languages'            },
-  interests:     { ar: 'الاهتمامات',        en: 'Interests'            },
-  contact:       { ar: 'بيانات التواصل',   en: 'Contact'              },
-  projects:      { ar: 'المشاريع',          en: 'Projects'             },
-  certificates:  { ar: 'الشهادات',          en: 'Certificates'         },
-  courses:       { ar: 'الدورات',           en: 'Courses'              },
-  awards:        { ar: 'الجوائز',           en: 'Awards'               },
-  organisations: { ar: 'المنظمات',          en: 'Organisations'        },
-  publications:  { ar: 'المنشورات',         en: 'Publications'         },
-  references:    { ar: 'المراجع',           en: 'References'           },
-  present:       { ar: 'حتى الآن',          en: 'Present'              },
+  summary:       { ar: 'نبذة مهنية',        en: 'Professional Summary' },
+  experience:    { ar: 'الخبرة المهنية',    en: 'Work Experience'      },
+  education:     { ar: 'المؤهلات العلمية',  en: 'Education'            },
+  skills:        { ar: 'المهارات',           en: 'Skills'               },
+  languages:     { ar: 'اللغات',             en: 'Languages'            },
+  interests:     { ar: 'الاهتمامات',         en: 'Interests'            },
+  contact:       { ar: 'بيانات التواصل',    en: 'Contact'              },
+  projects:      { ar: 'المشاريع',           en: 'Projects'             },
+  certificates:  { ar: 'الشهادات',           en: 'Certificates'         },
+  courses:       { ar: 'الدورات',            en: 'Courses'              },
+  awards:        { ar: 'الجوائز',            en: 'Awards'               },
+  organisations: { ar: 'المنظمات',           en: 'Organisations'        },
+  publications:  { ar: 'المنشورات',          en: 'Publications'         },
+  references:    { ar: 'المراجع',            en: 'References'           },
+  present:       { ar: 'حتى الآن',           en: 'Present'              },
 };
 const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const SIDEBAR_W = 210;
-const GOLD = '#b8892a';
-const GOLD_LIGHT = '#d4a843';
-const NAVY = '#0d1b2e';
+const GOLD      = '#b8892a';
+const GOLD_LIGHT= '#d4a843';
+const NAVY      = '#0d1b2e';
 
 const DEFAULT_ORDER = [
   'summary','experience','education','projects','publications','references',
@@ -32,7 +32,7 @@ const DEFAULT_ORDER = [
 const SIDEBAR_KEYS = new Set(['skills','languages','interests','certificates','courses','awards','organisations']);
 const MAIN_KEYS    = new Set(['summary','experience','education','projects','publications','references']);
 
-/* ── SVG Icons for contact ─────────────────────────────────── */
+/* ── SVG Icons ─────────────────────────────────────────────── */
 const PhoneIcon    = ({c='#fff'}) => <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M3 1h3l1.5 3.5-2 1.2c.8 1.6 2.3 3.1 3.8 3.8l1.2-2L14 9v3c0 1.1-.9 1-2 .7C5 11 1 6 1 3c-.3-1.1-.1-2 1-2z" stroke={c} strokeWidth="1.2" fill="none"/></svg>;
 const EmailIcon    = ({c='#fff'}) => <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="1" y="2.5" width="12" height="9" rx="1" stroke={c} strokeWidth="1.2"/><path d="M1 3.5l6 4.5 6-4.5" stroke={c} strokeWidth="1.2"/></svg>;
 const LocationIcon = ({c='#fff'}) => <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 0 1 4 4c0 3-4 8-4 8S3 8 3 5a4 4 0 0 1 4-4z" stroke={c} strokeWidth="1.2"/><circle cx="7" cy="5" r="1.5" fill={c}/></svg>;
@@ -40,7 +40,6 @@ const GlobeIcon    = ({c='#fff'}) => <svg width="11" height="11" viewBox="0 0 14
 const LinkedinIcon = ({c='#fff'}) => <svg width="11" height="11" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke={c} strokeWidth="1.2"/><path d="M4 6v4M4 4.5v.5M7 10V8a1.5 1.5 0 0 1 3 0v2M7 6v4" stroke={c} strokeWidth="1.2" strokeLinecap="round"/></svg>;
 const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>, portfolio:<GlobeIcon/>, linkedin:<LinkedinIcon/> };
 
-/* ── Section SVG icons (main area) ────────────────────────── */
 const ISummary    = () => <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="4" r="3" fill={GOLD}/><path d="M1 13c0-3.3 2.7-5 6-5s6 1.7 6 5" stroke={GOLD} strokeWidth="1.5" strokeLinecap="round"/></svg>;
 const IExperience = () => <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><rect x="1" y="4" width="12" height="9" rx="1.5" stroke={GOLD} strokeWidth="1.3"/><path d="M4.5 4V2.5A1.5 1.5 0 0 1 6 1h2a1.5 1.5 0 0 1 1.5 1.5V4" stroke={GOLD} strokeWidth="1.3"/><line x1="1" y1="8" x2="13" y2="8" stroke={GOLD} strokeWidth="1"/></svg>;
 const IEducation  = () => <svg width="12" height="12" viewBox="0 0 14 14" fill="none"><path d="M7 2L1 5.5l6 3.5 6-3.5L7 2z" fill={GOLD}/><path d="M4 7.5v3c0 1 1.3 2 3 2s3-1 3-2v-3" stroke={GOLD} strokeWidth="1.2" strokeLinecap="round"/></svg>;
@@ -48,47 +47,51 @@ const IProjects   = () => <svg width="12" height="12" viewBox="0 0 14 14" fill="
 const SICON = { summary:<ISummary/>, experience:<IExperience/>, education:<IEducation/>, projects:<IProjects/> };
 
 /* ── Main section heading ─────────────────────────────────── */
-const MainHeading = ({ label, iconKey, accent }) => (
-  <div style={{ direction:'rtl', marginTop:'15pt', marginBottom:'4pt', ...BREAK_HEADING }}>
-    <div style={{ display:'flex', alignItems:'center', gap:'7pt', direction:'rtl' }}>
-      <div style={{ fontSize:'11pt', fontWeight:'800', color: NAVY, letterSpacing:'-0.01em' }}>
-        {label}
+const MainHeading = ({ label, iconKey, accent, isRTL }) => {
+  const dir = isRTL ? 'rtl' : 'ltr';
+  const gradDir = isRTL ? 'to left' : 'to right';
+  const borderSide = isRTL ? { borderRight:`2.5px solid ${accent}` } : { borderLeft:`2.5px solid ${accent}` };
+  const justifyLine = isRTL ? 'flex-end' : 'flex-start';
+  return (
+    <div style={{ direction:dir, marginTop:'15pt', marginBottom:'4pt', ...BREAK_HEADING }}>
+      <div style={{ display:'flex', alignItems:'center', gap:'7pt', direction:dir }}>
+        <div style={{ fontSize:'11pt', fontWeight:'800', color:NAVY, letterSpacing:'-0.01em' }}>{label}</div>
+        {SICON[iconKey] || null}
+        <div style={{ flex:1, height:'1.5px', background:`linear-gradient(${gradDir}, transparent, ${accent})` }} />
       </div>
-      {SICON[iconKey] || null}
-      <div style={{ flex:1, height:'1.5px', background:`linear-gradient(to left, transparent, ${accent})` }} />
+      <div style={{ display:'flex', justifyContent:justifyLine }}>
+        <div style={{ width:'32pt', height:'2.5px', backgroundColor:accent, borderRadius:'2px', marginTop:'3pt' }} />
+      </div>
     </div>
-    <div style={{ display:'flex', justifyContent:'flex-end' }}>
-      <div style={{ width:'32pt', height:'2.5px', backgroundColor: accent, borderRadius:'2px', marginTop:'3pt' }} />
-    </div>
-  </div>
-);
+  );
+};
 
 /* ── Sidebar section title ────────────────────────────────── */
-const SbTitle = ({ label }) => (
-  <div style={{
-    fontSize:'8pt', fontWeight:'800', color: GOLD,
-    textAlign:'right', letterSpacing:'0.08em',
-    textTransform:'uppercase',
-    borderRight:`2.5px solid ${GOLD}`,
-    paddingRight:'7pt',
-    marginBottom:'8pt', marginTop:'15pt',
-    ...BREAK_HEADING,
-  }}>{label}</div>
-);
+const SbTitle = ({ label, isRTL, accent }) => {
+  const borderStyle = isRTL
+    ? { borderRight:`2.5px solid ${accent}`, paddingRight:'7pt', textAlign:'right' }
+    : { borderLeft:`2.5px solid ${accent}`,  paddingLeft:'7pt',  textAlign:'left'  };
+  return (
+    <div style={{
+      fontSize:'8pt', fontWeight:'800', color:accent,
+      letterSpacing:'0.08em', textTransform:'uppercase',
+      marginBottom:'8pt', marginTop:'15pt',
+      ...borderStyle, ...BREAK_HEADING,
+    }}>{label}</div>
+  );
+};
 
 /* ── Skill diamond bar ─────────────────────────────────────── */
-const DiamondBar = ({ level = 3, accent }) => {
-  const n = Math.min(Math.max(Math.round(level), 1), 5);
+const DiamondBar = ({ level=3, accent }) => {
+  const n = Math.min(Math.max(Math.round(level),1),5);
   return (
     <div style={{ display:'flex', gap:'4pt', direction:'ltr', marginTop:'2pt' }}>
-      {[1,2,3,4,5].map(i => (
+      {[1,2,3,4,5].map(i=>(
         <div key={i} style={{
           width:'9pt', height:'9pt',
-          backgroundColor: i <= n ? accent : 'rgba(255,255,255,0.12)',
-          transform:'rotate(45deg)',
-          flexShrink:0,
-          transition:'background .2s',
-        }} />
+          backgroundColor: i<=n ? accent : 'rgba(255,255,255,0.12)',
+          transform:'rotate(45deg)', flexShrink:0,
+        }}/>
       ))}
     </div>
   );
@@ -112,12 +115,14 @@ const LangGauge = ({ pct=75, label, accent }) => {
 
 /* ═══════════════════════════════════════════════════════════ */
 const ArabicLuxeTemplate = ({
-  data, theme,
+  data, theme, isRTL = true,
   visibleSections={}, visiblePersonalFields={},
   sectionOrder=DEFAULT_ORDER,
 }) => {
   const accent = theme?.primaryColor || GOLD;
-  const { sz, font, lineHeight } = resolveTheme(theme, true);
+  const { sz, font, lineHeight } = resolveTheme(theme, isRTL);
+  const dir   = isRTL ? 'rtl' : 'ltr';
+  const align = isRTL ? 'right' : 'left';
   const show  = k => visibleSections[k] !== false;
   const info  = data?.personalInfo || {};
   const vis   = visiblePersonalFields || {};
@@ -138,10 +143,10 @@ const ArabicLuxeTemplate = ({
 
       case 'skills': return data.skills?.length>0 ? (
         <div key="skills" style={BREAK_ITEM}>
-          <SbTitle label={tr('skills',true)} />
+          <SbTitle label={tr('skills',isRTL)} isRTL={isRTL} accent={accent} />
           {data.skills.map((sk,i)=>(
-            <div key={i} style={{ marginBottom:'9pt', direction:'rtl' }}>
-              <div style={{ fontSize:'8.5pt', color:'#fff', textAlign:'right', marginBottom:'3pt' }}>
+            <div key={i} style={{ marginBottom:'9pt', direction:dir }}>
+              <div style={{ fontSize:'8.5pt', color:'#fff', textAlign:align, marginBottom:'3pt' }}>
                 {typeof sk==='string' ? sk : (sk.name||sk)}
               </div>
               <DiamondBar level={typeof sk==='object'?(sk.level||3):3} accent={accent} />
@@ -152,7 +157,7 @@ const ArabicLuxeTemplate = ({
 
       case 'languages': return data.languages?.length>0 ? (
         <div key="languages" style={BREAK_ITEM}>
-          <SbTitle label={tr('languages',true)} />
+          <SbTitle label={tr('languages',isRTL)} isRTL={isRTL} accent={accent} />
           <div style={{ display:'flex', flexWrap:'wrap', gap:'5pt', justifyContent:'center' }}>
             {data.languages.map((l,i)=>{
               const map={native:100,fluent:90,advanced:80,'upper-intermediate':75,intermediate:65,elementary:45,beginner:35};
@@ -166,8 +171,8 @@ const ArabicLuxeTemplate = ({
 
       case 'interests': return data.interests?.length>0 ? (
         <div key="interests" style={BREAK_ITEM}>
-          <SbTitle label={tr('interests',true)} />
-          <div style={{ display:'flex', flexWrap:'wrap', gap:'4pt', justifyContent:'flex-end', direction:'rtl' }}>
+          <SbTitle label={tr('interests',isRTL)} isRTL={isRTL} accent={accent} />
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'4pt', justifyContent:align==='right'?'flex-end':'flex-start', direction:dir }}>
             {data.interests.map((item,i)=>(
               <span key={i} style={{
                 background:'rgba(255,255,255,0.1)', border:`1px solid ${accent}40`,
@@ -185,9 +190,9 @@ const ArabicLuxeTemplate = ({
         if(!items?.length) return null;
         return (
           <div key={key} style={BREAK_ITEM}>
-            <SbTitle label={tr(key,true)} />
+            <SbTitle label={tr(key,isRTL)} isRTL={isRTL} accent={accent} />
             {items.map((c,i)=>(
-              <div key={i} style={{ marginBottom:'5pt', direction:'rtl', textAlign:'right' }}>
+              <div key={i} style={{ marginBottom:'5pt', direction:dir, textAlign:align }}>
                 <div style={{ fontSize:'8pt', color:'#fff', fontWeight:'600' }}>{c.name||c.title||c}</div>
                 {(c.institution||c.issuer)&&<div style={{ fontSize:'7pt', color:`${accent}cc` }}>{c.institution||c.issuer}</div>}
               </div>
@@ -198,9 +203,9 @@ const ArabicLuxeTemplate = ({
 
       case 'awards': return data.awards?.length>0 ? (
         <div key="awards" style={BREAK_ITEM}>
-          <SbTitle label={tr('awards',true)} />
+          <SbTitle label={tr('awards',isRTL)} isRTL={isRTL} accent={accent} />
           {data.awards.map((a,i)=>(
-            <div key={i} style={{ fontSize:'8pt', color:'#fff', textAlign:'right', direction:'rtl', marginBottom:'4pt' }}>
+            <div key={i} style={{ fontSize:'8pt', color:'#fff', textAlign:align, direction:dir, marginBottom:'4pt' }}>
               {a.title||a.name||a}
             </div>
           ))}
@@ -209,9 +214,9 @@ const ArabicLuxeTemplate = ({
 
       case 'organisations': return data.organisations?.length>0 ? (
         <div key="organisations" style={BREAK_ITEM}>
-          <SbTitle label={tr('organisations',true)} />
+          <SbTitle label={tr('organisations',isRTL)} isRTL={isRTL} accent={accent} />
           {data.organisations.map((o,i)=>(
-            <div key={i} style={{ fontSize:'8pt', color:'rgba(255,255,255,0.8)', textAlign:'right', direction:'rtl', marginBottom:'4pt' }}>
+            <div key={i} style={{ fontSize:'8pt', color:'rgba(255,255,255,0.8)', textAlign:align, direction:dir, marginBottom:'4pt' }}>
               {o.name||o}
             </div>
           ))}
@@ -229,32 +234,38 @@ const ArabicLuxeTemplate = ({
 
       case 'summary': return info.summary ? (
         <div key="summary" style={BREAK_ITEM}>
-          <MainHeading label={tr('summary',true)} iconKey="summary" accent={accent} />
+          <MainHeading label={tr('summary',isRTL)} iconKey="summary" accent={accent} isRTL={isRTL} />
           <div style={{
             fontSize:sz.body, color:'#4a5568', lineHeight,
-            textAlign:'right', whiteSpace:'pre-line', direction:'rtl',
-            borderRight:`3px solid ${accent}20`,
-            paddingRight:'10pt', marginRight:'3pt',
+            textAlign:align, whiteSpace:'pre-line', direction:dir,
+            ...(isRTL
+              ? { borderRight:`3px solid ${accent}20`, paddingRight:'10pt', marginRight:'3pt' }
+              : { borderLeft:`3px solid ${accent}20`,  paddingLeft:'10pt',  marginLeft:'3pt'  }),
           }}>{info.summary}</div>
         </div>
       ):null;
 
       case 'experience': return data.experience?.length>0 ? (
         <div key="experience">
-          <MainHeading label={tr('experience',true)} iconKey="experience" accent={accent} />
+          <MainHeading label={tr('experience',isRTL)} iconKey="experience" accent={accent} isRTL={isRTL} />
           {data.experience.map((e,i)=>(
-            <div key={i} style={{ marginBottom:'12pt', ...BREAK_ITEM, paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }}>
-              <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:'rtl' }}>
-                <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, flex:1, textAlign:'right' }}>{e.jobTitle}</div>
+            <div key={i} style={{
+              marginBottom:'12pt', ...BREAK_ITEM,
+              ...(isRTL
+                ? { paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }
+                : { paddingLeft:'10pt',  marginLeft:'3pt',  borderLeft:`3px solid ${accent}20`  }),
+            }}>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:dir }}>
+                <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, flex:1, textAlign:align }}>{e.jobTitle}</div>
                 <div style={{ fontSize:'8pt', color:'#888', whiteSpace:'nowrap', flexShrink:0, background:`${accent}15`, padding:'1.5pt 6pt', borderRadius:'20pt' }}>
-                  {e.startDate}{(e.endDate||e.current)?` ← ${e.current?tr('present',true):e.endDate}`:''}
+                  {e.startDate}{(e.endDate||e.current)?` – ${e.current?tr('present',isRTL):e.endDate}`:''}
                 </div>
               </div>
-              <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', textAlign:'right', direction:'rtl', marginBottom:'3pt' }}>
+              <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', textAlign:align, direction:dir, marginBottom:'3pt' }}>
                 {e.company}{e.location?` · ${e.location}`:''}
               </div>
               {e.description&&(
-                <div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:'right', whiteSpace:'pre-line', direction:'rtl' }}>
+                <div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}>
                   {e.description}
                 </div>
               )}
@@ -265,20 +276,25 @@ const ArabicLuxeTemplate = ({
 
       case 'education': return data.education?.length>0 ? (
         <div key="education">
-          <MainHeading label={tr('education',true)} iconKey="education" accent={accent} />
+          <MainHeading label={tr('education',isRTL)} iconKey="education" accent={accent} isRTL={isRTL} />
           {data.education.map((e,i)=>(
-            <div key={i} style={{ marginBottom:'11pt', ...BREAK_ITEM, paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }}>
-              <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:'rtl' }}>
-                <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, flex:1, textAlign:'right' }}>{e.degree}</div>
+            <div key={i} style={{
+              marginBottom:'11pt', ...BREAK_ITEM,
+              ...(isRTL
+                ? { paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }
+                : { paddingLeft:'10pt',  marginLeft:'3pt',  borderLeft:`3px solid ${accent}20`  }),
+            }}>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:dir }}>
+                <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, flex:1, textAlign:align }}>{e.degree}</div>
                 <div style={{ fontSize:'8pt', color:'#888', whiteSpace:'nowrap', flexShrink:0, background:`${accent}15`, padding:'1.5pt 6pt', borderRadius:'20pt' }}>
-                  {e.startDate}{e.endDate?` ← ${e.endDate}`:''}
+                  {e.startDate}{e.endDate?` – ${e.endDate}`:''}
                 </div>
               </div>
-              <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', textAlign:'right', direction:'rtl', marginBottom:'3pt' }}>
+              <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', textAlign:align, direction:dir, marginBottom:'3pt' }}>
                 {e.institution}{e.location?` · ${e.location}`:''}
               </div>
               {e.description&&(
-                <div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:'right', whiteSpace:'pre-line', direction:'rtl' }}>
+                <div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}>
                   {e.description}
                 </div>
               )}
@@ -289,12 +305,17 @@ const ArabicLuxeTemplate = ({
 
       case 'projects': return data.projects?.length>0 ? (
         <div key="projects">
-          <MainHeading label={tr('projects',true)} iconKey="projects" accent={accent} />
+          <MainHeading label={tr('projects',isRTL)} iconKey="projects" accent={accent} isRTL={isRTL} />
           {data.projects.map((p,i)=>(
-            <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }}>
-              <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, textAlign:'right', direction:'rtl' }}>{p.title||p.name}</div>
-              {p.link&&<div style={{ fontSize:'8pt', color:accent, textAlign:'right' }}>{p.link}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:'right', whiteSpace:'pre-line', direction:'rtl' }}>{p.description}</div>}
+            <div key={i} style={{
+              marginBottom:'10pt', ...BREAK_ITEM,
+              ...(isRTL
+                ? { paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }
+                : { paddingLeft:'10pt',  marginLeft:'3pt',  borderLeft:`3px solid ${accent}20`  }),
+            }}>
+              <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, textAlign:align, direction:dir }}>{p.title||p.name}</div>
+              {p.link&&<div style={{ fontSize:'8pt', color:accent, textAlign:align }}>{p.link}</div>}
+              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}>{p.description}</div>}
             </div>
           ))}
         </div>
@@ -302,15 +323,15 @@ const ArabicLuxeTemplate = ({
 
       case 'publications': return data.publications?.length>0 ? (
         <div key="publications">
-          <MainHeading label={tr('publications',true)} iconKey={null} accent={accent} />
+          <MainHeading label={tr('publications',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />
           {data.publications.map((p,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
-              <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:'rtl' }}>
-                <div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, flex:1, textAlign:'right' }}>{p.title}</div>
+              <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:dir }}>
+                <div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, flex:1, textAlign:align }}>{p.title}</div>
                 {p.date&&<div style={{ fontSize:'8pt', color:'#888', whiteSpace:'nowrap' }}>{p.date}</div>}
               </div>
-              {p.publisher&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:'right', direction:'rtl' }}>{p.publisher}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:'right', direction:'rtl' }}>{p.description}</div>}
+              {p.publisher&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:align, direction:dir }}>{p.publisher}</div>}
+              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, direction:dir }}>{p.description}</div>}
             </div>
           ))}
         </div>
@@ -318,12 +339,12 @@ const ArabicLuxeTemplate = ({
 
       case 'references': return data.references?.length>0 ? (
         <div key="references">
-          <MainHeading label={tr('references',true)} iconKey={null} accent={accent} />
+          <MainHeading label={tr('references',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />
           {data.references.map((r,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
-              <div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, textAlign:'right', direction:'rtl' }}>{r.name}</div>
-              {(r.title||r.company)&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:'right', direction:'rtl' }}>{[r.title,r.company].filter(Boolean).join(' — ')}</div>}
-              {(r.email||r.phone)&&<div style={{ fontSize:sz.body, color:'#555', textAlign:'right', direction:'rtl' }}>{[r.email,r.phone].filter(Boolean).join(' | ')}</div>}
+              <div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, textAlign:align, direction:dir }}>{r.name}</div>
+              {(r.title||r.company)&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:align, direction:dir }}>{[r.title,r.company].filter(Boolean).join(' — ')}</div>}
+              {(r.email||r.phone)&&<div style={{ fontSize:sz.body, color:'#555', textAlign:align, direction:dir }}>{[r.email,r.phone].filter(Boolean).join(' | ')}</div>}
             </div>
           ))}
         </div>
@@ -335,12 +356,12 @@ const ArabicLuxeTemplate = ({
           if(!sec||!sec.items?.length) return null;
           return (
             <div key={key}>
-              <MainHeading label={sec.title} iconKey={null} accent={accent} />
+              <MainHeading label={sec.title} iconKey={null} accent={accent} isRTL={isRTL} />
               {sec.items.map((item,idx)=>(
                 <div key={idx} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
-                  {item.title&&<div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, textAlign:'right', direction:'rtl' }}>{item.title}</div>}
-                  {item.subtitle&&<div style={{ fontSize:'8pt', color:accent, textAlign:'right', direction:'rtl' }}>{item.subtitle}</div>}
-                  {item.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:'right', direction:'rtl' }}>{item.description}</div>}
+                  {item.title&&<div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, textAlign:align, direction:dir }}>{item.title}</div>}
+                  {item.subtitle&&<div style={{ fontSize:'8pt', color:accent, textAlign:align, direction:dir }}>{item.subtitle}</div>}
+                  {item.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, direction:dir }}>{item.description}</div>}
                 </div>
               ))}
             </div>
@@ -360,14 +381,44 @@ const ArabicLuxeTemplate = ({
       width:'794px', minHeight:'1122px', boxSizing:'border-box',
       display:'flex', flexDirection:'row', backgroundColor:'#f8f6f1',
     }}>
-      {/* ══ RIGHT SIDEBAR ═══════════════════════════════════ */}
+
+      {/* ══ MAIN AREA (always left in DOM → left side visually) ══ */}
+      <div style={{
+        flex:1, backgroundColor:'#fff',
+        display:'flex', flexDirection:'column',
+        boxSizing:'border-box', minHeight:'1122px',
+      }}>
+        {/* Header strip in main area */}
+        <div style={{
+          background:`linear-gradient(135deg, #f8f5ee 0%, #f0ece0 100%)`,
+          padding:'26pt 24pt 18pt',
+          direction:dir, flexShrink:0,
+          borderBottom:`3px solid ${GOLD}`,
+        }}>
+          <div style={{ fontSize:sz.name, fontWeight:'900', color:NAVY, lineHeight:1.1, marginBottom:'5pt', letterSpacing:'-0.02em', textAlign:align }}>
+            {info.fullName||''}
+          </div>
+          {info.jobTitle&&(
+            <div style={{ fontSize:'11pt', color:GOLD, fontWeight:'700', letterSpacing:'0.01em', textAlign:align }}>
+              {info.jobTitle}
+            </div>
+          )}
+        </div>
+
+        {/* Main sections */}
+        <div style={{ padding:'8pt 24pt 28pt', flex:1, direction:dir, boxSizing:'border-box' }}>
+          {mainKeys.map(k=>renderMain(k))}
+        </div>
+      </div>
+
+      {/* ══ SIDEBAR (rendered second → always on RIGHT) ══════ */}
       <div style={{
         width:`${SIDEBAR_W}px`, flexShrink:0,
         backgroundColor:NAVY,
         display:'flex', flexDirection:'column',
         boxSizing:'border-box', minHeight:'1122px',
       }}>
-        {/* Decorative top strip */}
+        {/* Top gold strip */}
         <div style={{ height:'6pt', background:`linear-gradient(to right, ${GOLD}, ${GOLD_LIGHT}, ${GOLD})`, flexShrink:0 }} />
 
         {/* Profile photo */}
@@ -387,10 +438,10 @@ const ArabicLuxeTemplate = ({
           </div>
         </div>
 
-        {/* Name + title inside sidebar header */}
+        {/* Name + title */}
         <div style={{ textAlign:'center', paddingBottom:'14pt', paddingLeft:'10pt', paddingRight:'10pt', flexShrink:0 }}>
           <div style={{ fontSize:'11pt', fontWeight:'800', color:'#fff', lineHeight:1.2, marginBottom:'3pt' }}>
-            {info.fullName||'الاسم الكامل'}
+            {info.fullName||''}
           </div>
           {info.jobTitle&&(
             <div style={{
@@ -407,16 +458,16 @@ const ArabicLuxeTemplate = ({
 
         {/* Contact */}
         <div style={{ padding:'12pt 14pt 0', flexShrink:0 }}>
-          <SbTitle label={tr('contact',true)} />
+          <SbTitle label={tr('contact',isRTL)} isRTL={isRTL} accent={accent} />
           {contactItems.map((row,i)=>(
-            <div key={i} style={{ display:'flex', flexDirection:'row-reverse', alignItems:'center', gap:'7pt', marginBottom:'8pt' }}>
+            <div key={i} style={{ display:'flex', flexDirection:'row', alignItems:'center', gap:'7pt', marginBottom:'8pt' }}>
               <div style={{
                 width:'20pt', height:'20pt', borderRadius:'50%', flexShrink:0,
                 background:`linear-gradient(135deg, ${GOLD}40, ${GOLD}20)`,
                 border:`1px solid ${GOLD}50`,
                 display:'flex', alignItems:'center', justifyContent:'center',
               }}>{CICON[row.key]||<GlobeIcon/>}</div>
-              <span style={{ fontSize:'7.5pt', color:'rgba(255,255,255,0.85)', wordBreak:'break-all', lineHeight:1.3, textAlign:'right' }}>
+              <span style={{ fontSize:'7.5pt', color:'rgba(255,255,255,0.85)', wordBreak:'break-all', lineHeight:1.3, textAlign:'left' }}>
                 {row.text}
               </span>
             </div>
@@ -428,38 +479,10 @@ const ArabicLuxeTemplate = ({
           {sideKeys.map(k=>renderSidebar(k))}
         </div>
 
-        {/* Bottom decorative strip */}
+        {/* Bottom gold strip */}
         <div style={{ height:'6pt', background:`linear-gradient(to right, ${GOLD}, ${GOLD_LIGHT}, ${GOLD})`, flexShrink:0, marginTop:'auto' }} />
       </div>
 
-      {/* ══ LEFT MAIN ═══════════════════════════════════════ */}
-      <div style={{
-        flex:1, backgroundColor:'#fff',
-        display:'flex', flexDirection:'column',
-        boxSizing:'border-box', minHeight:'1122px',
-      }}>
-        {/* Header area */}
-        <div style={{
-          background:`linear-gradient(135deg, #f8f5ee 0%, #f0ece0 100%)`,
-          padding:'26pt 24pt 18pt',
-          direction:'rtl', flexShrink:0,
-          borderBottom:`3px solid ${GOLD}`,
-        }}>
-          <div style={{ fontSize:sz.name, fontWeight:'900', color:NAVY, lineHeight:1.1, marginBottom:'5pt', letterSpacing:'-0.02em' }}>
-            {info.fullName||'الاسم الكامل'}
-          </div>
-          {info.jobTitle&&(
-            <div style={{ fontSize:'11pt', color:GOLD, fontWeight:'700', letterSpacing:'0.01em' }}>
-              {info.jobTitle}
-            </div>
-          )}
-        </div>
-
-        {/* Main sections */}
-        <div style={{ padding:'8pt 24pt 28pt', flex:1, direction:'rtl', boxSizing:'border-box' }}>
-          {mainKeys.map(k=>renderMain(k))}
-        </div>
-      </div>
     </div>
   );
 };
