@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
-import { FREE_TEMPLATE } from './EditorPanel';
+import { useTemplateConfig } from '../../context/TemplateConfigContext';
 
 const COLORS = [
   { label: 'Indigo',   value: '#4f46e5' },
@@ -283,6 +283,7 @@ const CustomizePanel = () => {
     visiblePersonalFields, togglePersonalField,
   } = useCV();
   const { isRTL, currentUser } = useAuth();
+  const { freeTemplates } = useTemplateConfig();
   const isFreeUser = !currentUser || currentUser.plan === 'free';
 
   return (
@@ -302,7 +303,7 @@ const CustomizePanel = () => {
           )}
           <div className="grid grid-cols-2 gap-2">
             {TEMPLATES.map(tpl => {
-              const isPaid = tpl.value !== FREE_TEMPLATE;
+              const isPaid = !freeTemplates.has(tpl.value);
               const isLocked = isFreeUser && isPaid;
               const isActive = selectedTemplate === tpl.value;
               return (

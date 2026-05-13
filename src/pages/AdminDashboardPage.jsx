@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 /* ─── helpers ─── */
@@ -105,6 +105,49 @@ const ReceiptModal = ({ url, onClose }) => (
 );
 
 /* ─── Main Admin Dashboard ─── */
+const ALL_TEMPLATES = [
+  { id: 'modern',             ar: 'عصري' },
+  { id: 'classic',            ar: 'كلاسيكي' },
+  { id: 'creative',           ar: 'إبداعي' },
+  { id: 'minimal',            ar: 'بسيط' },
+  { id: 'executive',          ar: 'تنفيذي' },
+  { id: 'atsclean',           ar: 'ATS نظيف' },
+  { id: 'atspro',             ar: 'ATS احترافي' },
+  { id: 'atssimple',          ar: 'ATS بسيط جداً' },
+  { id: 'atsbold',            ar: 'ATS قوي' },
+  { id: 'atscompact',         ar: 'ATS مضغوط' },
+  { id: 'atsmodern',          ar: 'ATS عصري' },
+  { id: 'atsharvard',         ar: 'ATS هارفارد' },
+  { id: 'atscenter',          ar: 'ATS توسيط' },
+  { id: 'atselegant',         ar: 'ATS أنيق' },
+  { id: 'prestige',           ar: 'بريستيج' },
+  { id: 'classicserif',       ar: 'كلاسيك سيريف' },
+  { id: 'atlanticblue',       ar: 'أتلانتيك بلو' },
+  { id: 'mercuryflow',        ar: 'ميركوري فلو' },
+  { id: 'editorialrule',      ar: 'إديتوريال رول' },
+  { id: 'sidebarlight',       ar: 'شريط جانبي فاتح' },
+  { id: 'tealpro',            ar: 'تيل برو' },
+  { id: 'roseelegant',        ar: 'روز إيليغانت' },
+  { id: 'darkheader',         ar: 'هيدر داكن' },
+  { id: 'arabicnavy',         ar: 'نيفي عربي' },
+  { id: 'arabicpro',          ar: 'عربي احترافي' },
+  { id: 'arabictealsidebar',  ar: 'شريط زمردي عربي' },
+  { id: 'arabicslatesidebar', ar: 'شريط كحلي عربي' },
+  { id: 'arabicmodern',       ar: 'عصري عربي' },
+  { id: 'arabiccard',         ar: 'بطاقة عربية' },
+  { id: 'arabicvelvet',       ar: 'مخمل عربي' },
+  { id: 'arabicaurora',       ar: 'أورورا عربي' },
+  { id: 'arabicgem',          ar: 'جوهرة عربية' },
+  { id: 'arabicwave',         ar: 'موجة عربية' },
+  { id: 'arabicluxe',         ar: 'لوكس عربي' },
+  { id: 'arabiczafir',        ar: 'زافير عربي' },
+  { id: 'arabicelite',        ar: 'إيليت عربي' },
+  { id: 'englishhorizon',     ar: 'هورايزون إنجليزي' },
+  { id: 'englishapex',        ar: 'أبيكس إنجليزي' },
+  { id: 'velvet',             ar: 'مخمل' },
+  { id: 'aurora',             ar: 'أورورا' },
+];
+
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const [admin, setAdmin]         = useState(null);
@@ -122,6 +165,8 @@ const AdminDashboardPage = () => {
   const [searchUser, setSearchUser]           = useState('');
   const [searchCV, setSearchCV]               = useState('');
   const [statusFilter, setStatusFilter]       = useState('all');
+  const [templateConfig, setTemplateConfig]   = useState({});
+  const [tplSaving, setTplSaving]             = useState({});
 
   const apiFetch = useCallback(async (url) => {
     const res = await fetch(url, { credentials: 'include' });
@@ -133,20 +178,38 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const [me, st, u, c, p, b] = await Promise.all([
+        const [me, st, u, c, p, b, tpl] = await Promise.all([
           apiFetch('/api/admin/me'),
           apiFetch('/api/admin/stats'),
           apiFetch('/api/admin/users'),
           apiFetch('/api/admin/cvs'),
           apiFetch('/api/admin/payment-requests'),
           apiFetch('/api/admin/business-contacts'),
+          fetch('/api/templates/config').then(r => r.json()),
         ]);
         setAdmin(me); setStats(st); setUsers(u); setCvs(c); setPayments(p); setBiz(b);
+        setTemplateConfig(tpl);
       } catch { /* redirect handled */ }
       finally { setLoading(false); }
     };
     init();
   }, [apiFetch]);
+
+  const handleToggleTemplate = async (id, currentFree) => {
+    setTplSaving(s => ({ ...s, [id]: true }));
+    try {
+      const res = await fetch(`/api/admin/templates/${id}`, {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ is_free: !currentFree }),
+      });
+      if (res.ok) {
+        setTemplateConfig(prev => ({ ...prev, [id]: !currentFree }));
+      }
+    } finally {
+      setTplSaving(s => ({ ...s, [id]: false }));
+    }
+  };
 
   const handleLogout = async () => {
     await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
@@ -176,12 +239,13 @@ const AdminDashboardPage = () => {
   };
 
   const TABS = [
-    { key: 'overview',  label: 'الإحصائيات',  icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
-    { key: 'users',     label: 'المستخدمون', badge: stats?.users, icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
-    { key: 'cvs',       label: 'السير الذاتية', badge: stats?.cvs, icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
-    { key: 'payments',  label: 'طلبات الدفع', badge: stats?.pendingPayments || null, icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
-    { key: 'business',  label: 'تواصل الأعمال', badge: bizContacts.length || null, icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
-    { key: 'settings',  label: 'الإعدادات',  icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+    { key: 'overview',   label: 'الإحصائيات',    icon: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z' },
+    { key: 'users',      label: 'المستخدمون',    badge: stats?.users, icon: 'M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z' },
+    { key: 'cvs',        label: 'السير الذاتية', badge: stats?.cvs, icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+    { key: 'payments',   label: 'طلبات الدفع',   badge: stats?.pendingPayments || null, icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z' },
+    { key: 'business',   label: 'تواصل الأعمال', badge: bizContacts.length || null, icon: 'M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z' },
+    { key: 'templates',  label: 'القوالب',       icon: 'M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z' },
+    { key: 'settings',   label: 'الإعدادات',     icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
   ];
 
   const filteredUsers = users.filter(u =>
@@ -597,6 +661,52 @@ const AdminDashboardPage = () => {
                   لا توجد طلبات أعمال
                 </div>
               )}
+            </div>
+          )}
+
+          {/* ── TEMPLATES ── */}
+          {activeTab === 'templates' && (
+            <div className="space-y-4">
+              <div className="bg-slate-800 rounded-2xl border border-slate-700 p-5">
+                <h3 className="font-bold text-white mb-1">إدارة القوالب</h3>
+                <p className="text-slate-400 text-sm mb-5">حدّد أي القوالب مجانية وأيها مدفوعة. المستخدمون المجانيون لا يستطيعون استخدام القوالب المدفوعة.</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {ALL_TEMPLATES.map(tpl => {
+                    const isFree = !!templateConfig[tpl.id];
+                    const saving = !!tplSaving[tpl.id];
+                    return (
+                      <div key={tpl.id}
+                        className="flex items-center justify-between px-4 py-3 rounded-xl bg-slate-700/60 border border-slate-600 gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${isFree ? 'bg-green-400' : 'bg-indigo-400'}`} />
+                          <div className="min-w-0">
+                            <p className="text-white text-sm font-medium truncate">{tpl.ar}</p>
+                            <p className="text-slate-500 text-xs">{tpl.id}</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 flex-shrink-0">
+                          <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${isFree ? 'bg-green-500/20 text-green-400' : 'bg-indigo-500/20 text-indigo-400'}`}>
+                            {isFree ? 'مجاني' : 'مدفوع'}
+                          </span>
+                          <button
+                            onClick={() => handleToggleTemplate(tpl.id, isFree)}
+                            disabled={saving}
+                            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none disabled:opacity-50 ${isFree ? 'bg-green-500' : 'bg-slate-600'}`}
+                          >
+                            <span
+                              className="inline-block h-4 w-4 rounded-full bg-white shadow transition-transform duration-200"
+                              style={{ transform: isFree ? 'translateX(24px)' : 'translateX(4px)' }}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <p className="text-slate-500 text-xs mt-4 text-center">
+                  {Object.values(templateConfig).filter(Boolean).length} قالب مجاني من أصل {ALL_TEMPLATES.length}
+                </p>
+              </div>
             </div>
           )}
 

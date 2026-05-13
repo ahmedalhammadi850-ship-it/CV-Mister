@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCV } from '../context/useCV';
 import { useAuth } from '../context/AuthContext';
+import { useTemplateConfig } from '../context/TemplateConfigContext';
 import ModernTemplate from '../templates/ModernTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeTemplate from '../templates/CreativeTemplate';
@@ -405,7 +406,7 @@ const PREVIEW_SCALE = 0.28;
 const PREVIEW_W = 794;
 const PREVIEW_H = 1122;
 
-const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse }) => {
+const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, isLocked }) => {
   const Component = template.component;
   const previewTheme = { primaryColor: template.color };
 
@@ -430,6 +431,31 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse }) => {
         >
           <Component data={template.previewData || sampleData} theme={previewTheme} isRTL={template.previewIsRTL ?? isRTL} />
         </div>
+
+        {/* Free / Paid badge */}
+        <div className="absolute top-3 right-3 z-10">
+          {isFree ? (
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-green-500 text-white shadow">
+              {isRTL ? 'مجاني' : 'Free'}
+            </span>
+          ) : (
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-600 text-white shadow flex items-center gap-1">
+              ⭐ {isRTL ? 'Pro' : 'Pro'}
+            </span>
+          )}
+        </div>
+
+        {/* Lock overlay for free users on paid templates */}
+        {isLocked && (
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center z-10">
+            <div className="bg-white/90 rounded-xl px-4 py-2 flex items-center gap-2 text-slate-700 font-semibold text-sm shadow">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              {isRTL ? 'مدفوع' : 'Pro Only'}
+            </div>
+          </div>
+        )}
 
         {/* ATS badge */}
         {template.atsScore && (
@@ -491,9 +517,11 @@ const TABS = [
 
 const TemplatesPage = () => {
   const { selectedTemplate, setSelectedTemplate, previewTemplate } = useCV();
-  const { isRTL } = useAuth();
+  const { isRTL, currentUser } = useAuth();
+  const { freeTemplates } = useTemplateConfig();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
+  const isFreeUser = !currentUser || currentUser.plan === 'free';
 
   const active = templates.find(t => t.id === selectedTemplate);
 
@@ -596,6 +624,8 @@ const TemplatesPage = () => {
               isRTL={isRTL}
               onSelect={setSelectedTemplate}
               onUse={handleUse}
+              isFree={freeTemplates.has(template.id)}
+              isLocked={isFreeUser && !freeTemplates.has(template.id)}
             />
           ))}
         </div>
