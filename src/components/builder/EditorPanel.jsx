@@ -14,18 +14,6 @@ const PuzzleIcon = () => (
 
 const t = (en, ar, isRTL) => isRTL ? ar : en;
 
-const COLORS = [
-  { label: 'Indigo',   value: '#4f46e5' },
-  { label: 'Blue',     value: '#1d4ed8' },
-  { label: 'Navy',     value: '#1e3a5f' },
-  { label: 'Teal',     value: '#0f766e' },
-  { label: 'Green',    value: '#15803d' },
-  { label: 'Purple',   value: '#7c3aed' },
-  { label: 'Crimson',  value: '#b91c1c' },
-  { label: 'Orange',   value: '#c2410c' },
-  { label: 'Charcoal', value: '#374151' },
-  { label: 'Black',    value: '#111111' },
-];
 
 const ALL_SECTIONS = [
   {
@@ -125,13 +113,6 @@ const ALL_SECTIONS = [
     en: { title: 'References',          desc: 'References from managers or coworkers.' },
     ar: { title: 'المراجع والتزكيات', desc: 'مراجعك من المديرين أو الزملاء.' },
     color: '#374151',
-  },
-  {
-    key: 'design',
-    icon: <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" /></svg>,
-    en: { title: 'Design & Style', desc: 'Colors, fonts, and visual customization.' },
-    ar: { title: 'التصميم والأسلوب', desc: 'الألوان والخطوط والتخصيص البصري.' },
-    color: '#b45309',
   },
   {
     key: 'custom',
@@ -307,7 +288,7 @@ const EditorPanel = () => {
       setShowCustomNameModal(true);
       return;
     }
-    if (key !== 'design' && key !== 'personalInfo' && key !== 'summary') {
+    if (key !== 'personalInfo' && key !== 'summary') {
       addSection(key);
     }
     setOpenSection(key === 'summary' ? 'personalInfo' : key);
@@ -341,110 +322,6 @@ const EditorPanel = () => {
       )}
 
       <div className="flex flex-col pb-20" dir={isRTL ? 'rtl' : 'ltr'} style={{ fontFamily: isRTL ? "'Tajawal', Arial, sans-serif" : undefined }}>
-
-        {/* Design & Style */}
-        <div>
-          <AccordionHeader en="Design & Style" ar="التصميم والأسلوب" section="design" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
-          {openSection === 'design' && (
-            <div className="p-4 space-y-5 bg-slate-50/50 border-b border-slate-100">
-              <div>
-                <label className={lbl}>{t('Accent Color', 'اللون الرئيسي', isRTL)}</label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {COLORS.map(c => (
-                    <button key={c.value} title={c.label} onClick={() => setTheme({ ...theme, primaryColor: c.value })}
-                      className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none"
-                      style={{ backgroundColor: c.value, borderColor: theme.primaryColor === c.value ? '#fff' : 'transparent', boxShadow: theme.primaryColor === c.value ? `0 0 0 2px ${c.value}` : 'none' }}
-                    />
-                  ))}
-                  <label className="w-7 h-7 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 relative overflow-hidden" title="Custom">
-                    <span className="text-slate-400 text-xs font-bold">+</span>
-                    <input type="color" value={theme.primaryColor} onChange={e => setTheme({ ...theme, primaryColor: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
-                  </label>
-                </div>
-              </div>
-              {/* Sidebar Color */}
-              <div>
-                <label className={lbl}>{t('Sidebar Color', 'لون الشريط الجانبي', isRTL)}</label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {[
-                    { label: 'Default', value: '' },
-                    { label: 'Navy', value: '#1a2744' },
-                    { label: 'Slate', value: '#334155' },
-                    { label: 'Teal', value: '#0d6e6e' },
-                    { label: 'Indigo', value: '#3730a3' },
-                    { label: 'Brown', value: '#4a2c17' },
-                    { label: 'Charcoal', value: '#2d3748' },
-                    { label: 'Forest', value: '#1a4731' },
-                    { label: 'Burgundy', value: '#6b1a1a' },
-                  ].map(c => (
-                    <button key={c.value} title={c.label}
-                      onClick={() => setTheme({ ...theme, sidebarColor: c.value })}
-                      className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none"
-                      style={{
-                        backgroundColor: c.value || '#e2e8f0',
-                        borderColor: theme.sidebarColor === c.value ? '#fff' : 'transparent',
-                        boxShadow: theme.sidebarColor === c.value ? `0 0 0 2px ${c.value || '#94a3b8'}` : 'none',
-                      }}
-                    >
-                      {!c.value && <span className="text-slate-400 text-[8px] font-bold leading-none flex items-center justify-center h-full">✕</span>}
-                    </button>
-                  ))}
-                  <label className="w-7 h-7 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 relative overflow-hidden" title="Custom">
-                    <span className="text-slate-400 text-xs font-bold">+</span>
-                    <input type="color" value={theme.sidebarColor || '#334155'} onChange={e => setTheme({ ...theme, sidebarColor: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
-                  </label>
-                </div>
-              </div>
-
-              {/* Background Color */}
-              <div>
-                <label className={lbl}>{t('Background Color', 'لون الخلفية', isRTL)}</label>
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {[
-                    { label: 'Default', value: '' },
-                    { label: 'White', value: '#ffffff' },
-                    { label: 'Cream', value: '#fdf8f3' },
-                    { label: 'Light Gray', value: '#f8f9fa' },
-                    { label: 'Light Blue', value: '#f0f4ff' },
-                    { label: 'Light Green', value: '#f0fff4' },
-                    { label: 'Warm', value: '#fff9f0' },
-                    { label: 'Rose', value: '#fff5f5' },
-                    { label: 'Lavender', value: '#f5f3ff' },
-                  ].map(c => (
-                    <button key={c.value} title={c.label}
-                      onClick={() => setTheme({ ...theme, bgColor: c.value })}
-                      className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none"
-                      style={{
-                        backgroundColor: c.value || '#e2e8f0',
-                        borderColor: theme.bgColor === c.value ? '#4f46e5' : '#d1d5db',
-                        boxShadow: theme.bgColor === c.value ? `0 0 0 2px #4f46e5` : 'none',
-                      }}
-                    >
-                      {!c.value && <span className="text-slate-400 text-[8px] font-bold leading-none flex items-center justify-center h-full">✕</span>}
-                    </button>
-                  ))}
-                  <label className="w-7 h-7 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 relative overflow-hidden" title="Custom">
-                    <span className="text-slate-400 text-xs font-bold">+</span>
-                    <input type="color" value={theme.bgColor || '#ffffff'} onChange={e => setTheme({ ...theme, bgColor: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
-                  </label>
-                </div>
-              </div>
-
-              <div>
-                <label className={lbl}>{t('Font Size', 'حجم الخط', isRTL)}</label>
-                <div className="flex gap-2 mt-2">
-                  {['small', 'medium', 'large'].map(size => (
-                    <button key={size} onClick={() => setTheme({ ...theme, fontSize: size })}
-                      className={`flex-1 py-2 rounded-lg text-sm font-medium border transition-colors ${theme.fontSize === size ? 'bg-primary-600 text-white border-primary-600' : 'bg-white text-slate-600 border-slate-200 hover:border-primary-300'}`}
-                    >
-                      {t(['Small','Medium','Large'][['small','medium','large'].indexOf(size)], ['صغير','متوسط','كبير'][['small','medium','large'].indexOf(size)], isRTL)}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
 
         {/* Personal Info */}
         <div>

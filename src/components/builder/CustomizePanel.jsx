@@ -482,6 +482,78 @@ const CustomizePanel = () => {
           </div>
         </div>
 
+        {/* Sidebar Color */}
+        <div>
+          <label className={labelClass}>{isRTL ? 'لون الشريط الجانبي' : 'Sidebar Color'}</label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {[
+              { label: 'Default',  value: '' },
+              { label: 'Navy',     value: '#1a2744' },
+              { label: 'Slate',    value: '#334155' },
+              { label: 'Teal',     value: '#0d6e6e' },
+              { label: 'Indigo',   value: '#3730a3' },
+              { label: 'Brown',    value: '#4a2c17' },
+              { label: 'Charcoal', value: '#2d3748' },
+              { label: 'Forest',   value: '#1a4731' },
+              { label: 'Burgundy', value: '#6b1a1a' },
+            ].map(c => (
+              <button
+                key={c.value}
+                title={c.label}
+                onClick={() => setTheme({ ...theme, sidebarColor: c.value })}
+                className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none"
+                style={{
+                  backgroundColor: c.value || '#e2e8f0',
+                  borderColor: theme.sidebarColor === c.value ? '#fff' : 'transparent',
+                  boxShadow: theme.sidebarColor === c.value ? `0 0 0 2.5px ${c.value || '#94a3b8'}` : 'none',
+                }}
+              >
+                {!c.value && <span className="text-slate-400 text-[8px] font-bold leading-none flex items-center justify-center h-full">✕</span>}
+              </button>
+            ))}
+            <label className="w-7 h-7 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 relative overflow-hidden" title="Custom">
+              <span className="text-slate-400 text-xs font-bold select-none">+</span>
+              <input type="color" value={theme.sidebarColor || '#334155'} onChange={e => setTheme({ ...theme, sidebarColor: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+            </label>
+          </div>
+        </div>
+
+        {/* Background Color */}
+        <div>
+          <label className={labelClass}>{isRTL ? 'لون الخلفية' : 'Background Color'}</label>
+          <div className="flex flex-wrap gap-2 mt-1">
+            {[
+              { label: 'Default',     value: '' },
+              { label: 'White',       value: '#ffffff' },
+              { label: 'Cream',       value: '#fdf8f3' },
+              { label: 'Light Gray',  value: '#f8f9fa' },
+              { label: 'Light Blue',  value: '#f0f4ff' },
+              { label: 'Light Green', value: '#f0fff4' },
+              { label: 'Warm',        value: '#fff9f0' },
+              { label: 'Rose',        value: '#fff5f5' },
+              { label: 'Lavender',    value: '#f5f3ff' },
+            ].map(c => (
+              <button
+                key={c.value}
+                title={c.label}
+                onClick={() => setTheme({ ...theme, bgColor: c.value })}
+                className="w-7 h-7 rounded-full border-2 transition-transform hover:scale-110 focus:outline-none"
+                style={{
+                  backgroundColor: c.value || '#e2e8f0',
+                  borderColor: theme.bgColor === c.value ? '#4f46e5' : '#d1d5db',
+                  boxShadow: theme.bgColor === c.value ? `0 0 0 2.5px #4f46e5` : 'none',
+                }}
+              >
+                {!c.value && <span className="text-slate-400 text-[8px] font-bold leading-none flex items-center justify-center h-full">✕</span>}
+              </button>
+            ))}
+            <label className="w-7 h-7 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center cursor-pointer hover:border-slate-400 relative overflow-hidden" title="Custom">
+              <span className="text-slate-400 text-xs font-bold select-none">+</span>
+              <input type="color" value={theme.bgColor || '#ffffff'} onChange={e => setTheme({ ...theme, bgColor: e.target.value })} className="absolute inset-0 opacity-0 cursor-pointer w-full h-full" />
+            </label>
+          </div>
+        </div>
+
         {/* Font Size */}
         <div>
           <label className={labelClass}>{t('fontSize', isRTL)}</label>
