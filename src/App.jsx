@@ -10,6 +10,7 @@ import LoginPage from './pages/LoginPage';
 import SignupPage from './pages/SignupPage';
 import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import PricingPage from './pages/PricingPage';
+import UpgradePage from './pages/UpgradePage';
 
 function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -38,6 +39,7 @@ function App() {
         <Route path="/templates" element={<Layout><TemplatesPage /></Layout>} />
         <Route path="/about"     element={<Layout><AboutPage /></Layout>} />
         <Route path="/pricing"   element={<Layout><PricingPage /></Layout>} />
+        <Route path="/upgrade"   element={<Layout><UpgradePage /></Layout>} />
 
         <Route path="/dashboard"   element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
         <Route path="/builder"     element={<Layout><BuilderPage /></Layout>} />

@@ -49,7 +49,7 @@ const plans = [
     periodEn: 'month',
     cta: 'اشترك الآن',
     ctaEn: 'Subscribe now',
-    ctaTo: '/signup',
+    ctaTo: '/upgrade',
     popular: true,
     gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #c026d3 100%)',
     features: [

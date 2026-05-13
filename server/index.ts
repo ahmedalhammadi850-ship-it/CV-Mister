@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerCVRoutes } from "./routes/cvRoutes";
+import { registerPaymentRoutes } from "./routes/paymentRoutes";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -60,6 +61,7 @@ async function main() {
   await setupAuth(app);
   registerAuthRoutes(app);
   registerCVRoutes(app);
+  registerPaymentRoutes(app);
 
   if (process.env.NODE_ENV === "production") {
     const distPath = path.resolve(__dirname, "../dist");
