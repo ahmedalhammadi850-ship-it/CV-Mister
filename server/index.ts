@@ -6,7 +6,6 @@ import { registerCVRoutes } from "./routes/cvRoutes";
 import { registerPaymentRoutes } from "./routes/paymentRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
 import { registerTemplateRoutes } from "./routes/templateRoutes";
-import { registerAIRoutes } from "./routes/aiRoutes";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -67,7 +66,6 @@ async function main() {
   registerPaymentRoutes(app);
   registerAdminRoutes(app);
   registerTemplateRoutes(app);
-  registerAIRoutes(app);
 
   if (process.env.NODE_ENV === "production") {
     const distPath = path.resolve(__dirname, "../dist");
