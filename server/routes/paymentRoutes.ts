@@ -5,6 +5,9 @@ import { paymentRequests } from "@shared/models/cv";
 import { businessContacts } from "@shared/models/business";
 import { eq, desc } from "drizzle-orm";
 
+const SUBMIT_COOLDOWN_MS = 30 * 1000;
+const lastSubmitTime = new Map<string, number>();
+
 function getUserId(req: any): string {
   if ((req.session as any)?.userId) return (req.session as any).userId;
   return req.user?.claims?.sub;
@@ -14,6 +17,19 @@ export function registerPaymentRoutes(app: Express) {
   app.post("/api/payment-requests", isAuthenticated, async (req: any, res: Response) => {
     try {
       const userId = getUserId(req);
+
+      const lastTime = lastSubmitTime.get(userId);
+      if (lastTime) {
+        const elapsed = Date.now() - lastTime;
+        if (elapsed < SUBMIT_COOLDOWN_MS) {
+          const remaining = Math.ceil((SUBMIT_COOLDOWN_MS - elapsed) / 1000);
+          return res.status(429).json({
+            message: `يرجى الانتظار ${remaining} ثانية قبل إعادة الإرسال`,
+            remaining,
+          });
+        }
+      }
+      lastSubmitTime.set(userId, Date.now());
       const { receiptImage } = req.body;
 
       if (!receiptImage) {

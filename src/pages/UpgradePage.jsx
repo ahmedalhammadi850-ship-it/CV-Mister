@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,7 +25,23 @@ const UpgradePage = () => {
   const [done, setDone]         = useState(false);
   const [error, setError]       = useState('');
   const [copied, setCopied]     = useState(false);
-  const inputRef = useRef();
+  const [cooldown, setCooldown] = useState(0);
+  const inputRef   = useRef();
+  const timerRef   = useRef(null);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  }, []);
+
+  const startCooldown = (seconds = 30) => {
+    setCooldown(seconds);
+    timerRef.current = setInterval(() => {
+      setCooldown(prev => {
+        if (prev <= 1) { clearInterval(timerRef.current); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+  };
 
   /* redirect if not logged in */
   if (!currentUser) {
@@ -67,6 +83,7 @@ const UpgradePage = () => {
 
   const onSubmit = async () => {
     if (!file) { setError('يرجى رفع صورة الحوالة'); return; }
+    if (cooldown > 0) { setError(`يرجى الانتظار ${cooldown} ثانية قبل إعادة الإرسال`); return; }
     setLoading(true); setError('');
     try {
       const reader = new FileReader();
@@ -79,7 +96,14 @@ const UpgradePage = () => {
           body: JSON.stringify({ receiptImage: base64 }),
         });
         const data = await res.json();
-        if (!res.ok) { setError(data.message || 'حدث خطأ'); setLoading(false); return; }
+        if (!res.ok) {
+          const remaining = data.remaining || 30;
+          if (res.status === 429) { startCooldown(remaining); }
+          setError(data.message || 'حدث خطأ');
+          setLoading(false);
+          return;
+        }
+        startCooldown(30);
         setDone(true);
       };
       reader.readAsDataURL(file);
@@ -290,7 +314,7 @@ const UpgradePage = () => {
         {/* Submit */}
         <button
           onClick={onSubmit}
-          disabled={loading || !file}
+          disabled={loading || !file || cooldown > 0}
           className="w-full py-4 rounded-2xl text-white font-bold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
           style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
         >
@@ -301,6 +325,13 @@ const UpgradePage = () => {
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
               جاري الإرسال...
+            </>
+          ) : cooldown > 0 ? (
+            <>
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              انتظر {cooldown} ثانية
             </>
           ) : (
             <>
