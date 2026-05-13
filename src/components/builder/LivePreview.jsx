@@ -35,6 +35,8 @@ import EnglishApexTemplate from '../../templates/EnglishApexTemplate';
 import TealProTemplate from '../../templates/TealProTemplate';
 import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
+import VelvetTemplate from '../../templates/VelvetTemplate';
+import AuroraTemplate from '../../templates/AuroraTemplate';
 import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
@@ -255,6 +257,8 @@ const LivePreview = ({ breakDataRef }) => {
       case 'tealpro':       return <TealProTemplate       {...props} />;
       case 'roseelegant':   return <RoseElegantTemplate   {...props} />;
       case 'darkheader':    return <DarkHeaderTemplate    {...props} />;
+      case 'velvet':        return <VelvetTemplate        {...props} />;
+      case 'aurora':        return <AuroraTemplate        {...props} />;
       case 'arabicnavy':         return <ArabicNavyTemplate         {...props} />;
       case 'arabicpro':          return <ArabicProTemplate          {...props} />;
       case 'arabictealsidebar':  return <ArabicTealSidebarTemplate  {...props} />;

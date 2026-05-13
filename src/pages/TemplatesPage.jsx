@@ -37,6 +37,8 @@ import EnglishApexTemplate from '../templates/EnglishApexTemplate';
 import TealProTemplate from '../templates/TealProTemplate';
 import RoseElegantTemplate from '../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../templates/DarkHeaderTemplate';
+import VelvetTemplate from '../templates/VelvetTemplate';
+import AuroraTemplate from '../templates/AuroraTemplate';
 import { sampleData, arabicSampleData } from '../utils/sampleData';
 
 const templates = [
@@ -365,6 +367,24 @@ const templates = [
     arabicDesc: 'هيدر داكن بالاسم الأبيض في المنتصف، فواصل أقسام أنيقة — مميز واحترافي.',
     color: '#1b2a4a',
     component: PrestigeTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'velvet',
+    name: 'Velvet',          arabicName: 'مخمل',
+    desc: 'Full-width dark banner header with white uppercase name, colored section badges and accent pills.',
+    arabicDesc: 'رأس بانر داكن بعرض كامل مع اسم أبيض بأحرف كبيرة، وشارات أقسام ملوّنة.',
+    color: '#0f2942',
+    component: VelvetTemplate,
+    atsScore: null,
+  },
+  {
+    id: 'aurora',
+    name: 'Aurora',          arabicName: 'أورورا',
+    desc: 'Extra-large bold name, gradient accent underline, left-bar section headings with timeline entries.',
+    arabicDesc: 'اسم كبير جريء، خط تدرّج لوني أسفل الاسم، عناوين أقسام بشريط جانبي وإدخالات بأسلوب الجدول الزمني.',
+    color: '#059669',
+    component: AuroraTemplate,
     atsScore: null,
   },
 ];
