@@ -76,6 +76,8 @@ export function CVProvider({ children }) {
     sectionSpacing: 'medium',
     headingAlign: 'left',
     headerAlign: 'left',
+    sidebarColor: '',
+    bgColor: '',
   });
 
   const [sectionOrder, setSectionOrder] = useState(DEFAULT_SECTION_ORDER);
@@ -251,6 +253,8 @@ export function CVProvider({ children }) {
       sectionSpacing: 'medium',
       headingAlign: 'left',
       headerAlign: 'left',
+      sidebarColor: '',
+      bgColor: '',
     });
     setSectionOrder(DEFAULT_SECTION_ORDER);
     setCurrentCVId(null);

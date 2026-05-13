@@ -73,7 +73,7 @@ const ArabicTealSidebarTemplate = ({
   const sb = {
     wrap: {
       width:'205px', minWidth:'205px',
-      backgroundColor: accentDark,
+      backgroundColor: theme?.sidebarColor || accentDark,
       padding:'22pt 13pt 22pt',
       boxSizing:'border-box',
       direction:'rtl',
@@ -112,7 +112,7 @@ const ArabicTealSidebarTemplate = ({
 
   /* ── Main styles ── */
   const mn = {
-    wrap:{ flex:1, padding:'22pt 20pt 18pt', boxSizing:'border-box', direction:'rtl', backgroundColor:'#fff' },
+    wrap:{ flex:1, padding:'22pt 20pt 18pt', boxSizing:'border-box', direction:'rtl', backgroundColor: theme?.bgColor || '#fff' },
     name:{ fontSize:sz.name, fontWeight:'700', color:'#1a202c', lineHeight:1.2, marginBottom:'2pt', textAlign:'right' },
     jobBadge:{
       display:'inline-block', backgroundColor: accentDark,

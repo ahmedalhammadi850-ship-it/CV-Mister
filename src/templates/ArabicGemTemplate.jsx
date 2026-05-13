@@ -117,13 +117,13 @@ const ArabicGemTemplate = ({
   const sb = {
     col: {
       width: '230px', minWidth: '230px',
-      backgroundColor: accentDark,
+      backgroundColor: theme?.sidebarColor || accentDark,
       boxSizing: 'border-box',
       direction: 'rtl',
     },
     topZone: {
       backgroundImage: patternUrl,
-      backgroundColor: accentDark,
+      backgroundColor: theme?.sidebarColor || accentDark,
       backgroundSize: '40px 40px',
       padding: '22pt 14pt 16pt',
       textAlign: 'center',
@@ -222,7 +222,7 @@ const ArabicGemTemplate = ({
 
   const mn = {
     col: {
-      flex: 1, backgroundColor: '#fff',
+      flex: 1, backgroundColor: theme?.bgColor || '#fff',
       padding: '22pt 20pt 22pt 18pt',
       boxSizing: 'border-box',
       direction: 'rtl',

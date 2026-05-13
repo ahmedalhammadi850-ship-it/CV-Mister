@@ -71,13 +71,13 @@ const ArabicSlateSidebarTemplate = ({
   const sb = {
     wrap:{
       width:'210px', minWidth:'210px',
-      background: `linear-gradient(180deg, ${accent} 0%, #2c5070 100%)`,
+      background: theme?.sidebarColor ? theme.sidebarColor : `linear-gradient(180deg, ${accent} 0%, #2c5070 100%)`,
       padding:'0 0 22pt',
       boxSizing:'border-box',
       direction:'rtl',
     },
     topBand:{
-      backgroundColor: accent,
+      backgroundColor: theme?.sidebarColor || accent,
       padding:'22pt 13pt 14pt',
     },
     photoWrap:{
@@ -116,7 +116,7 @@ const ArabicSlateSidebarTemplate = ({
 
   /* ── Main ── */
   const mn = {
-    wrap:{ flex:1, padding:'0', boxSizing:'border-box', direction:'rtl', backgroundColor:'#fff', display:'flex', flexDirection:'column' },
+    wrap:{ flex:1, padding:'0', boxSizing:'border-box', direction:'rtl', backgroundColor: theme?.bgColor || '#fff', display:'flex', flexDirection:'column' },
     nameBar:{
       backgroundColor:'#f0f4f8',
       borderBottom:`3px solid ${accent}`,

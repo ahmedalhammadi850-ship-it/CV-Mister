@@ -92,7 +92,7 @@ const AtlanticBlueTemplate = ({
   const sb = {
     wrapper: {
       width: '240px', minWidth: '240px',
-      backgroundColor: accent,
+      backgroundColor: theme?.sidebarColor || accent,
       padding: '32pt 18pt',
       boxSizing: 'border-box',
       direction: dir,
@@ -117,7 +117,7 @@ const AtlanticBlueTemplate = ({
   };
 
   const mn = {
-    wrapper: { flex: 1, padding: '32pt 28pt 28pt 24pt', boxSizing: 'border-box', direction: dir },
+    wrapper: { flex: 1, padding: '32pt 28pt 28pt 24pt', boxSizing: 'border-box', direction: dir, backgroundColor: theme?.bgColor || '#ffffff' },
     heading: {
       fontSize: sz.heading, fontWeight: '700', color: accent,
       textTransform: 'uppercase', letterSpacing: '0.08em',

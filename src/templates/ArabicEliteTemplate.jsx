@@ -440,7 +440,7 @@ const ArabicEliteTemplate = ({
       color: '#1a202c',
       width: '794px',
       minHeight: '1122px',
-      backgroundColor: DARK,   /* ← dark fills entire page */
+      backgroundColor: theme?.sidebarColor || DARK,   /* ← dark fills entire page */
       display: 'flex',
       flexDirection: 'column',
       boxSizing: 'border-box',
@@ -525,7 +525,7 @@ const ArabicEliteTemplate = ({
         {/* LEFT: white main content — rounded top corners create the wave */}
         <div style={{
           flex: 1,
-          backgroundColor: '#fff',
+          backgroundColor: theme?.bgColor || '#fff',
           borderTopLeftRadius: '22pt',
           borderTopRightRadius: '22pt',
           padding: '16pt 20pt 24pt 16pt',

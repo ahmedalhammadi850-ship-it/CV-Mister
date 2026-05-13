@@ -49,7 +49,7 @@ const ClassicSerifTemplate = ({
 
   const sidebar = {
     wrapper: {
-      width: '220px', minWidth: '220px', backgroundColor: '#f4f6f8',
+      width: '220px', minWidth: '220px', backgroundColor: theme?.sidebarColor || '#f4f6f8',
       padding: '28pt 18pt', boxSizing: 'border-box', direction: dir,
     },
     name: {
@@ -250,7 +250,7 @@ const ClassicSerifTemplate = ({
   const mainKeys = sectionOrder.filter(k => MAIN_SECTIONS.has(k));
 
   return (
-    <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', direction: 'ltr' }}>
+    <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: theme?.bgColor || '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', direction: 'ltr' }}>
       {/* Sidebar */}
       <div style={sidebar.wrapper}>
         {/* Photo */}

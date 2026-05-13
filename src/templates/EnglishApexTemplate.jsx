@@ -375,7 +375,7 @@ const EnglishApexTemplate = ({
     <div style={{
       fontFamily:font, fontSize:sz.body, color:TEXT,
       width:'794px', minHeight:'1122px', boxSizing:'border-box',
-      backgroundColor:WHITE, display:'flex',
+      backgroundColor: theme?.bgColor || WHITE, display:'flex',
       flexDirection: isRTL ? 'row-reverse' : 'row',
       direction: 'ltr',
     }}>
@@ -383,7 +383,7 @@ const EnglishApexTemplate = ({
       {/* ══ SIDEBAR ══════════════════════════════════════════ */}
       <div style={{
         width:`${SIDEBAR_W}px`, flexShrink:0,
-        background:`linear-gradient(180deg, ${NAVY} 0%, ${NAVY2} 100%)`,
+        background: theme?.sidebarColor ? theme.sidebarColor : `linear-gradient(180deg, ${NAVY} 0%, ${NAVY2} 100%)`,
         display:'flex', flexDirection:'column',
         boxSizing:'border-box', minHeight:'1122px',
       }}>

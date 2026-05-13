@@ -58,7 +58,7 @@ const SidebarLightTemplate = ({
     vis.portfolio !== false && info.portfolio && { icon: '⬡', text: info.portfolio },
   ].filter(Boolean);
 
-  const sidebarBg   = '#f4f6f8';
+  const sidebarBg   = theme?.sidebarColor || '#f4f6f8';
   const sidebarText = '#2c3e50';
 
   const sb = {
@@ -113,7 +113,7 @@ const SidebarLightTemplate = ({
   };
 
   const mn = {
-    wrapper: { flex: 1, padding: '32pt 28pt 28pt', boxSizing: 'border-box', direction: dir, backgroundColor: '#fff' },
+    wrapper: { flex: 1, padding: '32pt 28pt 28pt', boxSizing: 'border-box', direction: dir, backgroundColor: theme?.bgColor || '#fff' },
     heading: {
       fontSize: sz.heading, fontWeight: '700', color: accent,
       marginTop: sectionMt, marginBottom: '8pt',

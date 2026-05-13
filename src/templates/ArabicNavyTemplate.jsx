@@ -62,7 +62,7 @@ const ArabicNavyTemplate = ({
   const sb = {
     wrapper: {
       width: '215px', minWidth: '215px',
-      backgroundColor: accent,
+      backgroundColor: theme?.sidebarColor || accent,
       padding: '28pt 14pt',
       boxSizing: 'border-box',
       direction: 'rtl',
@@ -99,7 +99,7 @@ const ArabicNavyTemplate = ({
   };
 
   const mn = {
-    wrapper: { flex: 1, padding: '28pt 22pt 22pt', boxSizing: 'border-box', direction: 'rtl', backgroundColor: '#fff' },
+    wrapper: { flex: 1, padding: '28pt 22pt 22pt', boxSizing: 'border-box', direction: 'rtl', backgroundColor: theme?.bgColor || '#fff' },
     heading: {
       fontSize: sz.heading, fontWeight: '700', color: accent,
       marginTop: sectionMt, marginBottom: '8pt',

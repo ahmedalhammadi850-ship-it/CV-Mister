@@ -72,7 +72,7 @@ const ArabicCardTemplate = ({
   const sb = {
     wrapper: {
       width: '210px', minWidth: '210px',
-      backgroundColor: '#f7f9fc',
+      backgroundColor: theme?.sidebarColor || '#f7f9fc',
       padding: '24pt 14pt',
       boxSizing: 'border-box',
       direction: 'rtl',
@@ -115,7 +115,7 @@ const ArabicCardTemplate = ({
 
   /* ── Main (LEFT side, RTL) ── */
   const mn = {
-    wrapper: { flex: 1, padding: '24pt 20pt', boxSizing: 'border-box', direction: 'rtl', backgroundColor: '#fff' },
+    wrapper: { flex: 1, padding: '24pt 20pt', boxSizing: 'border-box', direction: 'rtl', backgroundColor: theme?.bgColor || '#fff' },
     nameBlock: {
       textAlign: 'right',
       paddingBottom: '12pt',

@@ -385,7 +385,7 @@ const ArabicLuxeTemplate = ({
 
       {/* ══ MAIN AREA (always left in DOM → left side visually) ══ */}
       <div style={{
-        flex:1, backgroundColor:'#fff',
+        flex:1, backgroundColor: theme?.bgColor || '#fff',
         display:'flex', flexDirection:'column',
         boxSizing:'border-box', minHeight:'1122px',
       }}>
@@ -415,7 +415,7 @@ const ArabicLuxeTemplate = ({
       {/* ══ SIDEBAR (rendered second → always on RIGHT) ══════ */}
       <div style={{
         width:`${SIDEBAR_W}px`, flexShrink:0,
-        backgroundColor:NAVY,
+        backgroundColor: theme?.sidebarColor || NAVY,
         display:'flex', flexDirection:'column',
         boxSizing:'border-box', minHeight:'1122px',
       }}>
