@@ -222,7 +222,7 @@ const ATSModernTemplate = ({
               {data.skills.map((skill, i) => (
                 <div key={i} style={s.skillCol}>
                   <span style={s.skillDot} />
-                  <span>{skill}</span>
+                  <span>{skill.name || skill}</span>
                 </div>
               ))}
             </div>

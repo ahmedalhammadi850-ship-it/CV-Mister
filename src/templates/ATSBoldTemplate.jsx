@@ -212,7 +212,7 @@ const ATSBoldTemplate = ({
               {data.skills.map((skill, i) => (
                 <div key={i} style={s.skillItem}>
                   <span style={s.bullet}>▪</span>
-                  <span>{skill}</span>
+                  <span>{skill.name || skill}</span>
                 </div>
               ))}
             </div>

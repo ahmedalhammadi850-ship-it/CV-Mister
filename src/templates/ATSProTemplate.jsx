@@ -239,7 +239,7 @@ const ATSProTemplate = ({
             <SectionHeading label={tr('skills', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               {data.skills.map((skill, i) => (
-                <span key={i} style={s.skillPill}>{skill}</span>
+                <span key={i} style={s.skillPill}>{skill.name || skill}</span>
               ))}
             </div>
           </div>
