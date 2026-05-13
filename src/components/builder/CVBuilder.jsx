@@ -155,20 +155,53 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
 
 const PAGE_H_PX = 1122; // A4 height at 96 dpi
 
+const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
+    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-amber-100">
+        <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-bold text-slate-900 mb-2">
+        {isRTL ? 'وصلت للحد الأقصى' : 'Limit Reached'}
+      </h3>
+      <p className="text-slate-500 text-sm leading-relaxed mb-6">
+        {plan === 'free'
+          ? (isRTL ? 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين (2).' : 'You\'ve used your free CV slot. Upgrade to create up to 2 CVs.')
+          : (isRTL ? 'لقد استخدمت سيرتيك الذاتيتين في هذه الدورة. قم بتجديد الاشتراك.' : 'You\'ve used both CVs in this cycle. Please renew your subscription.')}
+      </p>
+      <div className="flex flex-col gap-2">
+        <button onClick={onUpgrade} className="w-full py-3 rounded-2xl text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+          {isRTL ? '⭐ ترقية الآن — $3/شهر' : '⭐ Upgrade Now — $3/mo'}
+        </button>
+        <button onClick={onClose} className="w-full py-2.5 rounded-2xl text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
+          {isRTL ? 'إغلاق' : 'Close'}
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 const CVBuilder = () => {
   const { selectedTemplate, cvData, theme, visibleSections, visiblePersonalFields, sectionOrder, saveCurrentCV, currentCVId, currentCVName } = useCV();
-  const { isRTL } = useAuth();
+  const { isRTL, currentUser } = useAuth();
   const navigate = useNavigate();
   const [mobileTab, setMobileTab] = useState('editor');
   const [panelTab, setPanelTab] = useState('content');
   const [showSaveModal, setShowSaveModal] = useState(false);
   const [saveToast, setSaveToast] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
+  const [showLimitModal, setShowLimitModal] = useState(false);
   const breakDataRef = useRef({ breaks: [], totalHeight: PAGE_H_PX });
 
-  const handleSave = (name) => {
-    saveCurrentCV(name);
+  const handleSave = async (name) => {
+    const result = await saveCurrentCV(name);
     setShowSaveModal(false);
+    if (result?.error?.limitReached) {
+      setShowLimitModal(true);
+      return;
+    }
     setSaveToast(true);
     setTimeout(() => setSaveToast(false), 2500);
   };
@@ -317,6 +350,15 @@ const CVBuilder = () => {
         sectionOrder={sectionOrder}
         isRTL={isRTL}
       />
+
+      {showLimitModal && (
+        <LimitModal
+          isRTL={isRTL}
+          plan={currentUser?.plan || 'free'}
+          onClose={() => setShowLimitModal(false)}
+          onUpgrade={() => { setShowLimitModal(false); navigate('/upgrade'); }}
+        />
+      )}
 
       {showSaveModal && (
         <SaveModal

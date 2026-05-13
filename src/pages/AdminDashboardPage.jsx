@@ -405,9 +405,14 @@ const AdminDashboardPage = () => {
                           </td>
                           <td className="px-5 py-4 text-slate-300 hidden md:table-cell">{u.email || '—'}</td>
                           <td className="px-5 py-4 hidden lg:table-cell">
-                            <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${u.hasPassword ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
-                              {u.hasPassword ? 'بريد/كلمة مرور' : 'Replit OIDC'}
-                            </span>
+                            <div className="flex flex-col gap-1">
+                              <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold w-fit ${u.plan === 'pro' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-slate-600/40 text-slate-400'}`}>
+                                {u.plan === 'pro' ? '⭐ Pro' : 'مجاني'}
+                              </span>
+                              <span className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium w-fit ${u.hasPassword ? 'bg-blue-500/10 text-blue-400' : 'bg-purple-500/10 text-purple-400'}`}>
+                                {u.hasPassword ? 'بريد' : 'OIDC'}
+                              </span>
+                            </div>
                           </td>
                           <td className="px-5 py-4 text-slate-400 text-xs hidden lg:table-cell">{fmt(u.createdAt)}</td>
                           <td className="px-5 py-4">

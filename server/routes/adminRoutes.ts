@@ -99,6 +99,8 @@ export function registerAdminRoutes(app: Express) {
         lastName: u.lastName,
         createdAt: u.createdAt,
         hasPassword: !!u.passwordHash,
+        plan: u.plan || 'free',
+        cvCount: u.cvCount || 0,
       })));
     } catch (err) {
       console.error("Admin users error:", err);
@@ -169,6 +171,27 @@ export function registerAdminRoutes(app: Express) {
       );
       if (!result.rows.length)
         return res.status(404).json({ message: "الطلب غير موجود" });
+
+      const paymentRow = result.rows[0];
+
+      // If approved → upgrade user to pro + reset cv_count
+      if (status === "approved" && paymentRow.user_id) {
+        await pool.query(
+          `UPDATE users SET plan='pro', cv_count=0, updated_at=NOW() WHERE id=$1`,
+          [paymentRow.user_id]
+        );
+        // Delete existing CVs so they start fresh with 2 slots
+        await pool.query(`DELETE FROM cvs WHERE user_id=$1`, [paymentRow.user_id]);
+      }
+
+      // If rejected → keep user on free plan
+      if (status === "rejected" && paymentRow.user_id) {
+        await pool.query(
+          `UPDATE users SET plan='free', updated_at=NOW() WHERE id=$1`,
+          [paymentRow.user_id]
+        );
+      }
+
       res.json(result.rows[0]);
     } catch (err) {
       console.error("Admin update payment error:", err);

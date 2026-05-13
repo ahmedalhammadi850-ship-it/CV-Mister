@@ -3,7 +3,10 @@ import { isAuthenticated } from "../replit_integrations/auth";
 import { db } from "../db";
 import { cvs } from "@shared/models/cv";
 import { users } from "@shared/models/auth";
-import { eq, and, desc } from "drizzle-orm";
+import { eq, and, desc, sql } from "drizzle-orm";
+
+const FREE_LIMIT = 1;
+const PRO_LIMIT = 2;
 
 function getUserId(req: any): string {
   if ((req.session as any)?.userId) {
@@ -47,6 +50,32 @@ export function registerCVRoutes(app: Express) {
     try {
       const userId = getUserId(req);
       const { id, name, cvData, template, theme, atsScore } = req.body;
+
+      // Check if CV already exists (update vs new)
+      const [existing] = await db.select().from(cvs).where(eq(cvs.id, id));
+      const isNew = !existing;
+
+      if (isNew) {
+        // Enforce CV creation limits
+        const [user] = await db.select().from(users).where(eq(users.id, userId));
+        const plan = user?.plan || "free";
+        const limit = plan === "pro" ? PRO_LIMIT : FREE_LIMIT;
+        const currentCount = await db.select({ count: sql<number>`count(*)` }).from(cvs).where(eq(cvs.userId, userId));
+        const count = Number(currentCount[0]?.count || 0);
+
+        if (count >= limit) {
+          return res.status(403).json({
+            message: plan === "free"
+              ? `وصلت للحد المجاني (${FREE_LIMIT} سيرة). قم بالترقية للحصول على المزيد.`
+              : `وصلت لحد الخطة المدفوعة (${PRO_LIMIT} سيرة). قم بتجديد الاشتراك.`,
+            limitReached: true,
+            plan,
+            limit,
+            count,
+          });
+        }
+      }
+
       const [cv] = await db
         .insert(cvs)
         .values({ id, userId, name, cvData, template, theme, atsScore, lastModified: new Date() })

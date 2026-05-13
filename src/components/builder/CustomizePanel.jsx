@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
+import { FREE_TEMPLATE } from './EditorPanel';
 
 const COLORS = [
   { label: 'Indigo',   value: '#4f46e5' },
@@ -267,6 +268,12 @@ const DraggableSectionList = ({ sectionOrder, visibleSections, toggleSection, re
   );
 };
 
+const LockIcon = () => (
+  <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+  </svg>
+);
+
 const CustomizePanel = () => {
   const {
     theme, setTheme,
@@ -275,7 +282,8 @@ const CustomizePanel = () => {
     visibleSections, toggleSection,
     visiblePersonalFields, togglePersonalField,
   } = useCV();
-  const { isRTL } = useAuth();
+  const { isRTL, currentUser } = useAuth();
+  const isFreeUser = !currentUser || currentUser.plan === 'free';
 
   return (
     <div className="flex flex-col pb-20" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -286,20 +294,36 @@ const CustomizePanel = () => {
         {/* Template */}
         <div>
           <label className={labelClass}>{t('template', isRTL)}</label>
+          {isFreeUser && (
+            <p className="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2 mb-2 flex items-center gap-1.5">
+              <LockIcon />
+              {isRTL ? 'القالب المجاني: Minimal فقط — القوالب الأخرى تتطلب ترقية' : 'Free template: Minimal only — others require upgrade'}
+            </p>
+          )}
           <div className="grid grid-cols-2 gap-2">
-            {TEMPLATES.map(tpl => (
-              <button
-                key={tpl.value}
-                onClick={() => setSelectedTemplate(tpl.value)}
-                className={`py-2 px-3 rounded-lg text-sm font-medium border transition-all ${
-                  selectedTemplate === tpl.value
-                    ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
-                    : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
-                }`}
-              >
-                {isRTL ? tpl.ar : tpl.en}
-              </button>
-            ))}
+            {TEMPLATES.map(tpl => {
+              const isPaid = tpl.value !== FREE_TEMPLATE;
+              const isLocked = isFreeUser && isPaid;
+              const isActive = selectedTemplate === tpl.value;
+              return (
+                <button
+                  key={tpl.value}
+                  onClick={() => setSelectedTemplate(tpl.value)}
+                  className={`relative py-2 px-3 rounded-lg text-sm font-medium border transition-all ${
+                    isActive
+                      ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
+                      : isLocked
+                        ? 'bg-slate-50 text-slate-400 border-slate-200 hover:border-amber-300'
+                        : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
+                  }`}
+                >
+                  <span className="flex items-center justify-center gap-1">
+                    {isLocked && !isActive && <LockIcon />}
+                    {isRTL ? tpl.ar : tpl.en}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 

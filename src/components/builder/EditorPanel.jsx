@@ -1,10 +1,46 @@
 import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ExperienceCard from './ExperienceCard';
 import EducationCard from './EducationCard';
 import SkillsEditor from './SkillsEditor';
 import LanguagesEditor from './LanguagesEditor';
+
+export const FREE_TEMPLATE = 'minimal';
+
+const PaywallModal = ({ isRTL, onClose }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+          <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">{isRTL ? 'ميزة مدفوعة' : 'Pro Feature'}</h3>
+        <p className="text-slate-500 text-sm leading-relaxed mb-6">
+          {isRTL
+            ? 'هذا القسم متاح فقط في الخطة المدفوعة. قم بالترقية للوصول إلى جميع الأقسام وقوالب احترافية.'
+            : 'This section is available in the Pro plan. Upgrade to access all sections and premium templates.'}
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => navigate('/upgrade')}
+            className="w-full py-3 rounded-2xl text-white font-bold text-sm transition-all"
+            style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
+          >
+            {isRTL ? '⭐ ترقية الآن — $3/شهر' : '⭐ Upgrade Now — $3/mo'}
+          </button>
+          <button onClick={onClose} className="w-full py-2.5 rounded-2xl text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
+            {isRTL ? 'إلغاء' : 'Cancel'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const PuzzleIcon = () => (
   <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
@@ -269,11 +305,24 @@ const CardWrapper = ({ children, onDelete }) => (
 );
 
 const EditorPanel = () => {
-  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection, visiblePersonalFields, togglePersonalField } = useCV();
-  const { isRTL } = useAuth();
+  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection, visiblePersonalFields, togglePersonalField, selectedTemplate } = useCV();
+  const { isRTL, currentUser } = useAuth();
   const [openSection, setOpenSection] = useState('personalInfo');
   const [showAddContent, setShowAddContent] = useState(false);
   const [showCustomNameModal, setShowCustomNameModal] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const isPaidTemplate = selectedTemplate !== FREE_TEMPLATE;
+  const isFreeUser = !currentUser || currentUser.plan === 'free';
+  const isLocked = isPaidTemplate && isFreeUser;
+
+  const guardedToggle = (section) => {
+    if (isLocked && section !== 'personalInfo') {
+      setShowPaywall(true);
+      return;
+    }
+    setOpenSection(openSection === section ? null : section);
+  };
 
   const handlePersonalInfoChange = (e) => {
     const { name, value } = e.target;
@@ -313,6 +362,7 @@ const EditorPanel = () => {
           sectionOrder={sectionOrder}
         />
       )}
+      {showPaywall && <PaywallModal isRTL={isRTL} onClose={() => setShowPaywall(false)} />}
       {showCustomNameModal && (
         <CustomSectionNameModal
           isRTL={isRTL}
@@ -321,11 +371,34 @@ const EditorPanel = () => {
         />
       )}
 
+      {/* Paywall banner for paid templates on free plan */}
+      {isLocked && (
+        <div className="mx-4 mt-4 rounded-2xl px-4 py-3 flex items-center gap-3" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+          <svg className="w-5 h-5 text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <div className="flex-1 min-w-0">
+            <p className="text-white text-xs font-semibold leading-tight">
+              {isRTL ? 'قالب مدفوع — المعلومات الشخصية فقط مفتوحة' : 'Paid template — Personal Info only'}
+            </p>
+            <p className="text-white/70 text-xs mt-0.5">
+              {isRTL ? 'ترقّ للوصول إلى كل الأقسام' : 'Upgrade to unlock all sections'}
+            </p>
+          </div>
+          <button
+            onClick={() => setShowPaywall(true)}
+            className="flex-shrink-0 text-xs font-bold text-white bg-white/20 hover:bg-white/30 px-2.5 py-1.5 rounded-lg transition-colors"
+          >
+            {isRTL ? 'ترقية' : 'Upgrade'}
+          </button>
+        </div>
+      )}
+
       <div className="flex flex-col pb-20" dir={isRTL ? 'rtl' : 'ltr'} style={{ fontFamily: isRTL ? "'Tajawal', Arial, sans-serif" : undefined }}>
 
         {/* Personal Info */}
         <div>
-          <AccordionHeader en="Personal Information" ar="المعلومات الشخصية" section="personalInfo" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+          <AccordionHeader en="Personal Information" ar="المعلومات الشخصية" section="personalInfo" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
           {openSection === 'personalInfo' && (
             <div className="p-4 space-y-4 bg-slate-50/50 border-b border-slate-100">
 
@@ -430,7 +503,7 @@ const EditorPanel = () => {
 
         {/* Experience */}
         <div>
-          <AccordionHeader en="Experience" ar="الخبرة العملية" section="experience" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+          <AccordionHeader en="Experience" ar="الخبرة العملية" section="experience" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
           {openSection === 'experience' && (
             <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
               {cvData.experience.map((exp) => (
@@ -447,7 +520,7 @@ const EditorPanel = () => {
 
         {/* Education */}
         <div>
-          <AccordionHeader en="Education" ar="التعليم" section="education" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+          <AccordionHeader en="Education" ar="التعليم" section="education" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
           {openSection === 'education' && (
             <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
               {cvData.education.map((edu) => (
@@ -464,20 +537,20 @@ const EditorPanel = () => {
 
         {/* Skills */}
         <div>
-          <AccordionHeader en="Skills" ar="المهارات" section="skills" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+          <AccordionHeader en="Skills" ar="المهارات" section="skills" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
           {openSection === 'skills' && <SkillsEditor skills={cvData.skills} isRTL={isRTL} updateSection={updateSection} />}
         </div>
 
         {/* Languages */}
         <div>
-          <AccordionHeader en="Languages" ar="اللغات" section="languages" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+          <AccordionHeader en="Languages" ar="اللغات" section="languages" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
           {openSection === 'languages' && <LanguagesEditor languages={cvData.languages} isRTL={isRTL} updateSection={updateSection} />}
         </div>
 
         {/* Projects */}
         {(sectionOrder.includes('projects') || cvData.projects?.length > 0) && (
           <div>
-            <AccordionHeader en="Projects" ar="المشاريع" section="projects" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="Projects" ar="المشاريع" section="projects" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'projects' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.projects || []).map((proj, i) => (
@@ -497,7 +570,7 @@ const EditorPanel = () => {
         {/* Certificates */}
         {sectionOrder.includes('certificates') && (
           <div>
-            <AccordionHeader en="Certificates" ar="الشهادات والاعتمادات" section="certificates" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="Certificates" ar="الشهادات والاعتمادات" section="certificates" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'certificates' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.certificates || []).map((cert) => (
@@ -520,7 +593,7 @@ const EditorPanel = () => {
         {/* Interests */}
         {sectionOrder.includes('interests') && (
           <div>
-            <AccordionHeader en="Interests & Hobbies" ar="الاهتمامات والهوايات" section="interests" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="Interests & Hobbies" ar="الاهتمامات والهوايات" section="interests" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'interests' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.interests || []).map((item) => (
@@ -539,7 +612,7 @@ const EditorPanel = () => {
         {/* Courses */}
         {sectionOrder.includes('courses') && (
           <div>
-            <AccordionHeader en="Courses & Training" ar="الدورات والتدريب" section="courses" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="Courses & Training" ar="الدورات والتدريب" section="courses" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'courses' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.courses || []).map((course) => (
@@ -561,7 +634,7 @@ const EditorPanel = () => {
         {/* Awards */}
         {sectionOrder.includes('awards') && (
           <div>
-            <AccordionHeader en="Awards & Honours" ar="الجوائز والتكريمات" section="awards" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="Awards & Honours" ar="الجوائز والتكريمات" section="awards" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'awards' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.awards || []).map((award) => (
@@ -584,7 +657,7 @@ const EditorPanel = () => {
         {/* Organisations */}
         {sectionOrder.includes('organisations') && (
           <div>
-            <AccordionHeader en="Organisations" ar="المنظمات والجمعيات" section="organisations" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="Organisations" ar="المنظمات والجمعيات" section="organisations" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'organisations' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.organisations || []).map((org) => (
@@ -606,7 +679,7 @@ const EditorPanel = () => {
         {/* Publications */}
         {sectionOrder.includes('publications') && (
           <div>
-            <AccordionHeader en="Publications" ar="المنشورات والأبحاث" section="publications" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="Publications" ar="المنشورات والأبحاث" section="publications" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'publications' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.publications || []).map((pub) => (
@@ -629,7 +702,7 @@ const EditorPanel = () => {
         {/* References */}
         {sectionOrder.includes('references') && (
           <div>
-            <AccordionHeader en="References" ar="المراجع والتزكيات" section="references" isRTL={isRTL} openSection={openSection} onToggle={toggle} />
+            <AccordionHeader en="References" ar="المراجع والتزكيات" section="references" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
             {openSection === 'references' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.references || []).map((ref) => (
@@ -704,14 +777,31 @@ const EditorPanel = () => {
         {/* Add Content Button */}
         <div className="p-4 mt-2">
           <button
-            onClick={() => setShowAddContent(true)}
+            onClick={() => isLocked ? setShowPaywall(true) : setShowAddContent(true)}
             className="w-full py-3.5 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2 transition-all active:scale-95"
-            style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: '#fff', boxShadow: '0 4px 14px rgba(79,70,229,0.35)' }}
+            style={{
+              background: isLocked
+                ? 'linear-gradient(135deg, #94a3b8 0%, #cbd5e1 100%)'
+                : 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)',
+              color: '#fff',
+              boxShadow: isLocked ? 'none' : '0 4px 14px rgba(79,70,229,0.35)',
+            }}
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
-              <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            {t('+ Add Content', '+ إضافة محتوى', isRTL)}
+            {isLocked ? (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                {isRTL ? 'يتطلب ترقية' : 'Requires Upgrade'}
+              </>
+            ) : (
+              <>
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+                </svg>
+                {t('+ Add Content', '+ إضافة محتوى', isRTL)}
+              </>
+            )}
           </button>
         </div>
 

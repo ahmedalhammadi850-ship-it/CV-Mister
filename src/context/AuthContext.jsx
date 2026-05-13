@@ -11,6 +11,17 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isRTL, setIsRTL] = useState(false);
 
+  const buildUser = (user) => ({
+    uid: user.id,
+    id: user.id,
+    name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
+    displayName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email?.split('@')[0],
+    profileImage: user.profileImageUrl || null,
+    email: user.email,
+    plan: user.plan || 'free',
+    cvCount: user.cvCount || 0,
+  });
+
   const fetchUser = () => {
     return fetch('/api/auth/user', { credentials: 'include' })
       .then(res => {
@@ -19,21 +30,12 @@ export function AuthProvider({ children }) {
         return res.json();
       })
       .then(user => {
-        if (user) {
-          setCurrentUser({
-            uid: user.id,
-            id: user.id,
-            name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
-            displayName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email?.split('@')[0],
-            profileImage: user.profileImageUrl || null,
-            email: user.email,
-          });
-        } else {
-          setCurrentUser(null);
-        }
+        setCurrentUser(user ? buildUser(user) : null);
       })
       .catch(() => setCurrentUser(null));
   };
+
+  const refreshUser = () => fetchUser();
 
   useEffect(() => {
     fetchUser().finally(() => setLoading(false));
@@ -48,14 +50,7 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'فشل تسجيل الدخول');
-    setCurrentUser({
-      uid: data.id,
-      id: data.id,
-      name: data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : data.email,
-      displayName: data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : data.email?.split('@')[0],
-      profileImage: data.profileImageUrl || null,
-      email: data.email,
-    });
+    setCurrentUser(buildUser(data));
     return data;
   };
 
@@ -68,14 +63,7 @@ export function AuthProvider({ children }) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'فشل إنشاء الحساب');
-    setCurrentUser({
-      uid: data.id,
-      id: data.id,
-      name: data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : data.email,
-      displayName: data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : data.email?.split('@')[0],
-      profileImage: data.profileImageUrl || null,
-      email: data.email,
-    });
+    setCurrentUser(buildUser(data));
     return data;
   };
 
@@ -103,6 +91,7 @@ export function AuthProvider({ children }) {
     signUp,
     signOutUser,
     sendPasswordReset,
+    refreshUser,
   };
 
   return (

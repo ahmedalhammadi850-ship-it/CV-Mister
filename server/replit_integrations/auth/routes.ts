@@ -109,6 +109,8 @@ export function registerAuthRoutes(app: Express): void {
             firstName: user.firstName,
             lastName: user.lastName,
             profileImageUrl: user.profileImageUrl,
+            plan: user.plan || "free",
+            cvCount: user.cvCount || 0,
           });
         }
       }
@@ -123,6 +125,8 @@ export function registerAuthRoutes(app: Express): void {
             firstName: user.firstName,
             lastName: user.lastName,
             profileImageUrl: user.profileImageUrl,
+            plan: user.plan || "free",
+            cvCount: user.cvCount || 0,
           });
         }
       }

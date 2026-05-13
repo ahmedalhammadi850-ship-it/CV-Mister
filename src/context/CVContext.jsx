@@ -24,14 +24,20 @@ async function fetchAPICVs() {
 
 async function saveAPICV(entry) {
   try {
-    await fetch('/api/cvs', {
+    const res = await fetch('/api/cvs', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { error: data };
+    }
+    return { ok: true };
   } catch (e) {
     console.error('API CV save failed', e);
+    return { error: { message: 'Network error' } };
   }
 }
 
@@ -189,7 +195,7 @@ export function CVProvider({ children }) {
     });
   };
 
-  const saveCurrentCV = (name) => {
+  const saveCurrentCV = async (name) => {
     const id = currentCVId || `cv-${Date.now()}`;
     const cvName = name || currentCVName;
     const entry = saveCV({
@@ -206,10 +212,13 @@ export function CVProvider({ children }) {
     window.dispatchEvent(new Event('cv_saved'));
 
     if (currentUser) {
-      saveAPICV(entry);
+      const result = await saveAPICV(entry);
+      if (result?.error) {
+        return { error: result.error };
+      }
     }
 
-    return entry;
+    return { ok: true, entry };
   };
 
   const loadCVById = (id) => {
