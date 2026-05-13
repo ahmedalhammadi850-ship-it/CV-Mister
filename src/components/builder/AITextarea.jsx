@@ -96,7 +96,7 @@ export default function AITextarea({
     }
     setLoading(key);
     try {
-      const res = await fetch('https://ahmed144.app.n8n.cloud/webhook-test/94834e1e-04b3-451b-9b48-26d58ae28623', {
+      const res = await fetch('https://ahmed144.app.n8n.cloud/webhook/94834e1e-04b3-451b-9b48-26d58ae28623', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: value, action: key, language: isRTL ? 'ar' : 'en' }),

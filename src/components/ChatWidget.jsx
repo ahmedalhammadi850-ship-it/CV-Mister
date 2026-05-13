@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-const WEBHOOK_URL = 'https://ahmed144.app.n8n.cloud/webhook-test/1d6ee35d-0280-4d68-a839-eeb1b13e298e';
+const WEBHOOK_URL = 'https://ahmed144.app.n8n.cloud/webhook/1d6ee35d-0280-4d68-a839-eeb1b13e298e';
 
 export default function ChatWidget() {
   const { isRTL } = useAuth();
