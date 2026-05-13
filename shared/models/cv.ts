@@ -1,4 +1,4 @@
-import { pgTable, varchar, jsonb, timestamp, integer } from "drizzle-orm/pg-core";
+import { pgTable, varchar, jsonb, timestamp, integer, text } from "drizzle-orm/pg-core";
 
 export const cvs = pgTable("cvs", {
   id: varchar("id").primaryKey(),
