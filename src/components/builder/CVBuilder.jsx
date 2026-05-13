@@ -158,22 +158,29 @@ const PAGE_H_PX = 1122; // A4 height at 96 dpi
 const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
-      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-amber-100">
-        <svg className="w-8 h-8 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+      <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 ${plan === 'pro' ? 'bg-indigo-100' : 'bg-amber-100'}`}>
+        <svg className={`w-8 h-8 ${plan === 'pro' ? 'text-indigo-600' : 'text-amber-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          {plan === 'pro'
+            ? <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            : <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          }
         </svg>
       </div>
       <h3 className="text-xl font-bold text-slate-900 mb-2">
-        {isRTL ? 'وصلت للحد الأقصى' : 'Limit Reached'}
+        {plan === 'pro'
+          ? (isRTL ? 'انتهت سيرك الذاتية' : 'CV Limit Reached')
+          : (isRTL ? 'وصلت للحد الأقصى' : 'Limit Reached')}
       </h3>
       <p className="text-slate-500 text-sm leading-relaxed mb-6">
         {plan === 'free'
-          ? (isRTL ? 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين (2).' : 'You\'ve used your free CV slot. Upgrade to create up to 2 CVs.')
-          : (isRTL ? 'لقد استخدمت سيرتيك الذاتيتين في هذه الدورة. قم بتجديد الاشتراك.' : 'You\'ve used both CVs in this cycle. Please renew your subscription.')}
+          ? (isRTL ? 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين (2).' : "You've used your free CV slot. Upgrade to create up to 2 CVs.")
+          : (isRTL ? 'لقد وصلت لحد السيرتين الذاتيتين في خطة Pro. جدّد اشتراكك للاستمرار.' : "You've reached the 2-CV limit on your Pro plan. Renew your subscription to continue.")}
       </p>
       <div className="flex flex-col gap-2">
         <button onClick={onUpgrade} className="w-full py-3 rounded-2xl text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
-          {isRTL ? '⭐ ترقية الآن — $3/شهر' : '⭐ Upgrade Now — $3/mo'}
+          {plan === 'pro'
+            ? (isRTL ? '🔄 تجديد الاشتراك — $3/شهر' : '🔄 Renew Subscription — $3/mo')
+            : (isRTL ? '⭐ ترقية الآن — $3/شهر' : '⭐ Upgrade Now — $3/mo')}
         </button>
         <button onClick={onClose} className="w-full py-2.5 rounded-2xl text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
           {isRTL ? 'إغلاق' : 'Close'}
