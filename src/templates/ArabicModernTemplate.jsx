@@ -22,6 +22,7 @@ const DEFAULT_ORDER = ['summary', 'experience', 'skills', 'education', 'certific
 
 const BarRating = ({ level = 3, accent }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display: 'flex', gap: '3pt', alignItems: 'center', marginTop: '2pt' }}>
@@ -34,6 +35,7 @@ const BarRating = ({ level = 3, accent }) => {
 
 const DotsRating = ({ level = 3, accent }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>

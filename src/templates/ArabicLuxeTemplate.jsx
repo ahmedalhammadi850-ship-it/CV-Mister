@@ -84,6 +84,7 @@ const SbTitle = ({ label, isRTL, accent }) => {
 /* ── Skill diamond bar ─────────────────────────────────────── */
 const DiamondBar = ({ level=3, accent }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
     <div style={{ display:'flex', gap:'4pt', direction:'ltr', marginTop:'2pt' }}>
@@ -151,7 +152,7 @@ const ArabicLuxeTemplate = ({
               <div style={{ fontSize:'8.5pt', color:'#fff', textAlign:align, marginBottom:'3pt' }}>
                 {typeof sk==='string' ? sk : (sk.name||sk)}
               </div>
-              <DiamondBar level={typeof sk==='object'?(sk.level||3):3} accent={accent} />
+              <DiamondBar level={typeof sk==='object'?(sk.level||0):0} accent={accent} />
             </div>
           ))}
         </div>

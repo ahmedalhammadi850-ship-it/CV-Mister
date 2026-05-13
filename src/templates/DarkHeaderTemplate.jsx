@@ -26,6 +26,7 @@ const MAIN_SECTIONS    = new Set(['experience', 'education', 'projects', 'public
 
 const DotsRating = ({ level = 3, accent }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>
@@ -179,7 +180,7 @@ const DarkHeaderTemplate = ({
             {data.skills.map((sk, i) => (
               <div key={i} style={sb.skillRow}>
                 <span>{sk.name || sk}</span>
-                <DotsForSidebar level={sk.level || 3} />
+                <DotsForSidebar level={sk.level || 0} />
               </div>
             ))}
           </div>

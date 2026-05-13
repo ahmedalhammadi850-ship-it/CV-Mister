@@ -27,6 +27,7 @@ const MAIN_SECTIONS    = new Set(['summary', 'experience', 'education', 'project
 
 const BarRating = ({ level = 3, barColor, bgColor }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display: 'flex', gap: '3pt', alignItems: 'center' }}>
@@ -127,7 +128,7 @@ const ArabicNavyTemplate = ({
             {data.skills.map((sk, i) => (
               <div key={i} style={sb.skillItem}>
                 <div style={sb.skillName}>{sk.name || sk}</div>
-                <BarRating level={sk.level || 3} barColor="rgba(255,255,255,0.9)" bgColor="rgba(255,255,255,0.2)" />
+                <BarRating level={sk.level || 0} barColor="rgba(255,255,255,0.9)" bgColor="rgba(255,255,255,0.2)" />
               </div>
             ))}
           </div>

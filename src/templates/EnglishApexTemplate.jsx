@@ -47,6 +47,7 @@ const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>
 /* ── Segmented skill bar ────────────────────────────────────── */
 const SegmentBar = ({ level = 3, accent }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'3pt', direction:'ltr' }}>
@@ -139,7 +140,7 @@ const EnglishApexTemplate = ({
               <div style={{ fontSize:'8pt', color:'rgba(255,255,255,0.88)', fontWeight:'600', textAlign:align }}>
                 {typeof sk === 'string' ? sk : (sk.name || sk)}
               </div>
-              <SegmentBar level={typeof sk === 'object' ? (sk.level || 3) : 3} accent={accent} />
+              <SegmentBar level={typeof sk === 'object' ? (sk.level || 0) : 0} accent={accent} />
             </div>
           ))}
         </div>

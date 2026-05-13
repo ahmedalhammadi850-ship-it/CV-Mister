@@ -26,6 +26,7 @@ const MAIN_SECTIONS    = new Set(['experience','education','projects','publicati
 /* ── 5-segment skill bar ── */
 const SkillBar = ({ level = 3, filled, empty }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'3pt', direction:'ltr' }}>
@@ -346,7 +347,7 @@ const ArabicGemTemplate = ({
             {data.skills.map((sk, i) => (
               <div key={i} style={sb.skillRow}>
                 <div style={sb.skillName}>{sk.name || sk}</div>
-                <SkillBar level={sk.level || 3} filled={gold} empty="rgba(255,255,255,0.2)" />
+                <SkillBar level={sk.level || 0} filled={gold} empty="rgba(255,255,255,0.2)" />
               </div>
             ))}
           </div>

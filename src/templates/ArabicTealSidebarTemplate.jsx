@@ -27,6 +27,7 @@ const MAIN_SECTIONS    = new Set(['summary','experience','education','projects',
 /* ── Bar rating (sidebar) ── */
 const Bar = ({ level = 3, filled, empty }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'2pt' }}>
@@ -146,7 +147,7 @@ const ArabicTealSidebarTemplate = ({
           {data.skills.map((sk,i)=>(
             <div key={i} style={sb.skillItem}>
               <div style={sb.skillName}>{sk.name||sk}</div>
-              <Bar level={sk.level||3} filled="rgba(255,255,255,0.9)" empty="rgba(255,255,255,0.2)" />
+              <Bar level={sk.level||0} filled="rgba(255,255,255,0.9)" empty="rgba(255,255,255,0.2)" />
             </div>
           ))}
         </div>

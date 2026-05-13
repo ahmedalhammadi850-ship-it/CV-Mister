@@ -26,6 +26,7 @@ const MAIN_SECTIONS    = new Set(['summary','experience','education','projects',
 
 const Bar = ({ level=3, filled, empty }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'3pt' }}>
@@ -38,6 +39,7 @@ const Bar = ({ level=3, filled, empty }) => {
 
 const Dots = ({ level=3, filled, empty }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
     <span style={{ display:'inline-flex', gap:'3pt', verticalAlign:'middle' }}>

@@ -33,6 +33,7 @@ const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 /* ── Progress bar ───────────────────────────────────────────── */
 const ProgressBar = ({ level=3, accent }) => {
+  if ((level ?? 0) <= 0) return null;
   const pct = level > 5 ? Math.min(level, 100) : (Math.min(Math.max(level,1),5)/5)*100;
   return (
     <div style={{ height:'5pt', borderRadius:'3pt', backgroundColor:'#d0e8ec', overflow:'hidden', marginTop:'2pt' }}>
@@ -44,6 +45,7 @@ const ProgressBar = ({ level=3, accent }) => {
 /* ── Dot rating ─────────────────────────────────────────────── */
 const DotRating = ({ level=3, accent }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
     <div style={{ display:'flex', gap:'3pt', marginTop:'2pt' }}>
@@ -129,7 +131,7 @@ const EnglishHorizonTemplate = ({
               <div style={{ fontSize:'8.5pt', color:'#2d3748', fontWeight:'600', marginBottom:'2pt', textAlign:align }}>
                 {typeof sk==='string' ? sk : (sk.name||sk)}
               </div>
-              <ProgressBar level={typeof sk==='object'?(sk.level||3):3} accent={accent} />
+              <ProgressBar level={typeof sk==='object'?(sk.level||0):0} accent={accent} />
             </div>
           ))}
         </div>

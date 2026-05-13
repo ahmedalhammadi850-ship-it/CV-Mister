@@ -44,6 +44,7 @@ const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>
 
 /* ── Skill fill bar ─────────────────────────────────────────── */
 const SkillBar = ({ level = 3, accent }) => {
+  if ((level ?? 0) <= 0) return null;
   const pct = level > 5 ? Math.min(level, 100) : (Math.min(Math.max(level, 1), 5) / 5) * 100;
   return (
     <div style={{ height:'5pt', borderRadius:'3pt', backgroundColor:'rgba(255,255,255,0.1)', marginTop:'3pt', overflow:'hidden' }}>
@@ -146,7 +147,7 @@ const ArabicZafirTemplate = ({
               <div style={{ fontSize:'8pt', color:'rgba(255,255,255,0.88)', fontWeight:'600', textAlign:align }}>
                 {typeof sk === 'string' ? sk : (sk.name || sk)}
               </div>
-              <SkillBar level={typeof sk === 'object' ? (sk.level || 3) : 3} accent={accent} />
+              <SkillBar level={typeof sk === 'object' ? (sk.level || 0) : 0} accent={accent} />
             </div>
           ))}
         </div>

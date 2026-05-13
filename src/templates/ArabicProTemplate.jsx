@@ -29,6 +29,7 @@ const MAIN_SECTIONS    = new Set(['summary','experience','education','projects',
 
 /* ── Skill bar with percentage label ── */
 const SkillBar = ({ level = 3, accent, bg }) => {
+  if ((level ?? 0) <= 0) return null;
   const pct = level > 5 ? Math.min(level, 100) : Math.round((Math.min(Math.max(level, 1), 5) / 5) * 100);
   return (
     <div style={{ position:'relative', height:'8pt', borderRadius:'4pt', backgroundColor: bg, overflow:'hidden', marginTop:'2pt' }}>
@@ -132,7 +133,7 @@ const ArabicProTemplate = ({
           {data.skills.map((sk, i) => (
             <div key={i} style={sb.skillItem}>
               <div style={sb.skillName}>{sk.name || sk}</div>
-              <SkillBar level={sk.level || 3} accent="rgba(255,255,255,0.85)" bg="rgba(255,255,255,0.15)" />
+              <SkillBar level={sk.level || 0} accent="rgba(255,255,255,0.85)" bg="rgba(255,255,255,0.15)" />
             </div>
           ))}
         </div>

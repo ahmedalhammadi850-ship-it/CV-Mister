@@ -26,6 +26,7 @@ const MAIN_SECTIONS    = new Set(['summary', 'experience', 'projects', 'publicat
 
 const DotsRating = ({ level = 3, accent }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>
@@ -141,7 +142,7 @@ const SidebarLightTemplate = ({
             {data.skills.map((sk, i) => (
               <div key={i} style={sb.skillRow}>
                 <span>{sk.name || sk}</span>
-                <DotsRating level={sk.level || 3} accent={accent} />
+                <DotsRating level={sk.level || 0} accent={accent} />
               </div>
             ))}
           </div>

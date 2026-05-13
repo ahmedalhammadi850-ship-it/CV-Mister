@@ -156,6 +156,7 @@ const ContactRow = ({ iconKey, text }) => (
 /* ─── Diamond rating ──────────────────────────────────────────── */
 const Stars = ({ level = 3 }) => {
   const lvl = level > 5 ? Math.round(level / 20) : level;
+  if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '3pt', alignItems: 'center' }}>
@@ -248,7 +249,7 @@ const ArabicEliteTemplate = ({
               <div style={{ fontSize: '8.5pt', color: '#fff', textAlign: 'right', marginBottom: '3pt' }}>
                 {typeof sk === 'string' ? sk : (sk.name || sk)}
               </div>
-              <Stars level={typeof sk === 'object' ? (sk.level || 3) : 3} />
+              <Stars level={typeof sk === 'object' ? (sk.level || 0) : 0} />
             </div>
           ))}
         </div>
