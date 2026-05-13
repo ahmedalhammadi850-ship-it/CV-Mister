@@ -377,6 +377,7 @@ const EnglishApexTemplate = ({
       width:'794px', minHeight:'1122px', boxSizing:'border-box',
       backgroundColor:WHITE, display:'flex',
       flexDirection: isRTL ? 'row-reverse' : 'row',
+      direction: 'ltr',
     }}>
 
       {/* ══ SIDEBAR ══════════════════════════════════════════ */}

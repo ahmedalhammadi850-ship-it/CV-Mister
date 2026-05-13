@@ -335,7 +335,7 @@ const SidebarLightTemplate = ({
   const initials = (info.fullName || '').split(' ').map(w => w[0]).slice(0, 2).join('').toUpperCase();
 
   return (
-    <div style={{ fontFamily: font, fontSize: sz.body, color: sidebarText, backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+    <div style={{ fontFamily: font, fontSize: sz.body, color: sidebarText, backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', direction: 'ltr' }}>
       {/* Sidebar */}
       <div style={sb.wrapper}>
         {info.photo ? (
