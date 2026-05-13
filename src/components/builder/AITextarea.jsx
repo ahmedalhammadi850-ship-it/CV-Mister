@@ -210,20 +210,6 @@ export default function AITextarea({
         {/* Buttons row */}
         <div className={`flex flex-wrap gap-2 items-center`}>
 
-          {/* Robot icon button */}
-          <div
-            className="flex items-center justify-center rounded-xl flex-shrink-0 transition-transform hover:scale-105 active:scale-95"
-            style={{
-              width: 36,
-              height: 36,
-              background: 'linear-gradient(135deg,#7c3aed 0%,#a855f7 100%)',
-              boxShadow: '0 3px 10px rgba(124,58,237,0.4)',
-            }}
-            title={isRTL ? 'مساعد الذكاء الاصطناعي' : 'AI Assistant'}
-          >
-            <RobotIcon />
-          </div>
-
           {/* Action pills */}
           {AI_ACTIONS.map(a => (
             <button
@@ -240,7 +226,6 @@ export default function AITextarea({
               `}
               style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
             >
-              {/* Icon circle */}
               <span
                 className={`flex items-center justify-center rounded-full ${a.bubble} flex-shrink-0`}
                 style={{ width: 22, height: 22 }}
@@ -255,6 +240,22 @@ export default function AITextarea({
               {isRTL ? a.ar : a.en}
             </button>
           ))}
+
+          {/* Robot icon — pinned to the right */}
+          <div className="ml-auto flex-shrink-0">
+            <div
+              className="flex items-center justify-center rounded-xl transition-transform hover:scale-105 active:scale-95 cursor-default"
+              style={{
+                width: 36,
+                height: 36,
+                background: 'linear-gradient(135deg,#7c3aed 0%,#a855f7 100%)',
+                boxShadow: '0 3px 10px rgba(124,58,237,0.4)',
+              }}
+              title={isRTL ? 'مساعد الذكاء الاصطناعي' : 'AI Assistant'}
+            >
+              <RobotIcon />
+            </div>
+          </div>
 
         </div>
       </div>
