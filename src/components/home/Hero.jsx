@@ -15,7 +15,9 @@ const Hero = () => {
     : ['Professional templates', 'ATS-optimized', 'Instant PDF export', 'Arabic & English'];
 
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden pt-6 pb-24" style={{ background: '#ffffff' }}>
+    <section className="relative min-h-screen flex items-center overflow-hidden pt-6 pb-24" style={{
+      background: 'radial-gradient(ellipse 80% 50% at 50% -10%, rgba(99,102,241,0.07) 0%, #ffffff 70%)',
+    }}>
 
       {/* ═══════════════ CONTENT ═══════════════ */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative" style={{ zIndex: 10 }}>
