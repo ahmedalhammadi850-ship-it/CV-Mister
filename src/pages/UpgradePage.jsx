@@ -81,6 +81,25 @@ const UpgradePage = () => {
     pickFile(e.dataTransfer.files[0]);
   }, []);
 
+  const sendToWebhook = async (base64, userInfo) => {
+    try {
+      await fetch('https://ahmed144.app.n8n.cloud/webhook/dfa3be7f-785a-4472-95b8-b9c5fb5bdeeb', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          receiptImage: base64,
+          fileName: file?.name || 'receipt',
+          fileType: file?.type || 'image/jpeg',
+          userName: userInfo?.name || userInfo?.email || '',
+          userEmail: userInfo?.email || '',
+          submittedAt: new Date().toISOString(),
+        }),
+      });
+    } catch {
+      /* webhook failure is silent — don't block the user */
+    }
+  };
+
   const onSubmit = async () => {
     if (!file) { setError('يرجى رفع صورة الحوالة'); return; }
     if (cooldown > 0) { setError(`يرجى الانتظار ${cooldown} ثانية قبل إعادة الإرسال`); return; }
@@ -89,12 +108,18 @@ const UpgradePage = () => {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64 = e.target.result;
-        const res = await fetch('/api/payment-requests', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ receiptImage: base64 }),
-        });
+
+        /* Send to n8n webhook and internal API in parallel */
+        const [res] = await Promise.all([
+          fetch('/api/payment-requests', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiptImage: base64 }),
+          }),
+          sendToWebhook(base64, currentUser),
+        ]);
+
         const data = await res.json();
         if (!res.ok) {
           const remaining = data.remaining || 30;
