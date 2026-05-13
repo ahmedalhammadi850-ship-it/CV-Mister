@@ -35,6 +35,37 @@ const Dots = ({ level = 3, accent }) => {
   );
 };
 
+const PhoneIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+    <path d="M3 1h3l1.5 3.5-2 1.2c.8 1.6 2.3 3.1 3.8 3.8l1.2-2L14 9v3c0 1.1-.9 1-2 .7C5 11 1 6 1 3c-.3-1.1-.1-2 1-2z" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2" fill="none" />
+  </svg>
+);
+const EmailIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+    <rect x="1" y="2.5" width="12" height="9" rx="1" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2" />
+    <path d="M1 3.5l6 4.5 6-4.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2" />
+  </svg>
+);
+const LocationIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+    <path d="M7 1a4 4 0 0 1 4 4c0 3-4 8-4 8S3 8 3 5a4 4 0 0 1 4-4z" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2" />
+    <circle cx="7" cy="5" r="1.5" fill="rgba(255,255,255,0.75)" />
+  </svg>
+);
+const LinkedinIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+    <rect x="1" y="1" width="12" height="12" rx="2" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2" />
+    <path d="M4 6v4M4 4.5v.5M7 10V8a1.5 1.5 0 0 1 3 0v2M7 6v4" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2" strokeLinecap="round" />
+  </svg>
+);
+const GlobeIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 14 14" fill="none" style={{ flexShrink: 0 }}>
+    <circle cx="7" cy="7" r="5.5" stroke="rgba(255,255,255,0.75)" strokeWidth="1.2" />
+    <path d="M7 1.5c-1.5 1.5-2.5 3.3-2.5 5.5S5.5 11 7 12.5M7 1.5c1.5 1.5 2.5 3.3 2.5 5.5S8.5 11 7 12.5M1.5 7h11" stroke="rgba(255,255,255,0.75)" strokeWidth="1.1" />
+  </svg>
+);
+const CONTACT_ICON_MAP = { phone: <PhoneIcon />, email: <EmailIcon />, location: <LocationIcon />, linkedin: <LinkedinIcon />, portfolio: <GlobeIcon /> };
+
 const AtlanticBlueTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
@@ -51,11 +82,11 @@ const AtlanticBlueTemplate = ({
   const vis  = visiblePersonalFields || {};
 
   const contactItems = [
-    vis.email     !== false && info.email     && { icon: '✉', text: info.email },
-    vis.phone     !== false && info.phone     && { icon: '✆', text: info.phone },
-    vis.location  !== false && info.location  && { icon: '⌖', text: info.location },
-    vis.linkedin  !== false && info.linkedin  && { icon: 'in', text: info.linkedin },
-    vis.portfolio !== false && info.portfolio && { icon: '⬡', text: info.portfolio },
+    vis.phone     !== false && info.phone     && { iconKey: 'phone',     text: info.phone },
+    vis.email     !== false && info.email     && { iconKey: 'email',     text: info.email },
+    vis.location  !== false && info.location  && { iconKey: 'location',  text: info.location },
+    vis.linkedin  !== false && info.linkedin  && { iconKey: 'linkedin',  text: info.linkedin },
+    vis.portfolio !== false && info.portfolio && { iconKey: 'portfolio', text: info.portfolio },
   ].filter(Boolean);
 
   const sb = {
@@ -189,13 +220,22 @@ const AtlanticBlueTemplate = ({
           <div key="experience">
             <div style={mn.heading}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
-              <div key={i} style={mn.item}>
-                <div style={mn.row}>
-                  <div style={mn.role}>{e.jobTitle}</div>
-                  <div style={mn.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
+              <div key={i} style={{ ...mn.item, display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', gap: '10pt' }}>
+                {/* Timeline dot */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingTop: '3pt' }}>
+                  <div style={{ width: '9pt', height: '9pt', borderRadius: '50%', backgroundColor: accent, flexShrink: 0 }} />
+                  {i < data.experience.length - 1 && (
+                    <div style={{ width: '1.5px', flex: 1, backgroundColor: accent + '33', marginTop: '3pt', minHeight: '20pt' }} />
+                  )}
                 </div>
-                <div style={mn.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
-                {e.description && <div style={mn.body}>{e.description}</div>}
+                <div style={{ flex: 1 }}>
+                  <div style={mn.row}>
+                    <div style={mn.role}>{e.jobTitle}</div>
+                    <div style={mn.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
+                  </div>
+                  <div style={mn.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
+                  {e.description && <div style={mn.body}>{e.description}</div>}
+                </div>
               </div>
             ))}
           </div>
@@ -238,17 +278,19 @@ const AtlanticBlueTemplate = ({
 
   const sideKeys = sectionOrder.filter(k => SIDEBAR_SECTIONS.has(k));
   const mainKeys = sectionOrder.filter(k => MAIN_SECTIONS.has(k));
+  const initials = (info.fullName || '').split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
   return (
     <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row' }}>
       {/* Sidebar */}
       <div style={sb.wrapper}>
-        {/* Photo */}
-        {info.photo && (
-          <div style={{ width: '84pt', height: '84pt', borderRadius: '50%', overflow: 'hidden', margin: `0 auto 14pt`, border: '3px solid rgba(255,255,255,0.35)' }}>
-            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          </div>
-        )}
+        {/* Photo / Initials circle */}
+        <div style={{ width: '84pt', height: '84pt', borderRadius: '50%', overflow: 'hidden', margin: `0 auto 14pt`, border: '3px solid rgba(255,255,255,0.35)', backgroundColor: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          {info.photo
+            ? <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            : <span style={{ fontSize: '26pt', fontWeight: '700', color: '#fff', letterSpacing: '-1px' }}>{initials}</span>
+          }
+        </div>
         <div style={sb.name}>{info.fullName || 'Your Name'}</div>
         <div style={sb.jobTitle}>{info.jobTitle || ''}</div>
 
@@ -256,7 +298,7 @@ const AtlanticBlueTemplate = ({
         <div style={sb.sectionLabel}>{tr('profile', isRTL)}</div>
         {contactItems.map((row, i) => (
           <div key={i} style={sb.contactRow}>
-            <span style={sb.icon}>{row.icon}</span>
+            <span style={sb.icon}>{CONTACT_ICON_MAP[row.iconKey] || <GlobeIcon />}</span>
             <span style={{ wordBreak: 'break-all', lineHeight: 1.3 }}>{row.text}</span>
           </div>
         ))}

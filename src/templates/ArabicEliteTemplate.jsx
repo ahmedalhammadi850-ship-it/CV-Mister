@@ -153,15 +153,18 @@ const ContactRow = ({ iconKey, text }) => (
   </div>
 );
 
-/* ─── 5-Star rating ───────────────────────────────────────────── */
+/* ─── Diamond rating ──────────────────────────────────────────── */
 const Stars = ({ level = 3 }) => {
   const n = Math.min(Math.max(Math.round(level), 1), 5);
   return (
-    <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '2pt' }}>
+    <div style={{ display: 'flex', flexDirection: 'row-reverse', gap: '3pt', alignItems: 'center' }}>
       {[1,2,3,4,5].map(i => (
-        <span key={i} style={{ color: i <= n ? '#f5c518' : 'rgba(255,255,255,0.18)', fontSize: '10pt', lineHeight: 1 }}>
-          ★
-        </span>
+        <svg key={i} width="9" height="9" viewBox="0 0 10 10">
+          <polygon
+            points="5,0 10,5 5,10 0,5"
+            fill={i <= n ? '#f5c518' : 'rgba(255,255,255,0.18)'}
+          />
+        </svg>
       ))}
     </div>
   );
