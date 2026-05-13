@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { useCV } from '../context/useCV';
 import { formatDate } from '../utils/cvStorage';
 import TemplatesPage from './TemplatesPage';
+import CVReviewView from '../components/CVReviewView';
 
 const TEMPLATE_COLORS = {
   modern:        { from: '#4f46e5', to: '#818cf8' },
@@ -33,6 +34,12 @@ const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSide
       key: 'cvs',
       label: isRTL ? 'لوحة التحكم' : 'Dashboard',
       icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />,
+    },
+    {
+      key: 'review',
+      label: isRTL ? 'اختبار السيرة' : 'CV Review',
+      icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />,
+      badge: isRTL ? 'جديد' : 'New',
     },
     {
       key: 'templates',
@@ -85,6 +92,11 @@ const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSide
                 {item.icon}
               </svg>
               {item.label}
+              {item.badge && !active && (
+                <span className="ms-auto text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white" style={{ background: 'linear-gradient(135deg,#f59e0b,#ef4444)' }}>
+                  {item.badge}
+                </span>
+              )}
               {active && <div className="ms-auto w-1.5 h-1.5 rounded-full bg-indigo-600" />}
             </button>
           );
@@ -485,6 +497,11 @@ const DashboardPage = () => {
           </div>
           <div className="w-9" />
         </div>
+
+        {/* ══════════════ CV REVIEW VIEW ══════════════ */}
+        {activeView === 'review' && (
+          <CVReviewView isRTL={isRTL} onBack={() => setActiveView('cvs')} />
+        )}
 
         {/* ══════════════ TEMPLATES VIEW ══════════════ */}
         {activeView === 'templates' && (
