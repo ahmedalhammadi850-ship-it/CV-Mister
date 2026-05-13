@@ -260,16 +260,23 @@ export default function AITextarea({
           {/* Robot icon — pinned to the right */}
           <div className="ml-auto flex-shrink-0">
             <div
-              className="flex items-center justify-center rounded-xl transition-transform hover:scale-105 active:scale-95 cursor-default"
+              className={`flex items-center justify-center rounded-2xl cursor-default transition-transform hover:scale-105 active:scale-95 ${loading ? 'animate-ai-robot' : ''}`}
               style={{
-                width: 36,
-                height: 36,
-                background: 'linear-gradient(135deg,#7c3aed 0%,#a855f7 100%)',
-                boxShadow: '0 3px 10px rgba(124,58,237,0.4)',
+                width: 48,
+                height: 48,
+                background: loading
+                  ? 'linear-gradient(135deg,#6d28d9 0%,#c026d3 100%)'
+                  : 'linear-gradient(135deg,#7c3aed 0%,#a855f7 100%)',
+                boxShadow: loading
+                  ? '0 0 0 4px rgba(168,85,247,0.25), 0 4px 14px rgba(124,58,237,0.5)'
+                  : '0 3px 12px rgba(124,58,237,0.45)',
+                transition: 'background 0.3s, box-shadow 0.3s',
               }}
               title={isRTL ? 'مساعد الذكاء الاصطناعي' : 'AI Assistant'}
             >
-              <RobotIcon />
+              <span className={loading ? 'animate-ai-icon' : ''} style={{ display: 'flex' }}>
+                <RobotIcon />
+              </span>
             </div>
           </div>
 

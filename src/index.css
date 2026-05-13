@@ -97,6 +97,25 @@
   66% { transform: translate(-20px, 15px) scale(0.95); }
 }
 
+@keyframes aiRobotPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 0 4px rgba(168,85,247,0.2), 0 4px 14px rgba(124,58,237,0.5); }
+  50% { transform: scale(1.12); box-shadow: 0 0 0 8px rgba(168,85,247,0.15), 0 6px 20px rgba(124,58,237,0.6); }
+}
+
+@keyframes aiIconBounce {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-3px) rotate(-8deg); }
+  75% { transform: translateY(-1px) rotate(8deg); }
+}
+
+.animate-ai-robot {
+  animation: aiRobotPulse 0.9s ease-in-out infinite;
+}
+
+.animate-ai-icon {
+  animation: aiIconBounce 0.7s ease-in-out infinite;
+}
+
 @layer base {
   :root {
     --color-bg: #f8fafc;
