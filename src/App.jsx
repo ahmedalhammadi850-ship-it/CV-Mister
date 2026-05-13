@@ -43,7 +43,7 @@ function App() {
         <Route path="/upgrade"          element={<Layout><UpgradePage /></Layout>} />
         <Route path="/business-contact" element={<Layout><BusinessContactPage /></Layout>} />
 
-        <Route path="/dashboard"   element={<ProtectedRoute><Layout><DashboardPage /></Layout></ProtectedRoute>} />
+        <Route path="/dashboard"   element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/builder"     element={<Layout><BuilderPage /></Layout>} />
         <Route path="/builder/:id" element={<Layout><BuilderPage /></Layout>} />
 
