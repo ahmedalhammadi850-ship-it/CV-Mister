@@ -62,6 +62,24 @@ export function registerCVRoutes(app: Express) {
     }
   });
 
+  app.patch("/api/cvs/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      const { name } = req.body;
+      if (!name || !name.trim()) return res.status(400).json({ message: "Name is required" });
+      const [cv] = await db
+        .update(cvs)
+        .set({ name: name.trim(), lastModified: new Date() })
+        .where(and(eq(cvs.id, req.params.id), eq(cvs.userId, userId)))
+        .returning();
+      if (!cv) return res.status(404).json({ message: "CV not found" });
+      res.json(cv);
+    } catch (err) {
+      console.error("Error renaming CV:", err);
+      res.status(500).json({ message: "Failed to rename CV" });
+    }
+  });
+
   app.delete("/api/cvs/:id", isAuthenticated, async (req: any, res) => {
     try {
       const userId = getUserId(req);
