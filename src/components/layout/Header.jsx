@@ -52,10 +52,8 @@ const Header = () => {
     <header
       className="sticky top-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? 'rgba(255,255,255,0.92)' : 'rgba(255,255,255,0.75)',
-        backdropFilter: 'blur(20px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-        borderBottom: scrolled ? '1px solid rgba(226,232,240,0.8)' : '1px solid rgba(255,255,255,0.3)',
+        background: '#ffffff',
+        borderBottom: '1px solid rgba(226,232,240,0.8)',
         boxShadow: scrolled ? '0 4px 20px rgba(0,0,0,0.06)' : 'none',
       }}
     >
