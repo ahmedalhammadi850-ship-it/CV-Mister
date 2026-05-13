@@ -414,18 +414,18 @@ export default function AboutPage() {
       </section>
 
       {/* ─── CTA ──────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-slate-900 relative overflow-hidden">
+      <section className="py-20 bg-white relative overflow-hidden">
         <div
-          className="orb absolute w-96 h-96 opacity-20 -top-24 -start-24"
-          style={{ background: 'radial-gradient(circle, #6366f1, transparent)' }}
+          className="orb absolute w-96 h-96 opacity-30 -top-24 -start-24"
+          style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.12), transparent)' }}
         />
         <div
-          className="orb absolute w-80 h-80 opacity-15 -bottom-20 -end-20"
-          style={{ background: 'radial-gradient(circle, #c026d3, transparent)', animationDelay: '3s' }}
+          className="orb absolute w-80 h-80 opacity-20 -bottom-20 -end-20"
+          style={{ background: 'radial-gradient(circle, rgba(192,38,211,0.10), transparent)', animationDelay: '3s' }}
         />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-4">{t.cta.title}</h2>
-          <p className="text-slate-400 mb-8 text-lg">{t.cta.sub}</p>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-4">{t.cta.title}</h2>
+          <p className="text-slate-500 mb-8 text-lg">{t.cta.sub}</p>
           <Link
             to="/builder"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white text-lg transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5"
