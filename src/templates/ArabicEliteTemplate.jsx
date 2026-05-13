@@ -499,7 +499,7 @@ const ArabicEliteTemplate = ({
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          {vis.photo !== false && (
+          {vis.photo !== false && info.photo && (
             <div style={{
               width: '78pt',
               height: '78pt',
@@ -513,11 +513,7 @@ const ArabicEliteTemplate = ({
               flexShrink: 0,
               boxShadow: `0 0 0 4px rgba(255,255,255,0.12)`,
             }}>
-              {info.photo ? (
-                <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ fontSize: '22pt', fontWeight: '700', color: '#fff' }}>{initials}</span>
-              )}
+              <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           )}
         </div>

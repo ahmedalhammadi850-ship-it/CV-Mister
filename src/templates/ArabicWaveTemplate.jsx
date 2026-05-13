@@ -396,7 +396,7 @@ const ArabicWaveTemplate = ({
           paddingBottom: '14pt',
           flexShrink: 0,
         }}>
-          {vis.photo !== false && (
+          {vis.photo !== false && info.photo && (
             <div style={{
               width: '88pt',
               height: '88pt',
@@ -410,11 +410,7 @@ const ArabicWaveTemplate = ({
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              {info.photo ? (
-                <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-              ) : (
-                <span style={{ fontSize: '24pt', fontWeight: '700', color: '#fff' }}>{initials}</span>
-              )}
+              <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
           )}
         </div>

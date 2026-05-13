@@ -399,7 +399,7 @@ const ArabicZafirTemplate = ({
         <div style={{ display:'flex', alignItems:'center', gap:'20pt', direction:dir }}>
 
           {/* Photo */}
-          {vis.photo !== false && (
+          {vis.photo !== false && info.photo && (
             <div style={{ flexShrink:0 }}>
               <div style={{
                 width:'82pt', height:'82pt', borderRadius:'50%',
@@ -409,10 +409,7 @@ const ArabicZafirTemplate = ({
                 backgroundColor:'rgba(255,255,255,0.08)',
                 display:'flex', alignItems:'center', justifyContent:'center',
               }}>
-                {info.photo
-                  ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                  : <span style={{ fontSize:'24pt', fontWeight:'800', color:accent, lineHeight:1 }}>{initials}</span>
-                }
+                <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
               </div>
             </div>
           )}

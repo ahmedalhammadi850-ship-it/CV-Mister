@@ -252,12 +252,9 @@ const MercuryFlowTemplate = ({
     <div style={s.page}>
       {/* Header */}
       <div style={s.header}>
-        {vis.photo !== false && (
+        {vis.photo !== false && info.photo && (
           <div style={s.avatar}>
-            {info.photo
-              ? <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-              : initials
-            }
+            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           </div>
         )}
         <div style={s.headerText}>

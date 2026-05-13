@@ -359,7 +359,7 @@ const EnglishHorizonTemplate = ({
         minHeight:'110pt',
       }}>
         {/* Photo side */}
-        {vis.photo !== false && (
+        {vis.photo !== false && info.photo && (
           <div style={{
             width:'100pt', flexShrink:0,
             display:'flex', alignItems:'center', justifyContent:'center',
@@ -373,10 +373,7 @@ const EnglishHorizonTemplate = ({
               backgroundColor:'rgba(255,255,255,0.15)',
               display:'flex', alignItems:'center', justifyContent:'center',
             }}>
-              {info.photo
-                ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                : <span style={{ fontSize:'20pt', fontWeight:'800', color:'#fff' }}>{initials}</span>
-              }
+              <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             </div>
           </div>
         )}

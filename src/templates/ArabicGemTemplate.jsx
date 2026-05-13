@@ -551,12 +551,9 @@ const ArabicGemTemplate = ({
         {/* Top zone: pattern + photo + name */}
         <div style={sb.topZone}>
           {/* Photo */}
-          {vis.photo !== false && (
+          {vis.photo !== false && info.photo && (
             <div style={sb.photoWrap}>
-              {info.photo
-                ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                : <span style={sb.initials}>{initials}</span>
-              }
+              <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
             </div>
           )}
 
