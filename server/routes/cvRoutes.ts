@@ -119,4 +119,19 @@ export function registerCVRoutes(app: Express) {
       res.status(500).json({ message: "Failed to delete CV" });
     }
   });
+
+  app.post("/api/cvs/:id/download", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = getUserId(req);
+      const [cv] = await db
+        .update(cvs)
+        .set({ downloadCount: sql`${cvs.downloadCount} + 1` })
+        .where(and(eq(cvs.id, req.params.id), eq(cvs.userId, userId)))
+        .returning({ downloadCount: cvs.downloadCount });
+      res.json({ downloadCount: cv?.downloadCount ?? 0 });
+    } catch (err) {
+      console.error("Error tracking download:", err);
+      res.status(500).json({ message: "Failed to track download" });
+    }
+  });
 }

@@ -8,6 +8,7 @@ export const cvs = pgTable("cvs", {
   template: varchar("template").notNull().default("modern"),
   theme: jsonb("theme").notNull(),
   atsScore: integer("ats_score").default(95),
+  downloadCount: integer("download_count").notNull().default(0),
   lastModified: timestamp("last_modified").defaultNow(),
 });
 

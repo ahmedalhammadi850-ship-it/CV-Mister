@@ -334,6 +334,13 @@ const CVBuilder = () => {
 
       const name = cvData.personalInfo?.fullName || 'Resume';
       pdf.save(`${name} - CV.pdf`);
+
+      // Track download count
+      if (currentCVId) {
+        fetch(`/api/cvs/${currentCVId}/download`, {
+          method: 'POST', credentials: 'include',
+        }).catch(() => {});
+      }
     } catch (err) {
       console.error('PDF export failed:', err);
       alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');

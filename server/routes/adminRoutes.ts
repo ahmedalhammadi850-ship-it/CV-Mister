@@ -116,6 +116,7 @@ export function registerAdminRoutes(app: Express) {
           name: cvs.name,
           template: cvs.template,
           atsScore: cvs.atsScore,
+          downloadCount: cvs.downloadCount,
           lastModified: cvs.lastModified,
           userId: cvs.userId,
           userEmail: users.email,

@@ -530,6 +530,7 @@ const AdminDashboardPage = () => {
                         <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wide hidden md:table-cell">المالك</th>
                         <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wide hidden lg:table-cell">القالب</th>
                         <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wide hidden lg:table-cell">ATS</th>
+                        <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wide hidden lg:table-cell">التحميلات</th>
                         <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-400 uppercase tracking-wide hidden lg:table-cell">آخر تعديل</th>
                       </tr>
                     </thead>
@@ -550,6 +551,14 @@ const AdminDashboardPage = () => {
                           <td className="px-5 py-4 hidden lg:table-cell">
                             <span className={`font-semibold text-sm ${c.atsScore >= 85 ? 'text-emerald-400' : c.atsScore >= 60 ? 'text-amber-400' : 'text-red-400'}`}>
                               {c.atsScore ?? '—'}
+                            </span>
+                          </td>
+                          <td className="px-5 py-4 hidden lg:table-cell">
+                            <span className="flex items-center gap-1.5 text-slate-300 font-semibold text-sm">
+                              <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                              </svg>
+                              {c.downloadCount ?? 0}
                             </span>
                           </td>
                           <td className="px-5 py-4 text-slate-400 text-xs hidden lg:table-cell">{fmt(c.lastModified)}</td>
