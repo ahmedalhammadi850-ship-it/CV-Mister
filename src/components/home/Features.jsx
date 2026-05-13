@@ -202,27 +202,22 @@ const Features = () => {
       </section>
 
       {/* ── CTA Section ── */}
-      <section className="py-24 relative overflow-hidden" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 60%, #2d1b69 100%)' }}>
-        {/* BG orbs */}
-        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }} />
-        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl opacity-20" style={{ background: 'radial-gradient(circle, #a855f7, transparent)' }} />
-        <div className="absolute inset-0 opacity-[0.05]" style={{
-          backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-          backgroundSize: '30px 30px',
-        }} />
+      <section className="py-24 relative overflow-hidden" style={{ background: '#ffffff' }}>
+        <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-30" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.15), transparent)' }} />
+        <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl opacity-30" style={{ background: 'radial-gradient(circle, rgba(192,38,211,0.12), transparent)' }} />
 
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-2xl mx-auto">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 rounded-full px-3.5 py-1.5 mb-6">
+            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-3.5 py-1.5 mb-6">
               {isRTL ? 'ابدأ الآن' : 'Get started today'}
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-white mb-5 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-5 leading-tight">
               {isRTL
-                ? (<>سيرتك الذاتية الأفضل<br /><span style={{ background: 'linear-gradient(90deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>تنتظرك الآن</span></>)
-                : (<>Your best resume is<br /><span style={{ background: 'linear-gradient(90deg, #818cf8, #c084fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>one click away</span></>)
+                ? (<>سيرتك الذاتية الأفضل<br /><span style={{ background: 'linear-gradient(135deg, #4f46e5, #c026d3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>تنتظرك الآن</span></>)
+                : (<>Your best resume is<br /><span style={{ background: 'linear-gradient(135deg, #4f46e5, #c026d3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>one click away</span></>)
               }
             </h2>
-            <p className="text-lg text-slate-400 mb-10 leading-relaxed">
+            <p className="text-lg text-slate-500 mb-10 leading-relaxed">
               {isRTL
                 ? 'انضم لأكثر من 50 ألف محترف بنوا سيرهم الذاتية معنا وحصلوا على وظائف أحلامهم.'
                 : 'Join over 50,000 professionals who built their resumes with us and landed their dream jobs.'}
@@ -231,7 +226,7 @@ const Features = () => {
               <Link
                 to="/builder"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-white text-base transition-all duration-300 hover:scale-105"
-                style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', boxShadow: '0 8px 30px rgba(79,70,229,0.5)' }}
+                style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', boxShadow: '0 8px 30px rgba(79,70,229,0.3)' }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
@@ -240,7 +235,7 @@ const Features = () => {
               </Link>
               <Link
                 to="/templates"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-slate-200 text-base border border-white/20 bg-white/10 backdrop-blur-sm hover:bg-white/15 transition-all duration-200"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-slate-700 text-base border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-all duration-200"
               >
                 {isRTL ? 'استعرض القوالب' : 'Browse templates'}
               </Link>
