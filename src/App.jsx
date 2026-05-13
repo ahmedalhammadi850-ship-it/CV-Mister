@@ -12,6 +12,8 @@ import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import PricingPage from './pages/PricingPage';
 import UpgradePage from './pages/UpgradePage';
 import BusinessContactPage from './pages/BusinessContactPage';
+import AdminLoginPage from './pages/AdminLoginPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 
 function ProtectedRoute({ children }) {
   const { currentUser, loading } = useAuth();
@@ -46,6 +48,9 @@ function App() {
         <Route path="/dashboard"   element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
         <Route path="/builder"     element={<Layout><BuilderPage /></Layout>} />
         <Route path="/builder/:id" element={<Layout><BuilderPage /></Layout>} />
+
+        <Route path="/admin/login" element={<AdminLoginPage />} />
+        <Route path="/admin" element={<AdminDashboardPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
