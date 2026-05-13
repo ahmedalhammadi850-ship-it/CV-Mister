@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
-const WEBHOOK_URL = 'https://ahmed144.app.n8n.cloud/webhook/1d6ee35d-0280-4d68-a839-eeb1b13e298e';
+const CHAT_API = '/api/chat';
 
 export default function ChatWidget() {
   const { isRTL } = useAuth();
@@ -38,7 +38,7 @@ export default function ChatWidget() {
     setLoading(true);
 
     try {
-      const response = await fetch(WEBHOOK_URL, {
+      const response = await fetch(CHAT_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text }),
@@ -49,10 +49,10 @@ export default function ChatWidget() {
         try {
           const data = await response.json();
           botText =
+            data?.reply ||
             data?.output ||
             data?.message ||
             data?.text ||
-            data?.reply ||
             (typeof data === 'string' ? data : botText);
         } catch {
           botText = await response.text() || botText;
