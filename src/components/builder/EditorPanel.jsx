@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import ExperienceCard from './ExperienceCard';
+import AITextarea from './AITextarea';
 import EducationCard from './EducationCard';
 import SkillsEditor from './SkillsEditor';
 import LanguagesEditor from './LanguagesEditor';
@@ -495,7 +496,17 @@ const EditorPanel = () => {
                 <div className="col-span-2 sm:col-span-1"><label className={lbl}>{t('Phone','الهاتف',isRTL)}</label><input type="text" name="phone" value={cvData.personalInfo.phone} onChange={handlePersonalInfoChange} className={inp} /></div>
                 <div className="col-span-2"><label className={lbl}>{t('Location','الموقع',isRTL)}</label><input type="text" name="location" value={cvData.personalInfo.location} onChange={handlePersonalInfoChange} className={inp} /></div>
                 <div className="col-span-2"><label className={lbl}>LinkedIn</label><input type="text" name="linkedin" value={cvData.personalInfo.linkedin || ''} onChange={handlePersonalInfoChange} className={inp} /></div>
-                <div className="col-span-2"><label className={lbl}>{t('Professional Summary','الملخص المهني',isRTL)}</label><textarea name="summary" value={cvData.personalInfo.summary} onChange={handlePersonalInfoChange} rows={4} className={`${inp} resize-none`} /></div>
+                <div className="col-span-2">
+                  <label className={lbl}>{t('Professional Summary','الملخص المهني',isRTL)}</label>
+                  <AITextarea
+                    value={cvData.personalInfo.summary}
+                    onChange={val => handlePersonalInfoChange({ target: { name: 'summary', value: val } })}
+                    rows={4}
+                    className={`${inp} resize-none`}
+                    placeholder={isRTL ? 'لخّص خلفيتك المهنية...' : 'Summarize your professional background...'}
+                    isRTL={isRTL}
+                  />
+                </div>
               </div>
             </div>
           )}

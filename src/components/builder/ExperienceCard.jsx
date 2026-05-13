@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import AITextarea from './AITextarea';
 
 const uiExp = {
   jobTitle:    { en: 'Job Title',              ar: 'المسمى الوظيفي'     },
@@ -114,11 +115,13 @@ export default function ExperienceCard({ exp, isRTL, labelClass, inputClass, onC
             </div>
             <div className="col-span-2">
               <label className={labelClass}>{te('description', isRTL)}</label>
-              <textarea
+              <AITextarea
                 value={exp.description}
-                onChange={e => onChange('description', e.target.value)}
+                onChange={val => onChange('description', val)}
                 rows={4}
                 className={`${inputClass} resize-none`}
+                placeholder={isRTL ? 'صف مهامك ومسؤولياتك...' : 'Describe your duties and responsibilities...'}
+                isRTL={isRTL}
               />
             </div>
           </div>
