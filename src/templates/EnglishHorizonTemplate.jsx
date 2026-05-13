@@ -359,7 +359,7 @@ const EnglishHorizonTemplate = ({
         minHeight:'110pt',
       }}>
         {/* Photo side */}
-        {vis.photo !== false && info.photo && (
+        {vis.photo !== false && (
           <div style={{
             width:'100pt', flexShrink:0,
             display:'flex', alignItems:'center', justifyContent:'center',
@@ -373,7 +373,7 @@ const EnglishHorizonTemplate = ({
               backgroundColor:'rgba(255,255,255,0.15)',
               display:'flex', alignItems:'center', justifyContent:'center',
             }}>
-              <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width:'100%', height:'100%', objectFit: info.photo ? 'cover' : 'contain' }} />
             </div>
           </div>
         )}

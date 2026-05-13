@@ -399,7 +399,7 @@ const ArabicZafirTemplate = ({
         <div style={{ display:'flex', alignItems:'center', gap:'20pt', direction:dir }}>
 
           {/* Photo */}
-          {vis.photo !== false && info.photo && (
+          {vis.photo !== false && (
             <div style={{ flexShrink:0 }}>
               <div style={{
                 width:'82pt', height:'82pt', borderRadius:'50%',
@@ -409,7 +409,7 @@ const ArabicZafirTemplate = ({
                 backgroundColor:'rgba(255,255,255,0.08)',
                 display:'flex', alignItems:'center', justifyContent:'center',
               }}>
-                <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width:'100%', height:'100%', objectFit: info.photo ? 'cover' : 'contain' }} />
               </div>
             </div>
           )}

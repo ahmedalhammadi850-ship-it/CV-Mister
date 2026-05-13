@@ -338,9 +338,9 @@ const SidebarLightTemplate = ({
     <div style={{ fontFamily: font, fontSize: sz.body, color: sidebarText, backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', direction: 'ltr' }}>
       {/* Sidebar */}
       <div style={sb.wrapper}>
-        {vis.photo !== false && info.photo && (
+        {vis.photo !== false && (
           <div style={sb.photoWrap}>
-            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
           </div>
         )}
 

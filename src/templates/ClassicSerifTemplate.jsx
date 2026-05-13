@@ -254,9 +254,9 @@ const ClassicSerifTemplate = ({
       {/* Sidebar */}
       <div style={sidebar.wrapper}>
         {/* Photo */}
-        {info.photo && vis.photo !== false && (
-          <div style={{ width: '80pt', height: '80pt', borderRadius: '50%', overflow: 'hidden', margin: `0 auto 12pt`, border: `2px solid ${accent}` }}>
-            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {vis.photo !== false && (
+          <div style={{ width: '80pt', height: '80pt', borderRadius: '50%', overflow: 'hidden', margin: `0 auto 12pt`, border: `2px solid ${accent}`, backgroundColor: `${accent}33` }}>
+            <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
           </div>
         )}
         <div style={sidebar.name}>{info.fullName || 'Your Name'}</div>

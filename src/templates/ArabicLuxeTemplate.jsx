@@ -423,7 +423,7 @@ const ArabicLuxeTemplate = ({
         <div style={{ height:'6pt', background:`linear-gradient(to right, ${GOLD}, ${GOLD_LIGHT}, ${GOLD})`, flexShrink:0 }} />
 
         {/* Profile photo */}
-        {vis.photo !== false && info.photo && (
+        {vis.photo !== false && (
           <div style={{ display:'flex', justifyContent:'center', paddingTop:'20pt', paddingBottom:'12pt', flexShrink:0 }}>
             <div style={{
               width:'85pt', height:'85pt', borderRadius:'50%',
@@ -433,7 +433,7 @@ const ArabicLuxeTemplate = ({
               backgroundColor:'rgba(255,255,255,0.1)',
               display:'flex', alignItems:'center', justifyContent:'center',
             }}>
-              <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width:'100%', height:'100%', objectFit: info.photo ? 'cover' : 'contain' }} />
             </div>
           </div>
         )}

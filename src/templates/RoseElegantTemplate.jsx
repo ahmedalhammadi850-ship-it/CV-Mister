@@ -316,11 +316,11 @@ const RoseElegantTemplate = ({
     <div style={s.page}>
       {/* Header */}
       <div style={s.header}>
-        {(vis.photo !== false && info.photo) ? (
+        {vis.photo !== false && (
           <div style={s.photoWrap}>
-            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
           </div>
-        ) : null}
+        )}
         <div style={s.headerText}>
           <div style={s.name}>{info.fullName || 'Your Name'}</div>
           <div style={s.jobTitle}>{info.jobTitle || ''}</div>

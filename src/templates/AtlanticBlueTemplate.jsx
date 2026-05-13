@@ -284,10 +284,10 @@ const AtlanticBlueTemplate = ({
     <div style={{ fontFamily: font, fontSize: sz.body, color: '#1a1a1a', backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', direction: 'ltr' }}>
       {/* Sidebar */}
       <div style={sb.wrapper}>
-        {/* Photo / Initials circle */}
-        {vis.photo !== false && info.photo && (
+        {/* Photo / Default avatar circle */}
+        {vis.photo !== false && (
           <div style={{ width: '84pt', height: '84pt', borderRadius: '50%', overflow: 'hidden', margin: `0 auto 14pt`, border: '3px solid rgba(255,255,255,0.35)', backgroundColor: 'rgba(255,255,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
           </div>
         )}
         <div style={sb.name}>{info.fullName || 'Your Name'}</div>

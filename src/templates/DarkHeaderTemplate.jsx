@@ -359,9 +359,9 @@ const DarkHeaderTemplate = ({
       {/* Full-width dark header */}
       <div style={header.wrapper}>
         <div style={header.top}>
-          {info.photo && vis.photo !== false && (
+          {vis.photo !== false && (
             <div style={header.photoWrap}>
-              <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
             </div>
           )}
           <div style={header.textBlock}>

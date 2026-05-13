@@ -392,8 +392,8 @@ const EnglishApexTemplate = ({
 
         {/* Profile section */}
         <div style={{ padding:'22pt 16pt 16pt', flexShrink:0, textAlign:'center' }}>
-          {/* Photo / initials circle */}
-          {vis.photo !== false && info.photo && (
+          {/* Photo / default avatar circle */}
+          {vis.photo !== false && (
             <div style={{
               width:'84pt', height:'84pt', borderRadius:'50%',
               border:`3px solid ${accent}`,
@@ -402,7 +402,7 @@ const EnglishApexTemplate = ({
               backgroundColor:'rgba(255,255,255,0.06)',
               display:'flex', alignItems:'center', justifyContent:'center',
             }}>
-              <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+              <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width:'100%', height:'100%', objectFit: info.photo ? 'cover' : 'contain' }} />
             </div>
           )}
 

@@ -297,9 +297,9 @@ const TealProTemplate = ({
     <div style={s.page}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '4pt' }}>
-        {info.photo && vis.photo !== false && (
-          <div style={{ width: '70pt', height: '70pt', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 10pt', border: `2px solid ${accent}` }}>
-            <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {vis.photo !== false && (
+          <div style={{ width: '70pt', height: '70pt', borderRadius: '50%', overflow: 'hidden', margin: '0 auto 10pt', border: `2px solid ${accent}`, backgroundColor: `${accent}33` }}>
+            <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
           </div>
         )}
         <div style={s.name}>{info.fullName || 'Your Name'}</div>

@@ -396,7 +396,7 @@ const ArabicWaveTemplate = ({
           paddingBottom: '14pt',
           flexShrink: 0,
         }}>
-          {vis.photo !== false && info.photo && (
+          {vis.photo !== false && (
             <div style={{
               width: '88pt',
               height: '88pt',
@@ -410,7 +410,7 @@ const ArabicWaveTemplate = ({
               justifyContent: 'center',
               flexShrink: 0,
             }}>
-              <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
             </div>
           )}
         </div>

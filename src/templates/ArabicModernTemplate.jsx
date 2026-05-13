@@ -317,9 +317,9 @@ const ArabicModernTemplate = ({
       {/* Header */}
       <div style={s.header}>
         <div style={s.headerTop}>
-          {vis.photo !== false && info.photo && (
+          {vis.photo !== false && (
             <div style={s.photoWrap}>
-              <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
             </div>
           )}
           <div style={s.nameBlock}>
