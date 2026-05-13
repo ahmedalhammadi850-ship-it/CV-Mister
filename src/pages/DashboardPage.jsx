@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCV } from '../context/useCV';
 import { formatDate } from '../utils/cvStorage';
+import TemplatesPage from './TemplatesPage';
 
 const TEMPLATE_COLORS = {
   modern:        { from: '#4f46e5', to: '#818cf8' },
@@ -19,9 +20,8 @@ const getColors = (t) => TEMPLATE_COLORS[t?.toLowerCase()] || TEMPLATE_COLORS.mo
 const ATS_COLOR = (s) => s >= 85 ? '#10b981' : s >= 60 ? '#f59e0b' : '#ef4444';
 
 /* ─────────────────────── Sidebar ─────────────────────── */
-const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSideOpen }) => {
+const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSideOpen, activeView, setActiveView }) => {
   const navigate = useNavigate();
-  const location = useLocation();
 
   const initials = (() => {
     const n = currentUser?.displayName || currentUser?.name || '';
@@ -30,24 +30,20 @@ const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSide
 
   const NAV = [
     {
+      key: 'cvs',
       label: isRTL ? 'لوحة التحكم' : 'Dashboard',
-      path: '/dashboard',
       icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />,
     },
     {
+      key: 'templates',
       label: isRTL ? 'القوالب' : 'Templates',
-      path: '/templates',
       icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />,
     },
     {
+      key: 'pricing',
       label: isRTL ? 'الأسعار' : 'Pricing',
-      path: '/pricing',
       icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
-    },
-    {
-      label: isRTL ? 'من نحن' : 'About',
-      path: '/about',
-      icon: <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />,
+      external: '/pricing',
     },
   ];
 
@@ -67,13 +63,16 @@ const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSide
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
         {NAV.map(item => {
-          const active = location.pathname === item.path;
+          const active = item.external ? false : activeView === item.key;
           return (
-            <Link
-              key={item.path}
-              to={item.path}
-              onClick={() => setSideOpen(false)}
-              className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
+            <button
+              key={item.key}
+              onClick={() => {
+                if (item.external) { navigate(item.external); }
+                else { setActiveView(item.key); }
+                setSideOpen(false);
+              }}
+              className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all ${
                 active
                   ? 'bg-indigo-50 text-indigo-700'
                   : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -87,7 +86,7 @@ const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSide
               </svg>
               {item.label}
               {active && <div className="ms-auto w-1.5 h-1.5 rounded-full bg-indigo-600" />}
-            </Link>
+            </button>
           );
         })}
 
@@ -403,6 +402,7 @@ const DashboardPage = () => {
   const [sortBy, setSortBy]         = useState('date');
   const [renameTarget, setRenameTarget] = useState(null);
   const [sideOpen, setSideOpen]     = useState(false);
+  const [activeView, setActiveView] = useState('cvs');
 
   const fetchCVs = useCallback(async () => {
     setLoading(true); setError(null);
@@ -462,6 +462,8 @@ const DashboardPage = () => {
         toggleRTL={toggleRTL}
         sideOpen={sideOpen}
         setSideOpen={setSideOpen}
+        activeView={activeView}
+        setActiveView={setActiveView}
       />
 
       {/* Main scroll area */}
@@ -484,147 +486,184 @@ const DashboardPage = () => {
           <div className="w-9" />
         </div>
 
-        {/* ── Hero banner ── */}
-        <div
-          className="relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg,#4338ca 0%,#7c3aed 55%,#c026d3 100%)' }}
-        >
-          <div className="absolute inset-0 pointer-events-none overflow-hidden">
-            <div className="absolute -top-20 -end-20 w-72 h-72 rounded-full bg-white/5" />
-            <div className="absolute top-6 end-14 w-28 h-28 rounded-full bg-white/5" />
-            <div className="absolute -bottom-14 -start-14 w-56 h-56 rounded-full bg-white/5" />
+        {/* ══════════════ TEMPLATES VIEW ══════════════ */}
+        {activeView === 'templates' && (
+          <div>
+            {/* Back bar */}
+            <div className="sticky top-0 z-20 bg-white border-b border-slate-100 px-6 py-3 flex items-center gap-3 shadow-sm" dir={isRTL ? 'rtl' : 'ltr'}>
+              <button
+                onClick={() => setActiveView('cvs')}
+                className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-indigo-600 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRTL ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
+                </svg>
+                {isRTL ? 'العودة للوحة التحكم' : 'Back to Dashboard'}
+              </button>
+              <div className="h-4 w-px bg-slate-200" />
+              <span className="text-sm font-semibold text-slate-800">{isRTL ? 'القوالب' : 'Templates'}</span>
+            </div>
+            <TemplatesPage />
           </div>
+        )}
 
-          <div className="relative px-6 pt-8 pb-10">
-            <div className="flex items-center gap-4 mb-7">
-              {currentUser?.profileImage ? (
-                <img src={currentUser.profileImage} alt="avatar" className="w-14 h-14 rounded-2xl border-2 border-white/30 shadow-lg object-cover flex-shrink-0" />
-              ) : (
-                <div className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/30 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 select-none">
-                  {initials}
+        {/* ══════════════ DASHBOARD VIEW ══════════════ */}
+        {activeView === 'cvs' && (
+          <>
+            {/* ── Hero banner ── */}
+            <div
+              className="relative overflow-hidden"
+              style={{ background: 'linear-gradient(135deg,#4338ca 0%,#7c3aed 55%,#c026d3 100%)' }}
+            >
+              <div className="absolute inset-0 pointer-events-none overflow-hidden">
+                <div className="absolute -top-20 -end-20 w-72 h-72 rounded-full bg-white/5" />
+                <div className="absolute top-6 end-14 w-28 h-28 rounded-full bg-white/5" />
+                <div className="absolute -bottom-14 -start-14 w-56 h-56 rounded-full bg-white/5" />
+              </div>
+
+              <div className="relative px-6 pt-8 pb-10" dir={isRTL ? 'rtl' : 'ltr'}>
+                {/* Back arrow to home */}
+                <button
+                  onClick={() => navigate('/')}
+                  className="flex items-center gap-2 text-white/70 hover:text-white text-sm font-medium mb-5 transition-colors"
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isRTL ? "M9 5l7 7-7 7" : "M15 19l-7-7 7-7"} />
+                  </svg>
+                  {isRTL ? 'الصفحة الرئيسية' : 'Home'}
+                </button>
+
+                <div className="flex items-center gap-4 mb-7">
+                  {currentUser?.profileImage ? (
+                    <img src={currentUser.profileImage} alt="avatar" className="w-14 h-14 rounded-2xl border-2 border-white/30 shadow-lg object-cover flex-shrink-0" />
+                  ) : (
+                    <div className="w-14 h-14 rounded-2xl bg-white/20 border-2 border-white/30 flex items-center justify-center text-white font-bold text-lg flex-shrink-0 select-none">
+                      {initials}
+                    </div>
+                  )}
+                  <div>
+                    <p className="text-white/65 text-sm">{isRTL ? 'مرحباً بعودتك،' : 'Welcome back,'}</p>
+                    <h1 className="text-2xl font-bold text-white leading-tight">
+                      {currentUser?.displayName || currentUser?.name || (isRTL ? 'مستخدم' : 'User')}
+                    </h1>
+                    {currentUser?.email && <p className="text-white/50 text-xs mt-0.5">{currentUser.email}</p>}
+                  </div>
                 </div>
-              )}
-              <div>
-                <p className="text-white/65 text-sm">{isRTL ? 'مرحباً بعودتك،' : 'Welcome back,'}</p>
-                <h1 className="text-2xl font-bold text-white leading-tight">
-                  {currentUser?.displayName || currentUser?.name || (isRTL ? 'مستخدم' : 'User')}
-                </h1>
-                {currentUser?.email && <p className="text-white/50 text-xs mt-0.5">{currentUser.email}</p>}
+
+                {/* Stats */}
+                <div className="grid grid-cols-3 gap-3">
+                  {STATS.map((s) => (
+                    <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 flex flex-col gap-2">
+                      <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-white">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{s.icon}</svg>
+                      </div>
+                      <div>
+                        <div className="text-2xl sm:text-3xl font-bold text-white leading-none">{s.value}</div>
+                        <div className="text-white/65 text-xs mt-1 leading-tight">{s.label}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
             </div>
 
-            {/* Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              {STATS.map((s) => (
-                <div key={s.label} className="bg-white/10 backdrop-blur-sm rounded-2xl p-4 border border-white/20 flex flex-col gap-2">
-                  <div className="w-9 h-9 rounded-xl bg-white/15 flex items-center justify-center text-white">
-                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">{s.icon}</svg>
-                  </div>
-                  <div>
-                    <div className="text-2xl sm:text-3xl font-bold text-white leading-none">{s.value}</div>
-                    <div className="text-white/65 text-xs mt-1 leading-tight">{s.label}</div>
-                  </div>
+            {/* ── Content ── */}
+            <div className="px-6 py-7" dir={isRTL ? 'rtl' : 'ltr'}>
+
+              {/* Section header */}
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">{isRTL ? 'سيرتي الذاتية' : 'My Resumes'}</h2>
+                  {!loading && cvs.length > 0 && (
+                    <p className="text-sm text-slate-400 mt-0.5">
+                      {filtered.length} {isRTL ? `من ${cvs.length}` : `of ${cvs.length}`} {isRTL ? 'سيرة' : 'resume(s)'}
+                    </p>
+                  )}
                 </div>
-              ))}
-            </div>
-          </div>
-        </div>
 
-        {/* ── Content ── */}
-        <div className="px-6 py-7">
-
-          {/* Section header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-            <div>
-              <h2 className="text-xl font-bold text-slate-900">{isRTL ? 'سيرتي الذاتية' : 'My Resumes'}</h2>
-              {!loading && cvs.length > 0 && (
-                <p className="text-sm text-slate-400 mt-0.5">
-                  {filtered.length} {isRTL ? `من ${cvs.length}` : `of ${cvs.length}`} {isRTL ? 'سيرة' : 'resume(s)'}
-                </p>
-              )}
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              {cvs.length > 0 && (
-                <>
-                  <div className="relative">
-                    <svg className="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 pointer-events-none" style={{ [isRTL ? 'right' : 'left']: '12px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                    <input
-                      type="text" value={search} onChange={(e) => setSearch(e.target.value)}
-                      placeholder={isRTL ? 'بحث...' : 'Search...'}
-                      className="h-9 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder:text-slate-300"
-                      style={{ paddingLeft: isRTL ? '12px' : '36px', paddingRight: isRTL ? '36px' : '12px', width: '160px' }}
-                    />
-                  </div>
-                  <select
-                    value={sortBy} onChange={(e) => setSortBy(e.target.value)}
-                    className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                <div className="flex items-center gap-2 flex-wrap">
+                  {cvs.length > 0 && (
+                    <>
+                      <div className="relative">
+                        <svg className="w-4 h-4 text-slate-400 absolute top-1/2 -translate-y-1/2 pointer-events-none" style={{ [isRTL ? 'right' : 'left']: '12px' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <input
+                          type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+                          placeholder={isRTL ? 'بحث...' : 'Search...'}
+                          className="h-9 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder:text-slate-300"
+                          style={{ paddingLeft: isRTL ? '12px' : '36px', paddingRight: isRTL ? '36px' : '12px', width: '160px' }}
+                        />
+                      </div>
+                      <select
+                        value={sortBy} onChange={(e) => setSortBy(e.target.value)}
+                        className="h-9 px-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-400 cursor-pointer"
+                      >
+                        <option value="date">{isRTL ? 'الأحدث' : 'Newest'}</option>
+                        <option value="name">{isRTL ? 'الاسم' : 'Name'}</option>
+                        <option value="ats">{isRTL ? 'نقاط ATS' : 'ATS Score'}</option>
+                      </select>
+                    </>
+                  )}
+                  <button
+                    onClick={fetchCVs}
+                    className="h-9 w-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-colors"
                   >
-                    <option value="date">{isRTL ? 'الأحدث' : 'Newest'}</option>
-                    <option value="name">{isRTL ? 'الاسم' : 'Name'}</option>
-                    <option value="ats">{isRTL ? 'نقاط ATS' : 'ATS Score'}</option>
-                  </select>
-                </>
-              )}
-              <button
-                onClick={fetchCVs}
-                className="h-9 w-9 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:text-indigo-600 hover:border-indigo-200 transition-colors"
-              >
-                <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-              </button>
-            </div>
-          </div>
-
-          {/* Loading */}
-          {loading && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {[1,2,3,4].map(i => <SkeletonCard key={i} />)}
-            </div>
-          )}
-
-          {/* Error */}
-          {!loading && error && (
-            <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
-              <p className="text-red-600 font-semibold">{error}</p>
-              <button onClick={fetchCVs} className="mt-3 text-sm text-red-500 underline hover:text-red-700">{isRTL ? 'حاول مجدداً' : 'Try again'}</button>
-            </div>
-          )}
-
-          {/* Empty */}
-          {!loading && !error && cvs.length === 0 && <EmptyState isRTL={isRTL} onNew={() => navigate('/builder')} />}
-
-          {/* No results */}
-          {!loading && !error && cvs.length > 0 && filtered.length === 0 && (
-            <div className="bg-white rounded-2xl border border-slate-100 py-14 text-center">
-              <p className="text-slate-500 font-medium">{isRTL ? 'لا توجد نتائج' : 'No results found'}</p>
-              <button onClick={() => setSearch('')} className="mt-2 text-sm text-indigo-500 hover:underline">{isRTL ? 'مسح البحث' : 'Clear search'}</button>
-            </div>
-          )}
-
-          {/* Grid */}
-          {!loading && !error && filtered.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-              {filtered.map(cv => (
-                <CVCard key={cv.id} cv={cv} isRTL={isRTL} onDelete={handleDelete} onDuplicate={handleDuplicate} onRename={setRenameTarget} />
-              ))}
-              <button
-                onClick={() => navigate('/builder')}
-                className="bg-white rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center gap-3 p-8 min-h-[230px] text-slate-400 hover:text-indigo-600 group"
-              >
-                <div className="w-12 h-12 rounded-xl bg-slate-100 group-hover:bg-indigo-100 flex items-center justify-center transition-colors">
-                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
+                    <svg className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                  </button>
                 </div>
-                <span className="font-semibold text-sm">{isRTL ? 'سيرة ذاتية جديدة' : 'New Resume'}</span>
-              </button>
+              </div>
+
+              {/* Loading */}
+              {loading && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {[1,2,3,4].map(i => <SkeletonCard key={i} />)}
+                </div>
+              )}
+
+              {/* Error */}
+              {!loading && error && (
+                <div className="bg-red-50 border border-red-100 rounded-2xl p-8 text-center">
+                  <p className="text-red-600 font-semibold">{error}</p>
+                  <button onClick={fetchCVs} className="mt-3 text-sm text-red-500 underline hover:text-red-700">{isRTL ? 'حاول مجدداً' : 'Try again'}</button>
+                </div>
+              )}
+
+              {/* Empty */}
+              {!loading && !error && cvs.length === 0 && <EmptyState isRTL={isRTL} onNew={() => navigate('/builder')} />}
+
+              {/* No results */}
+              {!loading && !error && cvs.length > 0 && filtered.length === 0 && (
+                <div className="bg-white rounded-2xl border border-slate-100 py-14 text-center">
+                  <p className="text-slate-500 font-medium">{isRTL ? 'لا توجد نتائج' : 'No results found'}</p>
+                  <button onClick={() => setSearch('')} className="mt-2 text-sm text-indigo-500 hover:underline">{isRTL ? 'مسح البحث' : 'Clear search'}</button>
+                </div>
+              )}
+
+              {/* Grid */}
+              {!loading && !error && filtered.length > 0 && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                  {filtered.map(cv => (
+                    <CVCard key={cv.id} cv={cv} isRTL={isRTL} onDelete={handleDelete} onDuplicate={handleDuplicate} onRename={setRenameTarget} />
+                  ))}
+                  <button
+                    onClick={() => navigate('/builder')}
+                    className="bg-white rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center gap-3 p-8 min-h-[230px] text-slate-400 hover:text-indigo-600 group"
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-slate-100 group-hover:bg-indigo-100 flex items-center justify-center transition-colors">
+                      <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <span className="font-semibold text-sm">{isRTL ? 'سيرة ذاتية جديدة' : 'New Resume'}</span>
+                  </button>
+                </div>
+              )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </main>
 
       {renameTarget && (
