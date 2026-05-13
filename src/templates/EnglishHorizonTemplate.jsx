@@ -88,14 +88,16 @@ const MainHeading = ({ label, accent, isRTL }) => {
 
 /* ══════════════════════════════════════════════════════════════ */
 const EnglishHorizonTemplate = ({
-  data, theme, isRTL = false,
+  data, theme,
   visibleSections={}, visiblePersonalFields={},
   sectionOrder=DEFAULT_ORDER,
 }) => {
+  /* ── Layout is always LTR/English — matches the reference design ── */
+  const isRTL = false;
   const accent = theme?.primaryColor || TEAL;
-  const { sz, font, lineHeight } = resolveTheme(theme, isRTL);
-  const dir   = isRTL ? 'rtl' : 'ltr';
-  const align = isRTL ? 'right' : 'left';
+  const { sz, font, lineHeight } = resolveTheme(theme, false);
+  const dir   = 'ltr';
+  const align = 'left';
   const show  = k => visibleSections[k] !== false;
   const info  = data?.personalInfo || {};
   const vis   = visiblePersonalFields || {};

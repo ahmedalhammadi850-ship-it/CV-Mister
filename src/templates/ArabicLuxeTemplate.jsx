@@ -115,14 +115,16 @@ const LangGauge = ({ pct=75, label, accent }) => {
 
 /* ═══════════════════════════════════════════════════════════ */
 const ArabicLuxeTemplate = ({
-  data, theme, isRTL = true,
+  data, theme,
   visibleSections={}, visiblePersonalFields={},
   sectionOrder=DEFAULT_ORDER,
 }) => {
+  /* ── Layout is always RTL/Arabic — matches the reference design ── */
+  const isRTL = true;
   const accent = theme?.primaryColor || GOLD;
-  const { sz, font, lineHeight } = resolveTheme(theme, isRTL);
-  const dir   = isRTL ? 'rtl' : 'ltr';
-  const align = isRTL ? 'right' : 'left';
+  const { sz, font, lineHeight } = resolveTheme(theme, true);
+  const dir   = 'rtl';
+  const align = 'right';
   const show  = k => visibleSections[k] !== false;
   const info  = data?.personalInfo || {};
   const vis   = visiblePersonalFields || {};
