@@ -338,7 +338,7 @@ const SidebarLightTemplate = ({
     <div style={{ fontFamily: font, fontSize: sz.body, color: sidebarText, backgroundColor: '#ffffff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', direction: 'ltr' }}>
       {/* Sidebar */}
       <div style={sb.wrapper}>
-        {(vis.photo !== false && info.photo) ? (
+        {vis.photo !== false && (info.photo ? (
           <div style={sb.photoWrap}>
             <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
@@ -346,7 +346,7 @@ const SidebarLightTemplate = ({
           <div style={sb.photoWrap}>
             <span style={sb.initials}>{initials}</span>
           </div>
-        )}
+        ))}
 
         <div style={sb.name}>{info.fullName || 'Your Name'}</div>
         <div style={sb.jobTitle}>{info.jobTitle || ''}</div>

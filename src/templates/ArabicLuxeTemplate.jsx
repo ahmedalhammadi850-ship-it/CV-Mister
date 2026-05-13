@@ -423,21 +423,23 @@ const ArabicLuxeTemplate = ({
         <div style={{ height:'6pt', background:`linear-gradient(to right, ${GOLD}, ${GOLD_LIGHT}, ${GOLD})`, flexShrink:0 }} />
 
         {/* Profile photo */}
-        <div style={{ display:'flex', justifyContent:'center', paddingTop:'20pt', paddingBottom:'12pt', flexShrink:0 }}>
-          <div style={{
-            width:'85pt', height:'85pt', borderRadius:'50%',
-            overflow:'hidden', flexShrink:0,
-            border:`2px solid ${GOLD}`,
-            boxShadow:`0 0 0 4px ${NAVY}, 0 0 0 7px ${GOLD}40`,
-            backgroundColor:'rgba(255,255,255,0.1)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-          }}>
-            {(vis.photo !== false && info.photo)
-              ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-              : <span style={{ fontSize:'22pt', fontWeight:'800', color:GOLD }}>{initials}</span>
-            }
+        {vis.photo !== false && (
+          <div style={{ display:'flex', justifyContent:'center', paddingTop:'20pt', paddingBottom:'12pt', flexShrink:0 }}>
+            <div style={{
+              width:'85pt', height:'85pt', borderRadius:'50%',
+              overflow:'hidden', flexShrink:0,
+              border:`2px solid ${GOLD}`,
+              boxShadow:`0 0 0 4px ${NAVY}, 0 0 0 7px ${GOLD}40`,
+              backgroundColor:'rgba(255,255,255,0.1)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}>
+              {info.photo
+                ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : <span style={{ fontSize:'22pt', fontWeight:'800', color:GOLD }}>{initials}</span>
+              }
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Name + title */}
         <div style={{ textAlign:'center', paddingBottom:'14pt', paddingLeft:'10pt', paddingRight:'10pt', flexShrink:0 }}>

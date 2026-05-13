@@ -321,7 +321,7 @@ const ArabicNavyTemplate = ({
     <div style={{ fontFamily: font, fontSize: sz.body, color: '#222', backgroundColor: '#fff', width: '794px', minHeight: '1122px', boxSizing: 'border-box', display: 'flex', flexDirection: 'row-reverse', direction: 'rtl' }}>
       {/* Sidebar — RIGHT in RTL */}
       <div style={sb.wrapper}>
-        {(vis.photo !== false && info.photo) ? (
+        {vis.photo !== false && (info.photo ? (
           <div style={sb.photoWrap}>
             <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           </div>
@@ -329,7 +329,7 @@ const ArabicNavyTemplate = ({
           <div style={sb.photoWrap}>
             <span style={sb.initials}>{initials}</span>
           </div>
-        )}
+        ))}
         <div style={sb.name}>{info.fullName || 'الاسم الكامل'}</div>
         <div style={sb.jobTitle}>{info.jobTitle || ''}</div>
 

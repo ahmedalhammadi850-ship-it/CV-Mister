@@ -399,21 +399,23 @@ const ArabicZafirTemplate = ({
         <div style={{ display:'flex', alignItems:'center', gap:'20pt', direction:dir }}>
 
           {/* Photo */}
-          <div style={{ flexShrink:0 }}>
-            <div style={{
-              width:'82pt', height:'82pt', borderRadius:'50%',
-              border:`2.5px solid ${accent}`,
-              boxShadow:`0 0 0 5pt ${PLUM}, 0 0 0 7.5pt ${accent}40, 0 4px 20px rgba(0,0,0,0.4)`,
-              overflow:'hidden',
-              backgroundColor:'rgba(255,255,255,0.08)',
-              display:'flex', alignItems:'center', justifyContent:'center',
-            }}>
-              {(vis.photo !== false && info.photo)
-                ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-                : <span style={{ fontSize:'24pt', fontWeight:'800', color:accent, lineHeight:1 }}>{initials}</span>
-              }
+          {vis.photo !== false && (
+            <div style={{ flexShrink:0 }}>
+              <div style={{
+                width:'82pt', height:'82pt', borderRadius:'50%',
+                border:`2.5px solid ${accent}`,
+                boxShadow:`0 0 0 5pt ${PLUM}, 0 0 0 7.5pt ${accent}40, 0 4px 20px rgba(0,0,0,0.4)`,
+                overflow:'hidden',
+                backgroundColor:'rgba(255,255,255,0.08)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+              }}>
+                {info.photo
+                  ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                  : <span style={{ fontSize:'24pt', fontWeight:'800', color:accent, lineHeight:1 }}>{initials}</span>
+                }
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Name + title + contact */}
           <div style={{ flex:1, direction:dir }}>

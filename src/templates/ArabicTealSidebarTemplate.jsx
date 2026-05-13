@@ -328,13 +328,13 @@ const ArabicTealSidebarTemplate = ({
       {/* ── Sidebar RIGHT ── */}
       <div style={sb.wrap}>
         {/* Photo */}
-        {(vis.photo !== false && info.photo) ? (
+        {vis.photo !== false && (info.photo ? (
           <div style={sb.photoWrap}>
             <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
           </div>
         ) : (
           <div style={sb.photoWrap}><span style={sb.initials}>{initials}</span></div>
-        )}
+        ))}
 
         <div style={sb.jobTitle}>{info.jobTitle||''}</div>
 

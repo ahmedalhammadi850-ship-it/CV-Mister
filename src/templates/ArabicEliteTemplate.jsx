@@ -499,25 +499,27 @@ const ArabicEliteTemplate = ({
           alignItems: 'center',
           justifyContent: 'center',
         }}>
-          <div style={{
-            width: '78pt',
-            height: '78pt',
-            borderRadius: '50%',
-            overflow: 'hidden',
-            border: `3.5px solid ${accent}`,
-            backgroundColor: 'rgba(255,255,255,0.15)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            boxShadow: `0 0 0 4px rgba(255,255,255,0.12)`,
-          }}>
-            {(vis.photo !== false && info.photo) ? (
-              <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <span style={{ fontSize: '22pt', fontWeight: '700', color: '#fff' }}>{initials}</span>
-            )}
-          </div>
+          {vis.photo !== false && (
+            <div style={{
+              width: '78pt',
+              height: '78pt',
+              borderRadius: '50%',
+              overflow: 'hidden',
+              border: `3.5px solid ${accent}`,
+              backgroundColor: 'rgba(255,255,255,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+              boxShadow: `0 0 0 4px rgba(255,255,255,0.12)`,
+            }}>
+              {info.photo ? (
+                <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <span style={{ fontSize: '22pt', fontWeight: '700', color: '#fff' }}>{initials}</span>
+              )}
+            </div>
+          )}
         </div>
       </div>
 

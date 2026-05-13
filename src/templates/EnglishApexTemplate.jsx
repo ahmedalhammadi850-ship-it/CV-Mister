@@ -393,19 +393,21 @@ const EnglishApexTemplate = ({
         {/* Profile section */}
         <div style={{ padding:'22pt 16pt 16pt', flexShrink:0, textAlign:'center' }}>
           {/* Photo / initials circle */}
-          <div style={{
-            width:'84pt', height:'84pt', borderRadius:'50%',
-            border:`3px solid ${accent}`,
-            boxShadow:`0 0 0 5pt ${NAVY2}, 0 0 0 7pt ${accent}30, 0 8px 24px rgba(0,0,0,0.5)`,
-            overflow:'hidden', margin:'0 auto 12pt',
-            backgroundColor:'rgba(255,255,255,0.06)',
-            display:'flex', alignItems:'center', justifyContent:'center',
-          }}>
-            {(vis.photo !== false && info.photo)
-              ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-              : <span style={{ fontSize:'24pt', fontWeight:'900', color:accent, letterSpacing:'-0.03em', lineHeight:1 }}>{initials}</span>
-            }
-          </div>
+          {vis.photo !== false && (
+            <div style={{
+              width:'84pt', height:'84pt', borderRadius:'50%',
+              border:`3px solid ${accent}`,
+              boxShadow:`0 0 0 5pt ${NAVY2}, 0 0 0 7pt ${accent}30, 0 8px 24px rgba(0,0,0,0.5)`,
+              overflow:'hidden', margin:'0 auto 12pt',
+              backgroundColor:'rgba(255,255,255,0.06)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}>
+              {info.photo
+                ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : <span style={{ fontSize:'24pt', fontWeight:'900', color:accent, letterSpacing:'-0.03em', lineHeight:1 }}>{initials}</span>
+              }
+            </div>
+          )}
 
           {/* Name */}
           <div style={{ fontSize:'12.5pt', fontWeight:'900', color:WHITE, lineHeight:1.15, marginBottom:'4pt', letterSpacing:'-0.02em' }}>

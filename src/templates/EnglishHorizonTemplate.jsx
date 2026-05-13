@@ -359,25 +359,27 @@ const EnglishHorizonTemplate = ({
         minHeight:'110pt',
       }}>
         {/* Photo side */}
-        <div style={{
-          width:'100pt', flexShrink:0,
-          display:'flex', alignItems:'center', justifyContent:'center',
-          padding: isRTL ? '18pt 18pt 18pt 0' : '18pt 0 18pt 18pt',
-        }}>
+        {vis.photo !== false && (
           <div style={{
-            width:'72pt', height:'72pt', borderRadius:'50%',
-            overflow:'hidden', flexShrink:0,
-            border:'3px solid rgba(255,255,255,0.5)',
-            boxShadow:'0 4px 20px rgba(0,0,0,0.25)',
-            backgroundColor:'rgba(255,255,255,0.15)',
+            width:'100pt', flexShrink:0,
             display:'flex', alignItems:'center', justifyContent:'center',
+            padding: isRTL ? '18pt 18pt 18pt 0' : '18pt 0 18pt 18pt',
           }}>
-            {(vis.photo !== false && info.photo)
-              ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
-              : <span style={{ fontSize:'20pt', fontWeight:'800', color:'#fff' }}>{initials}</span>
-            }
+            <div style={{
+              width:'72pt', height:'72pt', borderRadius:'50%',
+              overflow:'hidden', flexShrink:0,
+              border:'3px solid rgba(255,255,255,0.5)',
+              boxShadow:'0 4px 20px rgba(0,0,0,0.25)',
+              backgroundColor:'rgba(255,255,255,0.15)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+            }}>
+              {info.photo
+                ? <img src={info.photo} alt="" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+                : <span style={{ fontSize:'20pt', fontWeight:'800', color:'#fff' }}>{initials}</span>
+              }
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Center: name + title */}
         <div style={{ flex:1, padding:'20pt 16pt', display:'flex', flexDirection:'column', justifyContent:'center', direction:dir }}>

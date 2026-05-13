@@ -317,7 +317,7 @@ const ArabicModernTemplate = ({
       {/* Header */}
       <div style={s.header}>
         <div style={s.headerTop}>
-          {(vis.photo !== false && info.photo) ? (
+          {vis.photo !== false && (info.photo ? (
             <div style={s.photoWrap}>
               <img src={info.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
@@ -327,7 +327,7 @@ const ArabicModernTemplate = ({
                 {(info.fullName || '').split(' ').map(w => w[0]).slice(0, 2).join('')}
               </span>
             </div>
-          )}
+          ))}
           <div style={s.nameBlock}>
             <div style={s.name}>{info.fullName || 'الاسم الكامل'}</div>
             {info.jobTitle && <div style={s.jobBox}>{info.jobTitle}</div>}
