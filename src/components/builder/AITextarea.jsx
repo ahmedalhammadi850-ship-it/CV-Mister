@@ -96,14 +96,28 @@ export default function AITextarea({
     }
     setLoading(key);
     try {
-      const res = await fetch('/api/ai/rewrite', {
+      const res = await fetch('https://ahmed144.app.n8n.cloud/webhook-test/94834e1e-04b3-451b-9b48-26d58ae28623', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: value, action: key, language: isRTL ? 'ar' : 'en' }),
       });
-      const data = await res.json();
-      if (res.ok && data.result) {
-        onChange(data.result);
+
+      let result = null;
+      if (res.ok) {
+        try {
+          const data = await res.json();
+          if (typeof data === 'string') result = data;
+          else if (data?.result) result = data.result;
+          else if (data?.output) result = data.output;
+          else if (data?.text) result = data.text;
+          else if (data?.message) result = data.message;
+          else if (Array.isArray(data) && data[0]?.result) result = data[0].result;
+          else if (Array.isArray(data) && data[0]?.output) result = data[0].output;
+        } catch { result = null; }
+      }
+
+      if (result) {
+        onChange(result);
         const successMsg = {
           improve: { ar: '✦ تم تحسين النص', en: '✦ Text improved!' },
           suggest: { ar: '✦ تم اقتراح النص', en: '✦ Text suggested!' },
