@@ -4,11 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "NODE_ENV=development tsx --tsconfig tsconfig.server.json server/index.ts & vite",
-    "server": "NODE_ENV=development tsx --tsconfig tsconfig.server.json server/index.ts",
-    "build": "vite build",
-    "start": "PORT=5000 NODE_ENV=production tsx --tsconfig tsconfig.server.json server/index.ts",
-    "db:push": "drizzle-kit push",
+    "dev": "NODE_ENV=development npx tsx --tsconfig tsconfig.server.json server/index.ts & npx vite",
+    "server": "NODE_ENV=development npx tsx --tsconfig tsconfig.server.json server/index.ts",
+    "build": "npx vite build",
+    "start": "PORT=5000 NODE_ENV=production npx tsx --tsconfig tsconfig.server.json server/index.ts",
+    "db:push": "npx drizzle-kit push",
     "lint": "eslint .",
     "preview": "vite preview"
   },
