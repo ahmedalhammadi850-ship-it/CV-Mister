@@ -1,46 +1,96 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useCallback } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
+const ACCOUNT = '00154578';
+
+const Step = ({ n, label }) => (
+  <div className="flex items-start gap-3">
+    <div
+      className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5"
+      style={{ background: 'linear-gradient(135deg,#0f766e,#14b8a6)' }}
+    >
+      {n}
+    </div>
+    <p className="text-sm text-slate-700 leading-relaxed pt-1">{label}</p>
+  </div>
+);
+
 const BusinessContactPage = () => {
-  const { isRTL, currentUser } = useAuth();
+  const { currentUser } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({
-    name: currentUser?.displayName || '',
-    email: currentUser?.email || '',
-    company: '',
-    teamSize: '',
-    message: '',
-  });
-  const [loading, setLoading] = useState(false);
-  const [done, setDone] = useState(false);
-  const [error, setError] = useState('');
+  const [file, setFile]         = useState(null);
+  const [preview, setPreview]   = useState(null);
+  const [dragging, setDragging] = useState(false);
+  const [loading, setLoading]   = useState(false);
+  const [done, setDone]         = useState(false);
+  const [error, setError]       = useState('');
+  const [copied, setCopied]     = useState(false);
+  const inputRef = useRef();
 
-  const set = (k) => (e) => setForm(f => ({ ...f, [k]: e.target.value }));
+  if (!currentUser) return (
+    <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <p className="text-slate-600 mb-4">يجب تسجيل الدخول أولاً</p>
+        <Link to="/login" className="px-6 py-2.5 bg-teal-600 text-white rounded-xl text-sm font-semibold">
+          تسجيل الدخول
+        </Link>
+      </div>
+    </div>
+  );
 
-  const onSubmit = async (e) => {
-    e.preventDefault();
-    if (!form.name || !form.email || !form.company) {
-      setError('يرجى ملء جميع الحقول المطلوبة');
-      return;
+  const copyAccount = () => {
+    navigator.clipboard.writeText(ACCOUNT);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const pickFile = (f) => {
+    if (!f) return;
+    if (f.size > 10 * 1024 * 1024) { setError('حجم الملف يتجاوز 10MB'); return; }
+    if (!['image/jpeg','image/jpg','image/png','image/webp'].includes(f.type)) {
+      setError('يرجى رفع صورة PNG, JPG, أو WEBP'); return;
     }
-    setLoading(true);
     setError('');
+    setFile(f);
+    const reader = new FileReader();
+    reader.onload = e => setPreview(e.target.result);
+    reader.readAsDataURL(f);
+  };
+
+  const onDrop = useCallback(e => {
+    e.preventDefault(); setDragging(false);
+    pickFile(e.dataTransfer.files[0]);
+  }, []);
+
+  const onSubmit = async () => {
+    if (!file) { setError('يرجى رفع صورة الحوالة'); return; }
+    setLoading(true); setError('');
     try {
-      const res = await fetch('/api/business-contact', {
-        method: 'POST',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      const data = await res.json();
-      if (!res.ok) { setError(data.message || 'حدث خطأ'); return; }
-      setDone(true);
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64 = e.target.result;
+        const res = await fetch('/api/business-contact', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: currentUser.displayName || currentUser.name,
+            email: currentUser.email,
+            company: 'business',
+            receiptImage: base64,
+            plan: 'business',
+            amount: 15,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) { setError(data.message || 'حدث خطأ'); setLoading(false); return; }
+        setDone(true);
+      };
+      reader.readAsDataURL(file);
     } catch {
-      setError('تعذّر الإرسال، تحقق من اتصالك');
-    } finally {
-      setLoading(false);
+      setError('تعذّر الإرسال، تحقق من اتصالك'); setLoading(false);
     }
   };
 
@@ -55,14 +105,14 @@ const BusinessContactPage = () => {
         </div>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">تم استلام طلبك!</h2>
         <p className="text-slate-500 text-sm leading-relaxed mb-8">
-          شكراً لاهتمامك بخطة الأعمال. سيتواصل معك فريقنا خلال 24 ساعة على البريد الإلكتروني المُدخل.
+          سنراجع إيصال الحوالة خلال دقائق ونُفعّل اشتراك الأعمال فور التأكيد.
         </p>
         <button
-          onClick={() => navigate('/pricing')}
+          onClick={() => navigate('/dashboard')}
           className="w-full py-3.5 rounded-2xl text-white font-bold text-sm"
           style={{ background: 'linear-gradient(135deg,#0f766e,#14b8a6)' }}
         >
-          العودة للأسعار
+          العودة إلى لوحة التحكم
         </button>
       </div>
     </div>
@@ -85,7 +135,7 @@ const BusinessContactPage = () => {
 
         {/* Header card */}
         <div
-          className="rounded-3xl p-6 mb-6 text-white relative overflow-hidden"
+          className="rounded-3xl p-6 mb-5 text-white relative overflow-hidden"
           style={{ background: 'linear-gradient(135deg,#134e4a 0%,#0f766e 60%,#14b8a6 100%)' }}
         >
           <div className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-white/5" />
@@ -94,8 +144,8 @@ const BusinessContactPage = () => {
             <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
               🏢 خطة الأعمال
             </span>
-            <h1 className="text-2xl font-bold mb-1">تواصل مع فريقنا</h1>
-            <p className="text-white/70 text-sm">للشركات والفرق التي تحتاج إلى حلول متكاملة</p>
+            <h1 className="text-2xl font-bold mb-1">ترقية إلى الأعمال</h1>
+            <p className="text-white/70 text-sm">سير ذاتية غير محدودة + جميع الميزات</p>
             <div className="mt-4 flex items-end gap-1">
               <span className="text-white/70 text-lg">$</span>
               <span className="text-5xl font-extrabold leading-none">15</span>
@@ -104,117 +154,128 @@ const BusinessContactPage = () => {
           </div>
         </div>
 
-        {/* What you get */}
+        {/* Steps */}
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-5">
-          <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+          <h2 className="font-bold text-slate-900 mb-5 flex items-center gap-2">
             <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
             </svg>
-            ما تحصل عليه
+            خطوات الترقية
           </h2>
-          <div className="grid grid-cols-1 gap-2.5">
-            {[
-              'سير ذاتية غير محدودة لجميع أعضاء الفريق',
-              'جميع القوالب بما فيها القوالب الحصرية',
-              'تصدير PDF عالي الجودة',
-              'دعم كامل للغة العربية والإنجليزية',
-              'ذكاء اصطناعي متقدم لجميع الأعضاء',
-              'رسائل تغطية غير محدودة',
-              'دعم فني متخصص',
-            ].map((f) => (
-              <div key={f} className="flex items-start gap-3">
-                <svg className="w-4 h-4 text-teal-500 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-sm text-slate-700">{f}</span>
-              </div>
-            ))}
+          <div className="flex flex-col gap-4">
+            <Step n="1" label="قم بتحويل المبلغ عبر الحوالة البنكية أو المحفظة الإلكترونية" />
+            <Step n="2" label="التقط صورة واضحة لإيصال التحويل" />
+            <Step n="3" label="ارفع الصورة أدناه وسنراجعها خلال دقائق" />
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={onSubmit} className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-5">
-          <h2 className="font-bold text-slate-900 mb-5 flex items-center gap-2">
+        {/* Bank info */}
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-5">
+          <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
             <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
-            بيانات التواصل
+            بيانات التحويل
           </h2>
-
-          <div className="flex flex-col gap-4">
-            {/* Name */}
+          <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                الاسم الكامل <span className="text-red-400">*</span>
-              </label>
-              <input
-                value={form.name}
-                onChange={set('name')}
-                placeholder="أحمد محمد"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-400 placeholder:text-slate-300"
-              />
+              <p className="text-xs text-slate-400 mb-0.5">البنك</p>
+              <p className="font-semibold text-slate-900 text-sm">بنك التضامن — Tadhamon Bank</p>
             </div>
-
-            {/* Email */}
+            <div className="h-px bg-slate-200" />
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                البريد الإلكتروني <span className="text-red-400">*</span>
-              </label>
-              <input
-                type="email"
-                value={form.email}
-                onChange={set('email')}
-                placeholder="ahmed@company.com"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-400 placeholder:text-slate-300"
-              />
+              <p className="text-xs text-slate-400 mb-0.5">اسم المستفيد</p>
+              <p className="font-semibold text-slate-900 text-sm">أحمد عبدالله عقلان الحمادي</p>
             </div>
-
-            {/* Company */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                اسم الشركة / المؤسسة <span className="text-red-400">*</span>
-              </label>
-              <input
-                value={form.company}
-                onChange={set('company')}
-                placeholder="شركة النجاح للتوظيف"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-400 placeholder:text-slate-300"
-              />
-            </div>
-
-            {/* Team size */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                حجم الفريق
-              </label>
-              <select
-                value={form.teamSize}
-                onChange={set('teamSize')}
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-400 bg-white"
+            <div className="h-px bg-slate-200" />
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs text-slate-400 mb-0.5">رقم الحساب</p>
+                <p className="font-bold text-slate-900 text-lg tracking-widest">{ACCOUNT}</p>
+              </div>
+              <button
+                onClick={copyAccount}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all ${
+                  copied ? 'bg-green-100 text-green-700' : 'bg-teal-50 text-teal-600 hover:bg-teal-100'
+                }`}
               >
-                <option value="">اختر...</option>
-                <option value="1-5">1 – 5 أشخاص</option>
-                <option value="6-20">6 – 20 شخصاً</option>
-                <option value="21-50">21 – 50 شخصاً</option>
-                <option value="50+">أكثر من 50 شخصاً</option>
-              </select>
-            </div>
-
-            {/* Message */}
-            <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">
-                رسالتك (اختياري)
-              </label>
-              <textarea
-                value={form.message}
-                onChange={set('message')}
-                rows={4}
-                placeholder="أخبرنا عن احتياجات شركتك..."
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-teal-400 placeholder:text-slate-300 resize-none"
-              />
+                {copied ? (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                    </svg>
+                    تم النسخ
+                  </>
+                ) : (
+                  <>
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    </svg>
+                    نسخ
+                  </>
+                )}
+              </button>
             </div>
           </div>
-        </form>
+        </div>
+
+        {/* Upload */}
+        <div className="bg-white rounded-3xl border border-slate-100 shadow-sm p-6 mb-5">
+          <h2 className="font-bold text-slate-900 mb-4 flex items-center gap-2">
+            <svg className="w-5 h-5 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            رفع صورة الحوالة
+          </h2>
+
+          {preview ? (
+            <div className="relative rounded-2xl overflow-hidden border-2 border-teal-200">
+              <img src={preview} alt="receipt" className="w-full max-h-64 object-contain bg-slate-100" />
+              <button
+                onClick={() => { setFile(null); setPreview(null); }}
+                className="absolute top-2 left-2 w-8 h-8 bg-white rounded-full shadow-lg flex items-center justify-center text-slate-500 hover:text-red-500 transition-colors"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+              <div className="absolute bottom-2 right-2 bg-green-500 text-white text-xs px-2.5 py-1 rounded-full font-semibold flex items-center gap-1">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                جاهز للإرسال
+              </div>
+            </div>
+          ) : (
+            <div
+              onClick={() => inputRef.current?.click()}
+              onDragOver={e => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={onDrop}
+              className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center gap-3 cursor-pointer transition-all ${
+                dragging ? 'border-teal-400 bg-teal-50' : 'border-slate-200 hover:border-teal-300 hover:bg-slate-50'
+              }`}
+            >
+              <div className="w-14 h-14 rounded-2xl bg-teal-50 flex items-center justify-center">
+                <svg className="w-7 h-7 text-teal-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                </svg>
+              </div>
+              <div className="text-center">
+                <p className="font-semibold text-slate-700 text-sm">اسحب صورة الحوالة هنا</p>
+                <p className="text-slate-400 text-xs mt-1">أو اضغط لاختيار ملف — PNG, JPG, WEBP (حتى 10MB)</p>
+              </div>
+            </div>
+          )}
+
+          <input
+            ref={inputRef}
+            type="file"
+            accept="image/png,image/jpeg,image/webp"
+            className="hidden"
+            onChange={e => pickFile(e.target.files[0])}
+          />
+        </div>
 
         {/* Error */}
         {error && (
@@ -229,8 +290,8 @@ const BusinessContactPage = () => {
         {/* Submit */}
         <button
           onClick={onSubmit}
-          disabled={loading}
-          className="w-full py-4 rounded-2xl text-white font-bold text-base transition-all disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg"
+          disabled={loading || !file}
+          className="w-full py-4 rounded-2xl text-white font-bold text-base transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-lg"
           style={{ background: 'linear-gradient(135deg,#0f766e,#14b8a6)' }}
         >
           {loading ? (
@@ -246,13 +307,13 @@ const BusinessContactPage = () => {
               <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
               </svg>
-              إرسال الطلب
+              إرسال طلب الترقية
             </>
           )}
         </button>
 
         <p className="text-center text-xs text-slate-400 mt-4 leading-relaxed">
-          سيتواصل معك فريقنا خلال 24 ساعة على بريدك الإلكتروني
+          سيتم مراجعة طلبك خلال دقائق وتفعيل اشتراكك فور التأكيد
         </p>
       </div>
     </div>

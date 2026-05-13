@@ -1,4 +1,4 @@
-import { pgTable, varchar, text, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, varchar, text, timestamp, integer } from "drizzle-orm/pg-core";
 
 export const businessContacts = pgTable("business_contacts", {
   id: varchar("id").primaryKey(),
@@ -8,7 +8,10 @@ export const businessContacts = pgTable("business_contacts", {
   company: varchar("company").notNull(),
   teamSize: varchar("team_size"),
   message: text("message"),
-  status: varchar("status").notNull().default("new"),
+  receiptImage: text("receipt_image"),
+  plan: varchar("plan").default("business"),
+  amount: integer("amount").default(15),
+  status: varchar("status").notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
