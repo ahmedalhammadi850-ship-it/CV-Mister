@@ -14,6 +14,7 @@ import UpgradePage from './pages/UpgradePage';
 import BusinessContactPage from './pages/BusinessContactPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import ChatWidget from './components/ChatWidget';
 
 function BusinessExpiredModal() {
   const { currentUser, isRTL } = useAuth();
@@ -71,6 +72,7 @@ function App() {
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-900 ${isRTL ? 'rtl' : 'ltr'}`}>
       <BusinessExpiredModal />
+      <ChatWidget />
       <Routes>
         <Route path="/login"           element={<GuestRoute><LoginPage /></GuestRoute>} />
         <Route path="/signup"          element={<GuestRoute><SignupPage /></GuestRoute>} />
