@@ -65,10 +65,10 @@ const Footer = () => {
 
       {/* Main Footer Grid */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="flex flex-col items-center text-center gap-10 mb-12">
+        <div className={`flex flex-col md:flex-row items-start justify-center gap-16 mb-12 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
 
-          {/* Brand */}
-          <div className="flex flex-col items-center">
+          {/* Column 1: Brand + Contact */}
+          <div className="flex flex-col items-center text-center">
             <Link to="/" className="flex items-center gap-2.5 mb-5">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
@@ -89,7 +89,6 @@ const Footer = () => {
               )}
             </p>
 
-            {/* Email contact */}
             <div className="flex flex-col items-center">
               <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-indigo-400">
                 {t('Contact us', 'تواصل معنا')}
@@ -123,12 +122,12 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Links */}
-          <div>
+          {/* Column 2: Links */}
+          <div className="flex flex-col items-center text-center">
             <h4 className="text-xs font-bold uppercase tracking-widest mb-5 text-indigo-400">
               {t('Links', 'الروابط')}
             </h4>
-            <ul className="flex flex-wrap justify-center gap-x-8 gap-y-3">
+            <ul className="space-y-3.5">
               {productLinks.map(({ label, to }, idx) => (
                 <li key={idx}>
                   <Link
