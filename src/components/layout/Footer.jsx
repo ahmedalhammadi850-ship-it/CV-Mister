@@ -6,9 +6,10 @@ const Footer = () => {
   const t = (en, ar) => isRTL ? ar : en;
 
   const productLinks = [
+    { label: { en: 'Home', ar: 'الرئيسية' }, to: '/' },
     { label: { en: 'Resume Builder', ar: 'منشئ السيرة' }, to: '/builder' },
     { label: { en: 'CV Templates', ar: 'قوالب السيرة' }, to: '/templates' },
-    { label: { en: 'Cover Letters', ar: 'خطابات التغطية' }, to: '/builder' },
+    { label: { en: 'About Us', ar: 'من نحن' }, to: '/about' },
   ];
 
 
