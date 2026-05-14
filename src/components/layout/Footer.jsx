@@ -5,25 +5,15 @@ const Footer = () => {
   const { isRTL } = useAuth();
   const t = (en, ar) => isRTL ? ar : en;
 
-  const columns = [
-    {
-      title: { en: 'Product', ar: 'المنتج' },
-      links: [
-        { label: { en: 'Resume Builder', ar: 'منشئ السيرة' }, to: '/builder' },
-        { label: { en: 'CV Templates', ar: 'قوالب السيرة' }, to: '/templates' },
-        { label: { en: 'ATS Checker', ar: 'فاحص ATS' }, to: '#' },
-        { label: { en: 'Cover Letters', ar: 'خطابات التغطية' }, to: '#' },
-      ],
-    },
-    {
-      title: { en: 'Resources', ar: 'الموارد' },
-      links: [
-        { label: { en: 'Career Blog', ar: 'مدونة المهنة' }, to: '#' },
-        { label: { en: 'About Us', ar: 'من نحن' }, to: '/about' },
-        { label: { en: 'Contact', ar: 'اتصل بنا' }, to: '#' },
-        { label: { en: 'Help Center', ar: 'مركز المساعدة' }, to: '#' },
-      ],
-    },
+  const productLinks = [
+    { label: { en: 'Resume Builder', ar: 'منشئ السيرة' }, to: '/builder' },
+    { label: { en: 'CV Templates', ar: 'قوالب السيرة' }, to: '/templates' },
+    { label: { en: 'Cover Letters', ar: 'خطابات التغطية' }, to: '/builder' },
+  ];
+
+  const companyLinks = [
+    { label: { en: 'About Us', ar: 'من نحن' }, to: '/about' },
+    { label: { en: 'Pricing', ar: 'الأسعار' }, to: '/pricing' },
   ];
 
   return (
@@ -78,13 +68,13 @@ const Footer = () => {
 
       {/* Main Footer Grid */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+        <div className={`flex flex-col md:flex-row gap-12 md:gap-16 mb-12 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
 
           {/* Brand */}
-          <div className="md:col-span-2">
+          <div className="flex-1 min-w-0 max-w-sm">
             <Link to="/" className="flex items-center gap-2.5 mb-5">
               <div
-                className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                 style={{
                   background: 'linear-gradient(135deg, #4f46e5, #a855f7)',
                   boxShadow: '0 4px 14px rgba(99,102,241,0.4)',
@@ -95,7 +85,7 @@ const Footer = () => {
               <span className="font-heading font-bold text-xl text-white">Mister</span>
             </Link>
 
-            <p className="text-sm text-slate-400 leading-relaxed mb-8 max-w-xs">
+            <p className="text-sm text-slate-400 leading-relaxed mb-8">
               {t(
                 'Build your professional resume in minutes. AI-powered, ATS-friendly, and beautifully designed.',
                 'أنشئ سيرتك الذاتية الاحترافية في دقائق. مدعوم بالذكاء الاصطناعي ومتوافق مع ATS.'
@@ -108,7 +98,7 @@ const Footer = () => {
                 {t('Contact us', 'تواصل معنا')}
               </p>
               <a
-                href="mailto:hello@cvmister.com"
+                href="mailto:ahmedalhammadi266@gmail.com"
                 className="inline-flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
                 style={{
                   background: 'rgba(99,102,241,0.1)',
@@ -130,46 +120,70 @@ const Footer = () => {
                   </svg>
                 </div>
                 <span className="text-sm font-medium text-slate-300">
-                  hello@cvmister.com
+                  ahmedalhammadi266@gmail.com
                 </span>
               </a>
             </div>
           </div>
 
-          {/* Link Columns */}
-          {columns.map((col, i) => (
-            <div key={i}>
+          {/* Links columns */}
+          <div className={`flex gap-12 md:gap-16 flex-shrink-0 ${isRTL ? 'flex-row-reverse' : ''}`}>
+
+            {/* Product */}
+            <div>
               <h4 className="text-xs font-bold uppercase tracking-widest mb-5 text-indigo-400">
-                {col.title[isRTL ? 'ar' : 'en']}
+                {t('Product', 'المنتج')}
               </h4>
               <ul className="space-y-3.5">
-                {col.links.map(({ label, to }, idx) => (
+                {productLinks.map(({ label, to }, idx) => (
                   <li key={idx}>
                     <Link
                       to={to}
-                      className="text-sm text-slate-400 hover:text-white transition-colors duration-200 inline-block"
+                      className="text-sm text-slate-400 hover:text-white transition-colors duration-200 inline-flex items-center gap-1.5 group"
                     >
+                      <span className="w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" />
                       {label[isRTL ? 'ar' : 'en']}
                     </Link>
                   </li>
                 ))}
               </ul>
             </div>
-          ))}
+
+            {/* Company */}
+            <div>
+              <h4 className="text-xs font-bold uppercase tracking-widest mb-5 text-indigo-400">
+                {t('Company', 'الشركة')}
+              </h4>
+              <ul className="space-y-3.5">
+                {companyLinks.map(({ label, to }, idx) => (
+                  <li key={idx}>
+                    <Link
+                      to={to}
+                      className="text-sm text-slate-400 hover:text-white transition-colors duration-200 inline-flex items-center gap-1.5 group"
+                    >
+                      <span className="w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" />
+                      {label[isRTL ? 'ar' : 'en']}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+          </div>
         </div>
 
         {/* Bottom Bar */}
         <div
-          className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4"
+          className={`pt-8 flex flex-col md:flex-row items-center justify-between gap-4 ${isRTL ? 'md:flex-row-reverse' : ''}`}
           style={{ borderTop: '1px solid rgba(255,255,255,0.06)' }}
         >
           <p className="text-sm text-slate-500">
             &copy; {new Date().getFullYear()} CV-Mister.{' '}
             {t('All rights reserved.', 'جميع الحقوق محفوظة.')}
           </p>
-          <div className="flex items-center gap-2 text-sm text-slate-500">
+          <div className={`flex items-center gap-2 text-sm text-slate-500 ${isRTL ? 'flex-row-reverse' : ''}`}>
             <span>{t('Made with', 'صُنع بـ')}</span>
-            <span className="text-pink-500">♥</span>
+            <span className="text-pink-400">♥</span>
             <span>{t('for job seekers everywhere', 'لكل باحث عن عمل')}</span>
           </div>
         </div>
