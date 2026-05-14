@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 const AI_ACTIONS = [
   {
@@ -82,7 +81,6 @@ export default function AITextarea({
   align: alignProp, onAlignChange,
 }) {
   const { currentUser } = useAuth();
-  const navigate = useNavigate();
   const isFree = !currentUser || currentUser.plan === 'free';
 
   const [alignLocal, setAlignLocal] = useState(isRTL ? 'right' : 'left');
@@ -235,16 +233,24 @@ export default function AITextarea({
         </div>
 
         {/* Buttons row */}
-        <div className={`flex flex-wrap gap-2 items-center ${isFree ? 'pointer-events-none select-none' : ''}`}
-          style={isFree ? { filter: 'blur(1.5px)', opacity: 0.55 } : {}}>
+        <div className="flex flex-wrap gap-2 items-center">
 
           {/* Action pills */}
           {AI_ACTIONS.map(a => (
             <button
               key={a.key}
               type="button"
-              onClick={() => handleAction(a.key)}
-              disabled={!!loading || isFree}
+              onClick={() => {
+                if (isFree) {
+                  showToast(
+                    isRTL ? '⭐ هذه ميزة مدفوعة — قم بالترقية للاستخدام' : '⭐ Pro feature — upgrade to use AI',
+                    'bg-indigo-600'
+                  );
+                  return;
+                }
+                handleAction(a.key);
+              }}
+              disabled={!!loading}
               className={`
                 flex items-center gap-2 px-3.5 py-1.5 rounded-full text-sm font-semibold
                 transition-all duration-150 active:scale-95 select-none
@@ -272,53 +278,27 @@ export default function AITextarea({
           {/* Robot icon — pinned to the right */}
           <div className="ml-auto flex-shrink-0">
             <div
-              className="flex items-center justify-center rounded-2xl"
+              className={`flex items-center justify-center rounded-2xl cursor-default transition-transform hover:scale-105 active:scale-95 ${loading ? 'animate-ai-robot' : ''}`}
               style={{
                 width: 48,
                 height: 48,
-                background: 'linear-gradient(135deg,#7c3aed 0%,#a855f7 100%)',
-                boxShadow: '0 3px 12px rgba(124,58,237,0.45)',
+                background: loading
+                  ? 'linear-gradient(135deg,#6d28d9 0%,#c026d3 100%)'
+                  : 'linear-gradient(135deg,#7c3aed 0%,#a855f7 100%)',
+                boxShadow: loading
+                  ? '0 0 0 4px rgba(168,85,247,0.25), 0 4px 14px rgba(124,58,237,0.5)'
+                  : '0 3px 12px rgba(124,58,237,0.45)',
+                transition: 'background 0.3s, box-shadow 0.3s',
               }}
+              title={isRTL ? 'مساعد الذكاء الاصطناعي' : 'AI Assistant'}
             >
-              <span style={{ display: 'flex' }}>
+              <span className={loading ? 'animate-ai-icon' : ''} style={{ display: 'flex' }}>
                 <RobotIcon />
               </span>
             </div>
           </div>
 
         </div>
-
-        {/* Lock overlay for free users */}
-        {isFree && (
-          <div
-            className="absolute inset-0 flex items-center justify-center rounded-b-xl cursor-pointer"
-            style={{ background: 'rgba(245,243,255,0.45)', zIndex: 10, top: 0 }}
-            onClick={() => navigate('/pricing')}
-          >
-            <div className="flex flex-col items-center gap-1.5 bg-white/90 backdrop-blur-sm border border-violet-200 rounded-2xl px-5 py-3 shadow-lg">
-              <div className="flex items-center gap-2">
-                <svg viewBox="0 0 20 20" fill="none" className="w-5 h-5 text-violet-600" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <rect x="4" y="9" width="12" height="9" rx="2" fill="#ede9fe" stroke="#7c3aed" strokeWidth="1.6"/>
-                  <path d="M7 9V6a3 3 0 016 0v3" stroke="#7c3aed" strokeWidth="1.8"/>
-                </svg>
-                <span className="text-sm font-bold text-violet-700">
-                  {isRTL ? 'ميزة مدفوعة' : 'Pro Feature'}
-                </span>
-                <span className="px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-indigo-600 text-white leading-none">⭐ Pro</span>
-              </div>
-              <p className="text-[11px] text-slate-500 text-center leading-snug">
-                {isRTL ? 'قم بالترقية للوصول إلى مساعد الذكاء الاصطناعي' : 'Upgrade to unlock AI Assistant'}
-              </p>
-              <button
-                type="button"
-                className="mt-0.5 px-4 py-1.5 rounded-full text-xs font-bold text-white bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-700 hover:to-purple-700 shadow transition-all active:scale-95"
-                onClick={(e) => { e.stopPropagation(); navigate('/pricing'); }}
-              >
-                {isRTL ? 'ترقية الآن' : 'Upgrade Now'}
-              </button>
-            </div>
-          </div>
-        )}
 
       </div>
 
