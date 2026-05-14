@@ -11,10 +11,6 @@ const Footer = () => {
     { label: { en: 'Cover Letters', ar: 'خطابات التغطية' }, to: '/builder' },
   ];
 
-  const companyLinks = [
-    { label: { en: 'About Us', ar: 'من نحن' }, to: '/about' },
-    { label: { en: 'Pricing', ar: 'الأسعار' }, to: '/pricing' },
-  ];
 
   return (
     <footer style={{ background: '#0f0f1a', color: '#cbd5e1' }}>
@@ -136,26 +132,6 @@ const Footer = () => {
               </h4>
               <ul className="space-y-3.5">
                 {productLinks.map(({ label, to }, idx) => (
-                  <li key={idx}>
-                    <Link
-                      to={to}
-                      className="text-sm text-slate-400 hover:text-white transition-colors duration-200 inline-flex items-center gap-1.5 group"
-                    >
-                      <span className="w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0" />
-                      {label[isRTL ? 'ar' : 'en']}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            {/* Company */}
-            <div>
-              <h4 className="text-xs font-bold uppercase tracking-widest mb-5 text-indigo-400">
-                {t('Company', 'الشركة')}
-              </h4>
-              <ul className="space-y-3.5">
-                {companyLinks.map(({ label, to }, idx) => (
                   <li key={idx}>
                     <Link
                       to={to}
