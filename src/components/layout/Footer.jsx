@@ -65,11 +65,11 @@ const Footer = () => {
 
       {/* Main Footer Grid */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-14">
-        <div className={`flex flex-col md:flex-row items-start justify-center gap-16 mb-12 ${isRTL ? 'md:flex-row-reverse' : ''}`}>
+        <div className={`grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 max-w-2xl mx-auto`}>
 
           {/* Column 1: Brand + Contact */}
-          <div className="flex flex-col items-center text-center">
-            <Link to="/" className="flex items-center gap-2.5 mb-5">
+          <div className={`flex flex-col ${isRTL ? 'items-end text-right' : 'items-start text-left'}`}>
+            <Link to="/" className="flex items-center gap-2.5 mb-4">
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm flex-shrink-0"
                 style={{
@@ -82,48 +82,46 @@ const Footer = () => {
               <span className="font-heading font-bold text-xl text-white">Mister</span>
             </Link>
 
-            <p className="text-sm text-slate-400 leading-relaxed mb-8 max-w-xs">
+            <p className="text-sm text-slate-400 leading-relaxed mb-6">
               {t(
                 'Build your professional resume in minutes. AI-powered, ATS-friendly, and beautifully designed.',
                 'أنشئ سيرتك الذاتية الاحترافية في دقائق. مدعوم بالذكاء الاصطناعي ومتوافق مع ATS.'
               )}
             </p>
 
-            <div className="flex flex-col items-center">
-              <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-indigo-400">
-                {t('Contact us', 'تواصل معنا')}
-              </p>
-              <a
-                href="mailto:ahmedalhammadi266@gmail.com"
-                className="inline-flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
-                style={{
-                  background: 'rgba(99,102,241,0.1)',
-                  border: '1px solid rgba(99,102,241,0.2)',
-                }}
-                onMouseEnter={e => {
-                  e.currentTarget.style.background = 'rgba(99,102,241,0.18)';
-                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)';
-                }}
-                onMouseLeave={e => {
-                  e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
-                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)';
-                }}
-              >
-                <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-                  style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3))' }}>
-                  <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-                  </svg>
-                </div>
-                <span className="text-sm font-medium text-slate-300">
-                  ahmedalhammadi266@gmail.com
-                </span>
-              </a>
-            </div>
+            <p className="text-xs font-semibold uppercase tracking-widest mb-3 text-indigo-400">
+              {t('Contact us', 'تواصل معنا')}
+            </p>
+            <a
+              href="mailto:ahmedalhammadi266@gmail.com"
+              className="inline-flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200"
+              style={{
+                background: 'rgba(99,102,241,0.1)',
+                border: '1px solid rgba(99,102,241,0.2)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = 'rgba(99,102,241,0.18)';
+                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
+                e.currentTarget.style.borderColor = 'rgba(99,102,241,0.2)';
+              }}
+            >
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+                style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.3), rgba(168,85,247,0.3))' }}>
+                <svg className="w-4 h-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+                </svg>
+              </div>
+              <span className="text-sm font-medium text-slate-300">
+                ahmedalhammadi266@gmail.com
+              </span>
+            </a>
           </div>
 
           {/* Column 2: Links */}
-          <div className="flex flex-col items-center text-center">
+          <div className={`flex flex-col ${isRTL ? 'items-end text-right' : 'items-start text-left'}`}>
             <h4 className="text-xs font-bold uppercase tracking-widest mb-5 text-indigo-400">
               {t('Links', 'الروابط')}
             </h4>
@@ -132,8 +130,9 @@ const Footer = () => {
                 <li key={idx}>
                   <Link
                     to={to}
-                    className="text-sm text-slate-400 hover:text-white transition-colors duration-200"
+                    className="text-sm text-slate-400 hover:text-white transition-colors duration-200 inline-flex items-center gap-1.5 group"
                   >
+                    <span className={`w-1 h-1 rounded-full bg-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0 ${isRTL ? 'order-last' : ''}`} />
                     {label[isRTL ? 'ar' : 'en']}
                   </Link>
                 </li>
