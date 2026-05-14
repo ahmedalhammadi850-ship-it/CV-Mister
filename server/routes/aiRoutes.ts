@@ -1,10 +1,12 @@
 import type { Express, Request, Response } from "express";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
-  baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
-});
+function getOpenAI() {
+  return new OpenAI({
+    apiKey: process.env.AI_INTEGRATIONS_OPENAI_API_KEY,
+    baseURL: process.env.AI_INTEGRATIONS_OPENAI_BASE_URL,
+  });
+}
 
 export function registerAIRoutes(app: Express) {
   app.post("/api/ai/rewrite", async (req: Request, res: Response) => {
@@ -34,7 +36,7 @@ export function registerAIRoutes(app: Express) {
     };
 
     try {
-      const completion = await openai.chat.completions.create({
+      const completion = await getOpenAI().chat.completions.create({
         model: "gpt-4o-mini",
         messages: [{ role: "user", content: prompts[action] }],
         max_tokens: 500,
