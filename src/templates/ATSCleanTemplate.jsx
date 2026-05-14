@@ -152,194 +152,194 @@ const ATSCleanTemplate = ({
     switch (key) {
       case 'summary':
         return data.personalInfo?.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('summary', isRTL)}</div>
+          <section key="summary" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('summary', isRTL)}</h2>
             <div style={s.rule} />
             <div style={ta(s.body, data.personalInfo?.summaryAlign)}>{data.personalInfo.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
-            <div style={s.heading}>{tr('experience', isRTL)}</div>
+          <section key="experience">
+            <h2 style={s.heading}>{tr('experience', isRTL)}</h2>
             <div style={s.rule} />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{e.jobTitle}</div>
+                  <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
                 <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
-            <div style={s.heading}>{tr('education', isRTL)}</div>
+          <section key="education">
+            <h2 style={s.heading}>{tr('education', isRTL)}</h2>
             <div style={s.rule} />
             {data.education.map((e, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{e.degree}</div>
+                  <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}</div>
                 {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('skills', isRTL)}</div>
+          <section key="skills" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('skills', isRTL)}</h2>
             <div style={s.rule} />
             <div style={s.skillsText}>{data.skills.map(sk => sk.name || sk).join('  ·  ')}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('languages', isRTL)}</div>
+          <section key="languages" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('languages', isRTL)}</h2>
             <div style={s.rule} />
             <div style={s.skillsText}>{data.languages.map(l => `${l.name} (${l.level})`).join('  ·  ')}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
-            <div style={s.heading}>{tr('projects', isRTL)}</div>
+          <section key="projects">
+            <h2 style={s.heading}>{tr('projects', isRTL)}</h2>
             <div style={s.rule} />
             {data.projects.map((p, i) => (
               <div key={i} style={s.itemSm}>
-                <div style={s.role}>{p.title}</div>
+                <h3 style={s.role}>{p.title}</h3>
                 {p.link && <div style={s.company}>{p.link}</div>}
                 <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates">
-            <div style={s.heading}>{tr('certificates', isRTL)}</div>
+          <section key="certificates">
+            <h2 style={s.heading}>{tr('certificates', isRTL)}</h2>
             <div style={s.rule} />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
                 {c.description && <div style={ta(s.body, c.descriptionAlign)}>{c.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('interests', isRTL)}</div>
+          <section key="interests" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('interests', isRTL)}</h2>
             <div style={s.rule} />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt' }}>
               {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses">
-            <div style={s.heading}>{tr('courses', isRTL)}</div>
+          <section key="courses">
+            <h2 style={s.heading}>{tr('courses', isRTL)}</h2>
             <div style={s.rule} />
             {data.courses.map((c, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.institution && <div style={s.company}>{c.institution}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards">
-            <div style={s.heading}>{tr('awards', isRTL)}</div>
+          <section key="awards">
+            <h2 style={s.heading}>{tr('awards', isRTL)}</h2>
             <div style={s.rule} />
             {data.awards.map((a, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{a.title}</div>
+                  <h3 style={s.role}>{a.title}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
                 {a.description && <div style={ta(s.body, a.descriptionAlign)}>{a.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'organisations':
         return data.organisations?.length > 0 ? (
-          <div key="organisations">
-            <div style={s.heading}>{tr('organisations', isRTL)}</div>
+          <section key="organisations">
+            <h2 style={s.heading}>{tr('organisations', isRTL)}</h2>
             <div style={s.rule} />
             {data.organisations.map((o, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{o.name}</div>
+                  <h3 style={s.role}>{o.name}</h3>
                   {o.date && <div style={s.date}>{o.date}</div>}
                 </div>
                 {o.role && <div style={s.company}>{o.role}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'publications':
         return data.publications?.length > 0 ? (
-          <div key="publications">
-            <div style={s.heading}>{tr('publications', isRTL)}</div>
+          <section key="publications">
+            <h2 style={s.heading}>{tr('publications', isRTL)}</h2>
             <div style={s.rule} />
             {data.publications.map((p, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{p.title}</div>
+                  <h3 style={s.role}>{p.title}</h3>
                   {p.date && <div style={s.date}>{p.date}</div>}
                 </div>
                 {p.publisher && <div style={s.company}>{p.publisher}</div>}
                 {p.description && <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
-            <div style={s.heading}>{tr('references', isRTL)}</div>
+          <section key="references">
+            <h2 style={s.heading}>{tr('references', isRTL)}</h2>
             <div style={s.rule} />
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
-                <div style={s.role}>{r.name}</div>
+                <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default:
@@ -348,11 +348,11 @@ const ATSCleanTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <div style={s.heading}>{sec.title}</div>
+              <h2 style={s.heading}>{sec.title}</h2>
               <div style={s.rule} />
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
-                  {item.title && <div style={s.role}>{item.title}</div>}
+                  {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <div style={ta(s.body, item.descriptionAlign)}>{item.description}</div>}
                 </div>
@@ -365,14 +365,14 @@ const ATSCleanTemplate = ({
   };
 
   return (
-    <div style={s.page}>
+    <article style={s.page}>
       <div style={{ ...BREAK_ITEM, marginBottom: '10pt' }}>
-        <div style={s.name}>{data.personalInfo.fullName}</div>
-        <div style={s.jobTitle}>{data.personalInfo.jobTitle}</div>
-        {contact && <div style={s.contact}>{contact}</div>}
+        <h1 style={s.name}>{data.personalInfo.fullName}</h1>
+        <p style={s.jobTitle}>{data.personalInfo.jobTitle}</p>
+        {contact && <address style={s.contact}>{contact}</address>}
       </div>
       {sectionOrder.map(key => renderSection(key))}
-    </div>
+    </article>
   );
 };
 

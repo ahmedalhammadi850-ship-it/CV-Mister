@@ -110,7 +110,7 @@ const ClassicSerifTemplate = ({
     switch (key) {
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills">
+          <section key="skills">
             <div style={sidebar.divider} />
             <div style={sidebar.sectionLabel}>{tr('skills', isRTL)}</div>
             {data.skills.map((sk, i) => (
@@ -119,12 +119,12 @@ const ClassicSerifTemplate = ({
                 {sk.name || sk}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages">
+          <section key="languages">
             <div style={sidebar.divider} />
             <div style={sidebar.sectionLabel}>{tr('languages', isRTL)}</div>
             {data.languages.map((l, i) => (
@@ -133,12 +133,12 @@ const ClassicSerifTemplate = ({
                 {l.name}{l.level ? ` — ${l.level}` : ''}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates">
+          <section key="certificates">
             <div style={sidebar.divider} />
             <div style={sidebar.sectionLabel}>{tr('certificates', isRTL)}</div>
             {data.certificates.map((c, i) => (
@@ -147,12 +147,12 @@ const ClassicSerifTemplate = ({
                 {c.name || c}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests">
+          <section key="interests">
             <div style={sidebar.divider} />
             <div style={sidebar.sectionLabel}>{tr('interests', isRTL)}</div>
             {data.interests.map((it, i) => (
@@ -161,12 +161,12 @@ const ClassicSerifTemplate = ({
                 {it.name || it}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards">
+          <section key="awards">
             <div style={sidebar.divider} />
             <div style={sidebar.sectionLabel}>{tr('awards', isRTL)}</div>
             {data.awards.map((a, i) => (
@@ -176,7 +176,7 @@ const ClassicSerifTemplate = ({
                 {a.issuer && <div style={{ fontSize: '8pt', color: '#666' }}>{a.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -188,15 +188,15 @@ const ClassicSerifTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <div style={main.sectionLabel}>{tr('summary', isRTL)}</div>
             <div style={main.body}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <div style={main.sectionLabel}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={main.item}>
@@ -208,12 +208,12 @@ const ClassicSerifTemplate = ({
                 {e.description && <div style={main.body}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <div style={main.sectionLabel}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={main.item}>
@@ -225,12 +225,12 @@ const ClassicSerifTemplate = ({
                 {e.description && <div style={main.body}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <div style={main.sectionLabel}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={main.item}>
@@ -239,7 +239,7 @@ const ClassicSerifTemplate = ({
                 {p.description && <div style={main.body}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;

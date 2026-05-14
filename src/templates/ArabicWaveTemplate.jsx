@@ -144,7 +144,7 @@ const ArabicWaveTemplate = ({
     switch (key) {
 
       case 'skills': return data.skills?.length > 0 ? (
-        <div key="skills" style={BREAK_ITEM}>
+        <section key="skills" style={BREAK_ITEM}>
           <SbHeading label={tr('skills', true)} accent={accent} />
           {data.skills.map((sk, i) => (
             <div key={i} style={{ marginBottom: '9pt', direction: 'rtl' }}>
@@ -154,11 +154,11 @@ const ArabicWaveTemplate = ({
               <Stars level={typeof sk === 'object' ? (sk.level || 0) : 0} />
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'languages': return data.languages?.length > 0 ? (
-        <div key="languages" style={BREAK_ITEM}>
+        <section key="languages" style={BREAK_ITEM}>
           <SbHeading label={tr('languages', true)} accent={accent} />
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6pt', justifyContent: 'center' }}>
             {data.languages.map((l, i) => {
@@ -168,11 +168,11 @@ const ArabicWaveTemplate = ({
               return <LangGauge key={i} pct={pct} label={shortName} accent={accent} />;
             })}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'interests': return data.interests?.length > 0 ? (
-        <div key="interests" style={BREAK_ITEM}>
+        <section key="interests" style={BREAK_ITEM}>
           <SbHeading label={tr('interests', true)} accent={accent} />
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5pt', justifyContent: 'center' }}>
             {data.interests.map((item, i) => (
@@ -188,7 +188,7 @@ const ArabicWaveTemplate = ({
               </div>
             ))}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'certificates':
@@ -209,25 +209,25 @@ const ArabicWaveTemplate = ({
       }
 
       case 'awards': return data.awards?.length > 0 ? (
-        <div key="awards" style={BREAK_ITEM}>
+        <section key="awards" style={BREAK_ITEM}>
           <SbHeading label={tr('awards', true)} accent={accent} />
           {data.awards.map((a, i) => (
             <div key={i} style={{ fontSize: '8pt', color: '#fff', textAlign: 'right', direction: 'rtl', marginBottom: '4pt' }}>
               {a.title || a.name || a}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'organisations': return data.organisations?.length > 0 ? (
-        <div key="organisations" style={BREAK_ITEM}>
+        <section key="organisations" style={BREAK_ITEM}>
           <SbHeading label={tr('organisations', true)} accent={accent} />
           {data.organisations.map((o, i) => (
             <div key={i} style={{ fontSize: '8pt', color: 'rgba(255,255,255,0.85)', textAlign: 'right', direction: 'rtl', marginBottom: '4pt' }}>
               {o.name || o}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default: return null;
@@ -240,16 +240,16 @@ const ArabicWaveTemplate = ({
     switch (key) {
 
       case 'summary': return info.summary ? (
-        <div key="summary" style={BREAK_ITEM}>
+        <section key="summary" style={BREAK_ITEM}>
           <MainHeading label={tr('summary', true)} iconKey="summary" accent={accent} />
           <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
             {info.summary}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'experience': return data.experience?.length > 0 ? (
-        <div key="experience">
+        <section key="experience">
           <MainHeading label={tr('experience', true)} iconKey="experience" accent={accent} />
           {data.experience.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
@@ -269,11 +269,11 @@ const ArabicWaveTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'education': return data.education?.length > 0 ? (
-        <div key="education">
+        <section key="education">
           <MainHeading label={tr('education', true)} iconKey="education" accent={accent} />
           {data.education.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
@@ -293,11 +293,11 @@ const ArabicWaveTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'projects': return data.projects?.length > 0 ? (
-        <div key="projects">
+        <section key="projects">
           <MainHeading label={tr('projects', true)} iconKey="projects" accent={accent} />
           {data.projects.map((p, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
@@ -310,11 +310,11 @@ const ArabicWaveTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'publications': return data.publications?.length > 0 ? (
-        <div key="publications">
+        <section key="publications">
           <MainHeading label={tr('publications', true)} iconKey={null} accent={accent} />
           {data.publications.map((p, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
@@ -326,11 +326,11 @@ const ArabicWaveTemplate = ({
               {p.description && <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', direction: 'rtl' }}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'references': return data.references?.length > 0 ? (
-        <div key="references">
+        <section key="references">
           <MainHeading label={tr('references', true)} iconKey={null} accent={accent} />
           {data.references.map((r, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
@@ -339,7 +339,7 @@ const ArabicWaveTemplate = ({
               {(r.email || r.phone) && <div style={{ fontSize: sz.body, color: '#555', textAlign: 'right', direction: 'rtl' }}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default:

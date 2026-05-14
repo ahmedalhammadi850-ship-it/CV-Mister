@@ -250,16 +250,16 @@ const ArabicCardTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <MainSection label={tr('summary', true)}>
               <div style={mn.body}>{info.summary}</div>
             </MainSection>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <MainSection label={tr('experience', true)}>
               {data.experience.map((e, i) => (
                 <div key={i} style={mn.item}>
@@ -272,12 +272,12 @@ const ArabicCardTemplate = ({
                 </div>
               ))}
             </MainSection>
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <MainSection label={tr('education', true)}>
               {data.education.map((e, i) => (
                 <div key={i} style={mn.item}>
@@ -290,12 +290,12 @@ const ArabicCardTemplate = ({
                 </div>
               ))}
             </MainSection>
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <MainSection label={tr('projects', true)}>
               {data.projects.map((p, i) => (
                 <div key={i} style={mn.item}>
@@ -305,12 +305,12 @@ const ArabicCardTemplate = ({
                 </div>
               ))}
             </MainSection>
-          </div>
+          </section>
         ) : null;
 
       case 'publications':
         return data.publications?.length > 0 ? (
-          <div key="publications">
+          <section key="publications">
             <MainSection label={tr('publications', true)}>
               {data.publications.map((p, i) => (
                 <div key={i} style={mn.item}>
@@ -323,12 +323,12 @@ const ArabicCardTemplate = ({
                 </div>
               ))}
             </MainSection>
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
+          <section key="references">
             <MainSection label={tr('references', true)}>
               {data.references.map((r, i) => (
                 <div key={i} style={mn.item}>
@@ -338,7 +338,7 @@ const ArabicCardTemplate = ({
                 </div>
               ))}
             </MainSection>
-          </div>
+          </section>
         ) : null;
 
       default:

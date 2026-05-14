@@ -195,189 +195,189 @@ const PrestigeTemplate = ({
     switch (key) {
       case 'summary':
         return data.personalInfo?.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <SectionHead label={tr('summary', isRTL)} />
             <div style={ta({ ...s.bodyText, textAlign: 'center', fontStyle: 'italic', color: '#444' }, data.personalInfo?.summaryAlign)}>
               {data.personalInfo.summary}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <SectionHead label={tr('experience', isRTL)} />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{e.jobTitle}</div>
+                  <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? `  ·  ${e.location}` : ''}</div>
                 <div style={s.bodyText}>{e.description}</div>
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <SectionHead label={tr('education', isRTL)} />
             {data.education.map((e, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{e.degree}</div>
+                  <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}</div>
                 {e.description && <div style={s.bodyText}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
+          <section key="skills" style={BREAK_ITEM}>
             <SectionHead label={tr('skills', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0' }}>
               {data.skills.map((sk, i) => <span key={i} style={s.skillPill}>{sk.name || sk}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
+          <section key="languages" style={BREAK_ITEM}>
             <SectionHead label={tr('languages', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0' }}>
               {data.languages.map((l, i) => (
                 <span key={i} style={s.skillPill}>{l.name} — {l.level}</span>
               ))}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <SectionHead label={tr('projects', isRTL)} />
             {data.projects.map((p, i) => (
               <div key={i} style={s.itemSm}>
-                <div style={s.role}>{p.title}</div>
+                <h3 style={s.role}>{p.title}</h3>
                 {p.link && <div style={{ ...s.company, fontSize: sz.meta }}>{p.link}</div>}
                 <div style={s.bodyText}>{p.description}</div>
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates">
+          <section key="certificates">
             <SectionHead label={tr('certificates', isRTL)} />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
                 {c.description && <div style={s.bodyText}>{c.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
+          <section key="interests" style={BREAK_ITEM}>
             <SectionHead label={tr('interests', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '0' }}>
               {data.interests.map((item, i) => <span key={i} style={s.skillPill}>{item.name || item}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses">
+          <section key="courses">
             <SectionHead label={tr('courses', isRTL)} />
             {data.courses.map((c, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.institution && <div style={s.company}>{c.institution}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards">
+          <section key="awards">
             <SectionHead label={tr('awards', isRTL)} />
             {data.awards.map((a, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{a.title}</div>
+                  <h3 style={s.role}>{a.title}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
                 {a.description && <div style={s.bodyText}>{a.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'organisations':
         return data.organisations?.length > 0 ? (
-          <div key="organisations">
+          <section key="organisations">
             <SectionHead label={tr('organisations', isRTL)} />
             {data.organisations.map((o, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{o.name}</div>
+                  <h3 style={s.role}>{o.name}</h3>
                   {o.date && <div style={s.date}>{o.date}</div>}
                 </div>
                 {o.role && <div style={s.company}>{o.role}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'publications':
         return data.publications?.length > 0 ? (
-          <div key="publications">
+          <section key="publications">
             <SectionHead label={tr('publications', isRTL)} />
             {data.publications.map((p, i) => (
               <div key={i} style={s.itemSm}>
                 <div style={s.roleRow}>
-                  <div style={s.role}>{p.title}</div>
+                  <h3 style={s.role}>{p.title}</h3>
                   {p.date && <div style={s.date}>{p.date}</div>}
                 </div>
                 {p.publisher && <div style={s.company}>{p.publisher}</div>}
                 {p.description && <div style={s.bodyText}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
+          <section key="references">
             <SectionHead label={tr('references', isRTL)} />
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
-                <div style={s.role}>{r.name}</div>
+                <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.bodyText}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default:
@@ -389,7 +389,7 @@ const PrestigeTemplate = ({
               <SectionHead label={sec.title} />
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
-                  {item.title && <div style={s.role}>{item.title}</div>}
+                  {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <div style={s.bodyText}>{item.description}</div>}
                 </div>
@@ -402,12 +402,12 @@ const PrestigeTemplate = ({
   };
 
   return (
-    <div style={s.page}>
+    <article style={s.page}>
 
       {/* ── Dark header ── */}
       <div style={s.header}>
-        <div style={s.name}>{info.fullName}</div>
-        {info.jobTitle && <div style={s.jobTitle}>{info.jobTitle}</div>}
+        <h1 style={s.name}>{info.fullName}</h1>
+        {info.jobTitle && <p style={s.jobTitle}>{info.jobTitle}</p>}
         {contactParts.length > 0 && (
           <div style={s.contactRow}>
             {contactParts.map((part, i) => (
@@ -425,7 +425,7 @@ const PrestigeTemplate = ({
         {sectionOrder.map(key => renderSection(key))}
       </div>
 
-    </div>
+    </article>
   );
 };
 

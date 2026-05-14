@@ -138,61 +138,61 @@ const MercuryFlowTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <SectionHead labelKey="summary" />
             <div style={s.bodyText}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <SectionHead labelKey="experience" />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{e.jobTitle}</div>
+                  <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
                 {e.description && <div style={s.bodyText}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <SectionHead labelKey="education" />
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{e.degree}</div>
+                  <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
                 {e.description && <div style={s.bodyText}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
+          <section key="skills" style={BREAK_ITEM}>
             <SectionHead labelKey="skills" />
             <div>
               {data.skills.map((sk, i) => (
                 <span key={i} style={s.tag}>{sk.name || sk}</span>
               ))}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
+          <section key="languages" style={BREAK_ITEM}>
             <SectionHead labelKey="languages" />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6pt' }}>
               {data.languages.map((l, i) => (
@@ -201,26 +201,26 @@ const MercuryFlowTemplate = ({
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <SectionHead labelKey="projects" />
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{p.name}</div>
+                <h3 style={s.role}>{p.name}</h3>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.url}</div>}
                 {p.description && <div style={s.bodyText}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates" style={BREAK_ITEM}>
+          <section key="certificates" style={BREAK_ITEM}>
             <SectionHead labelKey="certificates" />
             {data.certificates.map((c, i) => (
               <div key={i} style={{ fontSize: sz.body, color: '#333', marginBottom: '4pt' }}>
@@ -228,12 +228,12 @@ const MercuryFlowTemplate = ({
                 {c.issuer && <span style={{ color: '#777' }}> — {c.issuer}</span>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards" style={BREAK_ITEM}>
+          <section key="awards" style={BREAK_ITEM}>
             <SectionHead labelKey="awards" />
             {data.awards.map((a, i) => (
               <div key={i} style={{ marginBottom: '6pt', ...BREAK_ITEM }}>
@@ -241,7 +241,7 @@ const MercuryFlowTemplate = ({
                 {a.issuer && <span style={{ color: '#777', fontSize: sz.meta }}> — {a.issuer}</span>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -249,7 +249,7 @@ const MercuryFlowTemplate = ({
   };
 
   return (
-    <div style={s.page}>
+    <article style={s.page}>
       {/* Header */}
       <div style={s.header}>
         {vis.photo !== false && (
@@ -258,8 +258,8 @@ const MercuryFlowTemplate = ({
           </div>
         )}
         <div style={s.headerText}>
-          <div style={s.name}>{info.fullName || 'Your Name'}</div>
-          <div style={s.jobTitle}>{info.jobTitle || ''}</div>
+          <h1 style={s.name}>{info.fullName || 'Your Name'}</h1>
+          <p style={s.jobTitle}>{info.jobTitle || ''}</p>
         </div>
       </div>
 
@@ -279,7 +279,7 @@ const MercuryFlowTemplate = ({
       <div style={s.body}>
         {sectionOrder.map(k => renderSection(k))}
       </div>
-    </div>
+    </article>
   );
 };
 

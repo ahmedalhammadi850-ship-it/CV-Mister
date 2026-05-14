@@ -236,14 +236,14 @@ const ArabicSlateSidebarTemplate = ({
     if (!show(key)) return null;
     switch(key) {
       case 'summary': return info.summary ? (
-        <div key="summary" style={{ ...BREAK_ITEM, marginBottom:'12pt' }}>
+        <section key="summary" style={{ ...BREAK_ITEM, marginBottom:'12pt' }}>
           <MNHeading label={tr('summary',true)} />
           <div style={mn.bodyText}>{info.summary}</div>
-        </div>
+        </section>
       ) : null;
 
       case 'experience': return data.experience?.length > 0 ? (
-        <div key="experience">
+        <section key="experience">
           <MNHeading label={tr('experience',true)} />
           {data.experience.map((e,i)=>(
             <div key={i} style={mn.item}>
@@ -255,11 +255,11 @@ const ArabicSlateSidebarTemplate = ({
               {e.description && <div style={mn.bodyText}>{e.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'education': return data.education?.length > 0 ? (
-        <div key="education">
+        <section key="education">
           <MNHeading label={tr('education',true)} />
           {data.education.map((e,i)=>(
             <div key={i} style={mn.item}>
@@ -271,11 +271,11 @@ const ArabicSlateSidebarTemplate = ({
               {e.description && <div style={mn.bodyText}>{e.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'projects': return data.projects?.length > 0 ? (
-        <div key="projects">
+        <section key="projects">
           <MNHeading label={tr('projects',true)} />
           {data.projects.map((p,i)=>(
             <div key={i} style={mn.item}>
@@ -284,11 +284,11 @@ const ArabicSlateSidebarTemplate = ({
               {p.description && <div style={mn.bodyText}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'publications': return data.publications?.length > 0 ? (
-        <div key="publications">
+        <section key="publications">
           <MNHeading label={tr('publications',true)} />
           {data.publications.map((p,i)=>(
             <div key={i} style={mn.item}>
@@ -300,11 +300,11 @@ const ArabicSlateSidebarTemplate = ({
               {p.description && <div style={mn.bodyText}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'references': return data.references?.length > 0 ? (
-        <div key="references">
+        <section key="references">
           <MNHeading label={tr('references',true)} />
           {data.references.map((r,i)=>(
             <div key={i} style={mn.item}>
@@ -313,7 +313,7 @@ const ArabicSlateSidebarTemplate = ({
               {(r.email||r.phone) && <div style={mn.bodyText}>{[r.email,r.phone].filter(Boolean).join(' | ')}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default:

@@ -123,7 +123,7 @@ const ArabicNavyTemplate = ({
     switch (key) {
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
+          <section key="skills" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('skills', true)}</div>
             {data.skills.map((sk, i) => (
               <div key={i} style={sb.skillItem}>
@@ -131,12 +131,12 @@ const ArabicNavyTemplate = ({
                 <BarRating level={sk.level || 0} barColor="rgba(255,255,255,0.9)" bgColor="rgba(255,255,255,0.2)" />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
+          <section key="languages" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('languages', true)}</div>
             {data.languages.map((l, i) => (
               <div key={i} style={sb.skillItem}>
@@ -144,42 +144,42 @@ const ArabicNavyTemplate = ({
                 <BarRating level={l.proficiency || 3} barColor="rgba(255,255,255,0.9)" bgColor="rgba(255,255,255,0.2)" />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
+          <section key="interests" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('interests', true)}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
               {data.interests.map((item, i) => <span key={i} style={sb.tag}>{item.name || item}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates" style={BREAK_ITEM}>
+          <section key="certificates" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('certificates', true)}</div>
             {data.certificates.map((c, i) => (
               <div key={i} style={sb.bullet}>• {c.name || c}</div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses" style={BREAK_ITEM}>
+          <section key="courses" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('courses', true)}</div>
             {data.courses.map((c, i) => (
               <div key={i} style={sb.bullet}>• {c.name || c}</div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards" style={BREAK_ITEM}>
+          <section key="awards" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('awards', true)}</div>
             {data.awards.map((a, i) => (
               <div key={i} style={{ ...sb.bullet, marginBottom: '6pt' }}>
@@ -187,17 +187,17 @@ const ArabicNavyTemplate = ({
                 {a.issuer && <div style={{ fontSize: '8pt', color: 'rgba(255,255,255,0.6)' }}>{a.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'organisations':
         return data.organisations?.length > 0 ? (
-          <div key="organisations" style={BREAK_ITEM}>
+          <section key="organisations" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('organisations', true)}</div>
             {data.organisations.map((o, i) => (
               <div key={i} style={sb.bullet}>• {o.name || o}</div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -209,15 +209,15 @@ const ArabicNavyTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <div style={mn.heading}>{tr('summary', true)}</div>
             <div style={mn.body}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <div style={mn.heading}>{tr('experience', true)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={mn.item}>
@@ -229,12 +229,12 @@ const ArabicNavyTemplate = ({
                 {e.description && <div style={mn.body}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <div style={mn.heading}>{tr('education', true)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={mn.item}>
@@ -246,12 +246,12 @@ const ArabicNavyTemplate = ({
                 {e.description && <div style={mn.body}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <div style={mn.heading}>{tr('projects', true)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={mn.item}>
@@ -260,12 +260,12 @@ const ArabicNavyTemplate = ({
                 {p.description && <div style={mn.body}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'publications':
         return data.publications?.length > 0 ? (
-          <div key="publications">
+          <section key="publications">
             <div style={mn.heading}>{tr('publications', true)}</div>
             {data.publications.map((p, i) => (
               <div key={i} style={mn.item}>
@@ -277,12 +277,12 @@ const ArabicNavyTemplate = ({
                 {p.description && <div style={mn.body}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
+          <section key="references">
             <div style={mn.heading}>{tr('references', true)}</div>
             {data.references.map((r, i) => (
               <div key={i} style={mn.item}>
@@ -291,7 +291,7 @@ const ArabicNavyTemplate = ({
                 {(r.email || r.phone) && <div style={mn.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default:

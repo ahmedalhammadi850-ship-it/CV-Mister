@@ -167,15 +167,15 @@ const DarkHeaderTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('summary', isRTL)}</div>
             <div style={sb.body}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
+          <section key="skills" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('skills', isRTL)}</div>
             {data.skills.map((sk, i) => (
               <div key={i} style={sb.skillRow}>
@@ -183,12 +183,12 @@ const DarkHeaderTemplate = ({
                 <DotsForSidebar level={sk.level || 0} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
+          <section key="languages" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('languages', isRTL)}</div>
             {data.languages.map((l, i) => (
               <div key={i} style={sb.skillRow}>
@@ -196,32 +196,32 @@ const DarkHeaderTemplate = ({
                 <DotsForSidebar level={l.proficiency || 3} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
+          <section key="interests" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('interests', isRTL)}</div>
             <div style={{ fontSize: sz.meta, color: '#3d3452', lineHeight: 1.6 }}>
               {data.interests.map(i => i.name || i).join('  •  ')}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates" style={BREAK_ITEM}>
+          <section key="certificates" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('certificates', isRTL)}</div>
             {data.certificates.map((c, i) => (
               <div key={i} style={{ fontSize: sz.meta, color: '#3d3452', marginBottom: '4pt' }}>• {c.name || c}</div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards" style={BREAK_ITEM}>
+          <section key="awards" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('awards', isRTL)}</div>
             {data.awards.map((a, i) => (
               <div key={i} style={{ marginBottom: '6pt' }}>
@@ -229,17 +229,17 @@ const DarkHeaderTemplate = ({
                 {a.issuer && <div style={{ fontSize: '8pt', color: '#7c6b9a' }}>{a.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses" style={BREAK_ITEM}>
+          <section key="courses" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('courses', isRTL)}</div>
             {data.courses.map((c, i) => (
               <div key={i} style={{ fontSize: sz.meta, color: '#3d3452', marginBottom: '4pt' }}>• {c.name || c}</div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -251,7 +251,7 @@ const DarkHeaderTemplate = ({
     switch (key) {
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <div style={mn.heading}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={mn.item}>
@@ -265,12 +265,12 @@ const DarkHeaderTemplate = ({
                 {e.description && <div style={mn.body}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <div style={mn.heading}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={mn.item}>
@@ -284,12 +284,12 @@ const DarkHeaderTemplate = ({
                 {e.description && <div style={mn.body}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <div style={mn.heading}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={mn.item}>
@@ -298,12 +298,12 @@ const DarkHeaderTemplate = ({
                 {p.description && <div style={mn.body}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'publications':
         return data.publications?.length > 0 ? (
-          <div key="publications">
+          <section key="publications">
             <div style={mn.heading}>{tr('publications', isRTL)}</div>
             {data.publications.map((p, i) => (
               <div key={i} style={mn.item}>
@@ -315,12 +315,12 @@ const DarkHeaderTemplate = ({
                 {p.description && <div style={mn.body}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
+          <section key="references">
             <div style={mn.heading}>{tr('references', isRTL)}</div>
             {data.references.map((r, i) => (
               <div key={i} style={mn.item}>
@@ -329,7 +329,7 @@ const DarkHeaderTemplate = ({
                 {(r.email || r.phone) && <div style={mn.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default:

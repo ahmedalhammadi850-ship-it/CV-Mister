@@ -140,7 +140,7 @@ const ArabicZafirTemplate = ({
     if (!show(key)) return null;
     switch (key) {
       case 'skills': return data.skills?.length > 0 ? (
-        <div key="skills" style={BREAK_ITEM}>
+        <section key="skills" style={BREAK_ITEM}>
           <SbTitle label={tr('skills', isRTL)} isRTL={isRTL} accent={accent} />
           {data.skills.map((sk, i) => (
             <div key={i} style={{ marginBottom:'9pt', direction:dir }}>
@@ -150,11 +150,11 @@ const ArabicZafirTemplate = ({
               <SkillBar level={typeof sk === 'object' ? (sk.level || 0) : 0} accent={accent} />
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'languages': return data.languages?.length > 0 ? (
-        <div key="languages" style={BREAK_ITEM}>
+        <section key="languages" style={BREAK_ITEM}>
           <SbTitle label={tr('languages', isRTL)} isRTL={isRTL} accent={accent} />
           <div style={{ display:'flex', flexWrap:'wrap', gap:'5pt', justifyContent:'center' }}>
             {data.languages.map((l, i) => {
@@ -163,11 +163,11 @@ const ArabicZafirTemplate = ({
               return <LangGauge key={i} pct={pct} label={(l.name || '').slice(0, 3).toUpperCase()} accent={accent} />;
             })}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'interests': return data.interests?.length > 0 ? (
-        <div key="interests" style={BREAK_ITEM}>
+        <section key="interests" style={BREAK_ITEM}>
           <SbTitle label={tr('interests', isRTL)} isRTL={isRTL} accent={accent} />
           <div style={{ display:'flex', flexWrap:'wrap', gap:'4pt', justifyContent:'center' }}>
             {data.interests.map((item, i) => (
@@ -178,7 +178,7 @@ const ArabicZafirTemplate = ({
               }}>{item.name || item}</span>
             ))}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'certificates':
@@ -199,25 +199,25 @@ const ArabicZafirTemplate = ({
       }
 
       case 'awards': return data.awards?.length > 0 ? (
-        <div key="awards" style={BREAK_ITEM}>
+        <section key="awards" style={BREAK_ITEM}>
           <SbTitle label={tr('awards', isRTL)} isRTL={isRTL} accent={accent} />
           {data.awards.map((a, i) => (
             <div key={i} style={{ fontSize:'7.5pt', color:'rgba(255,255,255,0.82)', textAlign:align, direction:dir, marginBottom:'4pt' }}>
               {a.title || a.name || a}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'organisations': return data.organisations?.length > 0 ? (
-        <div key="organisations" style={BREAK_ITEM}>
+        <section key="organisations" style={BREAK_ITEM}>
           <SbTitle label={tr('organisations', isRTL)} isRTL={isRTL} accent={accent} />
           {data.organisations.map((o, i) => (
             <div key={i} style={{ fontSize:'7.5pt', color:'rgba(255,255,255,0.75)', textAlign:align, direction:dir, marginBottom:'4pt' }}>
               {o.name || o}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default: return null;
@@ -229,7 +229,7 @@ const ArabicZafirTemplate = ({
     if (!show(key)) return null;
     switch (key) {
       case 'summary': return info.summary ? (
-        <div key="summary" style={BREAK_ITEM}>
+        <section key="summary" style={BREAK_ITEM}>
           <MainHeading label={tr('summary', isRTL)} accent={accent} isRTL={isRTL} />
           <div style={{
             fontSize:sz.body, color:'#4a5568', lineHeight, textAlign:align,
@@ -239,11 +239,11 @@ const ArabicZafirTemplate = ({
             borderRadius:'4pt',
             ...(isRTL ? { borderRight:`3px solid ${accent}40` } : { borderLeft:`3px solid ${accent}40` }),
           }}>{info.summary}</div>
-        </div>
+        </section>
       ) : null;
 
       case 'experience': return data.experience?.length > 0 ? (
-        <div key="experience">
+        <section key="experience">
           <MainHeading label={tr('experience', isRTL)} accent={accent} isRTL={isRTL} />
           {data.experience.map((e, i) => (
             <div key={i} style={{ marginBottom:'13pt', ...BREAK_ITEM, display:'flex', gap:'9pt', direction:dir }}>
@@ -281,11 +281,11 @@ const ArabicZafirTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'education': return data.education?.length > 0 ? (
-        <div key="education">
+        <section key="education">
           <MainHeading label={tr('education', isRTL)} accent={accent} isRTL={isRTL} />
           {data.education.map((e, i) => (
             <div key={i} style={{
@@ -304,11 +304,11 @@ const ArabicZafirTemplate = ({
               {e.description && <div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }}>{e.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'projects': return data.projects?.length > 0 ? (
-        <div key="projects">
+        <section key="projects">
           <MainHeading label={tr('projects', isRTL)} accent={accent} isRTL={isRTL} />
           {data.projects.map((p, i) => (
             <div key={i} style={{
@@ -320,11 +320,11 @@ const ArabicZafirTemplate = ({
               {p.description && <div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line' }}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'publications': return data.publications?.length > 0 ? (
-        <div key="publications">
+        <section key="publications">
           <MainHeading label={tr('publications', isRTL)} accent={accent} isRTL={isRTL} />
           {data.publications.map((p, i) => (
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, direction:dir }}>
@@ -336,11 +336,11 @@ const ArabicZafirTemplate = ({
               {p.description && <div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align }}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'references': return data.references?.length > 0 ? (
-        <div key="references">
+        <section key="references">
           <MainHeading label={tr('references', isRTL)} accent={accent} isRTL={isRTL} />
           {data.references.map((r, i) => (
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, direction:dir, textAlign:align }}>
@@ -349,7 +349,7 @@ const ArabicZafirTemplate = ({
               {(r.email || r.phone) && <div style={{ fontSize:sz.body, color:'#555' }}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default:

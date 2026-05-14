@@ -139,7 +139,7 @@ const AtlanticBlueTemplate = ({
     switch (key) {
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills">
+          <section key="skills">
             <div style={sb.divider} />
             <div style={sb.sectionLabel}>{tr('skills', isRTL)}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
@@ -147,12 +147,12 @@ const AtlanticBlueTemplate = ({
                 <span key={i} style={sb.tag}>{sk.name || sk}</span>
               ))}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages">
+          <section key="languages">
             <div style={sb.divider} />
             <div style={sb.sectionLabel}>{tr('languages', isRTL)}</div>
             {data.languages.map((l, i) => (
@@ -161,34 +161,34 @@ const AtlanticBlueTemplate = ({
                 <Dots level={l.proficiency || 3} accent={accent} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests">
+          <section key="interests">
             <div style={sb.divider} />
             <div style={sb.sectionLabel}>{tr('interests', isRTL)}</div>
             <div style={{ fontSize: sz.meta, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
               {data.interests.map(i => i.name || i).join('  •  ')}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates">
+          <section key="certificates">
             <div style={sb.divider} />
             <div style={sb.sectionLabel}>{tr('certificates', isRTL)}</div>
             {data.certificates.map((c, i) => (
               <div key={i} style={{ fontSize: sz.meta, color: 'rgba(255,255,255,0.85)', marginBottom: '4pt' }}>• {c.name || c}</div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards">
+          <section key="awards">
             <div style={sb.divider} />
             <div style={sb.sectionLabel}>{tr('awards', isRTL)}</div>
             {data.awards.map((a, i) => (
@@ -197,7 +197,7 @@ const AtlanticBlueTemplate = ({
                 {a.issuer && <div style={{ fontSize: '8pt', color: 'rgba(255,255,255,0.6)' }}>{a.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -209,15 +209,15 @@ const AtlanticBlueTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <div style={mn.heading}>{tr('summary', isRTL)}</div>
             <div style={mn.body}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <div style={mn.heading}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={{ ...mn.item, display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', gap: '10pt' }}>
@@ -238,12 +238,12 @@ const AtlanticBlueTemplate = ({
                 </div>
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <div style={mn.heading}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={mn.item}>
@@ -255,12 +255,12 @@ const AtlanticBlueTemplate = ({
                 {e.description && <div style={mn.body}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <div style={mn.heading}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={mn.item}>
@@ -269,7 +269,7 @@ const AtlanticBlueTemplate = ({
                 {p.description && <div style={mn.body}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;

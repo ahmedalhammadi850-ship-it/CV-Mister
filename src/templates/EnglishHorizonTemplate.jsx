@@ -124,7 +124,7 @@ const EnglishHorizonTemplate = ({
     switch(key) {
 
       case 'skills': return data.skills?.length>0 ? (
-        <div key="skills" style={BREAK_ITEM}>
+        <section key="skills" style={BREAK_ITEM}>
           <SbHeading label={tr('skills',isRTL)} accent={accent} isRTL={isRTL} />
           {data.skills.map((sk,i)=>(
             <div key={i} style={{ marginBottom:'8pt' }}>
@@ -134,11 +134,11 @@ const EnglishHorizonTemplate = ({
               <ProgressBar level={typeof sk==='object'?(sk.level||0):0} accent={accent} />
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'languages': return data.languages?.length>0 ? (
-        <div key="languages" style={BREAK_ITEM}>
+        <section key="languages" style={BREAK_ITEM}>
           <SbHeading label={tr('languages',isRTL)} accent={accent} isRTL={isRTL} />
           {data.languages.map((l,i)=>(
             <div key={i} style={{ marginBottom:'8pt' }}>
@@ -146,11 +146,11 @@ const EnglishHorizonTemplate = ({
               <DotRating level={l.proficiency||3} accent={accent} />
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'interests': return data.interests?.length>0 ? (
-        <div key="interests" style={BREAK_ITEM}>
+        <section key="interests" style={BREAK_ITEM}>
           <SbHeading label={tr('interests',isRTL)} accent={accent} isRTL={isRTL} />
           <div style={{ display:'flex', flexWrap:'wrap', gap:'4pt' }}>
             {data.interests.map((item,i)=>(
@@ -161,7 +161,7 @@ const EnglishHorizonTemplate = ({
               }}>{item.name||item}</span>
             ))}
           </div>
-        </div>
+        </section>
       ):null;
 
       case 'certificates':
@@ -182,23 +182,23 @@ const EnglishHorizonTemplate = ({
       }
 
       case 'awards': return data.awards?.length>0 ? (
-        <div key="awards" style={BREAK_ITEM}>
+        <section key="awards" style={BREAK_ITEM}>
           <SbHeading label={tr('awards',isRTL)} accent={accent} isRTL={isRTL} />
           {data.awards.map((a,i)=>(
             <div key={i} style={{ fontSize:'8pt', color:'#2d3748', marginBottom:'4pt', textAlign:align }}>
               {a.title||a.name||a}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'organisations': return data.organisations?.length>0 ? (
-        <div key="organisations" style={BREAK_ITEM}>
+        <section key="organisations" style={BREAK_ITEM}>
           <SbHeading label={tr('organisations',isRTL)} accent={accent} isRTL={isRTL} />
           {data.organisations.map((o,i)=>(
             <div key={i} style={{ fontSize:'8pt', color:'#4a5568', marginBottom:'4pt', textAlign:align }}>{o.name||o}</div>
           ))}
-        </div>
+        </section>
       ):null;
 
       default: return null;
@@ -211,16 +211,16 @@ const EnglishHorizonTemplate = ({
     switch(key) {
 
       case 'summary': return info.summary ? (
-        <div key="summary" style={BREAK_ITEM}>
+        <section key="summary" style={BREAK_ITEM}>
           <MainHeading label={tr('summary',isRTL)} accent={accent} isRTL={isRTL} />
           <div style={{ fontSize:sz.body, color:'#4a5568', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }}>
             {info.summary}
           </div>
-        </div>
+        </section>
       ):null;
 
       case 'experience': return data.experience?.length>0 ? (
-        <div key="experience">
+        <section key="experience">
           <MainHeading label={tr('experience',isRTL)} accent={accent} isRTL={isRTL} />
           {data.experience.map((e,i)=>(
             <div key={i} style={{ marginBottom:'13pt', ...BREAK_ITEM, display:'flex', gap:'10pt', direction:dir }}>
@@ -250,11 +250,11 @@ const EnglishHorizonTemplate = ({
               </div>
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'education': return data.education?.length>0 ? (
-        <div key="education">
+        <section key="education">
           <MainHeading label={tr('education',isRTL)} accent={accent} isRTL={isRTL} />
           {data.education.map((e,i)=>(
             <div key={i} style={{ marginBottom:'11pt', ...BREAK_ITEM, display:'flex', gap:'10pt', direction:dir }}>
@@ -275,11 +275,11 @@ const EnglishHorizonTemplate = ({
               </div>
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'projects': return data.projects?.length>0 ? (
-        <div key="projects">
+        <section key="projects">
           <MainHeading label={tr('projects',isRTL)} accent={accent} isRTL={isRTL} />
           {data.projects.map((p,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, textAlign:align, direction:dir }}>
@@ -288,11 +288,11 @@ const EnglishHorizonTemplate = ({
               {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line' }}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'publications': return data.publications?.length>0 ? (
-        <div key="publications">
+        <section key="publications">
           <MainHeading label={tr('publications',isRTL)} accent={accent} isRTL={isRTL} />
           {data.publications.map((p,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, direction:dir }}>
@@ -304,11 +304,11 @@ const EnglishHorizonTemplate = ({
               {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align }}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'references': return data.references?.length>0 ? (
-        <div key="references">
+        <section key="references">
           <MainHeading label={tr('references',isRTL)} accent={accent} isRTL={isRTL} />
           {data.references.map((r,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, textAlign:align, direction:dir }}>
@@ -317,7 +317,7 @@ const EnglishHorizonTemplate = ({
               {(r.email||r.phone)&&<div style={{ fontSize:sz.body, color:'#555' }}>{[r.email,r.phone].filter(Boolean).join(' | ')}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       default:

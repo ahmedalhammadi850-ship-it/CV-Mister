@@ -103,21 +103,21 @@ const TealProTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('summary', isRTL)}</div>
+          <section key="summary" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('summary', isRTL)}</h2>
             <div style={s.body}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
-            <div style={s.heading}>{tr('experience', isRTL)}</div>
+          <section key="experience">
+            <h2 style={s.heading}>{tr('experience', isRTL)}</h2>
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
                   <div>
-                    <div style={s.role}>{e.jobTitle}</div>
+                    <h3 style={s.role}>{e.jobTitle}</h3>
                     <div style={s.company}>{e.company}{e.location ? `, ${e.location}` : ''}</div>
                   </div>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -125,18 +125,18 @@ const TealProTemplate = ({
                 {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
-            <div style={s.heading}>{tr('education', isRTL)}</div>
+          <section key="education">
+            <h2 style={s.heading}>{tr('education', isRTL)}</h2>
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
                   <div>
-                    <div style={s.role}>{e.degree}</div>
+                    <h3 style={s.role}>{e.degree}</h3>
                     <div style={s.company}>{e.institution}{e.location ? `, ${e.location}` : ''}</div>
                   </div>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -144,132 +144,132 @@ const TealProTemplate = ({
                 {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('skills', isRTL)}</div>
+          <section key="skills" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('skills', isRTL)}</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt' }}>
               {data.skills.map((sk, i) => <span key={i} style={s.tag}>{sk.name || sk}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('languages', isRTL)}</div>
+          <section key="languages" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('languages', isRTL)}</h2>
             {data.languages.map((l, i) => (
               <div key={i} style={s.skillRow}>
                 <span>{l.name}</span>
                 <DotsRating level={l.proficiency || 3} accent={accent} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
-            <div style={s.heading}>{tr('projects', isRTL)}</div>
+          <section key="projects">
+            <h2 style={s.heading}>{tr('projects', isRTL)}</h2>
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{p.title || p.name}</div>
+                <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ ...s.meta, color: accent }}>{p.link}</div>}
                 {p.description && <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates">
-            <div style={s.heading}>{tr('certificates', isRTL)}</div>
+          <section key="certificates">
+            <h2 style={s.heading}>{tr('certificates', isRTL)}</h2>
             {data.certificates.map((c, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
                 {c.description && <div style={ta(s.body, c.descriptionAlign)}>{c.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards">
-            <div style={s.heading}>{tr('awards', isRTL)}</div>
+          <section key="awards">
+            <h2 style={s.heading}>{tr('awards', isRTL)}</h2>
             {data.awards.map((a, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{a.title || a.name}</div>
+                  <h3 style={s.role}>{a.title || a.name}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
                 {a.description && <div style={ta(s.body, a.descriptionAlign)}>{a.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('interests', isRTL)}</div>
+          <section key="interests" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('interests', isRTL)}</h2>
             <div style={s.body}>{data.interests.map(i => i.name || i).join('  •  ')}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses">
-            <div style={s.heading}>{tr('courses', isRTL)}</div>
+          <section key="courses">
+            <h2 style={s.heading}>{tr('courses', isRTL)}</h2>
             {data.courses.map((c, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.institution && <div style={s.company}>{c.institution}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'organisations':
         return data.organisations?.length > 0 ? (
-          <div key="organisations">
-            <div style={s.heading}>{tr('organisations', isRTL)}</div>
+          <section key="organisations">
+            <h2 style={s.heading}>{tr('organisations', isRTL)}</h2>
             {data.organisations.map((o, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{o.name}</div>
+                  <h3 style={s.role}>{o.name}</h3>
                   {o.date && <div style={s.date}>{o.date}</div>}
                 </div>
                 {o.role && <div style={s.company}>{o.role}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
-            <div style={s.heading}>{tr('references', isRTL)}</div>
+          <section key="references">
+            <h2 style={s.heading}>{tr('references', isRTL)}</h2>
             {data.references.map((r, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{r.name}</div>
+                <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default:
@@ -278,10 +278,10 @@ const TealProTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <div style={s.heading}>{sec.title}</div>
+              <h2 style={s.heading}>{sec.title}</h2>
               {sec.items.map((item, idx) => (
                 <div key={idx} style={s.item}>
-                  {item.title && <div style={s.role}>{item.title}</div>}
+                  {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <div style={ta(s.body, item.descriptionAlign)}>{item.description}</div>}
                 </div>
@@ -294,7 +294,7 @@ const TealProTemplate = ({
   };
 
   return (
-    <div style={s.page}>
+    <article style={s.page}>
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '4pt' }}>
         {vis.photo !== false && (
@@ -302,7 +302,7 @@ const TealProTemplate = ({
             <img src={info.photo || '/default-avatar.svg'} alt="" style={{ width: '100%', height: '100%', objectFit: info.photo ? 'cover' : 'contain' }} />
           </div>
         )}
-        <div style={s.name}>{info.fullName || 'Your Name'}</div>
+        <h1 style={s.name}>{info.fullName || 'Your Name'}</h1>
         <span style={s.jobTitle}>{info.jobTitle || ''}</span>
       </div>
 
@@ -316,7 +316,7 @@ const TealProTemplate = ({
       )}
 
       {sectionOrder.map(k => renderSection(k))}
-    </div>
+    </article>
   );
 };
 

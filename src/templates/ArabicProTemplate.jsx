@@ -128,7 +128,7 @@ const ArabicProTemplate = ({
     if (!show(key)) return null;
     switch(key) {
       case 'skills': return data.skills?.length > 0 ? (
-        <div key="skills" style={BREAK_ITEM}>
+        <section key="skills" style={BREAK_ITEM}>
           <div style={sb.sectionBadge}><span style={sb.sectionLabel}>{tr('skills', true)}</span></div>
           {data.skills.map((sk, i) => (
             <div key={i} style={sb.skillItem}>
@@ -136,11 +136,11 @@ const ArabicProTemplate = ({
               <SkillBar level={sk.level || 0} accent="rgba(255,255,255,0.85)" bg="rgba(255,255,255,0.15)" />
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'languages': return data.languages?.length > 0 ? (
-        <div key="languages" style={BREAK_ITEM}>
+        <section key="languages" style={BREAK_ITEM}>
           <div style={sb.sectionBadge}><span style={sb.sectionLabel}>{tr('languages', true)}</span></div>
           {data.languages.map((l, i) => (
             <div key={i} style={sb.skillItem}>
@@ -148,7 +148,7 @@ const ArabicProTemplate = ({
               <LangBar level={l.proficiency || 3} accent="rgba(255,255,255,0.85)" bg="rgba(255,255,255,0.15)" />
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'certificates':
@@ -171,7 +171,7 @@ const ArabicProTemplate = ({
       }
 
       case 'awards': return data.awards?.length > 0 ? (
-        <div key="awards" style={BREAK_ITEM}>
+        <section key="awards" style={BREAK_ITEM}>
           <div style={sb.sectionBadge}><span style={sb.sectionLabel}>{tr('awards', true)}</span></div>
           {data.awards.map((a, i) => (
             <div key={i} style={{ marginBottom:'6pt' }}>
@@ -179,27 +179,27 @@ const ArabicProTemplate = ({
               {a.issuer && <div style={{ fontSize:'8pt', color:'rgba(255,255,255,0.55)', textAlign:'right' }}>{a.issuer}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'interests': return data.interests?.length > 0 ? (
-        <div key="interests" style={BREAK_ITEM}>
+        <section key="interests" style={BREAK_ITEM}>
           <div style={sb.sectionBadge}><span style={sb.sectionLabel}>{tr('interests', true)}</span></div>
           <div style={{ display:'flex', flexWrap:'wrap', flexDirection:'row-reverse', gap:'3pt' }}>
             {data.interests.map((item, i) => (
               <span key={i} style={sb.tag}>{item.name || item}</span>
             ))}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'organisations': return data.organisations?.length > 0 ? (
-        <div key="organisations" style={BREAK_ITEM}>
+        <section key="organisations" style={BREAK_ITEM}>
           <div style={sb.sectionBadge}><span style={sb.sectionLabel}>{tr('organisations', true)}</span></div>
           {data.organisations.map((o, i) => (
             <div key={i} style={sb.bullet}>• {o.name || o}</div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default: return null;
@@ -215,14 +215,14 @@ const ArabicProTemplate = ({
     if (!show(key)) return null;
     switch(key) {
       case 'summary': return info.summary ? (
-        <div key="summary" style={BREAK_ITEM}>
+        <section key="summary" style={BREAK_ITEM}>
           <MNSection label={tr('summary', true)} />
           <div style={mn.bodyText}>{info.summary}</div>
-        </div>
+        </section>
       ) : null;
 
       case 'experience': return data.experience?.length > 0 ? (
-        <div key="experience">
+        <section key="experience">
           <MNSection label={tr('experience', true)} />
           {data.experience.map((e, i) => (
             <div key={i} style={mn.item}>
@@ -234,11 +234,11 @@ const ArabicProTemplate = ({
               {e.description && <div style={mn.bodyText}>{e.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'education': return data.education?.length > 0 ? (
-        <div key="education">
+        <section key="education">
           <MNSection label={tr('education', true)} />
           {data.education.map((e, i) => (
             <div key={i} style={mn.item}>
@@ -250,22 +250,22 @@ const ArabicProTemplate = ({
               {e.description && <div style={mn.bodyText}>{e.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'interests': return data.interests?.length > 0 && !SIDEBAR_SECTIONS.has('interests') ? (
-        <div key="interests" style={BREAK_ITEM}>
+        <section key="interests" style={BREAK_ITEM}>
           <MNSection label={tr('interests', true)} />
           <div style={{ display:'flex', flexWrap:'wrap', flexDirection:'row-reverse', gap:'4pt' }}>
             {data.interests.map((item, i) => (
               <span key={i} style={{ background: accentDark + '18', border:`1px solid ${accentDark}44`, borderRadius:'4pt', padding:'2pt 8pt', fontSize:sz.meta, color: accentDark }}>{item.name || item}</span>
             ))}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'projects': return data.projects?.length > 0 ? (
-        <div key="projects">
+        <section key="projects">
           <MNSection label={tr('projects', true)} />
           {data.projects.map((p, i) => (
             <div key={i} style={mn.item}>
@@ -274,11 +274,11 @@ const ArabicProTemplate = ({
               {p.description && <div style={mn.bodyText}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'publications': return data.publications?.length > 0 ? (
-        <div key="publications">
+        <section key="publications">
           <MNSection label={tr('publications', true)} />
           {data.publications.map((p, i) => (
             <div key={i} style={mn.item}>
@@ -290,11 +290,11 @@ const ArabicProTemplate = ({
               {p.description && <div style={mn.bodyText}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'references': return data.references?.length > 0 ? (
-        <div key="references">
+        <section key="references">
           <MNSection label={tr('references', true)} />
           {data.references.map((r, i) => (
             <div key={i} style={mn.item}>
@@ -303,7 +303,7 @@ const ArabicProTemplate = ({
               {(r.email || r.phone) && <div style={mn.bodyText}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default:

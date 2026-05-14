@@ -145,7 +145,7 @@ const ArabicLuxeTemplate = ({
     switch(key) {
 
       case 'skills': return data.skills?.length>0 ? (
-        <div key="skills" style={BREAK_ITEM}>
+        <section key="skills" style={BREAK_ITEM}>
           <SbTitle label={tr('skills',isRTL)} isRTL={isRTL} accent={accent} />
           {data.skills.map((sk,i)=>(
             <div key={i} style={{ marginBottom:'9pt', direction:dir }}>
@@ -155,11 +155,11 @@ const ArabicLuxeTemplate = ({
               <DiamondBar level={typeof sk==='object'?(sk.level||0):0} accent={accent} />
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'languages': return data.languages?.length>0 ? (
-        <div key="languages" style={BREAK_ITEM}>
+        <section key="languages" style={BREAK_ITEM}>
           <SbTitle label={tr('languages',isRTL)} isRTL={isRTL} accent={accent} />
           <div style={{ display:'flex', flexWrap:'wrap', gap:'5pt', justifyContent:'center' }}>
             {data.languages.map((l,i)=>{
@@ -169,11 +169,11 @@ const ArabicLuxeTemplate = ({
               return <LangGauge key={i} pct={pct} label={shortName} accent={accent} />;
             })}
           </div>
-        </div>
+        </section>
       ):null;
 
       case 'interests': return data.interests?.length>0 ? (
-        <div key="interests" style={BREAK_ITEM}>
+        <section key="interests" style={BREAK_ITEM}>
           <SbTitle label={tr('interests',isRTL)} isRTL={isRTL} accent={accent} />
           <div style={{ display:'flex', flexWrap:'wrap', gap:'4pt', justifyContent:align==='right'?'flex-end':'flex-start', direction:dir }}>
             {data.interests.map((item,i)=>(
@@ -184,7 +184,7 @@ const ArabicLuxeTemplate = ({
               }}>{item.name||item}</span>
             ))}
           </div>
-        </div>
+        </section>
       ):null;
 
       case 'certificates':
@@ -205,25 +205,25 @@ const ArabicLuxeTemplate = ({
       }
 
       case 'awards': return data.awards?.length>0 ? (
-        <div key="awards" style={BREAK_ITEM}>
+        <section key="awards" style={BREAK_ITEM}>
           <SbTitle label={tr('awards',isRTL)} isRTL={isRTL} accent={accent} />
           {data.awards.map((a,i)=>(
             <div key={i} style={{ fontSize:'8pt', color:'#fff', textAlign:align, direction:dir, marginBottom:'4pt' }}>
               {a.title||a.name||a}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'organisations': return data.organisations?.length>0 ? (
-        <div key="organisations" style={BREAK_ITEM}>
+        <section key="organisations" style={BREAK_ITEM}>
           <SbTitle label={tr('organisations',isRTL)} isRTL={isRTL} accent={accent} />
           {data.organisations.map((o,i)=>(
             <div key={i} style={{ fontSize:'8pt', color:'rgba(255,255,255,0.8)', textAlign:align, direction:dir, marginBottom:'4pt' }}>
               {o.name||o}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       default: return null;
@@ -236,7 +236,7 @@ const ArabicLuxeTemplate = ({
     switch(key) {
 
       case 'summary': return info.summary ? (
-        <div key="summary" style={BREAK_ITEM}>
+        <section key="summary" style={BREAK_ITEM}>
           <MainHeading label={tr('summary',isRTL)} iconKey="summary" accent={accent} isRTL={isRTL} />
           <div style={{
             fontSize:sz.body, color:'#4a5568', lineHeight,
@@ -245,11 +245,11 @@ const ArabicLuxeTemplate = ({
               ? { borderRight:`3px solid ${accent}20`, paddingRight:'10pt', marginRight:'3pt' }
               : { borderLeft:`3px solid ${accent}20`,  paddingLeft:'10pt',  marginLeft:'3pt'  }),
           }}>{info.summary}</div>
-        </div>
+        </section>
       ):null;
 
       case 'experience': return data.experience?.length>0 ? (
-        <div key="experience">
+        <section key="experience">
           <MainHeading label={tr('experience',isRTL)} iconKey="experience" accent={accent} isRTL={isRTL} />
           {data.experience.map((e,i)=>(
             <div key={i} style={{
@@ -274,11 +274,11 @@ const ArabicLuxeTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'education': return data.education?.length>0 ? (
-        <div key="education">
+        <section key="education">
           <MainHeading label={tr('education',isRTL)} iconKey="education" accent={accent} isRTL={isRTL} />
           {data.education.map((e,i)=>(
             <div key={i} style={{
@@ -303,11 +303,11 @@ const ArabicLuxeTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'projects': return data.projects?.length>0 ? (
-        <div key="projects">
+        <section key="projects">
           <MainHeading label={tr('projects',isRTL)} iconKey="projects" accent={accent} isRTL={isRTL} />
           {data.projects.map((p,i)=>(
             <div key={i} style={{
@@ -321,11 +321,11 @@ const ArabicLuxeTemplate = ({
               {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'publications': return data.publications?.length>0 ? (
-        <div key="publications">
+        <section key="publications">
           <MainHeading label={tr('publications',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />
           {data.publications.map((p,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
@@ -337,11 +337,11 @@ const ArabicLuxeTemplate = ({
               {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, direction:dir }}>{p.description}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       case 'references': return data.references?.length>0 ? (
-        <div key="references">
+        <section key="references">
           <MainHeading label={tr('references',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />
           {data.references.map((r,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
@@ -350,7 +350,7 @@ const ArabicLuxeTemplate = ({
               {(r.email||r.phone)&&<div style={{ fontSize:sz.body, color:'#555', textAlign:align, direction:dir }}>{[r.email,r.phone].filter(Boolean).join(' | ')}</div>}
             </div>
           ))}
-        </div>
+        </section>
       ):null;
 
       default:

@@ -140,50 +140,50 @@ const ArabicModernTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('summary', true)}</div>
+          <section key="summary" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('summary', true)}</h2>
             <div style={s.bodyText}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
-            <div style={s.heading}>{tr('experience', true)}</div>
+          <section key="experience">
+            <h2 style={s.heading}>{tr('experience', true)}</h2>
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{e.jobTitle}</div>
+                  <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', true) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
                 {e.description && <div style={s.bodyText}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
-            <div style={s.heading}>{tr('education', true)}</div>
+          <section key="education">
+            <h2 style={s.heading}>{tr('education', true)}</h2>
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{e.degree}</div>
+                  <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
                 {e.description && <div style={s.bodyText}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('skills', true)}</div>
+          <section key="skills" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('skills', true)}</h2>
             {data.skills.map((sk, i) => (
               <div key={i} style={s.skillItem}>
                 <div style={s.skillRow}>
@@ -192,107 +192,107 @@ const ArabicModernTemplate = ({
                 <BarRating level={sk.level || 3} accent={accent} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('languages', true)}</div>
+          <section key="languages" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('languages', true)}</h2>
             {data.languages.map((l, i) => (
               <div key={i} style={s.langRow}>
                 <DotsRating level={l.proficiency || 3} accent={accent} />
                 <span>{l.name}</span>
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates">
-            <div style={s.heading}>{tr('certificates', true)}</div>
+          <section key="certificates">
+            <h2 style={s.heading}>{tr('certificates', true)}</h2>
             {data.certificates.map((c, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
                 {c.description && <div style={s.bodyText}>{c.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses">
-            <div style={s.heading}>{tr('courses', true)}</div>
+          <section key="courses">
+            <h2 style={s.heading}>{tr('courses', true)}</h2>
             {data.courses.map((c, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.institution && <div style={s.company}>{c.institution}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards">
-            <div style={s.heading}>{tr('awards', true)}</div>
+          <section key="awards">
+            <h2 style={s.heading}>{tr('awards', true)}</h2>
             {data.awards.map((a, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{a.title || a.name}</div>
+                  <h3 style={s.role}>{a.title || a.name}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
-            <div style={s.heading}>{tr('interests', true)}</div>
+          <section key="interests" style={BREAK_ITEM}>
+            <h2 style={s.heading}>{tr('interests', true)}</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
               {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
-            <div style={s.heading}>{tr('projects', true)}</div>
+          <section key="projects">
+            <h2 style={s.heading}>{tr('projects', true)}</h2>
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{p.title || p.name}</div>
+                <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ fontSize: sz.meta, color: accent, textAlign: 'right' }}>{p.link}</div>}
                 {p.description && <div style={s.bodyText}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
-            <div style={s.heading}>{tr('references', true)}</div>
+          <section key="references">
+            <h2 style={s.heading}>{tr('references', true)}</h2>
             {data.references.map((r, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{r.name}</div>
+                <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.bodyText}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default:
@@ -301,10 +301,10 @@ const ArabicModernTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <div style={s.heading}>{sec.title}</div>
+              <h2 style={s.heading}>{sec.title}</h2>
               {sec.items.map((item, idx) => (
                 <div key={idx} style={s.item}>
-                  {item.title && <div style={s.role}>{item.title}</div>}
+                  {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <div style={s.bodyText}>{item.description}</div>}
                 </div>
@@ -317,7 +317,7 @@ const ArabicModernTemplate = ({
   };
 
   return (
-    <div style={s.page}>
+    <article style={s.page}>
       {/* Header */}
       <div style={s.header}>
         <div style={s.headerTop}>
@@ -327,7 +327,7 @@ const ArabicModernTemplate = ({
             </div>
           )}
           <div style={s.nameBlock}>
-            <div style={s.name}>{info.fullName || 'الاسم الكامل'}</div>
+            <h1 style={s.name}>{info.fullName || 'الاسم الكامل'}</h1>
             {info.jobTitle && <div style={s.jobBox}>{info.jobTitle}</div>}
           </div>
         </div>
@@ -347,7 +347,7 @@ const ArabicModernTemplate = ({
       <div style={s.body}>
         {sectionOrder.map(k => renderSection(k))}
       </div>
-    </div>
+    </article>
   );
 };
 

@@ -120,21 +120,21 @@ const RoseElegantTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <SectionHeading label={tr('summary', isRTL)} />
             <div style={ta(s.body, info.summaryAlign)}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <SectionHeading label={tr('experience', isRTL)} />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
                   <div>
-                    <div style={s.role}>{e.jobTitle}</div>
+                    <h3 style={s.role}>{e.jobTitle}</h3>
                     <div style={s.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
                   </div>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -142,18 +142,18 @@ const RoseElegantTemplate = ({
                 {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <SectionHeading label={tr('education', isRTL)} />
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
                   <div>
-                    <div style={s.role}>{e.degree}</div>
+                    <h3 style={s.role}>{e.degree}</h3>
                     <div style={s.company}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
                   </div>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -161,22 +161,22 @@ const RoseElegantTemplate = ({
                 {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
+          <section key="skills" style={BREAK_ITEM}>
             <SectionHeading label={tr('skills', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               {data.skills.map((sk, i) => <span key={i} style={s.tag}>{sk.name || sk}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
+          <section key="languages" style={BREAK_ITEM}>
             <SectionHeading label={tr('languages', isRTL)} />
             {data.languages.map((l, i) => (
               <div key={i} style={s.skillRow}>
@@ -184,111 +184,111 @@ const RoseElegantTemplate = ({
                 <DotsRating level={l.proficiency || 3} accent={accent} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <SectionHeading label={tr('projects', isRTL)} />
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{p.title || p.name}</div>
+                <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ ...s.body, color: accent, fontSize: sz.meta }}>{p.link}</div>}
                 {p.description && <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates">
+          <section key="certificates">
             <SectionHeading label={tr('certificates', isRTL)} />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
                 {c.description && <div style={ta(s.body, c.descriptionAlign)}>{c.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards">
+          <section key="awards">
             <SectionHeading label={tr('awards', isRTL)} />
             {data.awards.map((a, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{a.title || a.name}</div>
+                  <h3 style={s.role}>{a.title || a.name}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
                 {a.description && <div style={ta(s.body, a.descriptionAlign)}>{a.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
+          <section key="interests" style={BREAK_ITEM}>
             <SectionHeading label={tr('interests', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
               {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses">
+          <section key="courses">
             <SectionHeading label={tr('courses', isRTL)} />
             {data.courses.map((c, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{c.name}</div>
+                  <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.institution && <div style={s.company}>{c.institution}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'organisations':
         return data.organisations?.length > 0 ? (
-          <div key="organisations">
+          <section key="organisations">
             <SectionHeading label={tr('organisations', isRTL)} />
             {data.organisations.map((o, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{o.name}</div>
+                  <h3 style={s.role}>{o.name}</h3>
                   {o.date && <div style={s.date}>{o.date}</div>}
                 </div>
                 {o.role && <div style={s.company}>{o.role}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
+          <section key="references">
             <SectionHeading label={tr('references', isRTL)} />
             {data.references.map((r, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{r.name}</div>
+                <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default:
@@ -300,7 +300,7 @@ const RoseElegantTemplate = ({
               <SectionHeading label={sec.title} />
               {sec.items.map((item, idx) => (
                 <div key={idx} style={s.item}>
-                  {item.title && <div style={s.role}>{item.title}</div>}
+                  {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <div style={ta(s.body, item.descriptionAlign)}>{item.description}</div>}
                 </div>
@@ -313,7 +313,7 @@ const RoseElegantTemplate = ({
   };
 
   return (
-    <div style={s.page}>
+    <article style={s.page}>
       {/* Header */}
       <div style={s.header}>
         {vis.photo !== false && (
@@ -322,8 +322,8 @@ const RoseElegantTemplate = ({
           </div>
         )}
         <div style={s.headerText}>
-          <div style={s.name}>{info.fullName || 'Your Name'}</div>
-          <div style={s.jobTitle}>{info.jobTitle || ''}</div>
+          <h1 style={s.name}>{info.fullName || 'Your Name'}</h1>
+          <p style={s.jobTitle}>{info.jobTitle || ''}</p>
           {contactParts.length > 0 && (
             <div style={s.contactStrip}>
               {contactParts.map((p, i) => (
@@ -338,7 +338,7 @@ const RoseElegantTemplate = ({
       <div style={s.content}>
         {sectionOrder.map(k => renderSection(k))}
       </div>
-    </div>
+    </article>
   );
 };
 

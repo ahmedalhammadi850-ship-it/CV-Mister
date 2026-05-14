@@ -109,7 +109,7 @@ const EditorialRuleTemplate = ({
 
   const SectionHead = ({ labelKey }) => (
     <div style={BREAK_HEADING}>
-      <div style={s.heading}>{tr(labelKey, isRTL)}</div>
+      <h2 style={s.heading}>{tr(labelKey, isRTL)}</h2>
       <div style={s.headingRule} />
     </div>
   );
@@ -119,58 +119,58 @@ const EditorialRuleTemplate = ({
     switch (key) {
       case 'summary':
         return info.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <SectionHead labelKey="summary" />
             <div style={s.bodyText}>{info.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <SectionHead labelKey="experience" />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{e.jobTitle}</div>
+                  <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? `, ${e.location}` : ''}</div>
                 {e.description && <div style={s.bodyText}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <SectionHead labelKey="education" />
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
                 <div style={s.row}>
-                  <div style={s.role}>{e.degree}</div>
+                  <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}{e.location ? `, ${e.location}` : ''}</div>
                 {e.description && <div style={s.bodyText}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <SectionHead labelKey="projects" />
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
-                <div style={s.role}>{p.name}</div>
+                <h3 style={s.role}>{p.name}</h3>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.url}</div>}
                 {p.description && <div style={s.bodyText}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -183,7 +183,7 @@ const EditorialRuleTemplate = ({
     switch (key) {
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={s.col}>
+          <section key="skills" style={s.col}>
             <SectionHead labelKey="skills" />
             {data.skills.map((sk, i) => (
               <div key={i} style={s.skillRow}>
@@ -191,12 +191,12 @@ const EditorialRuleTemplate = ({
                 <DotsRating level={sk.level || 3} accent={accent} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={s.col}>
+          <section key="languages" style={s.col}>
             <SectionHead labelKey="languages" />
             {data.languages.map((l, i) => (
               <div key={i} style={s.skillRow}>
@@ -204,12 +204,12 @@ const EditorialRuleTemplate = ({
                 <DotsRating level={l.proficiency || 3} accent={accent} />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates" style={s.col}>
+          <section key="certificates" style={s.col}>
             <SectionHead labelKey="certificates" />
             {data.certificates.map((c, i) => (
               <div key={i} style={{ fontSize: sz.body, color: '#333', marginBottom: '5pt' }}>
@@ -217,22 +217,22 @@ const EditorialRuleTemplate = ({
                 {c.issuer && <div style={{ color: '#777', fontSize: sz.meta }}>{c.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={s.col}>
+          <section key="interests" style={s.col}>
             <SectionHead labelKey="interests" />
             <div style={{ fontSize: sz.body, color: '#333', lineHeight: 1.7 }}>
               {data.interests.map(i => i.name || i).join('  ·  ')}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards" style={s.col}>
+          <section key="awards" style={s.col}>
             <SectionHead labelKey="awards" />
             {data.awards.map((a, i) => (
               <div key={i} style={{ marginBottom: '5pt' }}>
@@ -240,7 +240,7 @@ const EditorialRuleTemplate = ({
                 {a.issuer && <div style={{ color: '#777', fontSize: sz.meta }}>{a.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -253,11 +253,11 @@ const EditorialRuleTemplate = ({
   }
 
   return (
-    <div style={s.page}>
+    <article style={s.page}>
       {/* Header */}
       <div style={s.nameRow}>
-        <div style={s.name}>{info.fullName || 'Your Name'}</div>
-        <div style={s.jobTitle}>{info.jobTitle || ''}</div>
+        <h1 style={s.name}>{info.fullName || 'Your Name'}</h1>
+        <p style={s.jobTitle}>{info.jobTitle || ''}</p>
       </div>
       <div style={s.mainRule} />
       <div style={s.thinRule} />
@@ -284,7 +284,7 @@ const EditorialRuleTemplate = ({
           {pair.length === 1 && <div style={s.col} />}
         </div>
       ))}
-    </div>
+    </article>
   );
 };
 

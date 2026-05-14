@@ -242,7 +242,7 @@ const ArabicEliteTemplate = ({
     switch (key) {
 
       case 'skills': return data.skills?.length > 0 ? (
-        <div key="skills" style={BREAK_ITEM}>
+        <section key="skills" style={BREAK_ITEM}>
           <SbHeading label={L.skills} />
           {data.skills.map((sk, i) => (
             <div key={i} style={{ marginBottom: '8pt', direction: 'rtl' }}>
@@ -252,11 +252,11 @@ const ArabicEliteTemplate = ({
               <Stars level={typeof sk === 'object' ? (sk.level || 0) : 0} />
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'languages': return data.languages?.length > 0 ? (
-        <div key="languages" style={BREAK_ITEM}>
+        <section key="languages" style={BREAK_ITEM}>
           <SbHeading label={L.languages} />
           <div style={{ display: 'flex', flexDirection: 'row', gap: '6pt', flexWrap: 'wrap', justifyContent: 'center' }}>
             {data.languages.map((l, i) => {
@@ -268,18 +268,18 @@ const ArabicEliteTemplate = ({
               return <LangGauge key={i} pct={pct} label={shortName} accent={accent} />;
             })}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'interests': return data.interests?.length > 0 ? (
-        <div key="interests" style={BREAK_ITEM}>
+        <section key="interests" style={BREAK_ITEM}>
           <SbHeading label={L.interests} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5pt' }}>
             {data.interests.map((item, i) => (
               <InterestBox key={i} label={item.name || item} />
             ))}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'certificates':
@@ -300,25 +300,25 @@ const ArabicEliteTemplate = ({
       }
 
       case 'awards': return data.awards?.length > 0 ? (
-        <div key="awards" style={BREAK_ITEM}>
+        <section key="awards" style={BREAK_ITEM}>
           <SbHeading label={L.awards} />
           {data.awards.map((a, i) => (
             <div key={i} style={{ fontSize: '8pt', color: '#fff', textAlign: 'right', direction: 'rtl', marginBottom: '4pt' }}>
               {a.title || a.name || a}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'organisations': return data.organisations?.length > 0 ? (
-        <div key="organisations" style={BREAK_ITEM}>
+        <section key="organisations" style={BREAK_ITEM}>
           <SbHeading label={L.organisations} />
           {data.organisations.map((o, i) => (
             <div key={i} style={{ fontSize: '8pt', color: 'rgba(255,255,255,0.85)', textAlign: 'right', direction: 'rtl', marginBottom: '4pt' }}>
               {o.name || o}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default: return null;
@@ -331,16 +331,16 @@ const ArabicEliteTemplate = ({
     switch (key) {
 
       case 'summary': return info.summary ? (
-        <div key="summary" style={BREAK_ITEM}>
+        <section key="summary" style={BREAK_ITEM}>
           <MainHeading label={L.summary} accent={accent} iconKey="summary" />
           <div style={{ fontSize: sz.body, color: '#444', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
             {info.summary}
           </div>
-        </div>
+        </section>
       ) : null;
 
       case 'experience': return data.experience?.length > 0 ? (
-        <div key="experience">
+        <section key="experience">
           <MainHeading label={L.experience} accent={accent} iconKey="experience" />
           {data.experience.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
@@ -362,11 +362,11 @@ const ArabicEliteTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'education': return data.education?.length > 0 ? (
-        <div key="education">
+        <section key="education">
           <MainHeading label={L.education} accent={accent} iconKey="education" />
           {data.education.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
@@ -388,11 +388,11 @@ const ArabicEliteTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       case 'projects': return data.projects?.length > 0 ? (
-        <div key="projects">
+        <section key="projects">
           <MainHeading label={L.projects} accent={accent} iconKey="projects" />
           {data.projects.map((p, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
@@ -407,7 +407,7 @@ const ArabicEliteTemplate = ({
               )}
             </div>
           ))}
-        </div>
+        </section>
       ) : null;
 
       default:

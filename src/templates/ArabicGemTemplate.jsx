@@ -334,15 +334,15 @@ const ArabicGemTemplate = ({
     switch (key) {
       case 'summary':
         return data.personalInfo?.summary ? (
-          <div key="summary" style={BREAK_ITEM}>
+          <section key="summary" style={BREAK_ITEM}>
             <SbHeading label={tr('summary', true)} icon="✦" />
             <div style={ta(sb.bodyText, data.personalInfo?.summaryAlign)}>{data.personalInfo.summary}</div>
-          </div>
+          </section>
         ) : null;
 
       case 'skills':
         return data.skills?.length > 0 ? (
-          <div key="skills" style={BREAK_ITEM}>
+          <section key="skills" style={BREAK_ITEM}>
             <SbHeading label={tr('skills', true)} icon="◆" />
             {data.skills.map((sk, i) => (
               <div key={i} style={sb.skillRow}>
@@ -350,12 +350,12 @@ const ArabicGemTemplate = ({
                 <SkillBar level={sk.level || 0} filled={gold} empty="rgba(255,255,255,0.2)" />
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'languages':
         return data.languages?.length > 0 ? (
-          <div key="languages" style={BREAK_ITEM}>
+          <section key="languages" style={BREAK_ITEM}>
             <SbHeading label={tr('languages', true)} icon="◉" />
             {data.languages.map((l, i) => (
               <div key={i} style={sb.langRow}>
@@ -365,12 +365,12 @@ const ArabicGemTemplate = ({
                 </div>
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'certificates':
         return data.certificates?.length > 0 ? (
-          <div key="certificates" style={BREAK_ITEM}>
+          <section key="certificates" style={BREAK_ITEM}>
             <SbHeading label={tr('certificates', true)} icon="★" />
             {data.certificates.map((c, i) => (
               <div key={i} style={{ ...sb.certItem, marginBottom: '6pt' }}>
@@ -379,12 +379,12 @@ const ArabicGemTemplate = ({
                 {c.date && <div style={{ fontSize: '7pt', color: 'rgba(255,255,255,0.6)' }}>{c.date}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'courses':
         return data.courses?.length > 0 ? (
-          <div key="courses" style={BREAK_ITEM}>
+          <section key="courses" style={BREAK_ITEM}>
             <SbHeading label={tr('courses', true)} icon="◈" />
             {data.courses.map((c, i) => (
               <div key={i} style={{ ...sb.certItem, marginBottom: '6pt' }}>
@@ -392,12 +392,12 @@ const ArabicGemTemplate = ({
                 {c.institution && <div style={{ fontSize: '7pt', color: gold }}>{c.institution}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'awards':
         return data.awards?.length > 0 ? (
-          <div key="awards" style={BREAK_ITEM}>
+          <section key="awards" style={BREAK_ITEM}>
             <SbHeading label={tr('awards', true)} icon="🏆" />
             {data.awards.map((a, i) => (
               <div key={i} style={{ ...sb.certItem, marginBottom: '6pt' }}>
@@ -405,12 +405,12 @@ const ArabicGemTemplate = ({
                 {a.issuer && <div style={{ fontSize: '7pt', color: gold }}>{a.issuer}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'interests':
         return data.interests?.length > 0 ? (
-          <div key="interests" style={BREAK_ITEM}>
+          <section key="interests" style={BREAK_ITEM}>
             <SbHeading label={tr('interests', true)} icon="♥" />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt', justifyContent: 'flex-end' }}>
               {data.interests.map((item, i) => (
@@ -421,12 +421,12 @@ const ArabicGemTemplate = ({
                 }}>{item.name || item}</span>
               ))}
             </div>
-          </div>
+          </section>
         ) : null;
 
       case 'organisations':
         return data.organisations?.length > 0 ? (
-          <div key="organisations" style={BREAK_ITEM}>
+          <section key="organisations" style={BREAK_ITEM}>
             <SbHeading label={tr('organisations', true)} icon="◈" />
             {data.organisations.map((o, i) => (
               <div key={i} style={{ ...sb.certItem, marginBottom: '5pt' }}>
@@ -434,7 +434,7 @@ const ArabicGemTemplate = ({
                 {o.role && <div style={{ fontSize: '7pt', color: gold }}>{o.role}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
@@ -448,7 +448,7 @@ const ArabicGemTemplate = ({
     switch (key) {
       case 'experience':
         return data.experience?.length > 0 ? (
-          <div key="experience">
+          <section key="experience">
             <MnHeading label={tr('experience', true)} />
             {data.experience.map((e, i) => (
               <div key={i} style={mn.expItem}>
@@ -467,12 +467,12 @@ const ArabicGemTemplate = ({
                 )}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
-          <div key="education">
+          <section key="education">
             <MnHeading label={tr('education', true)} />
             {data.education.map((e, i) => (
               <div key={i} style={mn.eduItem}>
@@ -486,12 +486,12 @@ const ArabicGemTemplate = ({
                 {e.description && <div style={{ ...mn.desc, marginTop: '3pt' }}>{e.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
-          <div key="projects">
+          <section key="projects">
             <MnHeading label={tr('projects', true)} />
             {data.projects.map((p, i) => (
               <div key={i} style={mn.eduItem}>
@@ -500,12 +500,12 @@ const ArabicGemTemplate = ({
                 {p.description && <div style={mn.desc}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'publications':
         return data.publications?.length > 0 ? (
-          <div key="publications">
+          <section key="publications">
             <MnHeading label={tr('publications', true)} />
             {data.publications.map((p, i) => (
               <div key={i} style={mn.eduItem}>
@@ -517,12 +517,12 @@ const ArabicGemTemplate = ({
                 {p.description && <div style={mn.desc}>{p.description}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
-          <div key="references">
+          <section key="references">
             <MnHeading label={tr('references', true)} />
             {data.references.map((r, i) => (
               <div key={i} style={mn.eduItem}>
@@ -531,7 +531,7 @@ const ArabicGemTemplate = ({
                 {(r.email || r.phone) && <div style={mn.desc}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
               </div>
             ))}
-          </div>
+          </section>
         ) : null;
 
       default: return null;
