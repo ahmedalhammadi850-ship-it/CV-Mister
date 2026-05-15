@@ -169,38 +169,82 @@ export default function AboutPage() {
 
       {/* ─── Hero ─────────────────────────────────────────────────────── */}
       <section
-        className="py-36 flex items-center justify-center text-center"
-        style={{ background: 'linear-gradient(135deg, #fef08a 0%, #fde047 50%, #facc15 100%)' }}
+        className="relative py-36 flex items-center justify-center text-center overflow-hidden"
+        style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 45%, #312e81 100%)' }}
       >
-        <div className="max-w-3xl mx-auto px-6">
+        {/* Decorative blobs */}
+        <div className="absolute inset-0 pointer-events-none">
+          <div className="absolute -top-32 -left-32 w-[500px] h-[500px] rounded-full opacity-20"
+            style={{ background: 'radial-gradient(circle, #818cf8 0%, transparent 70%)' }} />
+          <div className="absolute -bottom-32 -right-32 w-[450px] h-[450px] rounded-full opacity-15"
+            style={{ background: 'radial-gradient(circle, #a855f7 0%, transparent 70%)' }} />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[300px] opacity-10"
+            style={{ background: 'radial-gradient(ellipse, #6366f1 0%, transparent 70%)' }} />
+        </div>
+
+        {/* Grid pattern overlay */}
+        <div className="absolute inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage: 'linear-gradient(rgba(255,255,255,0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.3) 1px, transparent 1px)',
+            backgroundSize: '60px 60px',
+          }} />
+
+        <div className="relative max-w-3xl mx-auto px-6">
 
           {/* Badge */}
-          <div className="flex justify-center mb-7">
+          <div className="flex justify-center mb-8">
             <span className="inline-flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold"
               style={{
-                background: 'rgba(0,0,0,0.08)',
-                border: '1px solid rgba(0,0,0,0.15)',
-                color: '#713f12',
+                background: 'rgba(99,102,241,0.2)',
+                border: '1px solid rgba(129,140,248,0.35)',
+                color: '#a5b4fc',
+                backdropFilter: 'blur(8px)',
               }}>
-              <span className="w-2 h-2 rounded-full bg-yellow-800 inline-block" />
+              <span className="w-2 h-2 rounded-full bg-indigo-400 inline-block animate-pulse" />
               {t.hero.tag}
             </span>
           </div>
 
           {/* Title */}
           <h1
-            className="font-heading font-extrabold mb-6 leading-tight text-yellow-900"
-            style={{ fontSize: 'clamp(2.2rem, 5.5vw, 4rem)' }}
+            className="font-extrabold mb-6 leading-[1.15] text-white"
+            style={{
+              fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)',
+              fontFamily: isRTL
+                ? "'Cairo', 'Tajawal', sans-serif"
+                : "'Inter', 'Plus Jakarta Sans', system-ui, sans-serif",
+              letterSpacing: isRTL ? '0' : '-0.02em',
+            }}
           >
             {isRTL ? (
-              <>نحن نبني <span className="text-yellow-700">مستقبل التوظيف</span></>
+              <>
+                نحن نبني{' '}
+                <span style={{
+                  background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c084fc 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>
+                  مستقبل التوظيف
+                </span>
+              </>
             ) : (
-              <>Building the <span className="text-yellow-700">future</span> of hiring</>
+              <>
+                Building the{' '}
+                <span style={{
+                  background: 'linear-gradient(135deg, #818cf8 0%, #a78bfa 50%, #c084fc 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                }}>
+                  future
+                </span>{' '}of hiring
+              </>
             )}
           </h1>
 
           {/* Subtitle */}
-          <p className="text-lg leading-relaxed max-w-2xl mx-auto text-yellow-800">
+          <p className="text-lg leading-relaxed max-w-2xl mx-auto" style={{ color: 'rgba(199,210,254,0.75)' }}>
             {t.hero.subtitle}
           </p>
         </div>
