@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const CHAT_API = '/api/chat';
-const CHAT_WEBHOOK_FALLBACK = import.meta.env.VITE_N8N_CHAT_WEBHOOK_URL || 'https://ahmed144.app.n8n.cloud/webhook/1d6ee35d-0280-4d68-a839-eeb1b13e298e';
 
 export default function ChatWidget() {
   const { isRTL } = useAuth();
@@ -58,27 +57,12 @@ export default function ChatWidget() {
     try {
       const fallbackText = isRTL ? 'حدث خطأ، يرجى المحاولة مجدداً.' : 'Something went wrong. Please try again.';
 
-      let botText = null;
-
-      try {
-        const response = await fetch(CHAT_API, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text }),
-        });
-        botText = await parseResponse(response, null);
-      } catch {
-        botText = null;
-      }
-
-      if (!botText) {
-        const response = await fetch(CHAT_WEBHOOK_FALLBACK, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, chatInput: text }),
-        });
-        botText = await parseResponse(response, fallbackText);
-      }
+      const response = await fetch(CHAT_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }),
+      });
+      const botText = await parseResponse(response, fallbackText);
 
       setMessages((prev) => [
         ...prev,
