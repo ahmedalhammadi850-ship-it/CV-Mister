@@ -1,17 +1,23 @@
-import { Pool } from "pg";
+import pkg from "pg";
+const { Pool } = pkg;
 
 let pool;
 function getPool() {
   if (!process.env.DATABASE_URL) {
-    throw new Error("DATABASE_URL environment variable is not set on Vercel");
+    throw new Error("DATABASE_URL is not set on Vercel — add it in Vercel → Settings → Environment Variables");
   }
-  if (!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  if (!pool) {
+    pool = new Pool({
+      connectionString: process.env.DATABASE_URL,
+      ssl: { rejectUnauthorized: false },
+    });
+  }
   return pool;
 }
 
 async function verifyFirebaseToken(idToken) {
   const apiKey = process.env.VITE_FIREBASE_API_KEY;
-  if (!apiKey) throw new Error("VITE_FIREBASE_API_KEY not set");
+  if (!apiKey) throw new Error("VITE_FIREBASE_API_KEY is not set on Vercel");
   const response = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
     {
@@ -20,9 +26,12 @@ async function verifyFirebaseToken(idToken) {
       body: JSON.stringify({ idToken }),
     }
   );
-  if (!response.ok) throw new Error("Invalid Firebase token");
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(`Firebase token error: ${JSON.stringify(err)}`);
+  }
   const data = await response.json();
-  if (!data.users || data.users.length === 0) throw new Error("User not found");
+  if (!data.users || data.users.length === 0) throw new Error("Firebase user not found");
   return data.users[0];
 }
 
@@ -30,8 +39,8 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
   try {
-    const { idToken } = req.body;
-    if (!idToken) return res.status(400).json({ message: "Missing token" });
+    const { idToken } = req.body || {};
+    if (!idToken) return res.status(400).json({ message: "Missing idToken" });
 
     const firebaseUser = await verifyFirebaseToken(idToken);
     const { localId: firebaseUid, email, emailVerified } = firebaseUser;
@@ -54,6 +63,8 @@ export default async function handler(req, res) {
           "UPDATE users SET firebase_uid = $1, updated_at = NOW() WHERE id = $2",
           [firebaseUid, user.id]
         );
+        result = await client.query("SELECT * FROM users WHERE id = $1", [user.id]);
+        user = result.rows[0];
       }
 
       let plan = user.plan || "free";
@@ -62,7 +73,7 @@ export default async function handler(req, res) {
         await client.query("UPDATE users SET plan = 'free', updated_at = NOW() WHERE id = $1", [user.id]);
       }
 
-      res.json({
+      return res.json({
         id: user.id,
         email: user.email,
         firstName: user.first_name,
@@ -76,7 +87,7 @@ export default async function handler(req, res) {
       client.release();
     }
   } catch (error) {
-    console.error("Firebase sync error:", error.message);
-    res.status(500).json({ message: error.message || "Failed to sync user" });
+    console.error("[firebase-sync] Error:", error.message);
+    return res.status(500).json({ message: error.message });
   }
 }
