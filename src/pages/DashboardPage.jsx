@@ -133,9 +133,6 @@ const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSide
             <p className="text-sm font-semibold text-slate-900 truncate">
               {currentUser?.displayName || currentUser?.name || (isRTL ? 'مستخدم' : 'User')}
             </p>
-            {currentUser?.email && (
-              <p className="text-xs text-slate-400 truncate">{currentUser.email}</p>
-            )}
           </div>
         </div>
 
@@ -546,7 +543,6 @@ const DashboardPage = () => {
                     <h1 className="text-2xl font-bold text-white leading-tight">
                       {currentUser?.displayName || currentUser?.name || (isRTL ? 'مستخدم' : 'User')}
                     </h1>
-                    {currentUser?.email && <p className="text-white/50 text-xs mt-0.5">{currentUser.email}</p>}
                   </div>
                 </div>
 
