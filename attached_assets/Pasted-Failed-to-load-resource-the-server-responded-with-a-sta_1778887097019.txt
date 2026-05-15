@@ -1,0 +1,85 @@
+Failed to load resource: the server responded with a status of 400 ()Understand this error
+index-CeFFeCzU.js:12  POST https://cv-mister.vercel.app/api/auth/firebase-register 500 (Internal Server Error)
+signUp @ index-CeFFeCzU.js:12
+await in signUp
+onSubmit @ index-CeFFeCzU.js:22
+Cd @ index-CeFFeCzU.js:9
+(anonymous) @ index-CeFFeCzU.js:9
+fn @ index-CeFFeCzU.js:9
+Od @ index-CeFFeCzU.js:9
+up @ index-CeFFeCzU.js:10
+cp @ index-CeFFeCzU.js:10Understand this error
+index-CeFFeCzU.js:12  POST https://cv-mister.vercel.app/api/auth/firebase-sync 500 (Internal Server Error)
+c @ index-CeFFeCzU.js:12
+await in c
+refreshUser @ index-CeFFeCzU.js:12
+(anonymous) @ index-CeFFeCzU.js:22
+setInterval
+(anonymous) @ index-CeFFeCzU.js:22
+Gc @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Al @ index-CeFFeCzU.js:9
+jl @ index-CeFFeCzU.js:9
+Ju @ index-CeFFeCzU.js:9
+(anonymous) @ index-CeFFeCzU.js:9
+D @ index-CeFFeCzU.js:2
+postMessage
+ee @ index-CeFFeCzU.js:2
+D @ index-CeFFeCzU.js:2
+postMessage
+ee @ index-CeFFeCzU.js:2
+D @ index-CeFFeCzU.js:2
+postMessage
+ee @ index-CeFFeCzU.js:2
+e.unstable_scheduleCallback @ index-CeFFeCzU.js:2
+fd @ index-CeFFeCzU.js:9
+dd @ index-CeFFeCzU.js:9
+(anonymous) @ index-CeFFeCzU.js:9Understand this error
+index-CeFFeCzU.js:12  POST https://cv-mister.vercel.app/api/auth/firebase-sync 500 (Internal Server Error)
+c @ index-CeFFeCzU.js:12
+await in c
+signIn @ index-CeFFeCzU.js:12
+await in signIn
+onSubmit @ index-CeFFeCzU.js:22
+Cd @ index-CeFFeCzU.js:9
+(anonymous) @ index-CeFFeCzU.js:9
+fn @ index-CeFFeCzU.js:9
+Od @ index-CeFFeCzU.js:9
+up @ index-CeFFeCzU.js:10
+cp @ index-CeFFeCzU.js:10Understand this error
