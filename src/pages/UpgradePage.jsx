@@ -83,7 +83,7 @@ const UpgradePage = () => {
 
   const sendToWebhook = async (base64, userInfo) => {
     try {
-      await fetch('https://ahmed144.app.n8n.cloud/webhook/dfa3be7f-785a-4472-95b8-b9c5fb5bdeeb', {
+      await fetch('/api/payment-webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

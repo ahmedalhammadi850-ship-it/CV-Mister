@@ -115,7 +115,7 @@ async function main() {
   // Chat webhook proxy — avoids CORS when calling n8n from the browser
   app.post("/api/chat", async (req, res) => {
     try {
-      const CHAT_WEBHOOK = process.env.N8N_WEBHOOK_URL || "https://ahmed144.app.n8n.cloud/webhook/1d6ee35d-0280-4d68-a839-eeb1b13e298e";
+      const CHAT_WEBHOOK = process.env.N8N_CHAT_WEBHOOK_URL || process.env.N8N_WEBHOOK_URL || "https://ahmed144.app.n8n.cloud/webhook/1d6ee35d-0280-4d68-a839-eeb1b13e298e";
       const response = await fetch(CHAT_WEBHOOK, {
         method: "POST",
         headers: { "Content-Type": "application/json" },

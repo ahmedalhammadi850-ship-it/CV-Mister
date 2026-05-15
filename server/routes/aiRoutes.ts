@@ -8,6 +8,31 @@ function getOpenAI() {
   });
 }
 
+async function rewriteViaN8n(text: string, action: string, language: string): Promise<string | null> {
+  const webhookUrl = process.env.N8N_AI_WEBHOOK_URL;
+  if (!webhookUrl) return null;
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, action, language }),
+    });
+    const raw = await response.text();
+    let parsed: any = null;
+    try { parsed = JSON.parse(raw); } catch { parsed = { output: raw }; }
+    return (
+      parsed?.result ||
+      parsed?.output ||
+      parsed?.text ||
+      parsed?.message ||
+      (Array.isArray(parsed) && (parsed[0]?.result || parsed[0]?.output)) ||
+      (typeof parsed === "string" ? parsed : null)
+    );
+  } catch {
+    return null;
+  }
+}
+
 export function registerAIRoutes(app: Express) {
   app.post("/api/ai/rewrite", async (req: Request, res: Response) => {
     const { text, action, language } = req.body as {
@@ -20,6 +45,13 @@ export function registerAIRoutes(app: Express) {
       return res.status(400).json({ message: "text and action are required" });
     }
 
+    // Try n8n webhook first if configured
+    const n8nResult = await rewriteViaN8n(text, action, language);
+    if (n8nResult) {
+      return res.json({ result: n8nResult });
+    }
+
+    // Fall back to OpenAI
     const prompts: Record<typeof action, string> = {
       improve: language === "ar"
         ? `أنت خبير في كتابة السير الذاتية. حسِّن النص التالي ليبدو أكثر احترافية وإقناعاً، مع الحفاظ على المعنى الأصلي. أعطني النص المحسَّن فقط بدون أي شرح:\n\n${text}`
@@ -42,12 +74,26 @@ export function registerAIRoutes(app: Express) {
         max_tokens: 500,
         temperature: 0.7,
       });
-
       const result = completion.choices[0]?.message?.content?.trim() ?? "";
       res.json({ result });
     } catch (err: any) {
       console.error("AI rewrite error:", err?.message);
       res.status(500).json({ message: "AI_ERROR" });
+    }
+  });
+
+  // Payment webhook proxy — forwards receipt image to n8n
+  app.post("/api/payment-webhook", async (req: Request, res: Response) => {
+    const webhookUrl = process.env.N8N_PAYMENT_WEBHOOK_URL || "https://ahmed144.app.n8n.cloud/webhook/dfa3be7f-785a-4472-95b8-b9c5fb5bdeeb";
+    try {
+      await fetch(webhookUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(req.body),
+      });
+      res.json({ success: true });
+    } catch {
+      res.json({ success: false });
     }
   });
 }
