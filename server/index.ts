@@ -7,6 +7,7 @@ import { registerAIRoutes } from "./routes/aiRoutes";
 import { registerPaymentRoutes } from "./routes/paymentRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
 import { registerTemplateRoutes } from "./routes/templateRoutes";
+import { pageRateLimiter } from "./middleware/rateLimiter";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -87,6 +88,8 @@ async function main() {
       res.status(500).json({ reply: "" });
     }
   });
+
+  app.get("/api/ping", pageRateLimiter);
 
   await setupAuth(app);
   registerAuthRoutes(app);

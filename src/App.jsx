@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate, useNavigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
+import { usePageRateLimit } from './hooks/usePageRateLimit';
 import Layout from './components/layout/Layout';
 import HomePage from './pages/HomePage';
 import BuilderPage from './pages/BuilderPage';
@@ -15,6 +16,7 @@ import BusinessContactPage from './pages/BusinessContactPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import RateLimitedPage from './pages/RateLimitedPage';
 import ChatWidget from './components/ChatWidget';
 
 function BusinessExpiredModal() {
@@ -69,6 +71,9 @@ function GuestRoute({ children }) {
 
 function App() {
   const { isRTL } = useAuth();
+  const { blocked, remainingMs } = usePageRateLimit();
+
+  if (blocked) return <RateLimitedPage remainingMs={remainingMs} />;
 
   return (
     <div className={`min-h-screen bg-slate-50 text-slate-900 ${isRTL ? 'rtl' : 'ltr'}`}>
