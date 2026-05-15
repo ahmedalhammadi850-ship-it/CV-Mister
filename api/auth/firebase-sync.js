@@ -1,9 +1,17 @@
-import pg from "pg";
+import { Pool } from "pg";
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+let pool;
+function getPool() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL environment variable is not set on Vercel");
+  }
+  if (!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  return pool;
+}
 
 async function verifyFirebaseToken(idToken) {
   const apiKey = process.env.VITE_FIREBASE_API_KEY;
+  if (!apiKey) throw new Error("VITE_FIREBASE_API_KEY not set");
   const response = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
     {
@@ -28,16 +36,11 @@ export default async function handler(req, res) {
     const firebaseUser = await verifyFirebaseToken(idToken);
     const { localId: firebaseUid, email, emailVerified } = firebaseUser;
 
-    if (!emailVerified) {
-      return res.status(403).json({ message: "Email not verified" });
-    }
+    if (!emailVerified) return res.status(403).json({ message: "Email not verified" });
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     try {
-      let result = await client.query(
-        "SELECT * FROM users WHERE email = $1",
-        [email.toLowerCase()]
-      );
+      let result = await client.query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()]);
       let user = result.rows[0];
 
       if (!user) {
@@ -54,14 +57,9 @@ export default async function handler(req, res) {
       }
 
       let plan = user.plan || "free";
-      if (plan === "business" && user.plan_expires_at) {
-        if (new Date() > new Date(user.plan_expires_at)) {
-          plan = "free";
-          await client.query(
-            "UPDATE users SET plan = 'free', updated_at = NOW() WHERE id = $1",
-            [user.id]
-          );
-        }
+      if (plan === "business" && user.plan_expires_at && new Date() > new Date(user.plan_expires_at)) {
+        plan = "free";
+        await client.query("UPDATE users SET plan = 'free', updated_at = NOW() WHERE id = $1", [user.id]);
       }
 
       res.json({
@@ -78,7 +76,7 @@ export default async function handler(req, res) {
       client.release();
     }
   } catch (error) {
-    console.error("Firebase sync error:", error);
-    res.status(500).json({ message: "Failed to sync user" });
+    console.error("Firebase sync error:", error.message);
+    res.status(500).json({ message: error.message || "Failed to sync user" });
   }
 }

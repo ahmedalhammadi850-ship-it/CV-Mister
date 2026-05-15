@@ -1,9 +1,17 @@
-import pg from "pg";
+import { Pool } from "pg";
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+let pool;
+function getPool() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL environment variable is not set on Vercel");
+  }
+  if (!pool) pool = new Pool({ connectionString: process.env.DATABASE_URL, ssl: { rejectUnauthorized: false } });
+  return pool;
+}
 
 async function verifyFirebaseToken(idToken) {
   const apiKey = process.env.VITE_FIREBASE_API_KEY;
+  if (!apiKey) throw new Error("VITE_FIREBASE_API_KEY not set");
   const response = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
     {
@@ -23,21 +31,16 @@ export default async function handler(req, res) {
 
   try {
     const { idToken, firstName, lastName } = req.body;
-    if (!idToken || !firstName) {
-      return res.status(400).json({ message: "Missing required fields" });
-    }
+    if (!idToken || !firstName) return res.status(400).json({ message: "Missing required fields" });
 
     const firebaseUser = await verifyFirebaseToken(idToken);
     const { localId: firebaseUid, email } = firebaseUser;
 
     if (!email) return res.status(400).json({ message: "No email from Firebase" });
 
-    const client = await pool.connect();
+    const client = await getPool().connect();
     try {
-      const result = await client.query(
-        "SELECT id FROM users WHERE email = $1",
-        [email.toLowerCase()]
-      );
+      const result = await client.query("SELECT id FROM users WHERE email = $1", [email.toLowerCase()]);
       if (!result.rows[0]) {
         await client.query(
           "INSERT INTO users (email, first_name, last_name, firebase_uid) VALUES ($1, $2, $3, $4)",
@@ -49,7 +52,7 @@ export default async function handler(req, res) {
       client.release();
     }
   } catch (error) {
-    console.error("Firebase register error:", error);
-    res.status(500).json({ message: "Failed to register user" });
+    console.error("Firebase register error:", error.message);
+    res.status(500).json({ message: error.message || "Failed to register user" });
   }
 }
