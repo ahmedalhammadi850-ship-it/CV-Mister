@@ -1,7 +1,8 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
-const features = [
+const featuresData = [
   {
     icon: (
       <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
@@ -104,14 +105,9 @@ const HowItWorks = ({ isRTL }) => {
 
   return (
     <div className="relative overflow-hidden rounded-3xl p-10 mb-8" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #2d1b69 100%)' }}>
-      {/* Background dots */}
-      <div className="absolute inset-0 opacity-10" style={{
-        backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)',
-        backgroundSize: '28px 28px',
-      }} />
+      <div className="absolute inset-0 opacity-10" style={{ backgroundImage: 'radial-gradient(circle, white 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
       <div className="absolute top-0 right-0 w-64 h-64 rounded-full opacity-10 blur-3xl" style={{ background: 'radial-gradient(circle, #818cf8, transparent)' }} />
       <div className="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10 blur-3xl" style={{ background: 'radial-gradient(circle, #a855f7, transparent)' }} />
-
       <div className="relative">
         <div className="text-center mb-10">
           <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-300 bg-indigo-500/20 border border-indigo-500/30 rounded-full px-3 py-1.5 mb-4">
@@ -121,11 +117,8 @@ const HowItWorks = ({ isRTL }) => {
             {isRTL ? 'ثلاث خطوات فقط' : 'Three steps to your best resume'}
           </h3>
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-          {/* Connector */}
           <div className="hidden md:block absolute top-10 left-[33%] right-[33%] h-px bg-gradient-to-r from-indigo-500/50 via-purple-500/50 to-fuchsia-500/50" />
-
           {steps.map((step, i) => (
             <div key={i} className="relative flex flex-col items-center text-center">
               <div
@@ -147,52 +140,65 @@ const HowItWorks = ({ isRTL }) => {
 
 const Features = () => {
   const { isRTL } = useAuth();
+  const { isDark } = useTheme();
+
+  const sectionBg = isDark
+    ? 'linear-gradient(180deg, #0f172a 0%, #0d1526 100%)'
+    : 'linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%)';
+
+  const ctaBg = isDark ? '#0f172a' : '#ffffff';
+  const badgeBg = isDark ? 'rgba(49,46,129,0.3)' : '#eef2ff';
+  const badgeBorder = isDark ? 'rgba(99,102,241,0.35)' : '#c7d2fe';
+  const badgeColor = isDark ? '#a5b4fc' : '#4338ca';
+  const headingColor = isDark ? '#f1f5f9' : '#0f172a';
+  const subColor = isDark ? '#94a3b8' : '#64748b';
+  const secBtnBg = isDark ? '#1e293b' : '#f8fafc';
+  const secBtnBorder = isDark ? '#334155' : '#e2e8f0';
+  const secBtnColor = isDark ? '#cbd5e1' : '#334155';
+  const trustColor = isDark ? '#64748b' : '#94a3b8';
 
   return (
     <>
       {/* ── Features Section ── */}
-      <section className="py-24 relative" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%)' }}>
+      <section className="py-24 relative" style={{ background: sectionBg }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Section Header */}
           <div className="text-center max-w-2xl mx-auto mb-14">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-3.5 py-1.5 mb-4">
+            <span
+              className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3.5 py-1.5 mb-4 border"
+              style={{ background: badgeBg, borderColor: badgeBorder, color: badgeColor }}
+            >
               {isRTL ? 'المميزات' : 'Features'}
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-4 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4 leading-tight" style={{ color: headingColor }}>
               {isRTL ? 'كل ما تحتاجه للحصول على المقابلة' : 'Everything you need to get the interview'}
             </h2>
-            <p className="text-lg text-slate-500 leading-relaxed">
+            <p className="text-lg leading-relaxed" style={{ color: subColor }}>
               {isRTL
                 ? 'أدوات متكاملة تجعلك تبرز من بين آلاف المتقدمين وتصل لوظيفة أحلامك.'
                 : "We've built every tool you need to craft a resume that gets noticed and lands interviews."}
             </p>
           </div>
 
-          {/* How It Works */}
           <HowItWorks isRTL={isRTL} />
 
-          {/* Features Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-8">
-            {features.map((feature, i) => (
+            {featuresData.map((feature, i) => (
               <div
                 key={i}
                 className={`group relative p-7 rounded-2xl border ${feature.light} ${feature.border} transition-all duration-300 hover:-translate-y-1 overflow-hidden`}
-                style={{ boxShadow: '0 2px 12px rgba(0,0,0,0.04)' }}
+                style={{ boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.04)' }}
               >
                 <div
                   className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"
                   style={{ background: `radial-gradient(ellipse at top left, ${feature.glow} 0%, transparent 70%)` }}
                 />
-                <div
-                  className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} text-white flex items-center justify-center mb-5 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}
-                >
+                <div className={`relative w-12 h-12 rounded-xl bg-gradient-to-br ${feature.gradient} text-white flex items-center justify-center mb-5 shadow-lg transition-transform duration-300 group-hover:scale-110 group-hover:rotate-3`}>
                   {feature.icon}
                 </div>
-                <h3 className="relative text-base font-heading font-bold text-slate-900 mb-2">
+                <h3 className="relative text-base font-heading font-bold mb-2" style={{ color: headingColor }}>
                   {feature.title[isRTL ? 'ar' : 'en']}
                 </h3>
-                <p className="relative text-sm text-slate-500 leading-relaxed">
+                <p className="relative text-sm leading-relaxed" style={{ color: subColor }}>
                   {feature.description[isRTL ? 'ar' : 'en']}
                 </p>
               </div>
@@ -202,22 +208,25 @@ const Features = () => {
       </section>
 
       {/* ── CTA Section ── */}
-      <section className="py-24 relative overflow-hidden" style={{ background: '#ffffff' }}>
+      <section className="py-24 relative overflow-hidden" style={{ background: ctaBg }}>
         <div className="absolute -top-32 -right-32 w-96 h-96 rounded-full blur-3xl opacity-30" style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.15), transparent)' }} />
         <div className="absolute -bottom-32 -left-32 w-96 h-96 rounded-full blur-3xl opacity-30" style={{ background: 'radial-gradient(circle, rgba(192,38,211,0.12), transparent)' }} />
 
         <div className="relative container mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="max-w-2xl mx-auto">
-            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-100 rounded-full px-3.5 py-1.5 mb-6">
+            <span
+              className="inline-flex items-center gap-1.5 text-xs font-semibold rounded-full px-3.5 py-1.5 mb-6 border"
+              style={{ background: badgeBg, borderColor: badgeBorder, color: badgeColor }}
+            >
               {isRTL ? 'ابدأ الآن' : 'Get started today'}
             </span>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-5 leading-tight">
+            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-5 leading-tight" style={{ color: headingColor }}>
               {isRTL
                 ? (<>سيرتك الذاتية الأفضل<br /><span style={{ background: 'linear-gradient(135deg, #4f46e5, #c026d3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>تنتظرك الآن</span></>)
                 : (<>Your best resume is<br /><span style={{ background: 'linear-gradient(135deg, #4f46e5, #c026d3)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>one click away</span></>)
               }
             </h2>
-            <p className="text-lg text-slate-500 mb-10 leading-relaxed">
+            <p className="text-lg mb-10 leading-relaxed" style={{ color: subColor }}>
               {isRTL
                 ? 'انضم لأكثر من 50 ألف محترف بنوا سيرهم الذاتية معنا وحصلوا على وظائف أحلامهم.'
                 : 'Join over 50,000 professionals who built their resumes with us and landed their dream jobs.'}
@@ -235,20 +244,19 @@ const Features = () => {
               </Link>
               <Link
                 to="/templates"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-slate-700 text-base border border-slate-200 bg-slate-50 hover:bg-slate-100 transition-all duration-200"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-base transition-all duration-200"
+                style={{ background: secBtnBg, border: `1px solid ${secBtnBorder}`, color: secBtnColor }}
               >
                 {isRTL ? 'استعرض القوالب' : 'Browse templates'}
               </Link>
             </div>
-
-            {/* Trust badges */}
             <div className="mt-10 flex items-center justify-center gap-6 flex-wrap">
               {[
                 { icon: '🔒', text: isRTL ? 'بيانات آمنة' : 'Secure data' },
                 { icon: '⚡', text: isRTL ? 'مجاني دائماً' : 'Always free' },
                 { icon: '📄', text: isRTL ? 'PDF بجودة عالية' : 'High-quality PDF' },
               ].map(({ icon, text }, i) => (
-                <div key={i} className="flex items-center gap-2 text-slate-400 text-sm">
+                <div key={i} className="flex items-center gap-2 text-sm" style={{ color: trustColor }}>
                   <span>{icon}</span>
                   <span>{text}</span>
                 </div>

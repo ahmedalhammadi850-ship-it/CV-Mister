@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useCV } from '../context/useCV';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { useTemplateConfig } from '../context/TemplateConfigContext';
 import ModernTemplate from '../templates/ModernTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
@@ -406,7 +407,7 @@ const PREVIEW_SCALE = 0.28;
 const PREVIEW_W = 794;
 const PREVIEW_H = 1122;
 
-const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, isLocked }) => {
+const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, isLocked, isDark }) => {
   const Component = template.component;
   const previewTheme = { primaryColor: template.color };
 
@@ -415,6 +416,7 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, is
       className={`group rounded-2xl overflow-hidden border-2 transition-all duration-300 cursor-pointer shadow-sm hover:shadow-xl ${
         isSelected ? 'border-primary-500 shadow-lg shadow-primary-100' : 'border-slate-200 hover:border-primary-300'
       }`}
+      style={isDark ? { borderColor: isSelected ? '#6366f1' : '#334155' } : {}}
       onClick={() => onUse(template.id)}
     >
       {/* Live mini preview */}
@@ -476,11 +478,11 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, is
       </div>
 
       {/* Card footer */}
-      <div className="p-4 bg-white">
+      <div className="p-4" style={{ background: isDark ? '#1e293b' : '#ffffff' }}>
         <div className="flex items-center justify-between mb-1">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 rounded-full" style={{ backgroundColor: template.color }} />
-            <h3 className="font-bold text-slate-800">
+            <h3 className="font-bold" style={{ color: isDark ? '#e2e8f0' : '#1e293b' }}>
               {isRTL ? template.arabicName : template.name}
             </h3>
           </div>
@@ -490,7 +492,7 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, is
             </span>
           )}
         </div>
-        <p className="text-xs text-slate-500">
+        <p className="text-xs" style={{ color: isDark ? '#64748b' : '#64748b' }}>
           {isRTL ? template.arabicDesc : template.desc}
         </p>
       </div>
@@ -507,6 +509,7 @@ const TABS = [
 const TemplatesPage = () => {
   const { selectedTemplate, setSelectedTemplate, previewTemplate } = useCV();
   const { isRTL, currentUser } = useAuth();
+  const { isDark } = useTheme();
   const { freeTemplates } = useTemplateConfig();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
@@ -526,19 +529,25 @@ const TemplatesPage = () => {
     return true;
   });
 
+  const pageBg = isDark ? '#0f172a' : '#f8fafc';
+  const heroBg = isDark ? '#111827' : '#ffffff';
+  const heroBorder = isDark ? '#1e293b' : '#f1f5f9';
+  const headingColor = isDark ? '#f1f5f9' : '#0f172a';
+  const subColor = isDark ? '#94a3b8' : '#64748b';
+
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen" style={{ background: pageBg }}>
       {/* Hero */}
-      <div className="bg-white border-b border-slate-100 py-12 px-4">
+      <div className="py-12 px-4 border-b" style={{ background: heroBg, borderColor: heroBorder }}>
         <div className="container mx-auto max-w-6xl text-center">
           <div className="inline-flex items-center gap-2 bg-primary-50 text-primary-700 px-3 py-1 rounded-full text-sm font-medium mb-4">
             <span>✦</span>
             <span>{isRTL ? 'معرض القوالب' : 'Template Gallery'}</span>
           </div>
-          <h1 className="text-4xl font-bold text-slate-900 mb-3">
+          <h1 className="text-4xl font-bold mb-3" style={{ color: headingColor }}>
             {isRTL ? 'اختر قالبك المثالي' : 'Choose Your Perfect Template'}
           </h1>
-          <p className="text-slate-500 max-w-xl mx-auto text-base">
+          <p className="max-w-xl mx-auto text-base" style={{ color: subColor }}>
             {isRTL
               ? 'اختر من بين قوالب تصميمية أنيقة أو قوالب مُحسَّنة لأنظمة ATS.'
               : 'Choose from elegant design templates or templates optimized for ATS systems.'}
@@ -547,7 +556,7 @@ const TemplatesPage = () => {
       </div>
 
       {/* Filter Navbar */}
-      <div className="bg-white border-b border-slate-100 sticky top-0 z-20 shadow-sm">
+      <div className="border-b sticky top-0 z-20 shadow-sm" style={{ background: heroBg, borderColor: heroBorder }}>
         <div className="container mx-auto max-w-6xl px-4">
           <div className="flex items-center gap-1 py-3 overflow-x-auto">
             {TABS.map(tab => {
@@ -564,8 +573,9 @@ const TemplatesPage = () => {
                   className={`flex items-center gap-2 px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 ${
                     isActive
                       ? 'bg-primary-600 text-white shadow-md shadow-primary-200'
-                      : 'text-slate-500 hover:text-slate-800 hover:bg-slate-100'
+                      : ''
                   }`}
+                  style={!isActive ? { color: isDark ? '#94a3b8' : '#64748b' } : {}}
                 >
                   {tab.id === 'ats' && (
                     <span className={`text-xs font-bold px-1.5 py-0.5 rounded ${isActive ? 'bg-white/20 text-white' : 'bg-green-100 text-green-700'}`}>
@@ -573,12 +583,13 @@ const TemplatesPage = () => {
                     </span>
                   )}
                   {tab.id === 'design' && (
-                    <span className={`text-xs ${isActive ? 'opacity-80' : 'text-slate-400'}`}>✦</span>
+                    <span className={`text-xs ${isActive ? 'opacity-80' : ''}`} style={!isActive ? { color: isDark ? '#64748b' : '#94a3b8' } : {}}>✦</span>
                   )}
                   {isRTL ? tab.ar : tab.en}
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${
-                    isActive ? 'bg-white/25 text-white' : 'bg-slate-100 text-slate-500'
-                  }`}>
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded-full font-medium ${isActive ? 'bg-white/25 text-white' : ''}`}
+                    style={!isActive ? { background: isDark ? '#1e293b' : '#f1f5f9', color: isDark ? '#94a3b8' : '#64748b' } : {}}
+                  >
                     {count}
                   </span>
                 </button>
@@ -615,13 +626,14 @@ const TemplatesPage = () => {
               onUse={handleUse}
               isFree={template.id === 'minimal'}
               isLocked={isFreeUser && template.id !== 'minimal'}
+              isDark={isDark}
             />
           ))}
         </div>
 
         {/* CTA */}
         <div className="mt-12 text-center">
-          <p className="text-slate-500 mb-4 text-sm">
+          <p className="mb-4 text-sm" style={{ color: subColor }}>
             {isRTL
               ? `تم اختيار قالب "${active?.arabicName || ''}"`
               : `"${active?.name || ''}" template selected`}

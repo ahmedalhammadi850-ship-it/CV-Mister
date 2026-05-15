@@ -1,4 +1,5 @@
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { Link } from 'react-router-dom';
 
 const content = {
@@ -162,7 +163,14 @@ const content = {
 
 export default function AboutPage() {
   const { isRTL } = useAuth();
+  const { isDark } = useTheme();
   const t = isRTL ? content.ar : content.en;
+
+  const bg = isDark ? '#0f172a' : '#ffffff';
+  const surfaceBg = isDark ? '#1e293b' : '#ffffff';
+  const headingColor = isDark ? '#f1f5f9' : '#0f172a';
+  const subColor = isDark ? '#94a3b8' : '#64748b';
+  const bodyColor = isDark ? '#cbd5e1' : '#475569';
 
   return (
     <div className="overflow-hidden" dir={isRTL ? 'rtl' : 'ltr'}>
@@ -252,11 +260,11 @@ export default function AboutPage() {
       </section>
 
       {/* ─── Stats ────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
+      <section className="py-20" style={{ background: bg }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <div className="section-tag mx-auto mb-4">{t.stats.tag}</div>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900">{t.stats.title}</h2>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold" style={{ color: headingColor }}>{t.stats.title}</h2>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {t.stats.items.map((s, i) => (
@@ -264,8 +272,10 @@ export default function AboutPage() {
                 key={i}
                 className="relative rounded-3xl p-8 text-center overflow-hidden group card-hover"
                 style={{
-                  background: 'linear-gradient(135deg, #f8f9ff 0%, #f0eeff 100%)',
-                  border: '1px solid rgba(99,102,241,0.12)',
+                  background: isDark
+                    ? 'linear-gradient(135deg, #1e293b 0%, #1a1f3a 100%)'
+                    : 'linear-gradient(135deg, #f8f9ff 0%, #f0eeff 100%)',
+                  border: `1px solid ${isDark ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.12)'}`,
                 }}
               >
                 <div
@@ -273,7 +283,7 @@ export default function AboutPage() {
                   style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.05) 0%, rgba(192,38,211,0.05) 100%)' }}
                 />
                 <div className="stat-number mb-2">{s.value}</div>
-                <div className="text-slate-500 font-medium text-sm">{s.label}</div>
+                <div className="font-medium text-sm" style={{ color: subColor }}>{s.label}</div>
               </div>
             ))}
           </div>
@@ -281,11 +291,11 @@ export default function AboutPage() {
       </section>
 
       {/* ─── Timeline ─────────────────────────────────────────────────── */}
-      <section className="py-20" style={{ background: 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)' }}>
+      <section className="py-20" style={{ background: isDark ? 'linear-gradient(180deg, #0d1526 0%, #0f172a 100%)' : 'linear-gradient(180deg, #f8f9ff 0%, #ffffff 100%)' }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-3xl">
           <div className="text-center mb-14">
             <div className="section-tag mx-auto mb-4">{t.timeline.tag}</div>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900">{t.timeline.title}</h2>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold" style={{ color: headingColor }}>{t.timeline.title}</h2>
           </div>
 
           <div className="relative">
@@ -305,22 +315,22 @@ export default function AboutPage() {
                       <div
                         className="rounded-2xl p-6 group card-hover"
                         style={{
-                          background: 'white',
-                          border: '1px solid rgba(99,102,241,0.12)',
-                          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+                          background: surfaceBg,
+                          border: `1px solid ${isDark ? 'rgba(99,102,241,0.2)' : 'rgba(99,102,241,0.12)'}`,
+                          boxShadow: isDark ? '0 4px 20px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0,0,0,0.05)',
                         }}
                       >
                         <span
                           className="inline-block text-xs font-bold px-3 py-1 rounded-full mb-3"
                           style={{
-                            background: 'linear-gradient(135deg, rgba(79,70,229,0.12), rgba(192,38,211,0.12))',
-                            color: '#4f46e5',
+                            background: 'linear-gradient(135deg, rgba(79,70,229,0.15), rgba(192,38,211,0.15))',
+                            color: isDark ? '#a5b4fc' : '#4f46e5',
                           }}
                         >
                           {item.year}
                         </span>
-                        <h3 className="font-heading font-bold text-slate-900 text-lg mb-2">{item.title}</h3>
-                        <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
+                        <h3 className="font-heading font-bold text-lg mb-2" style={{ color: headingColor }}>{item.title}</h3>
+                        <p className="text-sm leading-relaxed" style={{ color: subColor }}>{item.desc}</p>
                       </div>
                     </div>
 
@@ -342,7 +352,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── Mission + Vision ─────────────────────────────────────────── */}
-      <section className="py-20 bg-white">
+      <section className="py-20" style={{ background: bg }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
 
@@ -350,8 +360,10 @@ export default function AboutPage() {
             <div
               className="rounded-3xl p-10 relative overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, #eef2ff 0%, #f0eeff 100%)',
-                border: '1px solid rgba(99,102,241,0.15)',
+                background: isDark
+                  ? 'linear-gradient(135deg, #1a1f3a 0%, #1e1b4b 100%)'
+                  : 'linear-gradient(135deg, #eef2ff 0%, #f0eeff 100%)',
+                border: `1px solid ${isDark ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.15)'}`,
               }}
             >
               <div
@@ -360,8 +372,8 @@ export default function AboutPage() {
               />
               <div className="relative z-10">
                 <div className="section-tag mb-5">{t.mission.tag}</div>
-                <h2 className="text-2xl font-heading font-bold text-slate-900 mb-4">{t.mission.title}</h2>
-                <p className="text-slate-600 leading-relaxed mb-6">{t.mission.desc}</p>
+                <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: headingColor }}>{t.mission.title}</h2>
+                <p className="leading-relaxed mb-6" style={{ color: bodyColor }}>{t.mission.desc}</p>
                 <ul className="space-y-3">
                   {t.mission.points.map((p, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -373,7 +385,7 @@ export default function AboutPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <span className="text-slate-700 font-medium">{p}</span>
+                      <span className="font-medium" style={{ color: bodyColor }}>{p}</span>
                     </li>
                   ))}
                 </ul>
@@ -384,8 +396,10 @@ export default function AboutPage() {
             <div
               className="rounded-3xl p-10 relative overflow-hidden"
               style={{
-                background: 'linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%)',
-                border: '1px solid rgba(192,38,211,0.15)',
+                background: isDark
+                  ? 'linear-gradient(135deg, #1f1427 0%, #1e1033 100%)'
+                  : 'linear-gradient(135deg, #fdf4ff 0%, #fae8ff 100%)',
+                border: `1px solid ${isDark ? 'rgba(192,38,211,0.25)' : 'rgba(192,38,211,0.15)'}`,
               }}
             >
               <div
@@ -396,15 +410,17 @@ export default function AboutPage() {
                 <div
                   className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold mb-5"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(192,38,211,0.12) 0%, rgba(217,70,239,0.08) 100%)',
-                    color: '#a21caf',
-                    border: '1px solid rgba(192,38,211,0.2)',
+                    background: isDark
+                      ? 'linear-gradient(135deg, rgba(192,38,211,0.2) 0%, rgba(217,70,239,0.15) 100%)'
+                      : 'linear-gradient(135deg, rgba(192,38,211,0.12) 0%, rgba(217,70,239,0.08) 100%)',
+                    color: isDark ? '#e879f9' : '#a21caf',
+                    border: `1px solid ${isDark ? 'rgba(192,38,211,0.35)' : 'rgba(192,38,211,0.2)'}`,
                   }}
                 >
                   {t.vision.tag}
                 </div>
-                <h2 className="text-2xl font-heading font-bold text-slate-900 mb-4">{t.vision.title}</h2>
-                <p className="text-slate-600 leading-relaxed mb-6">{t.vision.desc}</p>
+                <h2 className="text-2xl font-heading font-bold mb-4" style={{ color: headingColor }}>{t.vision.title}</h2>
+                <p className="leading-relaxed mb-6" style={{ color: bodyColor }}>{t.vision.desc}</p>
                 <ul className="space-y-3">
                   {t.vision.points.map((p, i) => (
                     <li key={i} className="flex items-start gap-3">
@@ -416,7 +432,7 @@ export default function AboutPage() {
                           <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                         </svg>
                       </div>
-                      <span className="text-slate-700 font-medium">{p}</span>
+                      <span className="font-medium" style={{ color: bodyColor }}>{p}</span>
                     </li>
                   ))}
                 </ul>
@@ -427,11 +443,11 @@ export default function AboutPage() {
       </section>
 
       {/* ─── Pillars ──────────────────────────────────────────────────── */}
-      <section className="py-20" style={{ background: 'linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%)' }}>
+      <section className="py-20" style={{ background: isDark ? 'linear-gradient(180deg, #0f172a 0%, #0d1526 100%)' : 'linear-gradient(180deg, #ffffff 0%, #f8f9ff 100%)' }}>
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-14">
             <div className="section-tag mx-auto mb-4">{t.pillars.tag}</div>
-            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900">{t.pillars.title}</h2>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold" style={{ color: headingColor }}>{t.pillars.title}</h2>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {t.pillars.items.map((item, i) => (
@@ -439,19 +455,19 @@ export default function AboutPage() {
                 key={i}
                 className="group p-7 rounded-2xl card-hover"
                 style={{
-                  background: 'white',
-                  border: '1px solid rgba(99,102,241,0.1)',
-                  boxShadow: '0 2px 12px rgba(0,0,0,0.04)',
+                  background: surfaceBg,
+                  border: `1px solid ${isDark ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.1)'}`,
+                  boxShadow: isDark ? '0 2px 12px rgba(0,0,0,0.3)' : '0 2px 12px rgba(0,0,0,0.04)',
                 }}
               >
                 <div
                   className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-5 transition-transform duration-300 group-hover:scale-110"
-                  style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.1), rgba(192,38,211,0.1))' }}
+                  style={{ background: isDark ? 'linear-gradient(135deg, rgba(79,70,229,0.2), rgba(192,38,211,0.2))' : 'linear-gradient(135deg, rgba(79,70,229,0.1), rgba(192,38,211,0.1))' }}
                 >
                   {item.icon}
                 </div>
-                <h3 className="font-heading font-bold text-slate-900 text-lg mb-2">{item.title}</h3>
-                <p className="text-slate-500 text-sm leading-relaxed">{item.desc}</p>
+                <h3 className="font-heading font-bold text-lg mb-2" style={{ color: headingColor }}>{item.title}</h3>
+                <p className="text-sm leading-relaxed" style={{ color: subColor }}>{item.desc}</p>
               </div>
             ))}
           </div>
@@ -459,7 +475,7 @@ export default function AboutPage() {
       </section>
 
       {/* ─── CTA ──────────────────────────────────────────────────────── */}
-      <section className="py-20 bg-white relative overflow-hidden">
+      <section className="py-20 relative overflow-hidden" style={{ background: bg }}>
         <div
           className="orb absolute w-96 h-96 opacity-30 -top-24 -start-24"
           style={{ background: 'radial-gradient(circle, rgba(99,102,241,0.12), transparent)' }}
@@ -469,8 +485,8 @@ export default function AboutPage() {
           style={{ background: 'radial-gradient(circle, rgba(192,38,211,0.10), transparent)', animationDelay: '3s' }}
         />
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
-          <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900 mb-4">{t.cta.title}</h2>
-          <p className="text-slate-500 mb-8 text-lg">{t.cta.sub}</p>
+          <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4" style={{ color: headingColor }}>{t.cta.title}</h2>
+          <p className="mb-8 text-lg" style={{ color: subColor }}>{t.cta.sub}</p>
           <Link
             to="/builder"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white text-lg transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5"
