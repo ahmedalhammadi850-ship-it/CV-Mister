@@ -36,7 +36,6 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "memoizee": "^0.4.17",
-    "openai": "^6.37.0",
     "openid-client": "^6.8.4",
     "p-limit": "^7.3.0",
     "p-retry": "^7.1.1",
