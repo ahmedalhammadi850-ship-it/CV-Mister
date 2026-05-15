@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 const CHAT_API = '/api/chat';
+const CHAT_WEBHOOK_FALLBACK = import.meta.env.VITE_N8N_CHAT_WEBHOOK_URL || 'https://ahmed144.app.n8n.cloud/webhook/1d6ee35d-0280-4d68-a839-eeb1b13e298e';
 
 export default function ChatWidget() {
   const { isRTL } = useAuth();
@@ -37,31 +38,51 @@ export default function ChatWidget() {
     setInput('');
     setLoading(true);
 
-    try {
-      const response = await fetch(CHAT_API, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }),
-      });
+    const extractReply = (data, fallback) =>
+      data?.reply || data?.output || data?.message || data?.text ||
+      (Array.isArray(data) && (data[0]?.output || data[0]?.message || data[0]?.text || data[0]?.reply)) ||
+      (typeof data === 'string' ? data : null) ||
+      fallback;
 
-      let botText = isRTL ? 'تم استلام رسالتك!' : 'Your message was received!';
-      if (response.ok) {
-        try {
-          const data = await response.json();
-          botText =
-            data?.reply ||
-            data?.output ||
-            data?.message ||
-            data?.text ||
-            (typeof data === 'string' ? data : botText);
-        } catch {
-          botText = await response.text() || botText;
-        }
+    const parseResponse = async (response, fallback) => {
+      if (!response.ok) return null;
+      try {
+        const data = await response.json();
+        return extractReply(data, fallback);
+      } catch {
+        const text = await response.text().catch(() => '');
+        return text || null;
+      }
+    };
+
+    try {
+      const fallbackText = isRTL ? 'حدث خطأ، يرجى المحاولة مجدداً.' : 'Something went wrong. Please try again.';
+
+      let botText = null;
+
+      try {
+        const response = await fetch(CHAT_API, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text }),
+        });
+        botText = await parseResponse(response, null);
+      } catch {
+        botText = null;
+      }
+
+      if (!botText) {
+        const response = await fetch(CHAT_WEBHOOK_FALLBACK, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, chatInput: text }),
+        });
+        botText = await parseResponse(response, fallbackText);
       }
 
       setMessages((prev) => [
         ...prev,
-        { id: Date.now() + 1, role: 'bot', text: botText },
+        { id: Date.now() + 1, role: 'bot', text: botText || fallbackText },
       ]);
     } catch {
       setMessages((prev) => [
