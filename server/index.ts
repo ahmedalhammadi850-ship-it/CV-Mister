@@ -1,20 +1,71 @@
 import express from "express";
 import path from "path";
 import { fileURLToPath } from "url";
+import helmet from "helmet";
+import cors from "cors";
 import { setupAuth, registerAuthRoutes } from "./replit_integrations/auth";
 import { registerCVRoutes } from "./routes/cvRoutes";
 import { registerAIRoutes } from "./routes/aiRoutes";
 import { registerPaymentRoutes } from "./routes/paymentRoutes";
 import { registerAdminRoutes } from "./routes/adminRoutes";
 import { registerTemplateRoutes } from "./routes/templateRoutes";
-import { pageRateLimiter } from "./middleware/rateLimiter";
+import { pageRateLimiter, apiRateLimiter } from "./middleware/rateLimiter";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const ALLOWED_ORIGINS = [
+  process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "",
+  ...(process.env.REPLIT_DOMAINS ? process.env.REPLIT_DOMAINS.split(",").map((d) => `https://${d.trim()}`) : []),
+  "http://localhost:5000",
+  "http://localhost:5001",
+  "http://localhost:5002",
+].filter(Boolean);
+
 async function main() {
   const app = express();
+
+  // Security: Helmet — sets secure HTTP headers
+  app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
+          styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+          fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
+          imgSrc: ["'self'", "data:", "blob:", "https:"],
+          connectSrc: ["'self'", "https:"],
+          frameSrc: ["'none'"],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+      crossOriginEmbedderPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    })
+  );
+
+  // Security: CORS
+  app.use(
+    cors({
+      origin: (origin, callback) => {
+        if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error("Not allowed by CORS"));
+        }
+      },
+      credentials: true,
+      methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+      allowedHeaders: ["Content-Type", "Authorization"],
+    })
+  );
+
   app.use(express.json({ limit: "10mb" }));
   app.use(express.urlencoded({ extended: false }));
+
+  // Security: Rate limiting on all API routes
+  app.use("/api", apiRateLimiter);
 
   // Font proxy — fetches Google Fonts CSS server-side to avoid CORS in html-to-image
   app.get("/api/font-proxy", async (req, res) => {
@@ -30,7 +81,6 @@ async function main() {
         },
       });
       const css = await response.text();
-      // Rewrite font file URLs to go through a second proxy path
       const rewritten = css.replace(
         /url\((https:\/\/fonts\.gstatic\.com[^)]+)\)/g,
         "url(/api/font-file?url=$1)"
