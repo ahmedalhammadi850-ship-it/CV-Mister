@@ -3,7 +3,6 @@ import bcrypt from "bcryptjs";
 import { db } from "../../db";
 import { users } from "@shared/models/auth";
 import { eq } from "drizzle-orm";
-import { isAuthenticated } from "./replitAuth";
 
 declare module "express-session" {
   interface SessionData {
@@ -11,72 +10,118 @@ declare module "express-session" {
   }
 }
 
+async function verifyFirebaseToken(idToken: string): Promise<any> {
+  const apiKey = process.env.VITE_FIREBASE_API_KEY;
+  const response = await fetch(
+    `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ idToken }),
+    }
+  );
+  if (!response.ok) throw new Error("Invalid Firebase token");
+  const data = await response.json();
+  if (!data.users || data.users.length === 0) throw new Error("User not found");
+  return data.users[0];
+}
+
 export function registerAuthRoutes(app: Express): void {
-  app.post("/api/auth/register", async (req: Request, res: Response) => {
+  app.post("/api/auth/firebase-register", async (req: Request, res: Response) => {
     try {
-      const { firstName, lastName, email, password } = req.body;
-
-      if (!email || !password || !firstName) {
-        return res.status(400).json({ message: "الاسم والبريد الإلكتروني وكلمة المرور مطلوبة" });
+      const { idToken, firstName, lastName } = req.body;
+      if (!idToken || !firstName) {
+        return res.status(400).json({ message: "Missing required fields" });
       }
 
-      if (password.length < 6) {
-        return res.status(400).json({ message: "كلمة المرور يجب أن تكون 6 أحرف على الأقل" });
-      }
+      const firebaseUser = await verifyFirebaseToken(idToken);
+      const { localId: firebaseUid, email } = firebaseUser;
+
+      if (!email) return res.status(400).json({ message: "No email from Firebase" });
 
       const [existing] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
-      if (existing) {
-        return res.status(400).json({ message: "هذا البريد الإلكتروني مسجل بالفعل" });
-      }
-
-      const passwordHash = await bcrypt.hash(password, 12);
-
-      const [user] = await db
-        .insert(users)
-        .values({
+      if (!existing) {
+        await db.insert(users).values({
           email: email.toLowerCase(),
           firstName,
           lastName: lastName || null,
-          passwordHash,
-        })
-        .returning();
+          firebaseUid,
+        });
+      }
+
+      res.status(201).json({ success: true });
+    } catch (error) {
+      console.error("Firebase register error:", error);
+      res.status(500).json({ message: "Failed to register user" });
+    }
+  });
+
+  app.post("/api/auth/firebase-sync", async (req: Request, res: Response) => {
+    try {
+      const { idToken } = req.body;
+      if (!idToken) return res.status(400).json({ message: "Missing token" });
+
+      const firebaseUser = await verifyFirebaseToken(idToken);
+      const { localId: firebaseUid, email, emailVerified } = firebaseUser;
+
+      if (!emailVerified) {
+        return res.status(403).json({ message: "Email not verified" });
+      }
+
+      let [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
+
+      if (!user) {
+        [user] = await db
+          .insert(users)
+          .values({ email: email.toLowerCase(), firebaseUid })
+          .returning();
+      } else if (!user.firebaseUid) {
+        await db.update(users).set({ firebaseUid, updatedAt: new Date() }).where(eq(users.id, user.id));
+      }
 
       (req.session as any).userId = user.id;
 
-      res.status(201).json({
+      let plan = user.plan || "free";
+      if (plan === "business" && user.planExpiresAt) {
+        const now = new Date();
+        const expires = new Date(user.planExpiresAt);
+        if (now > expires) {
+          plan = "free";
+          await db.update(users).set({ plan: "free", updatedAt: new Date() }).where(eq(users.id, user.id));
+        }
+      }
+
+      res.json({
         id: user.id,
         email: user.email,
         firstName: user.firstName,
         lastName: user.lastName,
         profileImageUrl: user.profileImageUrl,
+        plan,
+        cvCount: user.cvCount || 0,
+        planExpiresAt: user.planExpiresAt || null,
       });
     } catch (error) {
-      console.error("Register error:", error);
-      res.status(500).json({ message: "حدث خطأ أثناء إنشاء الحساب" });
+      console.error("Firebase sync error:", error);
+      res.status(500).json({ message: "Failed to sync user" });
     }
   });
 
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     try {
       const { email, password } = req.body;
-
       if (!email || !password) {
         return res.status(400).json({ message: "البريد الإلكتروني وكلمة المرور مطلوبان" });
       }
-
       const [user] = await db.select().from(users).where(eq(users.email, email.toLowerCase()));
-
       if (!user || !user.passwordHash) {
         return res.status(401).json({ message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
       }
-
       const valid = await bcrypt.compare(password, user.passwordHash);
       if (!valid) {
         return res.status(401).json({ message: "البريد الإلكتروني أو كلمة المرور غير صحيحة" });
       }
-
       (req.session as any).userId = user.id;
-
       res.json({
         id: user.id,
         email: user.email,
@@ -102,15 +147,12 @@ export function registerAuthRoutes(app: Express): void {
 
       const serializeUser = async (user: any) => {
         let plan = user.plan || "free";
-        // Auto-downgrade business plan if expired
         if (plan === "business" && user.planExpiresAt) {
           const now = new Date();
           const expires = new Date(user.planExpiresAt);
           if (now > expires) {
             plan = "free";
-            await db.update(users)
-              .set({ plan: "free", updatedAt: new Date() })
-              .where(eq(users.id, user.id));
+            await db.update(users).set({ plan: "free", updatedAt: new Date() }).where(eq(users.id, user.id));
           }
         }
         return {

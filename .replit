@@ -80,3 +80,8 @@ publicDir = "dist"
 [userenv]
 
 [userenv.shared]
+VITE_FIREBASE_API_KEY = "AIzaSyAWOigTY6lsunLk6tTgeoXTm4JmwWUR4No"
+VITE_FIREBASE_AUTH_DOMAIN = "cv-mister-e4bbc.firebaseapp.com"
+VITE_FIREBASE_PROJECT_ID = "cv-mister-e4bbc"
+VITE_FIREBASE_APP_ID = "1:804951280569:web:5a75c62431fc26a6118468"
+VITE_FIREBASE_MESSAGING_SENDER_ID = "804951280569"

@@ -14,6 +14,7 @@ import UpgradePage from './pages/UpgradePage';
 import BusinessContactPage from './pages/BusinessContactPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import VerifyEmailPage from './pages/VerifyEmailPage';
 import ChatWidget from './components/ChatWidget';
 
 function BusinessExpiredModal() {
@@ -77,6 +78,7 @@ function App() {
         <Route path="/login"           element={<GuestRoute><LoginPage /></GuestRoute>} />
         <Route path="/signup"          element={<GuestRoute><SignupPage /></GuestRoute>} />
         <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
 
         <Route path="/"          element={<Layout><HomePage /></Layout>} />
         <Route path="/templates" element={<Layout><TemplatesPage /></Layout>} />

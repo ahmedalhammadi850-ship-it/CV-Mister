@@ -22,6 +22,7 @@ export const users = pgTable("users", {
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
   passwordHash: varchar("password_hash"),
+  firebaseUid: varchar("firebase_uid").unique(),
   plan: varchar("plan").notNull().default("free"),
   cvCount: integer("cv_count").notNull().default(0),
   planExpiresAt: timestamp("plan_expires_at"),

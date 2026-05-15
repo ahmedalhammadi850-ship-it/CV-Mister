@@ -23,6 +23,15 @@ const SignupPage = () => {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
+  const firebaseErrorMessage = (code) => {
+    const map = {
+      'auth/email-already-in-use': isRTL ? 'هذا البريد الإلكتروني مسجل بالفعل.' : 'This email is already registered.',
+      'auth/invalid-email':        isRTL ? 'البريد الإلكتروني غير صالح.' : 'Invalid email address.',
+      'auth/weak-password':        isRTL ? 'كلمة المرور ضعيفة جداً.' : 'Password is too weak.',
+    };
+    return map[code] || (isRTL ? 'حدث خطأ. حاول مجدداً.' : 'Something went wrong. Try again.');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -39,9 +48,9 @@ const SignupPage = () => {
     setLoading(true);
     try {
       await signUp(firstName, lastName, email, password);
-      navigate('/dashboard');
+      navigate('/verify-email');
     } catch (err) {
-      setError(err.message);
+      setError(firebaseErrorMessage(err.code) || err.message);
     } finally {
       setLoading(false);
     }
@@ -49,7 +58,6 @@ const SignupPage = () => {
 
   return (
     <div className="min-h-screen flex" dir={isRTL ? 'rtl' : 'ltr'}>
-      {/* Left decorative panel */}
       <div
         className="hidden lg:flex lg:w-1/2 flex-col justify-between p-12 relative overflow-hidden"
         style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #312e81 100%)' }}
@@ -115,11 +123,8 @@ const SignupPage = () => {
         </div>
       </div>
 
-      {/* Right form panel */}
       <div className="flex-1 flex items-center justify-center p-6 bg-slate-50 overflow-y-auto">
         <div className="w-full max-w-md py-8">
-
-          {/* Mobile logo */}
           <div className="lg:hidden flex items-center gap-2.5 mb-8">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)' }}>CV</div>
             <span className="font-bold text-xl text-slate-900">Mister</span>
@@ -140,9 +145,7 @@ const SignupPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-slate-700">
-                    {isRTL ? 'الاسم الأول *' : 'First name *'}
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700">{isRTL ? 'الاسم الأول *' : 'First name *'}</label>
                   <input
                     type="text"
                     value={firstName}
@@ -153,9 +156,7 @@ const SignupPage = () => {
                   />
                 </div>
                 <div className="space-y-1.5">
-                  <label className="block text-sm font-medium text-slate-700">
-                    {isRTL ? 'اسم العائلة' : 'Last name'}
-                  </label>
+                  <label className="block text-sm font-medium text-slate-700">{isRTL ? 'اسم العائلة' : 'Last name'}</label>
                   <input
                     type="text"
                     value={lastName}
@@ -167,9 +168,7 @@ const SignupPage = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">
-                  {isRTL ? 'البريد الإلكتروني' : 'Email address'}
-                </label>
+                <label className="block text-sm font-medium text-slate-700">{isRTL ? 'البريد الإلكتروني' : 'Email address'}</label>
                 <input
                   type="email"
                   value={email}
@@ -181,9 +180,7 @@ const SignupPage = () => {
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">
-                  {isRTL ? 'كلمة المرور' : 'Password'}
-                </label>
+                <label className="block text-sm font-medium text-slate-700">{isRTL ? 'كلمة المرور' : 'Password'}</label>
                 <div className="relative">
                   <input
                     type={showPassword ? 'text' : 'password'}
@@ -193,25 +190,18 @@ const SignupPage = () => {
                     placeholder="••••••••"
                     className="w-full px-4 py-3 rounded-2xl border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-300 transition"
                   />
-                  <button
-                    type="button"
-                    onClick={() => setShowPassword(p => !p)}
-                    className="absolute inset-y-0 end-3 flex items-center text-slate-400 hover:text-slate-600"
-                  >
-                    {showPassword ? (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
-                    ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                    )}
+                  <button type="button" onClick={() => setShowPassword(p => !p)} className="absolute inset-y-0 end-3 flex items-center text-slate-400 hover:text-slate-600">
+                    {showPassword
+                      ? <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                      : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                    }
                   </button>
                 </div>
                 <p className="text-slate-400 text-xs">{isRTL ? '٦ أحرف على الأقل' : 'At least 6 characters'}</p>
               </div>
 
               <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-slate-700">
-                  {isRTL ? 'تأكيد كلمة المرور' : 'Confirm password'}
-                </label>
+                <label className="block text-sm font-medium text-slate-700">{isRTL ? 'تأكيد كلمة المرور' : 'Confirm password'}</label>
                 <input
                   type={showPassword ? 'text' : 'password'}
                   value={confirmPassword}

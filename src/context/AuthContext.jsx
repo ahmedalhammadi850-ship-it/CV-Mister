@@ -1,4 +1,13 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  sendEmailVerification,
+  sendPasswordResetEmail,
+  signOut,
+  onAuthStateChanged,
+} from 'firebase/auth';
+import { auth } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -11,82 +20,116 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [isRTL, setIsRTL] = useState(false);
 
-  const buildUser = (user) => {
-    const planExpiresAt = user.planExpiresAt ? new Date(user.planExpiresAt) : null;
+  const buildUser = (dbUser) => {
+    const planExpiresAt = dbUser.planExpiresAt ? new Date(dbUser.planExpiresAt) : null;
     const now = new Date();
     let daysLeft = null;
-    if (planExpiresAt && user.plan === 'business') {
+    if (planExpiresAt && dbUser.plan === 'business') {
       const diff = planExpiresAt - now;
       daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
     }
-    // Was on business plan but now expired (auto-downgraded to free)
-    const subscriptionExpired = user.plan === 'free' && planExpiresAt && planExpiresAt < now;
+    const subscriptionExpired = dbUser.plan === 'free' && planExpiresAt && planExpiresAt < now;
     return {
-      uid: user.id,
-      id: user.id,
-      name: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email,
-      displayName: user.firstName ? `${user.firstName} ${user.lastName || ''}`.trim() : user.email?.split('@')[0],
-      profileImage: user.profileImageUrl || null,
-      email: user.email,
-      plan: user.plan || 'free',
-      cvCount: user.cvCount || 0,
+      uid: dbUser.id,
+      id: dbUser.id,
+      name: dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email,
+      displayName: dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email?.split('@')[0],
+      profileImage: dbUser.profileImageUrl || null,
+      email: dbUser.email,
+      plan: dbUser.plan || 'free',
+      cvCount: dbUser.cvCount || 0,
       planExpiresAt,
       daysLeft,
       subscriptionExpired: !!subscriptionExpired,
     };
   };
 
-  const fetchUser = () => {
-    return fetch('/api/auth/user', { credentials: 'include' })
-      .then(res => {
-        if (res.status === 401) return null;
-        if (!res.ok) throw new Error('Failed to fetch user');
-        return res.json();
-      })
-      .then(user => {
-        setCurrentUser(user ? buildUser(user) : null);
-      })
-      .catch(() => setCurrentUser(null));
+  const syncWithBackend = async (firebaseUser) => {
+    try {
+      const idToken = await firebaseUser.getIdToken();
+      const res = await fetch('/api/auth/firebase-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ idToken }),
+      });
+      if (!res.ok) return null;
+      const dbUser = await res.json();
+      return buildUser(dbUser);
+    } catch {
+      return null;
+    }
   };
-
-  const refreshUser = () => fetchUser();
 
   useEffect(() => {
-    fetchUser().finally(() => setLoading(false));
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser && firebaseUser.emailVerified) {
+        const user = await syncWithBackend(firebaseUser);
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(null);
+        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+      }
+      setLoading(false);
+    });
+    return unsubscribe;
   }, []);
 
-  const signIn = async (email, password) => {
-    const res = await fetch('/api/auth/login', {
+  const signUp = async (firstName, lastName, email, password) => {
+    const credential = await createUserWithEmailAndPassword(auth, email, password);
+    await fetch('/api/auth/firebase-register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        idToken: await credential.user.getIdToken(),
+        firstName,
+        lastName,
+      }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'فشل تسجيل الدخول');
-    setCurrentUser(buildUser(data));
-    return data;
+    await sendEmailVerification(credential.user);
+    return credential.user;
   };
 
-  const signUp = async (firstName, lastName, email, password) => {
-    const res = await fetch('/api/auth/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ firstName, lastName, email, password }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'فشل إنشاء الحساب');
-    setCurrentUser(buildUser(data));
-    return data;
+  const signIn = async (email, password) => {
+    const credential = await signInWithEmailAndPassword(auth, email, password);
+    if (!credential.user.emailVerified) {
+      await signOut(auth);
+      const err = new Error(
+        isRTL
+          ? 'يرجى تأكيد بريدك الإلكتروني أولاً. تحقق من صندوق الوارد.'
+          : 'Please verify your email first. Check your inbox.'
+      );
+      err.code = 'auth/email-not-verified';
+      throw err;
+    }
+    const user = await syncWithBackend(credential.user);
+    setCurrentUser(user);
+    return user;
   };
 
   const signOutUser = async () => {
+    await signOut(auth);
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setCurrentUser(null);
   };
 
-  const sendPasswordReset = () => {};
+  const sendPasswordReset = async (email) => {
+    await sendPasswordResetEmail(auth, email);
+  };
+
+  const resendVerification = async () => {
+    const user = auth.currentUser;
+    if (user) await sendEmailVerification(user);
+  };
+
+  const refreshUser = async () => {
+    const firebaseUser = auth.currentUser;
+    if (firebaseUser && firebaseUser.emailVerified) {
+      const user = await syncWithBackend(firebaseUser);
+      setCurrentUser(user);
+    }
+  };
 
   const toggleRTL = () => {
     setIsRTL(prev => {
@@ -105,6 +148,7 @@ export function AuthProvider({ children }) {
     signUp,
     signOutUser,
     sendPasswordReset,
+    resendVerification,
     refreshUser,
   };
 
