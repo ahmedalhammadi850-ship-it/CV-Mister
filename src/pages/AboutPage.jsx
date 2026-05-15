@@ -211,9 +211,10 @@ export default function AboutPage() {
             style={{
               fontSize: 'clamp(2.4rem, 5.5vw, 4.2rem)',
               fontFamily: isRTL
-                ? "'Cairo', 'Tajawal', sans-serif"
-                : "'Inter', 'Plus Jakarta Sans', system-ui, sans-serif",
-              letterSpacing: isRTL ? '0' : '-0.02em',
+                ? "'Amiri', 'Cairo', serif"
+                : "'Merriweather', Georgia, serif",
+              letterSpacing: isRTL ? '0.01em' : '-0.01em',
+              lineHeight: 1.2,
             }}
           >
             {isRTL ? (
