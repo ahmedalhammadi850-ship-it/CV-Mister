@@ -1,0 +1,47 @@
+14:48:31.610 Running build in Washington, D.C., USA (East) – iad1
+14:48:31.610 Build machine configuration: 2 cores, 8 GB
+14:48:31.752 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: 2cbb7d7)
+14:48:31.753 Previous build caches not available.
+14:48:34.001 Cloning completed: 2.249s
+14:48:34.306 Running "vercel build"
+14:48:34.326 Vercel CLI 53.3.2
+14:48:35.003 Installing dependencies...
+14:48:39.886 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+14:48:39.920 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+14:48:40.577 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+14:48:41.660 npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+14:48:42.055 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+14:48:42.065 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+14:48:42.071 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+14:48:48.224 
+14:48:48.225 added 637 packages in 13s
+14:48:48.227 
+14:48:48.227 103 packages are looking for funding
+14:48:48.228   run `npm fund` for details
+14:48:48.418 
+14:48:48.419 > cv-mister@0.0.0 build
+14:48:48.419 > npx vite build
+14:48:48.419 
+14:48:49.498 vite v8.0.13 building client environment for production...
+14:48:50.760 
+transforming...✓ 323 modules transformed.
+14:48:50.937 rendering chunks...
+14:48:51.292 computing gzip size...
+14:48:51.311 dist/index.html                           2.40 kB │ gzip:   1.15 kB
+14:48:51.312 dist/assets/index-CyOk9rGP.css          147.61 kB │ gzip:  23.55 kB
+14:48:51.312 dist/assets/typeof-mVVFPGHC.js            0.27 kB │ gzip:   0.16 kB
+14:48:51.312 dist/assets/es-Cx-YlPHy.js               13.24 kB │ gzip:   5.20 kB
+14:48:51.312 dist/assets/purify.es-BEO7sGA_.js        22.44 kB │ gzip:   8.81 kB
+14:48:51.312 dist/assets/index.es-DZPOt-qX.js        151.41 kB │ gzip:  48.89 kB
+14:48:51.312 dist/assets/html2canvas-CnbJ6TYS.js     199.56 kB │ gzip:  46.78 kB
+14:48:51.313 dist/assets/jspdf.es.min-DlUzaRRw.js    399.59 kB │ gzip: 129.67 kB
+14:48:51.313 dist/assets/index-CIYzjjfT.js         1,140.94 kB │ gzip: 229.74 kB
+14:48:51.313 
+14:48:51.314 [plugin builtin:vite-reporter] 
+14:48:51.314 (!) Some chunks are larger than 500 kB after minification. Consider:
+14:48:51.314 - Using dynamic import() to code-split the application
+14:48:51.314 - Use build.rolldownOptions.output.codeSplitting to improve chunking: https://rolldown.rs/reference/OutputOptions.codeSplitting
+14:48:51.315 - Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.
+14:48:51.315 ✓ built in 1.82s
+14:49:35.655 Build Completed in /vercel/output [1m]
+14:49:37.442 Deploying outputs...
