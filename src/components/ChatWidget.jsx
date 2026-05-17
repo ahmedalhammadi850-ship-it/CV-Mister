@@ -61,8 +61,9 @@ export default function ChatWidget() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: isRTL ? `[أجب باللغة العربية فقط] ${text}` : text,
+          message: text,
           language: isRTL ? 'ar' : 'en',
+          sessionId: 'chat-session',
         }),
       });
       const botText = await parseResponse(response, fallbackText);

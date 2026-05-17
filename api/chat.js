@@ -11,10 +11,20 @@ export default async function handler(req, res) {
   if (!CHAT_WEBHOOK) return res.status(503).json({ reply: "" });
 
   try {
+    const { message, language, sessionId } = req.body || {};
+
+    const payload = {
+      chatInput: message,
+      message,
+      input: message,
+      language: language || "ar",
+      sessionId: sessionId || "default-session",
+    };
+
     const response = await fetch(CHAT_WEBHOOK, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(req.body),
+      body: JSON.stringify(payload),
     });
 
     const raw = await response.text();
@@ -27,12 +37,15 @@ export default async function handler(req, res) {
 
     const reply =
       parsed?.output ||
-      parsed?.message ||
-      parsed?.text ||
       parsed?.reply ||
-      (typeof parsed === "string" ? parsed : null) ||
+      parsed?.text ||
+      parsed?.response ||
+      parsed?.answer ||
+      parsed?.chatOutput ||
+      parsed?.message ||
       (Array.isArray(parsed) &&
-        (parsed[0]?.output || parsed[0]?.message || parsed[0]?.text)) ||
+        (parsed[0]?.output || parsed[0]?.reply || parsed[0]?.text || parsed[0]?.message)) ||
+      (typeof parsed === "string" ? parsed : null) ||
       "";
 
     res.json({ reply });
