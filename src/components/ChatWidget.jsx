@@ -61,11 +61,8 @@ export default function ChatWidget() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
+          message: isRTL ? `[أجب باللغة العربية فقط] ${text}` : text,
           language: isRTL ? 'ar' : 'en',
-          systemPrompt: isRTL
-            ? 'أنت مساعد ذكي لموقع CV Mister لبناء السيرة الذاتية. أجب دائماً باللغة العربية بشكل ودي ومهني.'
-            : 'You are a helpful assistant for CV Mister, a resume builder website. Always respond in English in a friendly and professional manner.',
         }),
       });
       const botText = await parseResponse(response, fallbackText);
