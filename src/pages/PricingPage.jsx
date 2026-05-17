@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -14,77 +14,14 @@ const CROSS = (
   </svg>
 );
 
-const plans = [
-  {
-    id: 'free',
-    name: 'مجاني',
-    nameEn: 'Free',
-    desc: 'مثالي للبدء وتجربة المنصة',
-    descEn: 'Perfect to get started and try the platform',
-    price: 0,
-    period: 'شهرياً',
-    periodEn: 'month',
-    cta: 'ابدأ مجاناً',
-    ctaEn: 'Get started free',
-    ctaTo: '/signup',
-    popular: false,
-    gradient: null,
-    features: [
-      { label: 'سيرة ذاتية واحدة',               labelEn: '1 resume',                        included: true  },
-      { label: 'قالب أساسي',                       labelEn: 'Basic template',                  included: true  },
-      { label: 'تصدير PDF',                        labelEn: 'PDF export',                      included: true  },
-      { label: 'دعم اللغة العربية',                labelEn: 'Arabic language support',          included: true  },
-      { label: 'اقتراحات الذكاء الاصطناعي',       labelEn: 'AI suggestions',                  included: false },
-      { label: 'رسالة تغطية',                      labelEn: 'Cover letter',                    included: false },
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'احترافي',
-    nameEn: 'Professional',
-    desc: 'الخيار المثالي للباحثين عن عمل بجدية',
-    descEn: 'Ideal for serious job seekers',
-    price: 3,
-    period: 'شهرياً',
-    periodEn: 'month',
-    cta: 'اشترك الآن',
-    ctaEn: 'Subscribe now',
-    ctaTo: '/upgrade',
-    popular: true,
-    gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #c026d3 100%)',
-    features: [
-      { label: '2 سير ذاتية',                      labelEn: '2 resumes',                       included: true },
-      { label: 'جميع القوالب (25+)',                labelEn: 'All templates (25+)',              included: true },
-      { label: 'تصدير PDF عالي الجودة',            labelEn: 'High-quality PDF export',         included: true },
-      { label: 'دعم اللغة العربية والإنجليزية',    labelEn: 'Arabic & English support',        included: true },
-      { label: 'اقتراحات الذكاء الاصطناعي',       labelEn: 'AI suggestions',                  included: true },
-      { label: 'رسالة تغطية',                      labelEn: 'Cover letter',                    included: true },
-    ],
-  },
-  {
-    id: 'business',
-    name: 'أعمال',
-    nameEn: 'Business',
-    desc: 'للشركات والفرق التي تحتاج إلى حلول متكاملة',
-    descEn: 'For companies and teams needing complete solutions',
-    price: 15,
-    period: 'شهرياً',
-    periodEn: 'month',
-    cta: 'تواصل معنا',
-    ctaEn: 'Contact us',
-    ctaTo: '/business-contact',
-    popular: false,
-    gradient: null,
-    features: [
-      { label: 'سير ذاتية غير محدودة',             labelEn: 'Unlimited resumes',               included: true },
-      { label: 'جميع القوالب + حصرية',             labelEn: 'All templates + exclusive',       included: true },
-      { label: 'تصدير PDF عالي الجودة',            labelEn: 'High-quality PDF export',         included: true },
-      { label: 'دعم كامل متعدد اللغات',            labelEn: 'Full multilingual support',       included: true },
-      { label: 'ذكاء اصطناعي متقدم',              labelEn: 'Advanced AI',                      included: true },
-      { label: 'رسائل تغطية غير محدودة',           labelEn: 'Unlimited cover letters',         included: true },
-    ],
-  },
-];
+const DEFAULTS = {
+  pro_price: 3,
+  pro_name: 'احترافي',
+  pro_name_en: 'Professional',
+  business_price: 15,
+  business_name: 'أعمال',
+  business_name_en: 'Business',
+};
 
 const faqs = [
   {
@@ -110,6 +47,86 @@ const faqs = [
 const PricingPage = () => {
   const { isRTL, currentUser } = useAuth();
   const [openFaq, setOpenFaq] = useState(null);
+  const [pricing, setPricing] = useState(DEFAULTS);
+
+  useEffect(() => {
+    fetch('/api/pricing')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setPricing(prev => ({ ...prev, ...data })); })
+      .catch(() => {});
+  }, []);
+
+  const plans = [
+    {
+      id: 'free',
+      name: 'مجاني',
+      nameEn: 'Free',
+      desc: 'مثالي للبدء وتجربة المنصة',
+      descEn: 'Perfect to get started and try the platform',
+      price: 0,
+      period: 'شهرياً',
+      periodEn: 'month',
+      cta: 'ابدأ مجاناً',
+      ctaEn: 'Get started free',
+      ctaTo: '/signup',
+      popular: false,
+      gradient: null,
+      features: [
+        { label: 'سيرة ذاتية واحدة',               labelEn: '1 resume',                        included: true  },
+        { label: 'قالب أساسي',                       labelEn: 'Basic template',                  included: true  },
+        { label: 'تصدير PDF',                        labelEn: 'PDF export',                      included: true  },
+        { label: 'دعم اللغة العربية',                labelEn: 'Arabic language support',          included: true  },
+        { label: 'اقتراحات الذكاء الاصطناعي',       labelEn: 'AI suggestions',                  included: false },
+        { label: 'رسالة تغطية',                      labelEn: 'Cover letter',                    included: false },
+      ],
+    },
+    {
+      id: 'pro',
+      name: pricing.pro_name,
+      nameEn: pricing.pro_name_en,
+      desc: 'الخيار المثالي للباحثين عن عمل بجدية',
+      descEn: 'Ideal for serious job seekers',
+      price: pricing.pro_price,
+      period: 'شهرياً',
+      periodEn: 'month',
+      cta: 'اشترك الآن',
+      ctaEn: 'Subscribe now',
+      ctaTo: '/upgrade',
+      popular: true,
+      gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #c026d3 100%)',
+      features: [
+        { label: '2 سير ذاتية',                      labelEn: '2 resumes',                       included: true },
+        { label: 'جميع القوالب (25+)',                labelEn: 'All templates (25+)',              included: true },
+        { label: 'تصدير PDF عالي الجودة',            labelEn: 'High-quality PDF export',         included: true },
+        { label: 'دعم اللغة العربية والإنجليزية',    labelEn: 'Arabic & English support',        included: true },
+        { label: 'اقتراحات الذكاء الاصطناعي',       labelEn: 'AI suggestions',                  included: true },
+        { label: 'رسالة تغطية',                      labelEn: 'Cover letter',                    included: true },
+      ],
+    },
+    {
+      id: 'business',
+      name: pricing.business_name,
+      nameEn: pricing.business_name_en,
+      desc: 'للشركات والفرق التي تحتاج إلى حلول متكاملة',
+      descEn: 'For companies and teams needing complete solutions',
+      price: pricing.business_price,
+      period: 'شهرياً',
+      periodEn: 'month',
+      cta: 'تواصل معنا',
+      ctaEn: 'Contact us',
+      ctaTo: '/business-contact',
+      popular: false,
+      gradient: null,
+      features: [
+        { label: 'سير ذاتية غير محدودة',             labelEn: 'Unlimited resumes',               included: true },
+        { label: 'جميع القوالب + حصرية',             labelEn: 'All templates + exclusive',       included: true },
+        { label: 'تصدير PDF عالي الجودة',            labelEn: 'High-quality PDF export',         included: true },
+        { label: 'دعم كامل متعدد اللغات',            labelEn: 'Full multilingual support',       included: true },
+        { label: 'ذكاء اصطناعي متقدم',              labelEn: 'Advanced AI',                      included: true },
+        { label: 'رسائل تغطية غير محدودة',           labelEn: 'Unlimited cover letters',         included: true },
+      ],
+    },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-50" dir={isRTL ? 'rtl' : 'ltr'}>

@@ -177,6 +177,9 @@ const AdminDashboardPage = () => {
   const [n8nEditing, setN8nEditing]           = useState({});
   const [n8nSaving, setN8nSaving]             = useState({});
   const [n8nMsg, setN8nMsg]                   = useState({});
+  const [pricingEdit, setPricingEdit]         = useState({ pro_price: 3, pro_name: 'احترافي', pro_name_en: 'Professional', business_price: 15, business_name: 'أعمال', business_name_en: 'Business' });
+  const [pricingSaving, setPricingSaving]     = useState(false);
+  const [pricingMsg, setPricingMsg]           = useState('');
 
   const apiFetch = useCallback(async (url) => {
     const res = await fetch(url, { credentials: 'include' });
@@ -188,7 +191,7 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const [me, st, u, c, p, b, tpl, n8n] = await Promise.all([
+        const [me, st, u, c, p, b, tpl, n8n, pricing] = await Promise.all([
           apiFetch('/api/admin/me'),
           apiFetch('/api/admin/stats'),
           apiFetch('/api/admin/users'),
@@ -197,11 +200,15 @@ const AdminDashboardPage = () => {
           apiFetch('/api/admin/business-contacts'),
           fetch('/api/templates/config').then(r => r.json()),
           apiFetch('/api/admin/settings'),
+          apiFetch('/api/admin/pricing').catch(() => ({})),
         ]);
         setAdmin(me); setStats(st); setUsers(u); setCvs(c); setPayments(p); setBiz(b);
         setTemplateConfig(tpl);
         setN8nSettings(n8n);
         setN8nEditing(n8n);
+        if (pricing && Object.keys(pricing).length) {
+          setPricingEdit(prev => ({ ...prev, ...pricing }));
+        }
       } catch { /* redirect handled */ }
       finally { setLoading(false); }
     };
@@ -221,6 +228,32 @@ const AdminDashboardPage = () => {
       }
     } finally {
       setTplSaving(s => ({ ...s, [id]: false }));
+    }
+  };
+
+  const handleSavePricing = async () => {
+    setPricingSaving(true);
+    setPricingMsg('');
+    try {
+      const body = {
+        pro_price: Number(pricingEdit.pro_price) || 0,
+        pro_name: pricingEdit.pro_name || '',
+        pro_name_en: pricingEdit.pro_name_en || '',
+        business_price: Number(pricingEdit.business_price) || 0,
+        business_name: pricingEdit.business_name || '',
+        business_name_en: pricingEdit.business_name_en || '',
+      };
+      const res = await fetch('/api/admin/pricing', {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) setPricingMsg('✓ تم الحفظ');
+      else setPricingMsg('✗ فشل الحفظ');
+    } catch { setPricingMsg('✗ خطأ'); }
+    finally {
+      setPricingSaving(false);
+      setTimeout(() => setPricingMsg(''), 3000);
     }
   };
 
@@ -798,6 +831,132 @@ const AdminDashboardPage = () => {
           {/* ── SETTINGS ── */}
           {activeTab === 'settings' && (
             <div className="max-w-2xl space-y-4">
+
+              {/* ── Pricing Control ── */}
+              <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white">التحكم في الأسعار</h3>
+                    <p className="text-slate-400 text-xs">تعديل أسعار الخطط على صفحة الأسعار</p>
+                  </div>
+                </div>
+
+                <div className="space-y-5">
+                  {/* Pro Plan */}
+                  <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
+                      <p className="text-sm font-semibold text-indigo-400">الخطة الاحترافية (Pro)</p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
+                        <input
+                          type="text"
+                          value={pricingEdit.pro_name}
+                          onChange={e => setPricingEdit(s => ({ ...s, pro_name: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
+                          dir="rtl"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
+                        <input
+                          type="text"
+                          value={pricingEdit.pro_name_en}
+                          onChange={e => setPricingEdit(s => ({ ...s, pro_name_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
+                          dir="ltr"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">السعر ($)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={pricingEdit.pro_price}
+                          onChange={e => setPricingEdit(s => ({ ...s, pro_price: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Business Plan */}
+                  <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700">
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                      <p className="text-sm font-semibold text-amber-400">خطة الأعمال (Business)</p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
+                        <input
+                          type="text"
+                          value={pricingEdit.business_name}
+                          onChange={e => setPricingEdit(s => ({ ...s, business_name: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition"
+                          dir="rtl"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
+                        <input
+                          type="text"
+                          value={pricingEdit.business_name_en}
+                          onChange={e => setPricingEdit(s => ({ ...s, business_name_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition"
+                          dir="ltr"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">السعر ($)</label>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          value={pricingEdit.business_price}
+                          onChange={e => setPricingEdit(s => ({ ...s, business_price: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition"
+                          dir="ltr"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mt-5">
+                  {pricingMsg && (
+                    <span className={`text-sm font-medium ${pricingMsg.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {pricingMsg}
+                    </span>
+                  )}
+                  <button
+                    onClick={handleSavePricing}
+                    disabled={pricingSaving}
+                    className="mr-auto py-2.5 px-6 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2"
+                  >
+                    {pricingSaving ? (
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    حفظ الأسعار
+                  </button>
+                </div>
+              </div>
 
               {/* n8n Webhooks */}
               <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">

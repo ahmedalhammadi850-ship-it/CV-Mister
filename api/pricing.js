@@ -1,0 +1,22 @@
+import { getDb } from "./_lib/firebase.js";
+
+const DEFAULTS = {
+  pro_price: 3,
+  pro_name: "احترافي",
+  pro_name_en: "Professional",
+  business_price: 15,
+  business_name: "أعمال",
+  business_name_en: "Business",
+};
+
+export default async function handler(req, res) {
+  if (req.method !== "GET") return res.status(405).end();
+  try {
+    const db = getDb();
+    const snap = await db.doc("appConfig/pricing").get();
+    const stored = snap.exists ? snap.data() : {};
+    return res.json({ ...DEFAULTS, ...stored });
+  } catch {
+    return res.json(DEFAULTS);
+  }
+}

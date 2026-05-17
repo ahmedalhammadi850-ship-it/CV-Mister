@@ -126,6 +126,13 @@ async function main() {
   route("get",   "/api/admin/settings", "admin/settings");
   route("patch", "/api/admin/settings", "admin/settings");
 
+  // ── Pricing (public) ──
+  route("get", "/api/pricing", "pricing");
+
+  // ── Admin Pricing ──
+  route("get",   "/api/admin/pricing", "admin/pricing");
+  route("patch", "/api/admin/pricing", "admin/pricing");
+
   // ── Admin ──
   route("post",  "/api/admin/login",    "admin/login");
   route("get",   "/api/admin/me",       "admin/me");
