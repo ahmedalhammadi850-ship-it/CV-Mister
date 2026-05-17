@@ -148,6 +148,12 @@ const ALL_TEMPLATES = [
   { id: 'aurora',             ar: 'أورورا' },
 ];
 
+const N8N_KEYS = [
+  { key: 'N8N_AI_WEBHOOK_URL',      label: 'رابط الذكاء الاصطناعي (AI Rewrite)',  desc: 'يُستخدم لإعادة صياغة النصوص بالذكاء الاصطناعي' },
+  { key: 'N8N_CHAT_WEBHOOK_URL',    label: 'رابط المحادثة (Chat)',                desc: 'يُستخدم لمساعد الدردشة' },
+  { key: 'N8N_PAYMENT_WEBHOOK_URL', label: 'رابط الدفع (Payment)',               desc: 'يُستخدم عند قبول طلبات الدفع' },
+];
+
 const AdminDashboardPage = () => {
   const navigate = useNavigate();
   const [admin, setAdmin]         = useState(null);
@@ -167,6 +173,10 @@ const AdminDashboardPage = () => {
   const [statusFilter, setStatusFilter]       = useState('all');
   const [templateConfig, setTemplateConfig]   = useState({});
   const [tplSaving, setTplSaving]             = useState({});
+  const [n8nSettings, setN8nSettings]         = useState({});
+  const [n8nEditing, setN8nEditing]           = useState({});
+  const [n8nSaving, setN8nSaving]             = useState({});
+  const [n8nMsg, setN8nMsg]                   = useState({});
 
   const apiFetch = useCallback(async (url) => {
     const res = await fetch(url, { credentials: 'include' });
