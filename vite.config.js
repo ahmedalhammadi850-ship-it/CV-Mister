@@ -31,6 +31,24 @@ export default defineConfig({
       '@shared': path.resolve(import.meta.dirname, 'shared'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules/react') || id.includes('node_modules/react-dom') || id.includes('node_modules/react-router-dom')) {
+            return 'react-vendor';
+          }
+          if (id.includes('node_modules/jspdf') || id.includes('node_modules/html2canvas') || id.includes('node_modules/html-to-image')) {
+            return 'pdf-vendor';
+          }
+          if (id.includes('node_modules/firebase')) {
+            return 'firebase-vendor';
+          }
+        },
+      },
+    },
+    chunkSizeWarningLimit: 900,
+  },
   server: {
     host: '0.0.0.0',
     port: 5000,
