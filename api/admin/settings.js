@@ -1,5 +1,6 @@
 import { getAdminFromReq } from "../_lib/token.js";
 import { getDb } from "../_lib/firebase.js";
+import { invalidateCache } from "../_lib/n8nSettings.js";
 
 const SETTINGS_DOC = "appConfig/n8n";
 
@@ -27,18 +28,14 @@ export default async function handler(req, res) {
 
   if (req.method === "PATCH") {
     try {
+      const { key, value } = req.body || {};
       const allowed = ["N8N_AI_WEBHOOK_URL", "N8N_CHAT_WEBHOOK_URL", "N8N_PAYMENT_WEBHOOK_URL"];
-      const updates = {};
-      for (const key of allowed) {
-        if (req.body && key in req.body) {
-          updates[key] = req.body[key];
-        }
-      }
-      if (Object.keys(updates).length === 0)
-        return res.status(400).json({ message: "لا توجد قيم للتحديث" });
+      if (!key || !allowed.includes(key))
+        return res.status(400).json({ message: "مفتاح غير مسموح به" });
 
-      await ref.set(updates, { merge: true });
-      return res.json({ success: true, updated: updates });
+      await ref.set({ [key]: value ?? "" }, { merge: true });
+      invalidateCache();
+      return res.json({ success: true });
     } catch (err) {
       return res.status(500).json({ message: err.message });
     }

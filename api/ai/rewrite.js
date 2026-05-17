@@ -1,9 +1,12 @@
+import { getN8nSettings } from "../_lib/n8nSettings.js";
+
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
   const { text, action, language } = req.body || {};
   if (!text || !action) return res.status(400).json({ message: "text and action are required" });
 
-  const webhookUrl = process.env.N8N_AI_WEBHOOK_URL;
+  const settings = await getN8nSettings();
+  const webhookUrl = settings.N8N_AI_WEBHOOK_URL;
   if (!webhookUrl) return res.status(503).json({ message: "AI service not configured" });
 
   try {
@@ -22,7 +25,7 @@ export default async function handler(req, res) {
 
     if (result) return res.json({ result });
     return res.status(503).json({ message: "No result from AI" });
-  } catch (err) {
+  } catch {
     return res.status(503).json({ message: "AI service error" });
   }
 }
