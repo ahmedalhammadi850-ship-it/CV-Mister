@@ -2,6 +2,41 @@ import express from "express";
 import helmet from "helmet";
 import cors from "cors";
 
+// ── Static imports for all handlers ──
+import authFirebaseSync     from "../api/auth/firebase-sync.js";
+import authFirebaseRegister from "../api/auth/firebase-register.js";
+import authLogout           from "../api/auth/logout.js";
+import authUser             from "../api/auth/user.js";
+
+import cvsIndex             from "../api/cvs/index.js";
+import cvsById              from "../api/cvs/[id].js";
+import cvsDownload          from "../api/cvs/[id]/download.js";
+
+import paymentRequestsIndex from "../api/payment-requests/index.js";
+import paymentRequestsMy    from "../api/payment-requests/my.js";
+
+import businessContact      from "../api/business-contact.js";
+import templatesConfig      from "../api/templates/config.js";
+import aiRewrite            from "../api/ai/rewrite.js";
+import chat                 from "../api/chat.js";
+import paymentWebhook       from "../api/payment-webhook.js";
+import ping                 from "../api/ping.js";
+import debug                from "../api/debug.js";
+
+import adminLogin           from "../api/admin/login.js";
+import adminMe              from "../api/admin/me.js";
+import adminLogout          from "../api/admin/logout.js";
+import adminPassword        from "../api/admin/password.js";
+import adminStats           from "../api/admin/stats.js";
+import adminCvs             from "../api/admin/cvs.js";
+import adminUsersIndex      from "../api/admin/users/index.js";
+import adminUsersById       from "../api/admin/users/[id].js";
+import adminPayReqIndex     from "../api/admin/payment-requests/index.js";
+import adminPayReqById      from "../api/admin/payment-requests/[id].js";
+import adminBizIndex        from "../api/admin/business-contacts/index.js";
+import adminBizById         from "../api/admin/business-contacts/[id].js";
+import adminTemplatesById   from "../api/admin/templates/[id].js";
+
 function makeReq(req: any, params: Record<string, string> = {}) {
   return { ...req, query: req.query, body: req.body, headers: req.headers, method: req.method, params };
 }
@@ -19,9 +54,16 @@ function makeRes(res: any) {
   return r;
 }
 
-async function loadHandler(relPath: string) {
-  const mod = await import(`../api/${relPath}`);
-  return mod.default as (req: any, res: any) => Promise<void>;
+function wrap(handler: any, paramMap?: (params: any) => Record<string, string>) {
+  return async (req: any, res: any) => {
+    try {
+      const params = paramMap ? paramMap(req.params) : {};
+      await handler(makeReq(req, params), makeRes(res));
+    } catch (err: any) {
+      console.error("[handler error]", err.message);
+      res.status(500).json({ message: err.message || "Internal server error" });
+    }
+  };
 }
 
 const app = express();
@@ -54,72 +96,59 @@ app.use(cors({
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false }));
 
-function route(method: string, expressPath: string, handlerPath: string, paramMap?: (params: any) => Record<string, string>) {
-  (app as any)[method](expressPath, async (req: any, res: any) => {
-    try {
-      const handler = await loadHandler(handlerPath);
-      const params = paramMap ? paramMap(req.params) : {};
-      await handler(makeReq(req, params), makeRes(res));
-    } catch (err: any) {
-      console.error(`[${handlerPath}]`, err.message);
-      res.status(500).json({ message: err.message || "Internal server error" });
-    }
-  });
-}
-
 // ── Auth ──
-route("post", "/api/auth/firebase-sync",     "auth/firebase-sync");
-route("post", "/api/auth/firebase-register", "auth/firebase-register");
-route("post", "/api/auth/logout",            "auth/logout");
-route("get",  "/api/auth/user",              "auth/user");
+app.post("/api/auth/firebase-sync",     wrap(authFirebaseSync));
+app.post("/api/auth/firebase-register", wrap(authFirebaseRegister));
+app.post("/api/auth/logout",            wrap(authLogout));
+app.get( "/api/auth/user",              wrap(authUser));
 
 // ── CVs ──
-route("get",  "/api/cvs",             "cvs/index");
-route("post", "/api/cvs",             "cvs/index");
-route("get",  "/api/cvs/:id",         "cvs/[id]", p => ({ id: p.id }));
-route("patch","/api/cvs/:id",         "cvs/[id]", p => ({ id: p.id }));
-route("delete","/api/cvs/:id",        "cvs/[id]", p => ({ id: p.id }));
-route("post", "/api/cvs/:id/download","cvs/[id]/download", p => ({ id: p.id }));
+app.get(   "/api/cvs",              wrap(cvsIndex));
+app.post(  "/api/cvs",              wrap(cvsIndex));
+app.get(   "/api/cvs/:id",          wrap(cvsById,      p => ({ id: p.id })));
+app.patch( "/api/cvs/:id",          wrap(cvsById,      p => ({ id: p.id })));
+app.delete("/api/cvs/:id",          wrap(cvsById,      p => ({ id: p.id })));
+app.post(  "/api/cvs/:id/download", wrap(cvsDownload,  p => ({ id: p.id })));
 
 // ── Payment requests ──
-route("post", "/api/payment-requests",     "payment-requests/index");
-route("get",  "/api/payment-requests/my",  "payment-requests/my");
+app.post("/api/payment-requests",     wrap(paymentRequestsIndex));
+app.get( "/api/payment-requests/my",  wrap(paymentRequestsMy));
 
 // ── Business contact ──
-route("post", "/api/business-contact", "business-contact");
+app.post("/api/business-contact", wrap(businessContact));
 
 // ── Templates ──
-route("get", "/api/templates/config", "templates/config");
+app.get("/api/templates/config", wrap(templatesConfig));
 
 // ── AI ──
-route("post", "/api/ai/rewrite", "ai/rewrite");
+app.post("/api/ai/rewrite", wrap(aiRewrite));
 
 // ── Chat ──
-route("post", "/api/chat", "chat");
+app.post("/api/chat", wrap(chat));
 
 // ── Payment webhook ──
-route("post", "/api/payment-webhook", "payment-webhook");
+app.post("/api/payment-webhook", wrap(paymentWebhook));
 
 // ── Ping ──
-route("get", "/api/ping", "ping");
+app.get("/api/ping", wrap(ping));
 
 // ── Debug ──
-route("get", "/api/debug", "debug");
+app.get("/api/debug", wrap(debug));
 
 // ── Admin ──
-route("post",  "/api/admin/login",    "admin/login");
-route("get",   "/api/admin/me",       "admin/me");
-route("post",  "/api/admin/logout",   "admin/logout");
-route("patch", "/api/admin/password", "admin/password");
-route("get",   "/api/admin/stats",    "admin/stats");
-route("get",   "/api/admin/cvs",      "admin/cvs");
-route("get",   "/api/admin/users",                    "admin/users/index");
-route("delete","/api/admin/users/:id",                "admin/users/[id]", p => ({ id: p.id }));
-route("get",   "/api/admin/payment-requests",         "admin/payment-requests/index");
-route("patch", "/api/admin/payment-requests/:id",     "admin/payment-requests/[id]", p => ({ id: p.id }));
-route("get",   "/api/admin/business-contacts",        "admin/business-contacts/index");
-route("patch", "/api/admin/business-contacts/:id",    "admin/business-contacts/[id]", p => ({ id: p.id }));
-route("patch", "/api/admin/templates/:id",            "admin/templates/[id]", p => ({ id: p.id }));
+app.post(  "/api/admin/login",                  wrap(adminLogin));
+app.get(   "/api/admin/me",                     wrap(adminMe));
+app.post(  "/api/admin/logout",                 wrap(adminLogout));
+app.patch( "/api/admin/password",               wrap(adminPassword));
+app.get(   "/api/admin/stats",                  wrap(adminStats));
+app.get(   "/api/admin/cvs",                    wrap(adminCvs));
+app.get(   "/api/admin/users",                  wrap(adminUsersIndex));
+app.delete("/api/admin/users/:id",              wrap(adminUsersById,     p => ({ id: p.id })));
+app.get(   "/api/admin/payment-requests",       wrap(adminPayReqIndex));
+app.patch( "/api/admin/payment-requests/:id",   wrap(adminPayReqById,    p => ({ id: p.id })));
+app.get(   "/api/admin/business-contacts",      wrap(adminBizIndex));
+app.patch( "/api/admin/business-contacts/:id",  wrap(adminBizById,       p => ({ id: p.id })));
+app.patch( "/api/admin/templates/:id",          wrap(adminTemplatesById, p => ({ id: p.id })));
 
 // ── Font proxies ──
 app.get("/api/font-proxy", async (req, res) => {
