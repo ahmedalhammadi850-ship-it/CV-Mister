@@ -3,6 +3,30 @@ import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useState, useEffect, useRef } from 'react';
 
+const NAV_DEFAULTS = {
+  home_ar: 'الرئيسية', home_en: 'Home',
+  templates_ar: 'القوالب', templates_en: 'Templates',
+  pricing_ar: 'الأسعار', pricing_en: 'Pricing',
+  about_ar: 'من نحن', about_en: 'About',
+};
+
+let _navbarCache = null;
+let _navbarFetchedAt = 0;
+
+async function fetchNavbarLabels() {
+  const now = Date.now();
+  if (_navbarCache && now - _navbarFetchedAt < 60000) return _navbarCache;
+  try {
+    const res = await fetch('/api/navbar');
+    if (res.ok) {
+      _navbarCache = { ...NAV_DEFAULTS, ...await res.json() };
+      _navbarFetchedAt = now;
+      return _navbarCache;
+    }
+  } catch {}
+  return NAV_DEFAULTS;
+}
+
 const SunIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
     <circle cx="12" cy="12" r="4" />
@@ -22,9 +46,14 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [navLabels, setNavLabels] = useState(NAV_DEFAULTS);
   const userMenuRef = useRef(null);
   const location = useLocation();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    fetchNavbarLabels().then(setNavLabels);
+  }, []);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 20);
@@ -52,10 +81,10 @@ const Header = () => {
   };
 
   const navLinks = [
-    { to: '/',          label: isRTL ? 'الرئيسية' : 'Home'      },
-    { to: '/templates', label: isRTL ? 'القوالب'  : 'Templates'  },
-    { to: '/pricing',   label: isRTL ? 'الأسعار'  : 'Pricing'    },
-    { to: '/about',     label: isRTL ? 'من نحن'   : 'About'      },
+    { to: '/',          label: isRTL ? navLabels.home_ar      : navLabels.home_en      },
+    { to: '/templates', label: isRTL ? navLabels.templates_ar : navLabels.templates_en },
+    { to: '/pricing',   label: isRTL ? navLabels.pricing_ar   : navLabels.pricing_en   },
+    { to: '/about',     label: isRTL ? navLabels.about_ar     : navLabels.about_en     },
   ];
 
   const isActive = (path) => location.pathname === path;

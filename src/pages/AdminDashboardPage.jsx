@@ -180,6 +180,9 @@ const AdminDashboardPage = () => {
   const [pricingEdit, setPricingEdit]         = useState({ pro_price: 3, pro_name: 'احترافي', pro_name_en: 'Professional', business_price: 15, business_name: 'أعمال', business_name_en: 'Business' });
   const [pricingSaving, setPricingSaving]     = useState(false);
   const [pricingMsg, setPricingMsg]           = useState('');
+  const [navbarEdit, setNavbarEdit]           = useState({ home_ar: 'الرئيسية', home_en: 'Home', templates_ar: 'القوالب', templates_en: 'Templates', pricing_ar: 'الأسعار', pricing_en: 'Pricing', about_ar: 'من نحن', about_en: 'About' });
+  const [navbarSaving, setNavbarSaving]       = useState(false);
+  const [navbarMsg, setNavbarMsg]             = useState('');
 
   const apiFetch = useCallback(async (url) => {
     const res = await fetch(url, { credentials: 'include' });
@@ -191,7 +194,7 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const [me, st, u, c, p, b, tpl, n8n, pricing] = await Promise.all([
+        const [me, st, u, c, p, b, tpl, n8n, pricing, navbar] = await Promise.all([
           apiFetch('/api/admin/me'),
           apiFetch('/api/admin/stats'),
           apiFetch('/api/admin/users'),
@@ -201,6 +204,7 @@ const AdminDashboardPage = () => {
           fetch('/api/templates/config').then(r => r.json()),
           apiFetch('/api/admin/settings'),
           apiFetch('/api/admin/pricing').catch(() => ({})),
+          apiFetch('/api/admin/navbar').catch(() => ({})),
         ]);
         setAdmin(me); setStats(st); setUsers(u); setCvs(c); setPayments(p); setBiz(b);
         setTemplateConfig(tpl);
@@ -208,6 +212,9 @@ const AdminDashboardPage = () => {
         setN8nEditing(n8n);
         if (pricing && Object.keys(pricing).length) {
           setPricingEdit(prev => ({ ...prev, ...pricing }));
+        }
+        if (navbar && Object.keys(navbar).length) {
+          setNavbarEdit(prev => ({ ...prev, ...navbar }));
         }
       } catch { /* redirect handled */ }
       finally { setLoading(false); }
@@ -228,6 +235,24 @@ const AdminDashboardPage = () => {
       }
     } finally {
       setTplSaving(s => ({ ...s, [id]: false }));
+    }
+  };
+
+  const handleSaveNavbar = async () => {
+    setNavbarSaving(true);
+    setNavbarMsg('');
+    try {
+      const res = await fetch('/api/admin/navbar', {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(navbarEdit),
+      });
+      if (res.ok) setNavbarMsg('✓ تم الحفظ');
+      else setNavbarMsg('✗ فشل الحفظ');
+    } catch { setNavbarMsg('✗ خطأ'); }
+    finally {
+      setNavbarSaving(false);
+      setTimeout(() => setNavbarMsg(''), 3000);
     }
   };
 
@@ -831,6 +856,83 @@ const AdminDashboardPage = () => {
           {/* ── SETTINGS ── */}
           {activeTab === 'settings' && (
             <div className="max-w-2xl space-y-4">
+
+              {/* ── Navbar Labels ── */}
+              <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="w-9 h-9 rounded-xl bg-indigo-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-white">التحكم في شريط التنقل</h3>
+                    <p className="text-slate-400 text-xs">تعديل نصوص روابط القائمة العلوية</p>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  {[
+                    { key: 'home',      labelAr: 'الرئيسية', labelEn: 'Home'      },
+                    { key: 'templates', labelAr: 'القوالب',  labelEn: 'Templates' },
+                    { key: 'pricing',   labelAr: 'الأسعار',  labelEn: 'Pricing'   },
+                    { key: 'about',     labelAr: 'من نحن',   labelEn: 'About'     },
+                  ].map(({ key, labelAr, labelEn }) => (
+                    <div key={key} className="bg-slate-900/60 rounded-xl p-4 border border-slate-700">
+                      <p className="text-xs text-slate-500 mb-3 font-semibold uppercase tracking-wide">
+                        {labelAr} / {labelEn}
+                      </p>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1">عربي</label>
+                          <input
+                            type="text"
+                            value={navbarEdit[`${key}_ar`]}
+                            onChange={e => setNavbarEdit(s => ({ ...s, [`${key}_ar`]: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
+                            dir="rtl"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-500 mb-1">English</label>
+                          <input
+                            type="text"
+                            value={navbarEdit[`${key}_en`]}
+                            onChange={e => setNavbarEdit(s => ({ ...s, [`${key}_en`]: e.target.value }))}
+                            className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
+                            dir="ltr"
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between mt-5">
+                  {navbarMsg && (
+                    <span className={`text-sm font-medium ${navbarMsg.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>
+                      {navbarMsg}
+                    </span>
+                  )}
+                  <button
+                    onClick={handleSaveNavbar}
+                    disabled={navbarSaving}
+                    className="mr-auto py-2.5 px-6 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2"
+                  >
+                    {navbarSaving ? (
+                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                    حفظ التنقل
+                  </button>
+                </div>
+              </div>
 
               {/* ── Pricing Control ── */}
               <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
