@@ -188,7 +188,7 @@ const AdminDashboardPage = () => {
   useEffect(() => {
     const init = async () => {
       try {
-        const [me, st, u, c, p, b, tpl] = await Promise.all([
+        const [me, st, u, c, p, b, tpl, n8n] = await Promise.all([
           apiFetch('/api/admin/me'),
           apiFetch('/api/admin/stats'),
           apiFetch('/api/admin/users'),
@@ -196,9 +196,12 @@ const AdminDashboardPage = () => {
           apiFetch('/api/admin/payment-requests'),
           apiFetch('/api/admin/business-contacts'),
           fetch('/api/templates/config').then(r => r.json()),
+          apiFetch('/api/admin/settings'),
         ]);
         setAdmin(me); setStats(st); setUsers(u); setCvs(c); setPayments(p); setBiz(b);
         setTemplateConfig(tpl);
+        setN8nSettings(n8n);
+        setN8nEditing(n8n);
       } catch { /* redirect handled */ }
       finally { setLoading(false); }
     };
@@ -219,6 +222,24 @@ const AdminDashboardPage = () => {
     } finally {
       setTplSaving(s => ({ ...s, [id]: false }));
     }
+  };
+
+  const handleSaveN8n = async (key) => {
+    setN8nSaving(s => ({ ...s, [key]: true }));
+    setN8nMsg(m => ({ ...m, [key]: '' }));
+    try {
+      const res = await fetch('/api/admin/settings', {
+        method: 'PATCH', credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key, value: n8nEditing[key] }),
+      });
+      const data = await res.json();
+      if (!res.ok) { setN8nMsg(m => ({ ...m, [key]: data.message || 'خطأ' })); return; }
+      setN8nSettings(s => ({ ...s, [key]: n8nEditing[key] }));
+      setN8nMsg(m => ({ ...m, [key]: '✓ تم الحفظ' }));
+      setTimeout(() => setN8nMsg(m => ({ ...m, [key]: '' })), 2000);
+    } catch { setN8nMsg(m => ({ ...m, [key]: 'حدث خطأ' })); }
+    finally { setN8nSaving(s => ({ ...s, [key]: false })); }
   };
 
   const handleLogout = async () => {
