@@ -1,5 +1,5 @@
 import { getAdminFromReq } from "../../_lib/token.js";
-import { query } from "../../_lib/db.js";
+import { getDb } from "../../_lib/firebase.js";
 
 export default async function handler(req, res) {
   if (req.method !== "PATCH") return res.status(405).end();
@@ -9,12 +9,12 @@ export default async function handler(req, res) {
   const { is_free } = req.body || {};
   if (typeof is_free !== "boolean") return res.status(400).json({ message: "قيمة is_free يجب أن تكون boolean" });
   try {
-    const result = await query(
-      "UPDATE template_config SET is_free=$1, updated_at=NOW() WHERE template_id=$2 RETURNING *",
-      [is_free, id]
+    const db = getDb();
+    await db.collection("templateConfig").doc(id).set(
+      { isFree: is_free, updatedAt: new Date().toISOString() },
+      { merge: true }
     );
-    if (!result.rows.length) return res.status(404).json({ message: "القالب غير موجود" });
-    return res.json(result.rows[0]);
+    return res.json({ templateId: id, isFree: is_free });
   } catch (err) {
     return res.status(500).json({ message: "حدث خطأ" });
   }

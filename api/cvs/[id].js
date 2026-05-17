@@ -1,18 +1,19 @@
 import { getUserFromReq } from "../_lib/token.js";
-import { query } from "../_lib/db.js";
+import { getDb } from "../_lib/firebase.js";
 
 export default async function handler(req, res) {
   const payload = getUserFromReq(req);
   if (!payload?.userId) return res.status(401).json({ message: "غير مصادق" });
-  const userId = payload.userId;
+  const uid = payload.userId;
   const { id } = req.query;
+  const db = getDb();
 
   if (req.method === "GET") {
     try {
-      const result = await query("SELECT * FROM cvs WHERE id=$1 AND user_id=$2", [id, userId]);
-      if (!result.rows[0]) return res.status(404).json({ message: "CV not found" });
-      return res.json(result.rows[0]);
-    } catch (err) {
+      const snap = await db.collection("cvs").doc(id).get();
+      if (!snap.exists || snap.data().userId !== uid) return res.status(404).json({ message: "CV not found" });
+      return res.json({ id: snap.id, ...snap.data() });
+    } catch {
       return res.status(500).json({ message: "Failed to fetch CV" });
     }
   }
@@ -21,22 +22,24 @@ export default async function handler(req, res) {
     try {
       const { name } = req.body || {};
       if (!name?.trim()) return res.status(400).json({ message: "Name is required" });
-      const result = await query(
-        "UPDATE cvs SET name=$1, last_modified=NOW() WHERE id=$2 AND user_id=$3 RETURNING *",
-        [name.trim(), id, userId]
-      );
-      if (!result.rows[0]) return res.status(404).json({ message: "CV not found" });
-      return res.json(result.rows[0]);
-    } catch (err) {
+      const snap = await db.collection("cvs").doc(id).get();
+      if (!snap.exists || snap.data().userId !== uid) return res.status(404).json({ message: "CV not found" });
+      const now = new Date().toISOString();
+      await db.collection("cvs").doc(id).update({ name: name.trim(), lastModified: now });
+      return res.json({ id, ...snap.data(), name: name.trim(), lastModified: now });
+    } catch {
       return res.status(500).json({ message: "Failed to rename CV" });
     }
   }
 
   if (req.method === "DELETE") {
     try {
-      await query("DELETE FROM cvs WHERE id=$1 AND user_id=$2", [id, userId]);
+      const snap = await db.collection("cvs").doc(id).get();
+      if (snap.exists && snap.data().userId === uid) {
+        await db.collection("cvs").doc(id).delete();
+      }
       return res.json({ success: true });
-    } catch (err) {
+    } catch {
       return res.status(500).json({ message: "Failed to delete CV" });
     }
   }

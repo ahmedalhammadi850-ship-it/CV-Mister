@@ -1,5 +1,5 @@
 import { getAdminFromReq } from "../../_lib/token.js";
-import { query } from "../../_lib/db.js";
+import { getDb } from "../../_lib/firebase.js";
 
 export default async function handler(req, res) {
   if (req.method !== "PATCH") return res.status(405).end();
@@ -11,22 +11,33 @@ export default async function handler(req, res) {
     return res.status(400).json({ message: "حالة غير صحيحة" });
   }
   try {
-    const result = await query(
-      "UPDATE business_contacts SET status=$1 WHERE id=$2 RETURNING *",
-      [status, id]
-    );
-    if (!result.rows.length) return res.status(404).json({ message: "الطلب غير موجود" });
-    const row = result.rows[0];
-    if (status === "approved" && row.user_id) {
+    const db = getDb();
+    const ref = db.collection("businessContacts").doc(id);
+    const snap = await ref.get();
+    if (!snap.exists) return res.status(404).json({ message: "الطلب غير موجود" });
+
+    await ref.update({ status });
+    const data = snap.data();
+    const now = new Date().toISOString();
+
+    if (status === "approved" && data.userId) {
       const expires = new Date();
       expires.setDate(expires.getDate() + 30);
-      await query("UPDATE users SET plan='business', plan_expires_at=$1, updated_at=NOW() WHERE id=$2",
-        [expires.toISOString(), row.user_id]);
+      await db.collection("users").doc(data.userId).update({
+        plan: "business",
+        planExpiresAt: expires.toISOString(),
+        updatedAt: now,
+      });
     }
-    if (status === "rejected" && row.user_id) {
-      await query("UPDATE users SET plan='free', plan_expires_at=NULL, updated_at=NOW() WHERE id=$1", [row.user_id]);
+    if (status === "rejected" && data.userId) {
+      await db.collection("users").doc(data.userId).update({
+        plan: "free",
+        planExpiresAt: null,
+        updatedAt: now,
+      });
     }
-    return res.json(row);
+
+    return res.json({ id, ...data, status });
   } catch (err) {
     return res.status(500).json({ message: "حدث خطأ" });
   }

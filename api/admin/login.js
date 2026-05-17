@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { query } from "../_lib/db.js";
+import { getDb } from "../_lib/firebase.js";
 import { setAdminCookie } from "../_lib/token.js";
 
 export default async function handler(req, res) {
@@ -8,14 +8,16 @@ export default async function handler(req, res) {
     const { username, password } = req.body || {};
     if (!username || !password) return res.status(400).json({ message: "اسم المستخدم وكلمة المرور مطلوبان" });
 
-    const result = await query("SELECT * FROM admin_config WHERE username=$1 LIMIT 1", [username]);
-    const admin = result.rows[0];
-    if (!admin) return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
+    const db = getDb();
+    const snap = await db.collection("adminConfig").where("username", "==", username).limit(1).get();
+    if (snap.empty) return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
 
-    const valid = await bcrypt.compare(password, admin.password_hash);
+    const doc = snap.docs[0];
+    const admin = doc.data();
+    const valid = await bcrypt.compare(password, admin.passwordHash);
     if (!valid) return res.status(401).json({ message: "بيانات الدخول غير صحيحة" });
 
-    setAdminCookie(res, admin.id, admin.username);
+    setAdminCookie(res, doc.id, admin.username);
     return res.json({ username: admin.username });
   } catch (err) {
     console.error("[admin/login]", err.message);

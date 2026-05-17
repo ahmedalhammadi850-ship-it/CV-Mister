@@ -1,5 +1,5 @@
 import { getUserFromReq } from "./_lib/token.js";
-import { query } from "./_lib/db.js";
+import { getDb } from "./_lib/firebase.js";
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
@@ -10,12 +10,21 @@ export default async function handler(req, res) {
     const payload = getUserFromReq(req);
     const userId = payload?.userId || null;
     const id = `biz-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const db = getDb();
 
-    await query(
-      `INSERT INTO business_contacts (id, user_id, name, email, company, team_size, message, receipt_image, plan, amount)
-       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
-      [id, userId, name || "—", email || "—", company || "business", teamSize, message, receiptImage, plan || "business", amount || 15]
-    );
+    await db.collection("businessContacts").doc(id).set({
+      userId,
+      name: name || "—",
+      email: email || "—",
+      company: company || "business",
+      teamSize: teamSize || null,
+      message: message || null,
+      receiptImage,
+      plan: plan || "business",
+      amount: amount || 15,
+      status: "pending",
+      createdAt: new Date().toISOString(),
+    });
     return res.status(201).json({ success: true });
   } catch (err) {
     console.error("[business-contact]", err.message);

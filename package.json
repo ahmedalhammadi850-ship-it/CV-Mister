@@ -10,7 +10,8 @@
     "start": "PORT=5000 NODE_ENV=production npx tsx --tsconfig tsconfig.server.json server/index.ts",
     "db:push": "npx drizzle-kit push",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "seed:firestore": "node scripts/seed-firestore.mjs"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",
@@ -21,6 +22,7 @@
     "@types/memoizee": "^0.4.12",
     "@types/passport": "^1.0.17",
     "@types/pg": "^8.20.0",
+    "@vercel/node": "^5.8.2",
     "bcryptjs": "^3.0.3",
     "connect-pg-simple": "^10.0.0",
     "cors": "^2.8.6",

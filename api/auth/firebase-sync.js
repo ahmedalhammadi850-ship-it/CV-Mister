@@ -1,5 +1,4 @@
-import { verifyFirebaseToken } from "../_lib/firebase.js";
-import { query } from "../_lib/db.js";
+import { verifyFirebaseToken, getDb } from "../_lib/firebase.js";
 import { setUserCookie } from "../_lib/token.js";
 
 export default async function handler(req, res) {
@@ -9,36 +8,50 @@ export default async function handler(req, res) {
     if (!idToken) return res.status(400).json({ message: "Missing idToken" });
 
     const firebaseUser = await verifyFirebaseToken(idToken);
-    const { localId: firebaseUid, email, emailVerified } = firebaseUser;
+    const { localId: uid, email, emailVerified } = firebaseUser;
     if (!emailVerified) return res.status(403).json({ message: "Email not verified" });
 
-    let result = await query("SELECT * FROM users WHERE email = $1", [email.toLowerCase()]);
-    let user = result.rows[0];
+    const db = getDb();
+    const userRef = db.collection("users").doc(uid);
+    const userSnap = await userRef.get();
 
-    if (!user) {
-      result = await query(
-        "INSERT INTO users (email, firebase_uid) VALUES ($1, $2) RETURNING *",
-        [email.toLowerCase(), firebaseUid]
-      );
-      user = result.rows[0];
-    } else if (!user.firebase_uid) {
-      await query("UPDATE users SET firebase_uid=$1, updated_at=NOW() WHERE id=$2", [firebaseUid, user.id]);
-      result = await query("SELECT * FROM users WHERE id=$1", [user.id]);
-      user = result.rows[0];
+    let userData;
+    if (!userSnap.exists) {
+      userData = {
+        email: email.toLowerCase(),
+        firstName: null,
+        lastName: null,
+        profileImageUrl: null,
+        plan: "free",
+        cvCount: 0,
+        planExpiresAt: null,
+        firebaseUid: uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      await userRef.set(userData);
+    } else {
+      userData = userSnap.data();
+      if (
+        userData.plan === "business" &&
+        userData.planExpiresAt &&
+        new Date() > new Date(userData.planExpiresAt)
+      ) {
+        await userRef.update({ plan: "free", updatedAt: new Date().toISOString() });
+        userData.plan = "free";
+      }
     }
 
-    let plan = user.plan || "free";
-    if (plan === "business" && user.plan_expires_at && new Date() > new Date(user.plan_expires_at)) {
-      plan = "free";
-      await query("UPDATE users SET plan='free', updated_at=NOW() WHERE id=$1", [user.id]);
-    }
-
-    setUserCookie(res, user.id);
+    setUserCookie(res, uid);
     return res.json({
-      id: user.id, email: user.email,
-      firstName: user.first_name, lastName: user.last_name,
-      profileImageUrl: user.profile_image_url,
-      plan, cvCount: user.cv_count || 0, planExpiresAt: user.plan_expires_at || null,
+      id: uid,
+      email: userData.email,
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: userData.profileImageUrl || null,
+      plan: userData.plan || "free",
+      cvCount: userData.cvCount || 0,
+      planExpiresAt: userData.planExpiresAt || null,
     });
   } catch (error) {
     console.error("[firebase-sync]", error.message);
