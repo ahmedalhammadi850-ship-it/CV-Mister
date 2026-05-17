@@ -1,0 +1,42 @@
+15:24:12.538 Running build in Washington, D.C., USA (East) – iad1
+15:24:12.539 Build machine configuration: 2 cores, 8 GB
+15:24:12.700 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: de6d3f8)
+15:24:12.702 Previous build caches not available.
+15:24:16.709 Cloning completed: 4.007s
+15:24:17.018 Running "vercel build"
+15:24:17.040 Vercel CLI 53.3.2
+15:24:17.871 Installing dependencies...
+15:24:22.549 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+15:24:22.571 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+15:24:23.122 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+15:24:24.310 npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+15:24:24.695 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+15:24:24.697 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+15:24:24.715 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+15:24:31.284 
+15:24:31.284 added 637 packages in 13s
+15:24:31.286 
+15:24:31.286 103 packages are looking for funding
+15:24:31.286   run `npm fund` for details
+15:24:31.470 
+15:24:31.470 > cv-mister@0.0.0 build
+15:24:31.470 > npx vite build
+15:24:31.471 
+15:24:31.966 vite v8.0.13 building client environment for production...
+15:24:33.089 
+transforming...✓ 323 modules transformed.
+15:24:33.240 rendering chunks...
+15:24:33.558 computing gzip size...
+15:24:33.579 dist/index.html                             2.74 kB │ gzip:   1.23 kB
+15:24:33.580 dist/assets/index-CyOk9rGP.css            147.61 kB │ gzip:  23.55 kB
+15:24:33.580 dist/assets/rolldown-runtime-S-ySWqyJ.js    0.69 kB │ gzip:   0.42 kB
+15:24:33.580 dist/assets/purify.es-CTpuD0bk.js          22.44 kB │ gzip:   8.81 kB
+15:24:33.581 dist/assets/firebase-vendor-CPNR-Baj.js   113.04 kB │ gzip:  33.45 kB
+15:24:33.581 dist/assets/index.es-H520MSnR.js          151.42 kB │ gzip:  48.90 kB
+15:24:33.581 dist/assets/react-vendor-Dd4uTC46.js      230.65 kB │ gzip:  73.84 kB
+15:24:33.581 dist/assets/pdf-vendor-t1Q2jBvQ.js        614.26 kB │ gzip: 181.92 kB
+15:24:33.582 dist/assets/index-BmxfCt5x.js             795.26 kB │ gzip: 122.96 kB
+15:24:33.582 
+15:24:33.582 ✓ built in 1.61s
+15:25:15.996 Build Completed in /vercel/output [58s]
+15:25:17.627 Deploying outputs...
