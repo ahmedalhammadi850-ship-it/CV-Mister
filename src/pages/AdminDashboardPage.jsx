@@ -296,9 +296,11 @@ const AdminDashboardPage = () => {
   const filteredUsers = users.filter(u =>
     `${u.firstName || ''} ${u.lastName || ''} ${u.email || ''}`.toLowerCase().includes(searchUser.toLowerCase())
   );
-  const filteredCVs = cvs.filter(c =>
-    `${c.name || ''} ${c.userEmail || ''} ${c.userFirstName || ''}`.toLowerCase().includes(searchCV.toLowerCase())
-  );
+  const [cvDownloadFilter, setCvDownloadFilter] = useState(false);
+  const filteredCVs = cvs
+    .filter(c => `${c.name || ''} ${c.userEmail || ''} ${c.userFirstName || ''}`.toLowerCase().includes(searchCV.toLowerCase()))
+    .filter(c => !cvDownloadFilter || (c.downloadCount || 0) > 0)
+    .sort((a, b) => cvDownloadFilter ? (b.downloadCount || 0) - (a.downloadCount || 0) : 0);
   const filteredPayments = payments.filter(p =>
     statusFilter === 'all' || p.status === statusFilter
   );
@@ -414,11 +416,13 @@ const AdminDashboardPage = () => {
           {/* ── OVERVIEW ── */}
           {activeTab === 'overview' && (
             <div className="space-y-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                 <StatCard icon={<svg className="w-6 h-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>} color="bg-indigo-50" label="إجمالي المستخدمين" value={stats?.users} />
                 <StatCard icon={<svg className="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>} color="bg-emerald-50" label="السير الذاتية المُنشأة" value={stats?.cvs} />
                 <StatCard icon={<svg className="w-6 h-6 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} color="bg-amber-50" label="طلبات دفع قيد المراجعة" value={stats?.pendingPayments} />
                 <StatCard icon={<svg className="w-6 h-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} color="bg-green-50" label="طلبات دفع مقبولة" value={stats?.approvedPayments} />
+                <StatCard icon={<svg className="w-6 h-6 text-violet-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>} color="bg-violet-50" label="مستخدمون نزّلوا سيرة ذاتية" value={stats?.usersWithDownloads} sub={`${stats?.totalDownloads ?? 0} تنزيل إجمالاً`} />
+                <StatCard icon={<svg className="w-6 h-6 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>} color="bg-sky-50" label="طلبات الأعمال" value={stats?.businessContacts} />
               </div>
 
               {/* Recent Payments */}
@@ -545,11 +549,18 @@ const AdminDashboardPage = () => {
           {/* ── CVs ── */}
           {activeTab === 'cvs' && (
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex flex-wrap items-center gap-3">
                 <div className="relative flex-1 max-w-sm">
                   <svg className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                   <input value={searchCV} onChange={e => setSearchCV(e.target.value)} placeholder="البحث في السير الذاتية..." className="w-full pr-9 pl-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50" />
                 </div>
+                <button
+                  onClick={() => setCvDownloadFilter(f => !f)}
+                  className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium transition-all border ${cvDownloadFilter ? 'bg-violet-600 text-white border-violet-600 shadow-lg' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}`}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                  نزّلوا سيرة ذاتية فقط
+                </button>
                 <span className="text-slate-400 text-sm">{filteredCVs.length} سيرة</span>
               </div>
               <div className="bg-slate-800 rounded-2xl border border-slate-700 overflow-hidden">
