@@ -122,6 +122,10 @@ async function main() {
   // ── Debug ──
   route("get", "/api/debug", "debug");
 
+  // ── Admin Settings (n8n) ──
+  route("get",   "/api/admin/settings", "admin/settings");
+  route("patch", "/api/admin/settings", "admin/settings");
+
   // ── Admin ──
   route("post",  "/api/admin/login",    "admin/login");
   route("get",   "/api/admin/me",       "admin/me");
