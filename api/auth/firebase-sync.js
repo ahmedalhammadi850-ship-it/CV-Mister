@@ -33,11 +33,11 @@ export default async function handler(req, res) {
     } else {
       userData = userSnap.data();
       if (
-        userData.plan === "business" &&
+        (userData.plan === "business" || userData.plan === "pro") &&
         userData.planExpiresAt &&
         new Date() > new Date(userData.planExpiresAt)
       ) {
-        await userRef.update({ plan: "free", updatedAt: new Date().toISOString() });
+        await userRef.update({ plan: "free", planExpiresAt: null, updatedAt: new Date().toISOString() });
         userData.plan = "free";
       }
     }

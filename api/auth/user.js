@@ -13,10 +13,11 @@ export default async function handler(req, res) {
 
     const user = userSnap.data();
     let plan = user.plan || "free";
-    if (plan === "business" && user.planExpiresAt && new Date() > new Date(user.planExpiresAt)) {
+    if ((plan === "business" || plan === "pro") && user.planExpiresAt && new Date() > new Date(user.planExpiresAt)) {
       plan = "free";
       await db.collection("users").doc(payload.userId).update({
         plan: "free",
+        planExpiresAt: null,
         updatedAt: new Date().toISOString(),
       });
     }

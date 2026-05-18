@@ -21,10 +21,16 @@ export default async function handler(req, res) {
     const data = snap.data();
 
     if (status === "approved" && data.userId) {
-      await db.collection("users").doc(data.userId).update({ plan: "pro", updatedAt: now });
+      const expiresAt = new Date();
+      expiresAt.setMonth(expiresAt.getMonth() + 1);
+      await db.collection("users").doc(data.userId).update({
+        plan: "pro",
+        planExpiresAt: expiresAt.toISOString(),
+        updatedAt: now,
+      });
     }
     if (status === "rejected" && data.userId) {
-      await db.collection("users").doc(data.userId).update({ plan: "free", updatedAt: now });
+      await db.collection("users").doc(data.userId).update({ plan: "free", planExpiresAt: null, updatedAt: now });
     }
 
     return res.json({ id, ...data, status, notes: notes || null, reviewedAt: now });
