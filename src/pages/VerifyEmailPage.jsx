@@ -12,24 +12,33 @@ const VerifyEmailPage = () => {
   const [redirecting, setRedirecting] = useState(false);
   const intervalRef = useRef(null);
 
+  const checkVerified = async () => {
+    try {
+      const u = auth.currentUser;
+      if (!u) return false;
+      await u.reload();
+      if (u.emailVerified) {
+        clearInterval(intervalRef.current);
+        setRedirecting(true);
+        await refreshUser();
+        navigate('/dashboard');
+        return true;
+      }
+    } catch {
+    }
+    return false;
+  };
+
   useEffect(() => {
     const user = auth.currentUser;
     if (user) setEmail(user.email || '');
 
-    intervalRef.current = setInterval(async () => {
-      try {
-        const u = auth.currentUser;
-        if (!u) return;
-        await u.reload();
-        if (u.emailVerified) {
-          clearInterval(intervalRef.current);
-          setRedirecting(true);
-          await refreshUser();
-          navigate('/dashboard');
-        }
-      } catch {
+    // Check immediately in case user already verified (e.g. arrived via email link)
+    checkVerified().then((alreadyVerified) => {
+      if (!alreadyVerified) {
+        intervalRef.current = setInterval(checkVerified, 3000);
       }
-    }, 3000);
+    });
 
     return () => clearInterval(intervalRef.current);
   }, []);
