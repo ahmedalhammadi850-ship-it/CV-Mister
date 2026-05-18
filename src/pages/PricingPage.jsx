@@ -29,6 +29,30 @@ const DEFAULTS = {
   free_name_en: 'Free',
   free_desc: 'مثالي للبدء وتجربة المنصة',
   free_desc_en: 'Perfect to get started and try the platform',
+  free_features: [
+    { label: 'سيرة ذاتية واحدة',          labelEn: '1 resume',                 included: true  },
+    { label: 'قالب أساسي',                labelEn: 'Basic template',           included: true  },
+    { label: 'تصدير PDF',                 labelEn: 'PDF export',               included: true  },
+    { label: 'دعم اللغة العربية',          labelEn: 'Arabic language support',  included: true  },
+    { label: 'اقتراحات الذكاء الاصطناعي', labelEn: 'AI suggestions',           included: false },
+    { label: 'رسالة تغطية',               labelEn: 'Cover letter',             included: false },
+  ],
+  pro_features: [
+    { label: '2 سير ذاتية',               labelEn: '2 resumes',                included: true },
+    { label: 'جميع القوالب (25+)',          labelEn: 'All templates (25+)',      included: true },
+    { label: 'تصدير PDF عالي الجودة',      labelEn: 'High-quality PDF export',  included: true },
+    { label: 'دعم العربية والإنجليزية',    labelEn: 'Arabic & English support', included: true },
+    { label: 'اقتراحات الذكاء الاصطناعي', labelEn: 'AI suggestions',           included: true },
+    { label: 'رسالة تغطية',               labelEn: 'Cover letter',             included: true },
+  ],
+  business_features: [
+    { label: 'سير ذاتية غير محدودة',       labelEn: 'Unlimited resumes',        included: true },
+    { label: 'جميع القوالب + حصرية',       labelEn: 'All templates + exclusive',included: true },
+    { label: 'تصدير PDF عالي الجودة',      labelEn: 'High-quality PDF export',  included: true },
+    { label: 'دعم كامل متعدد اللغات',      labelEn: 'Full multilingual support',included: true },
+    { label: 'ذكاء اصطناعي متقدم',         labelEn: 'Advanced AI',              included: true },
+    { label: 'رسائل تغطية غير محدودة',     labelEn: 'Unlimited cover letters',  included: true },
+  ],
 };
 
 const faqs = [
@@ -79,14 +103,7 @@ const PricingPage = () => {
       ctaTo: '/signup',
       popular: false,
       gradient: null,
-      features: [
-        { label: 'سيرة ذاتية واحدة',               labelEn: '1 resume',                        included: true  },
-        { label: 'قالب أساسي',                       labelEn: 'Basic template',                  included: true  },
-        { label: 'تصدير PDF',                        labelEn: 'PDF export',                      included: true  },
-        { label: 'دعم اللغة العربية',                labelEn: 'Arabic language support',          included: true  },
-        { label: 'اقتراحات الذكاء الاصطناعي',       labelEn: 'AI suggestions',                  included: false },
-        { label: 'رسالة تغطية',                      labelEn: 'Cover letter',                    included: false },
-      ],
+      features: pricing.free_features,
     },
     {
       id: 'pro',
@@ -102,14 +119,7 @@ const PricingPage = () => {
       ctaTo: '/upgrade',
       popular: true,
       gradient: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #c026d3 100%)',
-      features: [
-        { label: '2 سير ذاتية',                      labelEn: '2 resumes',                       included: true },
-        { label: 'جميع القوالب (25+)',                labelEn: 'All templates (25+)',              included: true },
-        { label: 'تصدير PDF عالي الجودة',            labelEn: 'High-quality PDF export',         included: true },
-        { label: 'دعم اللغة العربية والإنجليزية',    labelEn: 'Arabic & English support',        included: true },
-        { label: 'اقتراحات الذكاء الاصطناعي',       labelEn: 'AI suggestions',                  included: true },
-        { label: 'رسالة تغطية',                      labelEn: 'Cover letter',                    included: true },
-      ],
+      features: pricing.pro_features,
     },
     {
       id: 'business',
@@ -125,14 +135,7 @@ const PricingPage = () => {
       ctaTo: '/business-contact',
       popular: false,
       gradient: null,
-      features: [
-        { label: 'سير ذاتية غير محدودة',             labelEn: 'Unlimited resumes',               included: true },
-        { label: 'جميع القوالب + حصرية',             labelEn: 'All templates + exclusive',       included: true },
-        { label: 'تصدير PDF عالي الجودة',            labelEn: 'High-quality PDF export',         included: true },
-        { label: 'دعم كامل متعدد اللغات',            labelEn: 'Full multilingual support',       included: true },
-        { label: 'ذكاء اصطناعي متقدم',              labelEn: 'Advanced AI',                      included: true },
-        { label: 'رسائل تغطية غير محدودة',           labelEn: 'Unlimited cover letters',         included: true },
-      ],
+      features: pricing.business_features,
     },
   ];
 

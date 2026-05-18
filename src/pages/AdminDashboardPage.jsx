@@ -177,7 +177,36 @@ const AdminDashboardPage = () => {
   const [n8nEditing, setN8nEditing]           = useState({});
   const [n8nSaving, setN8nSaving]             = useState({});
   const [n8nMsg, setN8nMsg]                   = useState({});
-  const [pricingEdit, setPricingEdit]         = useState({ pro_price: 3, pro_name: 'احترافي', pro_name_en: 'Professional', pro_desc: 'الخيار المثالي للباحثين عن عمل بجدية', pro_desc_en: 'Ideal for serious job seekers', business_price: 15, business_name: 'أعمال', business_name_en: 'Business', business_desc: 'للشركات والفرق التي تحتاج إلى حلول متكاملة', business_desc_en: 'For companies and teams needing complete solutions', free_name: 'مجاني', free_name_en: 'Free', free_desc: 'مثالي للبدء وتجربة المنصة', free_desc_en: 'Perfect to get started and try the platform', payment_account: '00154578', payment_bank: 'بنك التضامن — Tadhamon Bank', payment_beneficiary: 'أحمد عبدالله عقلان الحمادي' });
+  const [pricingEdit, setPricingEdit]         = useState({
+    pro_price: 3, pro_name: 'احترافي', pro_name_en: 'Professional', pro_desc: 'الخيار المثالي للباحثين عن عمل بجدية', pro_desc_en: 'Ideal for serious job seekers',
+    business_price: 15, business_name: 'أعمال', business_name_en: 'Business', business_desc: 'للشركات والفرق التي تحتاج إلى حلول متكاملة', business_desc_en: 'For companies and teams needing complete solutions',
+    free_name: 'مجاني', free_name_en: 'Free', free_desc: 'مثالي للبدء وتجربة المنصة', free_desc_en: 'Perfect to get started and try the platform',
+    payment_account: '00154578', payment_bank: 'بنك التضامن — Tadhamon Bank', payment_beneficiary: 'أحمد عبدالله عقلان الحمادي',
+    free_features: [
+      { label: 'سيرة ذاتية واحدة',          labelEn: '1 resume',                 included: true  },
+      { label: 'قالب أساسي',                labelEn: 'Basic template',           included: true  },
+      { label: 'تصدير PDF',                 labelEn: 'PDF export',               included: true  },
+      { label: 'دعم اللغة العربية',          labelEn: 'Arabic language support',  included: true  },
+      { label: 'اقتراحات الذكاء الاصطناعي', labelEn: 'AI suggestions',           included: false },
+      { label: 'رسالة تغطية',               labelEn: 'Cover letter',             included: false },
+    ],
+    pro_features: [
+      { label: '2 سير ذاتية',               labelEn: '2 resumes',                included: true },
+      { label: 'جميع القوالب (25+)',          labelEn: 'All templates (25+)',      included: true },
+      { label: 'تصدير PDF عالي الجودة',      labelEn: 'High-quality PDF export',  included: true },
+      { label: 'دعم العربية والإنجليزية',    labelEn: 'Arabic & English support', included: true },
+      { label: 'اقتراحات الذكاء الاصطناعي', labelEn: 'AI suggestions',           included: true },
+      { label: 'رسالة تغطية',               labelEn: 'Cover letter',             included: true },
+    ],
+    business_features: [
+      { label: 'سير ذاتية غير محدودة',       labelEn: 'Unlimited resumes',        included: true },
+      { label: 'جميع القوالب + حصرية',       labelEn: 'All templates + exclusive',included: true },
+      { label: 'تصدير PDF عالي الجودة',      labelEn: 'High-quality PDF export',  included: true },
+      { label: 'دعم كامل متعدد اللغات',      labelEn: 'Full multilingual support',included: true },
+      { label: 'ذكاء اصطناعي متقدم',         labelEn: 'Advanced AI',              included: true },
+      { label: 'رسائل تغطية غير محدودة',     labelEn: 'Unlimited cover letters',  included: true },
+    ],
+  });
   const [pricingSaving, setPricingSaving]     = useState(false);
   const [pricingMsg, setPricingMsg]           = useState('');
   const [navbarEdit, setNavbarEdit]           = useState({ home_ar: 'الرئيسية', home_en: 'Home', templates_ar: 'القوالب', templates_en: 'Templates', pricing_ar: 'الأسعار', pricing_en: 'Pricing', about_ar: 'من نحن', about_en: 'About' });
@@ -256,6 +285,14 @@ const AdminDashboardPage = () => {
     }
   };
 
+  const updateFeature = (plan, index, field, value) => {
+    setPricingEdit(s => {
+      const key = `${plan}_features`;
+      const updated = s[key].map((f, i) => i === index ? { ...f, [field]: value } : f);
+      return { ...s, [key]: updated };
+    });
+  };
+
   const handleSavePricing = async () => {
     setPricingSaving(true);
     setPricingMsg('');
@@ -278,6 +315,9 @@ const AdminDashboardPage = () => {
         payment_account: pricingEdit.payment_account || '',
         payment_bank: pricingEdit.payment_bank || '',
         payment_beneficiary: pricingEdit.payment_beneficiary || '',
+        free_features: pricingEdit.free_features,
+        pro_features: pricingEdit.pro_features,
+        business_features: pricingEdit.business_features,
       };
       const res = await fetch('/api/admin/pricing', {
         method: 'PATCH', credentials: 'include',
@@ -989,6 +1029,26 @@ const AdminDashboardPage = () => {
                           className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="ltr" />
                       </div>
                     </div>
+                    <div className="mt-4">
+                      <label className="block text-xs text-slate-500 mb-2">القيود والمميزات</label>
+                      <div className="space-y-2">
+                        {pricingEdit.free_features.map((f, i) => (
+                          <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
+                            <button type="button" onClick={() => updateFeature('free', i, 'included', !f.included)}
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.included ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                              {f.included
+                                ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                              }
+                            </button>
+                            <input type="text" value={f.label} onChange={e => updateFeature('free', i, 'label', e.target.value)}
+                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-slate-500/60" dir="rtl" placeholder="عربي" />
+                            <input type="text" value={f.labelEn} onChange={e => updateFeature('free', i, 'labelEn', e.target.value)}
+                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-slate-500/60" dir="ltr" placeholder="English" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Pro Plan */}
@@ -1024,6 +1084,26 @@ const AdminDashboardPage = () => {
                           className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="ltr" />
                       </div>
                     </div>
+                    <div className="mt-4">
+                      <label className="block text-xs text-slate-500 mb-2">القيود والمميزات</label>
+                      <div className="space-y-2">
+                        {pricingEdit.pro_features.map((f, i) => (
+                          <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
+                            <button type="button" onClick={() => updateFeature('pro', i, 'included', !f.included)}
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.included ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                              {f.included
+                                ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                              }
+                            </button>
+                            <input type="text" value={f.label} onChange={e => updateFeature('pro', i, 'label', e.target.value)}
+                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/60" dir="rtl" placeholder="عربي" />
+                            <input type="text" value={f.labelEn} onChange={e => updateFeature('pro', i, 'labelEn', e.target.value)}
+                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/60" dir="ltr" placeholder="English" />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
 
                   {/* Business Plan */}
@@ -1057,6 +1137,26 @@ const AdminDashboardPage = () => {
                         <label className="block text-xs text-slate-500 mb-1">الوصف (إنجليزي)</label>
                         <input type="text" value={pricingEdit.business_desc_en} onChange={e => setPricingEdit(s => ({ ...s, business_desc_en: e.target.value }))}
                           className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="ltr" />
+                      </div>
+                    </div>
+                    <div className="mt-4">
+                      <label className="block text-xs text-slate-500 mb-2">القيود والمميزات</label>
+                      <div className="space-y-2">
+                        {pricingEdit.business_features.map((f, i) => (
+                          <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
+                            <button type="button" onClick={() => updateFeature('business', i, 'included', !f.included)}
+                              className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.included ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
+                              {f.included
+                                ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                              }
+                            </button>
+                            <input type="text" value={f.label} onChange={e => updateFeature('business', i, 'label', e.target.value)}
+                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/60" dir="rtl" placeholder="عربي" />
+                            <input type="text" value={f.labelEn} onChange={e => updateFeature('business', i, 'labelEn', e.target.value)}
+                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/60" dir="ltr" placeholder="English" />
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>

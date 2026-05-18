@@ -8,6 +8,7 @@ const ALLOWED_KEYS = [
   "business_price", "business_name", "business_name_en", "business_desc", "business_desc_en",
   "free_name", "free_name_en", "free_desc", "free_desc_en",
   "payment_account", "payment_bank", "payment_beneficiary",
+  "free_features", "pro_features", "business_features",
 ];
 
 export default async function handler(req, res) {
