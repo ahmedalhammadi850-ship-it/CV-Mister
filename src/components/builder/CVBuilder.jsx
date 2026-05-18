@@ -142,54 +142,67 @@ const CVBuilder = () => {
         import('jspdf'),
       ]);
 
-      // Wait for all fonts to be loaded so text renders identically to the preview
       await document.fonts.ready;
 
-      // Use the same element the LivePreview uses for measurement — guarantees
-      // the captured image is pixel-identical to what the user sees on screen.
-      const element = breakDataRef.current?.captureEl;
-      if (!element) return;
+      const sourceEl = breakDataRef.current?.captureEl;
+      if (!sourceEl) return;
 
-      const PR = 2; // pixelRatio 2 is sharp enough without freezing the browser
+      const PR = 3;
       const A4_W_MM = 210;
       const A4_H_MM = 297;
-      const CONTENT_W = 794; // fixed A4 width in CSS pixels
+      const CONTENT_W = 794;
 
-      // Inject font CSS from the same-origin proxy DIRECTLY into the print element.
-      // This lets html-to-image read @font-face rules (same-origin, no CORS) and
-      // embed the Arabic + Latin fonts into the SVG so they render identically to
-      // the live preview — including Arabic ligatures and RTL shaping.
-      let injectedFontStyle = null;
+      // Clone the CV element into a fixed off-screen container.
+      // Using position:fixed (not absolute at -9999px) ensures the browser
+      // renders it through the same pipeline as the visible preview — giving
+      // identical font shaping, colours, and layout in the captured image.
+      const clone = sourceEl.cloneNode(true);
+      clone.style.cssText = [
+        'position:fixed',
+        'top:0',
+        `left:${-(CONTENT_W + 200)}px`,
+        `width:${CONTENT_W}px`,
+        'pointer-events:none',
+        'z-index:-9999',
+      ].join(';');
+      document.body.appendChild(clone);
+
+      // Two animation frames so the browser fully computes layout and styles.
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      // Inject proxied Google Fonts so html-to-image can embed them (same-origin).
+      let fontStyle = null;
       try {
         const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
           'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
         );
         const res = await fetch(proxyUrl);
         if (res.ok) {
-          const css = await res.text();
-          injectedFontStyle = document.createElement('style');
-          injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
-          injectedFontStyle.textContent = css;
-          element.prepend(injectedFontStyle);
+          fontStyle = document.createElement('style');
+          fontStyle.setAttribute('data-cv-pdf-fonts', '1');
+          fontStyle.textContent = await res.text();
+          clone.prepend(fontStyle);
         }
-      } catch (_) { /* proceed without font injection if proxy unavailable */ }
+      } catch (_) {}
 
-      // Capture the full CV as one image (once only).
-      // With same-origin @font-face rules injected, html-to-image can embed fonts
-      // properly — critical for Arabic text shaping and RTL layout in the PDF.
+      // Give fonts time to resolve after injection before capturing.
+      await new Promise(r => setTimeout(r, 200));
+      await document.fonts.ready;
+
+      const captureH = clone.scrollHeight;
       let fullDataUrl;
       try {
-        fullDataUrl = await toPng(element, {
+        fullDataUrl = await toPng(clone, {
           backgroundColor: '#ffffff',
           width: CONTENT_W,
-          height: element.scrollHeight,
+          height: captureH,
           pixelRatio: PR,
+          cacheBust: true,
         });
       } finally {
-        if (injectedFontStyle) injectedFontStyle.remove();
+        document.body.removeChild(clone);
       }
 
-      // Yield to keep the UI responsive after the heavy capture
       await new Promise(r => setTimeout(r, 0));
 
       const fullImg = await new Promise((resolve, reject) => {
@@ -199,35 +212,29 @@ const CVBuilder = () => {
         im.src = fullDataUrl;
       });
 
-      // Since we capture from the exact same element used for measurement,
-      // the break positions are already correct — no scaling needed.
-      const printH = element.scrollHeight;
       const { breaks } = breakDataRef.current;
-
       const contentRanges = [];
       let prev = 0;
       for (const brk of breaks) {
-        if (brk > prev && brk < printH) {
+        if (brk > prev && brk < captureH) {
           contentRanges.push({ start: prev, end: brk });
           prev = brk;
         }
       }
-      contentRanges.push({ start: prev, end: printH });
+      contentRanges.push({ start: prev, end: captureH });
 
       const imgW = CONTENT_W * PR;
-      const a4H  = Math.round((A4_H_MM / A4_W_MM) * imgW); // A4 height in image pixels
+      const a4H  = Math.round((A4_H_MM / A4_W_MM) * imgW);
 
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
       for (let i = 0; i < contentRanges.length; i++) {
-        await new Promise(r => setTimeout(r, 0)); // yield between pages
-
+        await new Promise(r => setTimeout(r, 0));
         if (i > 0) pdf.addPage();
 
         const { start, end } = contentRanges[i];
-        const sliceH = Math.round((end - start) * PR); // content height in image pixels
+        const sliceH = Math.round((end - start) * PR);
 
-        // Draw this page's slice onto a full-A4-height canvas
         const a4Canvas = document.createElement('canvas');
         a4Canvas.width  = imgW;
         a4Canvas.height = a4H;
@@ -236,17 +243,16 @@ const CVBuilder = () => {
         ctx.fillRect(0, 0, imgW, a4H);
         ctx.drawImage(
           fullImg,
-          0, Math.round(start * PR), imgW, sliceH, // source: slice from full image
-          0, 0,                       imgW, sliceH  // dest: top of A4 canvas
+          0, Math.round(start * PR), imgW, sliceH,
+          0, 0,                       imgW, sliceH
         );
 
-        pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.92), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+        pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
       pdf.save(`${name} - CV.pdf`);
 
-      // Track download count
       if (currentCVId) {
         fetch(`/api/cvs/${currentCVId}/download`, {
           method: 'POST', credentials: 'include',
