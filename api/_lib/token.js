@@ -37,12 +37,6 @@ export function getAdminFromReq(req) {
   return verifyToken(cookies.cv_admin);
 }
 
-export function getIdTokenFromReq(req) {
-  const auth = req.headers?.authorization || "";
-  if (auth.startsWith("Bearer ")) return auth.slice(7);
-  return null;
-}
-
 export function setUserCookie(res, userId) {
   const token = signToken({ userId });
   res.setHeader("Set-Cookie", `cv_auth=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800`);

@@ -4,7 +4,6 @@ import { useAuth } from '../context/AuthContext';
 import { useCV } from '../context/useCV';
 import { formatDate } from '../utils/cvStorage';
 import TemplatesPage from './TemplatesPage';
-import { apiFetch } from '../lib/apiFetch';
 
 const TEMPLATE_COLORS = {
   modern:        { from: '#4f46e5', to: '#818cf8' },
@@ -405,7 +404,7 @@ const DashboardPage = () => {
   const fetchCVs = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await apiFetch('/api/cvs');
+      const res = await fetch('/api/cvs', { credentials: 'include' });
       if (res.status === 401) { navigate('/login'); return; }
       if (!res.ok) throw new Error('Failed');
       setCvs(await res.json());
@@ -416,15 +415,15 @@ const DashboardPage = () => {
 
   useEffect(() => { fetchCVs(); }, [fetchCVs]);
 
-  const handleDelete    = async (id) => { deleteCV(id); await apiFetch(`/api/cvs/${id}`, { method: 'DELETE' }); setCvs(prev => prev.filter(c => c.id !== id)); };
+  const handleDelete    = async (id) => { deleteCV(id); await fetch(`/api/cvs/${id}`, { method: 'DELETE', credentials: 'include' }); setCvs(prev => prev.filter(c => c.id !== id)); };
   const handleDuplicate = async (id) => {
     const cv = cvs.find(c => c.id === id); if (!cv) return;
     const copy = { ...cv, id: `cv-${Date.now()}`, name: cv.name + (isRTL ? ' (نسخة)' : ' (Copy)'), lastModified: new Date().toISOString() };
-    const res = await apiFetch('/api/cvs', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
+    const res = await fetch('/api/cvs', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
     if (res.ok) { const saved = await res.json(); setCvs(prev => [saved, ...prev]); }
   };
   const handleRename    = async (id, name) => {
-    const res = await apiFetch(`/api/cvs/${id}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+    const res = await fetch(`/api/cvs/${id}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
     if (res.ok) { const updated = await res.json(); setCvs(prev => prev.map(c => c.id === id ? { ...c, name: updated.name } : c)); }
   };
 

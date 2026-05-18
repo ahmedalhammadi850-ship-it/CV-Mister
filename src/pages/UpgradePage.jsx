@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { apiFetch } from '../lib/apiFetch';
 
 const ACCOUNT = '00154578';
 
@@ -112,8 +111,9 @@ const UpgradePage = () => {
 
         /* Send to n8n webhook and internal API in parallel */
         const [res] = await Promise.all([
-          apiFetch('/api/payment-requests', {
+          fetch('/api/payment-requests', {
             method: 'POST',
+            credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ receiptImage: base64 }),
           }),

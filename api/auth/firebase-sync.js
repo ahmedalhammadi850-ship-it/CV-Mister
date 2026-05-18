@@ -11,39 +11,12 @@ export default async function handler(req, res) {
     const { localId: uid, email, emailVerified } = firebaseUser;
     if (!emailVerified) return res.status(403).json({ message: "Email not verified" });
 
-    let userData;
-    try {
-      const db = getDb(idToken);
-      const userRef = db.collection("users").doc(uid);
-      const userSnap = await userRef.get();
+    const db = getDb();
+    const userRef = db.collection("users").doc(uid);
+    const userSnap = await userRef.get();
 
-      if (!userSnap.exists) {
-        userData = {
-          email: email.toLowerCase(),
-          firstName: null,
-          lastName: null,
-          profileImageUrl: null,
-          plan: "free",
-          cvCount: 0,
-          planExpiresAt: null,
-          firebaseUid: uid,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        };
-        await userRef.set(userData);
-      } else {
-        userData = userSnap.data();
-        if (
-          userData.plan === "business" &&
-          userData.planExpiresAt &&
-          new Date() > new Date(userData.planExpiresAt)
-        ) {
-          await userRef.update({ plan: "free", updatedAt: new Date().toISOString() });
-          userData.plan = "free";
-        }
-      }
-    } catch (dbErr) {
-      console.warn("[firebase-sync] Firestore unavailable, using token data:", dbErr.message);
+    let userData;
+    if (!userSnap.exists) {
       userData = {
         email: email.toLowerCase(),
         firstName: null,
@@ -52,7 +25,21 @@ export default async function handler(req, res) {
         plan: "free",
         cvCount: 0,
         planExpiresAt: null,
+        firebaseUid: uid,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       };
+      await userRef.set(userData);
+    } else {
+      userData = userSnap.data();
+      if (
+        userData.plan === "business" &&
+        userData.planExpiresAt &&
+        new Date() > new Date(userData.planExpiresAt)
+      ) {
+        await userRef.update({ plan: "free", updatedAt: new Date().toISOString() });
+        userData.plan = "free";
+      }
     }
 
     setUserCookie(res, uid);
