@@ -39,6 +39,10 @@ import EnglishApexTemplate from '../../templates/EnglishApexTemplate';
 import TealProTemplate from '../../templates/TealProTemplate';
 import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
 import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
+import VelvetTemplate from '../../templates/VelvetTemplate';
+import AuroraTemplate from '../../templates/AuroraTemplate';
+import ArabicGemTemplate from '../../templates/ArabicGemTemplate';
+import ArabicEliteTemplate from '../../templates/ArabicEliteTemplate';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -127,12 +131,16 @@ const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visibleP
       case 'tealpro':       return <TealProTemplate       {...props} />;
       case 'roseelegant':   return <RoseElegantTemplate   {...props} />;
       case 'darkheader':    return <DarkHeaderTemplate    {...props} />;
+      case 'velvet':        return <VelvetTemplate        {...props} />;
+      case 'aurora':        return <AuroraTemplate        {...props} />;
+      case 'arabicgem':     return <ArabicGemTemplate     {...props} />;
       case 'arabicnavy':         return <ArabicNavyTemplate         {...props} />;
       case 'arabicpro':          return <ArabicProTemplate          {...props} />;
       case 'arabictealsidebar':  return <ArabicTealSidebarTemplate  {...props} />;
       case 'arabicslatesidebar': return <ArabicSlateSidebarTemplate {...props} />;
       case 'arabicmodern':       return <ArabicModernTemplate       {...props} />;
       case 'arabiccard':         return <ArabicCardTemplate         {...props} />;
+      case 'arabicelite':        return <ArabicEliteTemplate        {...props} />;
       case 'arabicwave':         return <ArabicWaveTemplate         {...props} />;
       case 'arabicluxe':         return <ArabicLuxeTemplate         {...props} />;
       case 'englishhorizon':     return <EnglishHorizonTemplate     {...props} />;
