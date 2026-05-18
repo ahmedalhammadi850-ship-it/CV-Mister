@@ -4,13 +4,20 @@ import { useAuth } from '../context/AuthContext';
 import { auth } from '../firebase';
 
 const VerifyEmailPage = () => {
-  const { isRTL, resendVerification, signOutUser, refreshUser } = useAuth();
+  const { isRTL, resendVerification, signOutUser, currentUser } = useAuth();
   const navigate = useNavigate();
   const [resent, setResent] = useState(false);
   const [error, setError] = useState('');
   const [email, setEmail] = useState('');
   const [redirecting, setRedirecting] = useState(false);
   const intervalRef = useRef(null);
+
+  // Once redirecting=true AND currentUser is set by onAuthStateChanged, go to dashboard
+  useEffect(() => {
+    if (redirecting && currentUser) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [redirecting, currentUser]);
 
   const checkVerified = async () => {
     try {
@@ -20,8 +27,6 @@ const VerifyEmailPage = () => {
       if (u.emailVerified) {
         clearInterval(intervalRef.current);
         setRedirecting(true);
-        await refreshUser();
-        navigate('/dashboard');
         return true;
       }
     } catch {
