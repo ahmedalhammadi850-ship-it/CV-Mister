@@ -7,8 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -16,11 +15,14 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
+const POLL_INTERVAL = 30000;
+
 export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser]   = useState(null);
   const [loading, setLoading]           = useState(true);
   const [isRTL, setIsRTL]               = useState(false);
-  const unsubUserRef                    = useRef(null);
+  const pollTimerRef                    = useRef(null);
+  const loggedInRef                     = useRef(false);
 
   const buildUser = (dbUser) => {
     const planExpiresAt = dbUser.planExpiresAt ? new Date(dbUser.planExpiresAt) : null;
@@ -63,31 +65,51 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const startUserListener = (uid) => {
-    if (unsubUserRef.current) unsubUserRef.current();
-    const userRef = doc(db, 'users', uid);
-    unsubUserRef.current = onSnapshot(userRef, (snap) => {
-      if (snap.exists()) {
-        setCurrentUser(buildUser({ id: snap.id, ...snap.data() }));
-      }
-    });
+  const fetchUserFromBackend = async () => {
+    try {
+      const res = await fetch('/api/auth/user', { credentials: 'include' });
+      if (!res.ok) return null;
+      const dbUser = await res.json();
+      return buildUser(dbUser);
+    } catch {
+      return null;
+    }
   };
 
-  const stopUserListener = () => {
-    if (unsubUserRef.current) {
-      unsubUserRef.current();
-      unsubUserRef.current = null;
+  const startPolling = () => {
+    stopPolling();
+    pollTimerRef.current = setInterval(async () => {
+      if (!loggedInRef.current) return;
+      const updated = await fetchUserFromBackend();
+      if (updated) {
+        setCurrentUser(prev => {
+          if (!prev) return updated;
+          if (prev.plan !== updated.plan || prev.cvCount !== updated.cvCount) {
+            return updated;
+          }
+          return prev;
+        });
+      }
+    }, POLL_INTERVAL);
+  };
+
+  const stopPolling = () => {
+    if (pollTimerRef.current) {
+      clearInterval(pollTimerRef.current);
+      pollTimerRef.current = null;
     }
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      stopUserListener();
+      stopPolling();
       if (firebaseUser && firebaseUser.emailVerified) {
         const user = await syncWithBackend(firebaseUser);
         setCurrentUser(user);
-        if (user?.uid) startUserListener(user.uid);
+        loggedInRef.current = true;
+        startPolling();
       } else {
+        loggedInRef.current = false;
         setCurrentUser(null);
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
       }
@@ -95,7 +117,7 @@ export function AuthProvider({ children }) {
     });
     return () => {
       unsubscribe();
-      stopUserListener();
+      stopPolling();
     };
   }, []);
 
@@ -129,12 +151,14 @@ export function AuthProvider({ children }) {
     }
     const user = await syncWithBackend(credential.user);
     setCurrentUser(user);
-    if (user?.uid) startUserListener(user.uid);
+    loggedInRef.current = true;
+    startPolling();
     return user;
   };
 
   const signOutUser = async () => {
-    stopUserListener();
+    stopPolling();
+    loggedInRef.current = false;
     await signOut(auth);
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setCurrentUser(null);
@@ -150,11 +174,8 @@ export function AuthProvider({ children }) {
   };
 
   const refreshUser = async () => {
-    const firebaseUser = auth.currentUser;
-    if (firebaseUser && firebaseUser.emailVerified) {
-      const user = await syncWithBackend(firebaseUser);
-      setCurrentUser(user);
-    }
+    const updated = await fetchUserFromBackend();
+    if (updated) setCurrentUser(updated);
   };
 
   const toggleRTL = () => {
