@@ -39,6 +39,7 @@ import adminTemplatesById   from "../api/admin/templates/[id].js";
 import adminSettings        from "../api/admin/settings.js";
 import adminPricing         from "../api/admin/pricing.js";
 import adminNavbar          from "../api/admin/navbar.js";
+import navbar               from "../api/navbar.js";
 
 function makeReq(req: any, params: Record<string, string> = {}) {
   return { ...req, query: { ...req.query, ...params }, body: req.body, headers: req.headers, method: req.method, params };
@@ -119,6 +120,9 @@ app.get( "/api/payment-requests/my",  wrap(paymentRequestsMy));
 
 // ── Business contact ──
 app.post("/api/business-contact", wrap(businessContact));
+
+// ── Navbar (public) ──
+app.get("/api/navbar", wrap(navbar));
 
 // ── Templates ──
 app.get("/api/templates/config", wrap(templatesConfig));
