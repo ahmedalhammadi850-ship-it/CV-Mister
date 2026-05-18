@@ -168,6 +168,42 @@ const CVBuilder = () => {
 
       const captureH = element.scrollHeight;
 
+      // html2canvas v1.4.x can't parse oklch() (used by Tailwind v4).
+      // Walk the cloned element tree and convert every oklch / color-mix value
+      // to plain rgb() using a 1×1 canvas — the browser resolves it natively.
+      function resolveColor(color) {
+        try {
+          const cv = document.createElement('canvas');
+          cv.width = 1; cv.height = 1;
+          const ctx = cv.getContext('2d');
+          ctx.fillStyle = color;
+          ctx.fillRect(0, 0, 1, 1);
+          const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
+          if (a === 0) return 'transparent';
+          return `rgb(${r},${g},${b})`;
+        } catch { return color; }
+      }
+
+      const COLOR_PROPS = [
+        'backgroundColor', 'color',
+        'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
+        'outlineColor', 'textDecorationColor', 'caretColor',
+      ];
+
+      function fixColors(node, view) {
+        if (!(node instanceof Element)) return;
+        try {
+          const cs = view.getComputedStyle(node);
+          for (const prop of COLOR_PROPS) {
+            const val = cs[prop];
+            if (val && (val.includes('oklch') || val.includes('color-mix'))) {
+              node.style[prop] = resolveColor(val);
+            }
+          }
+        } catch (_) {}
+        for (const child of node.children) fixColors(child, view);
+      }
+
       let fullCanvas;
       try {
         fullCanvas = await html2canvas(element, {
@@ -180,6 +216,10 @@ const CVBuilder = () => {
           scrollX: 0,
           scrollY: 0,
           logging: false,
+          onclone: (doc, clonedEl) => {
+            const view = doc.defaultView || window;
+            fixColors(clonedEl, view);
+          },
         });
       } finally {
         element.style.position = savedPos;
