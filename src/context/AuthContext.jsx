@@ -132,8 +132,8 @@ export function AuthProvider({ children }) {
     });
     try {
       const actionCodeSettings = {
-        url: `${window.location.origin}/verify-email`,
-        handleCodeInApp: false,
+        url: `${window.location.origin}/email-action`,
+        handleCodeInApp: true,
       };
       await sendEmailVerification(credential.user, actionCodeSettings);
     } catch {
@@ -173,8 +173,8 @@ export function AuthProvider({ children }) {
     if (u) {
       try {
         const actionCodeSettings = {
-          url: `${window.location.origin}/verify-email`,
-          handleCodeInApp: false,
+          url: `${window.location.origin}/email-action`,
+          handleCodeInApp: true,
         };
         await sendEmailVerification(u, actionCodeSettings);
       } catch {

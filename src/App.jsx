@@ -16,6 +16,7 @@ import BusinessContactPage from './pages/BusinessContactPage';
 import AdminLoginPage from './pages/AdminLoginPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import VerifyEmailPage from './pages/VerifyEmailPage';
+import EmailActionPage from './pages/EmailActionPage';
 import RateLimitedPage from './pages/RateLimitedPage';
 import ChatWidget from './components/ChatWidget';
 
@@ -84,6 +85,7 @@ function App() {
         <Route path="/signup"          element={<GuestRoute><SignupPage /></GuestRoute>} />
         <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
         <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/email-action" element={<EmailActionPage />} />
 
         <Route path="/"          element={<Layout><HomePage /></Layout>} />
         <Route path="/templates" element={<Layout><TemplatesPage /></Layout>} />
