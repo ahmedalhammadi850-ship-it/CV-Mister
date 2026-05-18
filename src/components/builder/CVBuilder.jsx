@@ -201,11 +201,34 @@ const CVBuilder = () => {
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
 
-      // Two frames so the browser lays out the clone before capture.
+      // Wait for layout + explicitly force every font family used in the
+      // clone to be loaded so the SVG renders with the correct typefaces.
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      await document.fonts.ready;
+
+      const usedFamilies = new Set();
+      clone.querySelectorAll('*').forEach(el => {
+        const ff = window.getComputedStyle(el).fontFamily;
+        if (ff) {
+          ff.split(',').forEach(f => {
+            const name = f.trim().replace(/^['"]|['"]$/g, '');
+            if (name) usedFamilies.add(name);
+          });
+        }
+      });
+      await Promise.all(
+        [...usedFamilies].map(name =>
+          document.fonts.load(`400 16px "${name}"`).catch(() => {})
+        )
+      );
+      // Give the browser one more frame to render with the loaded fonts.
+      await new Promise(r => requestAnimationFrame(r));
 
       let fullDataUrl;
       try {
+        // Call toPng twice — first pass primes the image/font cache inside
+        // html-to-image; second pass produces a clean consistent result.
+        await toPng(clone, { backgroundColor: '#ffffff', width: CONTENT_W, height: captureH, pixelRatio: PR, cacheBust: false }).catch(() => {});
         fullDataUrl = await toPng(clone, {
           backgroundColor: '#ffffff',
           width: CONTENT_W,
