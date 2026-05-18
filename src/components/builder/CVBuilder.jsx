@@ -152,6 +152,22 @@ const CVBuilder = () => {
       const A4_H_MM = 297;
       const CONTENT_W = 794;
 
+      // Temporarily move the live element to a fixed off-screen position so the
+      // browser composites it properly for capture. Keeping z-index -1 and
+      // position absolute at -9999px prevents html-to-image from reading pixels.
+      const savedPos     = element.style.position;
+      const savedTop     = element.style.top;
+      const savedLeft    = element.style.left;
+      const savedZIndex  = element.style.zIndex;
+
+      element.style.position = 'fixed';
+      element.style.top      = '0';
+      element.style.left     = `${-(CONTENT_W + 200)}px`;
+      element.style.zIndex   = '9999';
+
+      // Two frames so the browser re-composites at the new position.
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
       // Inject proxied Google Fonts so html-to-image can embed them (same-origin).
       let injectedFontStyle = null;
       try {
@@ -167,7 +183,7 @@ const CVBuilder = () => {
         }
       } catch (_) {}
 
-      // Give fonts time to resolve after injection, then re-check ready state.
+      // Give fonts time to resolve, then re-check ready state.
       await new Promise(r => setTimeout(r, 200));
       await document.fonts.ready;
 
@@ -182,7 +198,12 @@ const CVBuilder = () => {
           cacheBust: true,
         });
       } finally {
+        // Always restore the element's original position.
         if (injectedFontStyle) injectedFontStyle.remove();
+        element.style.position = savedPos;
+        element.style.top      = savedTop;
+        element.style.left     = savedLeft;
+        element.style.zIndex   = savedZIndex;
       }
 
       await new Promise(r => setTimeout(r, 0));
