@@ -36,6 +36,9 @@ import adminPayReqById      from "../api/admin/payment-requests/[id].js";
 import adminBizIndex        from "../api/admin/business-contacts/index.js";
 import adminBizById         from "../api/admin/business-contacts/[id].js";
 import adminTemplatesById   from "../api/admin/templates/[id].js";
+import adminSettings        from "../api/admin/settings.js";
+import adminPricing         from "../api/admin/pricing.js";
+import adminNavbar          from "../api/admin/navbar.js";
 
 function makeReq(req: any, params: Record<string, string> = {}) {
   return { ...req, query: req.query, body: req.body, headers: req.headers, method: req.method, params };
@@ -149,6 +152,12 @@ app.patch( "/api/admin/payment-requests/:id",   wrap(adminPayReqById,    p => ({
 app.get(   "/api/admin/business-contacts",      wrap(adminBizIndex));
 app.patch( "/api/admin/business-contacts/:id",  wrap(adminBizById,       p => ({ id: p.id })));
 app.patch( "/api/admin/templates/:id",          wrap(adminTemplatesById, p => ({ id: p.id })));
+app.get(   "/api/admin/settings",               wrap(adminSettings));
+app.patch( "/api/admin/settings",               wrap(adminSettings));
+app.get(   "/api/admin/pricing",                wrap(adminPricing));
+app.patch( "/api/admin/pricing",                wrap(adminPricing));
+app.get(   "/api/admin/navbar",                 wrap(adminNavbar));
+app.patch( "/api/admin/navbar",                 wrap(adminNavbar));
 
 // ── Font proxies ──
 app.get("/api/font-proxy", async (req, res) => {
