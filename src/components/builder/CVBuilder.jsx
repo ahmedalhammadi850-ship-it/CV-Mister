@@ -137,8 +137,8 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      const [{ toPng }, { jsPDF }] = await Promise.all([
-        import('html-to-image'),
+      const [{ default: html2canvas }, { jsPDF }] = await Promise.all([
+        import('html2canvas'),
         import('jspdf'),
       ]);
 
@@ -152,55 +152,7 @@ const CVBuilder = () => {
       const A4_H_MM = 297;
       const CONTENT_W = 794;
 
-      // ── Font pre-loading ──────────────────────────────────────────────────────
-      // Fetch the proxied Google Fonts CSS, then download every font binary and
-      // embed it as a base64 data-URI so html-to-image gets pixel-perfect fonts
-      // regardless of CORS or network timing.
-      let injectedFontStyle = null;
-      try {
-        const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
-          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
-        );
-        const res = await fetch(proxyUrl);
-        if (res.ok) {
-          let css = await res.text();
-
-          // Collect every font-file URL referenced in the CSS
-          const fontUrlMatches = [...css.matchAll(/url\(([^)]+)\)/g)];
-          const uniqueFontUrls = [...new Set(fontUrlMatches.map(m => m[1]))];
-
-          // Fetch every font binary in parallel and convert to base64 data-URI
-          const dataUriMap = {};
-          await Promise.all(uniqueFontUrls.map(async (url) => {
-            try {
-              const fontRes = await fetch(url);
-              if (!fontRes.ok) return;
-              const buffer = await fontRes.arrayBuffer();
-              const bytes  = new Uint8Array(buffer);
-              let binary   = '';
-              const chunk  = 8192;
-              for (let i = 0; i < bytes.length; i += chunk) {
-                binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-              }
-              const ct = fontRes.headers.get('content-type') || 'font/woff2';
-              dataUriMap[url] = `data:${ct};base64,${btoa(binary)}`;
-            } catch (_) {}
-          }));
-
-          // Replace every proxy URL with the embedded data-URI
-          for (const [url, dataUri] of Object.entries(dataUriMap)) {
-            css = css.split(url).join(dataUri);
-          }
-
-          injectedFontStyle = document.createElement('style');
-          injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
-          injectedFontStyle.textContent = css;
-          // Inject into <head> so document.styleSheets picks it up for html-to-image
-          document.head.appendChild(injectedFontStyle);
-        }
-      } catch (_) {}
-
-      // Force-load every weight so the browser has them in its font cache
+      // ── Force-load all Google Font weights before capture ─────────────────
       const FONT_FAMILIES = [
         'Plus Jakarta Sans', 'DM Sans', 'Merriweather',
         'Tajawal', 'Cairo', 'Amiri', 'Noto Naskh Arabic', 'Scheherazade New',
@@ -217,14 +169,8 @@ const CVBuilder = () => {
 
       const captureH = element.scrollHeight;
 
-      // The element lives at position:absolute top:-9999px inside an
-      // overflow:hidden parent. html-to-image copies all inline styles onto
-      // its internal clone, so those -9999px offsets carry over and the
-      // SVG renders blank.
-      //
-      // Reliable fix: create our own clone with position reset to relative,
-      // attach it to the document body (off-screen via a fixed wrapper so
-      // getComputedStyle works), capture THAT clone, then clean up.
+      // Place the hidden element clone on-screen (off-viewport) so
+      // html2canvas can access computed styles and system fonts correctly.
       const wrapper = document.createElement('div');
       wrapper.style.cssText = [
         'position:fixed',
@@ -246,76 +192,38 @@ const CVBuilder = () => {
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
 
-      // ── System-font → web-font substitution ────────────────────────────────
-      // html-to-image renders via SVG <foreignObject>, which blocks access to
-      // OS system fonts (Calibri, Arial, Georgia, etc.) for security reasons.
-      // We replace every system font in the clone's inline styles with the
-      // nearest Google Font we have embedded, so the PDF stays pixel-perfect.
-      const SYSTEM_FONT_MAP = {
-        'calibri':         '"DM Sans"',
-        'inter':           '"DM Sans"',
-        'outfit':          '"Plus Jakarta Sans"',
-        'trebuchet ms':    '"DM Sans"',
-        'verdana':         '"DM Sans"',
-        'arial':           '"DM Sans"',
-        'georgia':         '"Merriweather"',
-        'times new roman': '"Merriweather"',
-      };
-      clone.querySelectorAll('*').forEach(el => {
-        const ff = el.style.fontFamily;
-        if (!ff) return;
-        let updated = ff;
-        for (const [system, web] of Object.entries(SYSTEM_FONT_MAP)) {
-          updated = updated.replace(
-            new RegExp(`'${system}'|"${system}"`, 'gi'),
-            web
-          );
-        }
-        if (updated !== ff) el.style.fontFamily = updated;
-      });
-
       // Wait for layout to settle
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       await document.fonts.ready;
 
-      // Temporarily disable cross-origin stylesheets (e.g. from Google Translate
-      // extension) to prevent SecurityError when html-to-image tries to read cssRules.
-      const disabledSheets = [];
-      for (const sheet of Array.from(document.styleSheets)) {
-        try {
-          // Accessing cssRules on a cross-origin sheet throws SecurityError
-          const _ = sheet.cssRules;
-        } catch (_e) {
-          try {
-            sheet.disabled = true;
-            disabledSheets.push(sheet);
-          } catch (_) {}
-        }
-      }
-
+      // ── Capture via html2canvas (Canvas API — supports all system fonts) ──
+      // html2canvas renders using the same Canvas font engine as the browser,
+      // so Calibri, Arial, Georgia etc. all look identical to the preview.
       let fullDataUrl;
       try {
-        // Call toPng twice — first pass primes the image/font cache inside
-        // html-to-image; second pass produces a clean consistent result.
-        await toPng(clone, { backgroundColor: '#ffffff', width: CONTENT_W, height: captureH, pixelRatio: PR, cacheBust: false }).catch(() => {});
-        fullDataUrl = await toPng(clone, {
+        const canvas = await html2canvas(clone, {
           backgroundColor: '#ffffff',
+          scale: PR,
           width: CONTENT_W,
           height: captureH,
-          pixelRatio: PR,
-          cacheBust: false,
+          useCORS: true,
+          allowTaint: false,
+          logging: false,
+          foreignObjectRendering: false,
+          imageTimeout: 15000,
+          removeContainer: false,
+          x: 0,
+          y: 0,
+          scrollX: 0,
+          scrollY: 0,
         });
+        fullDataUrl = canvas.toDataURL('image/png');
       } finally {
-        // Restore cross-origin stylesheets
-        for (const sheet of disabledSheets) {
-          try { sheet.disabled = false; } catch (_) {}
-        }
-        if (injectedFontStyle) injectedFontStyle.remove();
         document.body.removeChild(wrapper);
       }
 
       if (!fullDataUrl || fullDataUrl === 'data:,') {
-        throw new Error('html-to-image returned an empty result');
+        throw new Error('html2canvas returned an empty result');
       }
 
       await new Promise(r => setTimeout(r, 0));
