@@ -137,8 +137,8 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      const [html2canvas, { jsPDF }] = await Promise.all([
-        import('html2canvas').then(m => m.default),
+      const [{ toPng }, { jsPDF }] = await Promise.all([
+        import('html-to-image'),
         import('jspdf'),
       ]);
 
@@ -152,81 +152,59 @@ const CVBuilder = () => {
       const A4_H_MM = 297;
       const CONTENT_W = 794;
 
-      // Temporarily reposition the element so html2canvas can render it.
-      // Elements hidden at -9999px with z-index:-1 are skipped by the renderer.
-      const savedPos    = element.style.position;
-      const savedTop    = element.style.top;
-      const savedLeft   = element.style.left;
-      const savedZIndex = element.style.zIndex;
+      // Inject proxied Google Fonts so html-to-image can embed them (same-origin).
+      let injectedFontStyle = null;
+      try {
+        const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
+          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
+        );
+        const res = await fetch(proxyUrl);
+        if (res.ok) {
+          injectedFontStyle = document.createElement('style');
+          injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
+          injectedFontStyle.textContent = await res.text();
+          element.prepend(injectedFontStyle);
+        }
+      } catch (_) {}
 
-      element.style.position = 'fixed';
-      element.style.top      = '0';
-      element.style.left     = `${-(CONTENT_W + 200)}px`;
-      element.style.zIndex   = '9999';
-
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      await new Promise(r => setTimeout(r, 200));
+      await document.fonts.ready;
 
       const captureH = element.scrollHeight;
 
-      // html2canvas v1.4.x can't parse oklch() (used by Tailwind v4).
-      // Walk the cloned element tree and convert every oklch / color-mix value
-      // to plain rgb() using a 1×1 canvas — the browser resolves it natively.
-      function resolveColor(color) {
-        try {
-          const cv = document.createElement('canvas');
-          cv.width = 1; cv.height = 1;
-          const ctx = cv.getContext('2d');
-          ctx.fillStyle = color;
-          ctx.fillRect(0, 0, 1, 1);
-          const [r, g, b, a] = ctx.getImageData(0, 0, 1, 1).data;
-          if (a === 0) return 'transparent';
-          return `rgb(${r},${g},${b})`;
-        } catch { return color; }
-      }
-
-      const COLOR_PROPS = [
-        'backgroundColor', 'color',
-        'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
-        'outlineColor', 'textDecorationColor', 'caretColor',
-      ];
-
-      function fixColors(node, view) {
-        if (!(node instanceof Element)) return;
-        try {
-          const cs = view.getComputedStyle(node);
-          for (const prop of COLOR_PROPS) {
-            const val = cs[prop];
-            if (val && (val.includes('oklch') || val.includes('color-mix'))) {
-              node.style[prop] = resolveColor(val);
-            }
-          }
-        } catch (_) {}
-        for (const child of node.children) fixColors(child, view);
-      }
-
-      let fullCanvas;
+      // The element lives at position:absolute top:-9999px left:-9999px to stay
+      // off-screen in the live UI. html-to-image clones the element and copies
+      // all its inline styles into the SVG foreignObject, so those -9999px
+      // offsets carry over and the clone renders blank.
+      // Fix: use the `style` option to override position on the CLONE only —
+      // the original element is never touched, so there's no visible flash.
+      let fullDataUrl;
       try {
-        fullCanvas = await html2canvas(element, {
-          scale: PR,
-          useCORS: true,
-          allowTaint: true,
+        fullDataUrl = await toPng(element, {
           backgroundColor: '#ffffff',
           width: CONTENT_W,
           height: captureH,
-          scrollX: 0,
-          scrollY: 0,
-          logging: false,
-          onclone: (doc, clonedEl) => {
-            const view = doc.defaultView || window;
-            fixColors(clonedEl, view);
+          pixelRatio: PR,
+          cacheBust: true,
+          style: {
+            position: 'relative',
+            top: '0',
+            left: '0',
+            zIndex: 'auto',
           },
         });
       } finally {
-        element.style.position = savedPos;
-        element.style.top      = savedTop;
-        element.style.left     = savedLeft;
-        element.style.zIndex   = savedZIndex;
+        if (injectedFontStyle) injectedFontStyle.remove();
       }
+
+      await new Promise(r => setTimeout(r, 0));
+
+      const fullImg = await new Promise((resolve, reject) => {
+        const im = new Image();
+        im.onload = () => resolve(im);
+        im.onerror = reject;
+        im.src = fullDataUrl;
+      });
 
       const { breaks } = breakDataRef.current;
       const contentRanges = [];
@@ -251,19 +229,19 @@ const CVBuilder = () => {
         const { start, end } = contentRanges[i];
         const sliceH = Math.round((end - start) * PR);
 
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width  = imgW;
-        pageCanvas.height = a4H;
-        const ctx = pageCanvas.getContext('2d');
+        const a4Canvas = document.createElement('canvas');
+        a4Canvas.width  = imgW;
+        a4Canvas.height = a4H;
+        const ctx = a4Canvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, imgW, a4H);
         ctx.drawImage(
-          fullCanvas,
+          fullImg,
           0, Math.round(start * PR), imgW, sliceH,
           0, 0,                       imgW, sliceH
         );
 
-        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+        pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
