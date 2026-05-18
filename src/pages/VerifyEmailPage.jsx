@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { auth } from '../firebase';
 
 const VerifyEmailPage = () => {
-  const { isRTL, resendVerification, signOutUser, currentUser } = useAuth();
+  const { isRTL, resendVerification, signOutUser, currentUser, refreshUser } = useAuth();
   const navigate = useNavigate();
   const [resent, setResent] = useState(false);
   const [error, setError] = useState('');
@@ -26,6 +26,7 @@ const VerifyEmailPage = () => {
       await u.reload();
       if (u.emailVerified) {
         clearInterval(intervalRef.current);
+        await refreshUser();
         setRedirecting(true);
         return true;
       }
