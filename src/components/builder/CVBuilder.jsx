@@ -341,6 +341,10 @@ const CVBuilder = () => {
       const imgW = CONTENT_W * PR;
       const a4H  = Math.round((A4_H_MM / A4_W_MM) * imgW);
 
+      // Must match the MARGIN constant in LivePreview.jsx (48px) so the PDF
+      // top-of-page white gap looks identical to the browser preview.
+      const PAGE_TOP_MARGIN = 48;
+
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
       for (let i = 0; i < contentRanges.length; i++) {
@@ -348,7 +352,9 @@ const CVBuilder = () => {
         if (i > 0) pdf.addPage();
 
         const { start, end } = contentRanges[i];
-        const sliceH = Math.round((end - start) * PR);
+        const sliceH    = Math.round((end - start) * PR);
+        // Pages 2+ get a top margin to match the live-preview white gap
+        const marginTop = i > 0 ? Math.round(PAGE_TOP_MARGIN * PR) : 0;
 
         const a4Canvas = document.createElement('canvas');
         a4Canvas.width  = imgW;
@@ -359,7 +365,7 @@ const CVBuilder = () => {
         ctx.drawImage(
           fullImg,
           0, Math.round(start * PR), imgW, sliceH,
-          0, 0,                       imgW, sliceH
+          0, marginTop,               imgW, sliceH
         );
 
         pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
