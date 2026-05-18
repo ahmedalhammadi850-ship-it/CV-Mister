@@ -246,6 +246,34 @@ const CVBuilder = () => {
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
 
+      // ── System-font → web-font substitution ────────────────────────────────
+      // html-to-image renders via SVG <foreignObject>, which blocks access to
+      // OS system fonts (Calibri, Arial, Georgia, etc.) for security reasons.
+      // We replace every system font in the clone's inline styles with the
+      // nearest Google Font we have embedded, so the PDF stays pixel-perfect.
+      const SYSTEM_FONT_MAP = {
+        'calibri':         '"DM Sans"',
+        'inter':           '"DM Sans"',
+        'outfit':          '"Plus Jakarta Sans"',
+        'trebuchet ms':    '"DM Sans"',
+        'verdana':         '"DM Sans"',
+        'arial':           '"DM Sans"',
+        'georgia':         '"Merriweather"',
+        'times new roman': '"Merriweather"',
+      };
+      clone.querySelectorAll('*').forEach(el => {
+        const ff = el.style.fontFamily;
+        if (!ff) return;
+        let updated = ff;
+        for (const [system, web] of Object.entries(SYSTEM_FONT_MAP)) {
+          updated = updated.replace(
+            new RegExp(`'${system}'|"${system}"`, 'gi'),
+            web
+          );
+        }
+        if (updated !== ff) el.style.fontFamily = updated;
+      });
+
       // Wait for layout to settle
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       await document.fonts.ready;
