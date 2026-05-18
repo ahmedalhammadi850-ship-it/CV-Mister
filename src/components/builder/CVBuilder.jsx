@@ -101,6 +101,8 @@ const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => (
   </div>
 );
 
+const PAGE_H_PX = 1122;
+
 const CVBuilder = () => {
   const { selectedTemplate, cvData, theme, visibleSections, visiblePersonalFields, sectionOrder, saveCurrentCV, currentCVId, currentCVName } = useCV();
   const { isRTL, currentUser } = useAuth();
