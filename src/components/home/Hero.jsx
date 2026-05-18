@@ -120,14 +120,14 @@ const Hero = () => {
 
           {/* Stats */}
           <div
-            className="inline-flex items-center rounded-2xl overflow-hidden"
+            className="flex w-full sm:w-auto sm:inline-flex items-center rounded-2xl overflow-hidden"
             style={{ background: statsBg, border: `1px solid ${statsBorder}`, boxShadow: '0 4px 24px rgba(79,70,229,0.08)' }}
           >
             {stats.map(({ value, label }, i) => (
-              <div key={i} className="px-8 py-5 text-center" style={{
+              <div key={i} className="flex-1 sm:flex-none px-4 sm:px-8 py-4 sm:py-5 text-center" style={{
                 borderRight: i < stats.length - 1 ? `1px solid ${statsInnerBorder}` : 'none',
               }}>
-                <div className="text-2xl font-heading font-extrabold"
+                <div className="text-xl sm:text-2xl font-heading font-extrabold"
                   style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 60%, #c026d3 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   {value}
                 </div>

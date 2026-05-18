@@ -410,13 +410,36 @@ const CVBuilder = () => {
       )}
 
       {/* Mobile top tabs */}
-      <div className="md:hidden flex bg-white border-b border-slate-200 sticky top-0 z-10 no-print">
+      <div className="md:hidden flex items-center bg-white border-b border-slate-200 sticky top-0 z-10 no-print">
         <button onClick={() => setMobileTab('editor')} className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'editor' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>
           {isRTL ? 'تعديل' : 'Edit'}
         </button>
         <button onClick={() => setMobileTab('preview')} className={`flex-1 py-3 text-sm font-medium ${mobileTab === 'preview' ? 'text-indigo-600 border-b-2 border-indigo-600' : 'text-slate-500'}`}>
-          {isRTL ? 'المعاينة' : 'Preview'}
+          {isRTL ? 'معاينة' : 'Preview'}
         </button>
+        {/* Quick-action icons always visible on mobile */}
+        <div className="flex items-center gap-1 px-2 border-l border-slate-200">
+          <button
+            onClick={handleSaveClick}
+            title={isRTL ? 'حفظ' : 'Save'}
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
+            </svg>
+          </button>
+          <button
+            onClick={handleDownloadPDF}
+            disabled={isPrinting}
+            title={isRTL ? 'تنزيل PDF' : 'Download PDF'}
+            className="w-9 h-9 flex items-center justify-center rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-60"
+          >
+            {isPrinting
+              ? <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+              : <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+            }
+          </button>
+        </div>
       </div>
 
       {/* ── Editor Sidebar ── */}
@@ -447,44 +470,45 @@ const CVBuilder = () => {
       <div className={`flex-1 bg-slate-100 overflow-y-auto ${mobileTab === 'preview' ? 'block' : 'hidden md:block'}`}>
 
         {/* Top action bar */}
-        <div className="sticky top-0 right-0 p-4 flex justify-end gap-3 z-10 pointer-events-none no-print">
+        <div className="sticky top-0 right-0 p-3 sm:p-4 flex justify-end gap-2 sm:gap-3 z-10 pointer-events-none no-print">
           <div className="pointer-events-auto">
             <button onClick={() => navigate('/dashboard')}
-              className="bg-white border border-slate-200 text-slate-600 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              className="bg-white border border-slate-200 text-slate-600 shadow-sm px-3 sm:px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
-              {isRTL ? 'لوحة التحكم' : 'Dashboard'}
+              <span className="hidden sm:inline">{isRTL ? 'لوحة التحكم' : 'Dashboard'}</span>
             </button>
           </div>
           <div className="pointer-events-auto">
             <button onClick={handleSaveClick}
-              className="bg-white border border-slate-200 text-slate-700 shadow-sm px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              className="bg-white border border-slate-200 text-slate-700 shadow-sm px-3 sm:px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
               </svg>
-              {isRTL ? 'حفظ' : 'Save'}
+              <span className="hidden sm:inline">{isRTL ? 'حفظ' : 'Save'}</span>
             </button>
           </div>
           <div className="pointer-events-auto">
             <button
               onClick={handleDownloadPDF}
               disabled={isPrinting}
-              className="bg-indigo-600 text-white shadow-md px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 text-sm disabled:opacity-70"
+              className="bg-indigo-600 text-white shadow-md px-3 sm:px-5 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors flex items-center gap-2 text-sm disabled:opacity-70"
             >
               {isPrinting ? (
                 <>
-                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 flex-shrink-0 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                   </svg>
-                  {isRTL ? 'جاري...' : 'Loading...'}
+                  <span className="hidden sm:inline">{isRTL ? 'جاري...' : 'Loading...'}</span>
                 </>
               ) : (
                 <>
-                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                   </svg>
-                  {isRTL ? 'تنزيل PDF' : 'Download PDF'}
+                  <span className="hidden sm:inline">{isRTL ? 'تنزيل PDF' : 'Download PDF'}</span>
+                  <span className="sm:hidden">PDF</span>
                 </>
               )}
             </button>
