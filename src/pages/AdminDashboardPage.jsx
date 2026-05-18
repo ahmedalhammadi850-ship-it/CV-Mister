@@ -177,7 +177,7 @@ const AdminDashboardPage = () => {
   const [n8nEditing, setN8nEditing]           = useState({});
   const [n8nSaving, setN8nSaving]             = useState({});
   const [n8nMsg, setN8nMsg]                   = useState({});
-  const [pricingEdit, setPricingEdit]         = useState({ pro_price: 3, pro_name: 'احترافي', pro_name_en: 'Professional', business_price: 15, business_name: 'أعمال', business_name_en: 'Business' });
+  const [pricingEdit, setPricingEdit]         = useState({ pro_price: 3, pro_name: 'احترافي', pro_name_en: 'Professional', pro_desc: 'الخيار المثالي للباحثين عن عمل بجدية', pro_desc_en: 'Ideal for serious job seekers', business_price: 15, business_name: 'أعمال', business_name_en: 'Business', business_desc: 'للشركات والفرق التي تحتاج إلى حلول متكاملة', business_desc_en: 'For companies and teams needing complete solutions', free_name: 'مجاني', free_name_en: 'Free', free_desc: 'مثالي للبدء وتجربة المنصة', free_desc_en: 'Perfect to get started and try the platform', payment_account: '00154578', payment_bank: 'بنك التضامن — Tadhamon Bank', payment_beneficiary: 'أحمد عبدالله عقلان الحمادي' });
   const [pricingSaving, setPricingSaving]     = useState(false);
   const [pricingMsg, setPricingMsg]           = useState('');
   const [navbarEdit, setNavbarEdit]           = useState({ home_ar: 'الرئيسية', home_en: 'Home', templates_ar: 'القوالب', templates_en: 'Templates', pricing_ar: 'الأسعار', pricing_en: 'Pricing', about_ar: 'من نحن', about_en: 'About' });
@@ -264,9 +264,20 @@ const AdminDashboardPage = () => {
         pro_price: Number(pricingEdit.pro_price) || 0,
         pro_name: pricingEdit.pro_name || '',
         pro_name_en: pricingEdit.pro_name_en || '',
+        pro_desc: pricingEdit.pro_desc || '',
+        pro_desc_en: pricingEdit.pro_desc_en || '',
         business_price: Number(pricingEdit.business_price) || 0,
         business_name: pricingEdit.business_name || '',
         business_name_en: pricingEdit.business_name_en || '',
+        business_desc: pricingEdit.business_desc || '',
+        business_desc_en: pricingEdit.business_desc_en || '',
+        free_name: pricingEdit.free_name || '',
+        free_name_en: pricingEdit.free_name_en || '',
+        free_desc: pricingEdit.free_desc || '',
+        free_desc_en: pricingEdit.free_desc_en || '',
+        payment_account: pricingEdit.payment_account || '',
+        payment_bank: pricingEdit.payment_bank || '',
+        payment_beneficiary: pricingEdit.payment_beneficiary || '',
       };
       const res = await fetch('/api/admin/pricing', {
         method: 'PATCH', credentials: 'include',
@@ -943,92 +954,135 @@ const AdminDashboardPage = () => {
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-white">التحكم في الأسعار</h3>
-                    <p className="text-slate-400 text-xs">تعديل أسعار الخطط على صفحة الأسعار</p>
+                    <h3 className="font-bold text-white">التحكم الكامل في الأسعار</h3>
+                    <p className="text-slate-400 text-xs">تعديل أسماء الخطط وأسعارها وأوصافها وبيانات الدفع</p>
                   </div>
                 </div>
 
                 <div className="space-y-5">
-                  {/* Pro Plan */}
+
+                  {/* Free Plan */}
                   <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700">
-                    <div className="flex items-center gap-2 mb-3">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>
+                      <p className="text-sm font-semibold text-slate-300">الخطة المجانية (Free)</p>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
+                        <input type="text" value={pricingEdit.free_name} onChange={e => setPricingEdit(s => ({ ...s, free_name: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="rtl" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
+                        <input type="text" value={pricingEdit.free_name_en} onChange={e => setPricingEdit(s => ({ ...s, free_name_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="ltr" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الوصف (عربي)</label>
+                        <input type="text" value={pricingEdit.free_desc} onChange={e => setPricingEdit(s => ({ ...s, free_desc: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="rtl" />
+                      </div>
+                      <div>
+                        <label className="block text-xs text-slate-500 mb-1">الوصف (إنجليزي)</label>
+                        <input type="text" value={pricingEdit.free_desc_en} onChange={e => setPricingEdit(s => ({ ...s, free_desc_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="ltr" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Pro Plan */}
+                  <div className="bg-slate-900/60 rounded-xl p-4 border border-indigo-800/50">
+                    <div className="flex items-center gap-2 mb-4">
                       <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
                       <p className="text-sm font-semibold text-indigo-400">الخطة الاحترافية (Pro)</p>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
-                        <input
-                          type="text"
-                          value={pricingEdit.pro_name}
-                          onChange={e => setPricingEdit(s => ({ ...s, pro_name: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
-                          dir="rtl"
-                        />
+                        <input type="text" value={pricingEdit.pro_name} onChange={e => setPricingEdit(s => ({ ...s, pro_name: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="rtl" />
                       </div>
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
-                        <input
-                          type="text"
-                          value={pricingEdit.pro_name_en}
-                          onChange={e => setPricingEdit(s => ({ ...s, pro_name_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
-                          dir="ltr"
-                        />
+                        <input type="text" value={pricingEdit.pro_name_en} onChange={e => setPricingEdit(s => ({ ...s, pro_name_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="ltr" />
                       </div>
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">السعر ($)</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.5"
-                          value={pricingEdit.pro_price}
-                          onChange={e => setPricingEdit(s => ({ ...s, pro_price: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition"
-                          dir="ltr"
-                        />
+                        <input type="number" min="0" step="0.5" value={pricingEdit.pro_price} onChange={e => setPricingEdit(s => ({ ...s, pro_price: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="ltr" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs text-slate-500 mb-1">الوصف (عربي)</label>
+                        <input type="text" value={pricingEdit.pro_desc} onChange={e => setPricingEdit(s => ({ ...s, pro_desc: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="rtl" />
+                      </div>
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs text-slate-500 mb-1">الوصف (إنجليزي)</label>
+                        <input type="text" value={pricingEdit.pro_desc_en} onChange={e => setPricingEdit(s => ({ ...s, pro_desc_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="ltr" />
                       </div>
                     </div>
                   </div>
 
                   {/* Business Plan */}
-                  <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700">
-                    <div className="flex items-center gap-2 mb-3">
+                  <div className="bg-slate-900/60 rounded-xl p-4 border border-amber-800/50">
+                    <div className="flex items-center gap-2 mb-4">
                       <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
                       <p className="text-sm font-semibold text-amber-400">خطة الأعمال (Business)</p>
                     </div>
                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
-                        <input
-                          type="text"
-                          value={pricingEdit.business_name}
-                          onChange={e => setPricingEdit(s => ({ ...s, business_name: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition"
-                          dir="rtl"
-                        />
+                        <input type="text" value={pricingEdit.business_name} onChange={e => setPricingEdit(s => ({ ...s, business_name: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="rtl" />
                       </div>
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
-                        <input
-                          type="text"
-                          value={pricingEdit.business_name_en}
-                          onChange={e => setPricingEdit(s => ({ ...s, business_name_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition"
-                          dir="ltr"
-                        />
+                        <input type="text" value={pricingEdit.business_name_en} onChange={e => setPricingEdit(s => ({ ...s, business_name_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="ltr" />
                       </div>
                       <div>
                         <label className="block text-xs text-slate-500 mb-1">السعر ($)</label>
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.5"
-                          value={pricingEdit.business_price}
-                          onChange={e => setPricingEdit(s => ({ ...s, business_price: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition"
-                          dir="ltr"
-                        />
+                        <input type="number" min="0" step="0.5" value={pricingEdit.business_price} onChange={e => setPricingEdit(s => ({ ...s, business_price: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="ltr" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs text-slate-500 mb-1">الوصف (عربي)</label>
+                        <input type="text" value={pricingEdit.business_desc} onChange={e => setPricingEdit(s => ({ ...s, business_desc: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="rtl" />
+                      </div>
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs text-slate-500 mb-1">الوصف (إنجليزي)</label>
+                        <input type="text" value={pricingEdit.business_desc_en} onChange={e => setPricingEdit(s => ({ ...s, business_desc_en: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="ltr" />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Payment Info */}
+                  <div className="bg-slate-900/60 rounded-xl p-4 border border-emerald-800/50">
+                    <div className="flex items-center gap-2 mb-4">
+                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
+                      <p className="text-sm font-semibold text-emerald-400">بيانات التحويل البنكي</p>
+                      <span className="text-xs text-slate-500 mr-1">— تظهر في صفحة الترقية</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                      <div className="sm:col-span-1">
+                        <label className="block text-xs text-slate-500 mb-1">رقم الحساب</label>
+                        <input type="text" value={pricingEdit.payment_account} onChange={e => setPricingEdit(s => ({ ...s, payment_account: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition" dir="ltr" />
+                      </div>
+                      <div className="sm:col-span-2">
+                        <label className="block text-xs text-slate-500 mb-1">اسم البنك</label>
+                        <input type="text" value={pricingEdit.payment_bank} onChange={e => setPricingEdit(s => ({ ...s, payment_bank: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition" dir="rtl" />
+                      </div>
+                      <div className="sm:col-span-3">
+                        <label className="block text-xs text-slate-500 mb-1">اسم المستفيد</label>
+                        <input type="text" value={pricingEdit.payment_beneficiary} onChange={e => setPricingEdit(s => ({ ...s, payment_beneficiary: e.target.value }))}
+                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition" dir="rtl" />
                       </div>
                     </div>
                   </div>
@@ -1055,7 +1109,7 @@ const AdminDashboardPage = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                     )}
-                    حفظ الأسعار
+                    حفظ الأسعار كاملاً
                   </button>
                 </div>
               </div>

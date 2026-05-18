@@ -2,8 +2,6 @@ import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
-const ACCOUNT = '00154578';
-
 const Step = ({ n, label, isRTL }) => (
   <div className="flex items-start gap-3">
     <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold text-white flex-shrink-0 mt-0.5"
@@ -13,6 +11,15 @@ const Step = ({ n, label, isRTL }) => (
     <p className="text-sm text-slate-700 leading-relaxed pt-1">{label}</p>
   </div>
 );
+
+const PRICING_DEFAULTS = {
+  pro_price: 3,
+  pro_name: 'احترافي',
+  pro_name_en: 'Professional',
+  payment_account: '00154578',
+  payment_bank: 'بنك التضامن — Tadhamon Bank',
+  payment_beneficiary: 'أحمد عبدالله عقلان الحمادي',
+};
 
 const UpgradePage = () => {
   const { isRTL, currentUser } = useAuth();
@@ -26,10 +33,15 @@ const UpgradePage = () => {
   const [error, setError]       = useState('');
   const [copied, setCopied]     = useState(false);
   const [cooldown, setCooldown] = useState(0);
+  const [pricing, setPricing]   = useState(PRICING_DEFAULTS);
   const inputRef   = useRef();
   const timerRef   = useRef(null);
 
   useEffect(() => {
+    fetch('/api/pricing')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setPricing(prev => ({ ...prev, ...data })); })
+      .catch(() => {});
     return () => { if (timerRef.current) clearInterval(timerRef.current); };
   }, []);
 
@@ -58,7 +70,7 @@ const UpgradePage = () => {
   }
 
   const copyAccount = () => {
-    navigator.clipboard.writeText(ACCOUNT);
+    navigator.clipboard.writeText(pricing.payment_account);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -187,12 +199,14 @@ const UpgradePage = () => {
             <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
               ⭐ الأكثر شيوعاً
             </span>
-            <h1 className="text-2xl font-bold mb-1">ترقية إلى Pro</h1>
-            <p className="text-white/70 text-sm">جميع القوالب + ميزات متقدمة</p>
+            <h1 className="text-2xl font-bold mb-1">
+              {isRTL ? `ترقية إلى ${pricing.pro_name}` : `Upgrade to ${pricing.pro_name_en}`}
+            </h1>
+            <p className="text-white/70 text-sm">{isRTL ? pricing.pro_desc : pricing.pro_desc_en}</p>
             <div className="mt-4 flex items-end gap-1">
               <span className="text-white/70 text-lg">$</span>
-              <span className="text-5xl font-extrabold leading-none">3</span>
-              <span className="text-white/60 text-sm mb-1">/ شهرياً</span>
+              <span className="text-5xl font-extrabold leading-none">{pricing.pro_price}</span>
+              <span className="text-white/60 text-sm mb-1">/ {isRTL ? 'شهرياً' : 'month'}</span>
             </div>
           </div>
         </div>
@@ -223,18 +237,18 @@ const UpgradePage = () => {
           <div className="bg-slate-50 rounded-2xl p-4 space-y-3">
             <div>
               <p className="text-xs text-slate-400 mb-0.5">البنك</p>
-              <p className="font-semibold text-slate-900 text-sm">بنك التضامن — Tadhamon Bank</p>
+              <p className="font-semibold text-slate-900 text-sm">{pricing.payment_bank}</p>
             </div>
             <div className="h-px bg-slate-200" />
             <div>
               <p className="text-xs text-slate-400 mb-0.5">اسم المستفيد</p>
-              <p className="font-semibold text-slate-900 text-sm">أحمد عبدالله عقلان الحمادي</p>
+              <p className="font-semibold text-slate-900 text-sm">{pricing.payment_beneficiary}</p>
             </div>
             <div className="h-px bg-slate-200" />
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-xs text-slate-400 mb-0.5">رقم الحساب</p>
-                <p className="font-bold text-slate-900 text-lg tracking-widest">{ACCOUNT}</p>
+                <p className="font-bold text-slate-900 text-lg tracking-widest">{pricing.payment_account}</p>
               </div>
               <button
                 onClick={copyAccount}
