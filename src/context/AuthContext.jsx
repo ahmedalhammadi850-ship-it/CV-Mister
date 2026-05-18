@@ -112,11 +112,15 @@ export function AuthProvider({ children }) {
         lastName,
       }),
     });
-    const actionCodeSettings = {
-      url: `${window.location.origin}/verify-email`,
-      handleCodeInApp: false,
-    };
-    await sendEmailVerification(credential.user, actionCodeSettings);
+    try {
+      const actionCodeSettings = {
+        url: `${window.location.origin}/verify-email`,
+        handleCodeInApp: false,
+      };
+      await sendEmailVerification(credential.user, actionCodeSettings);
+    } catch {
+      await sendEmailVerification(credential.user);
+    }
     return credential.user;
   };
 
@@ -149,11 +153,15 @@ export function AuthProvider({ children }) {
   const resendVerification = async () => {
     const u = auth.currentUser;
     if (u) {
-      const actionCodeSettings = {
-        url: `${window.location.origin}/verify-email`,
-        handleCodeInApp: false,
-      };
-      await sendEmailVerification(u, actionCodeSettings);
+      try {
+        const actionCodeSettings = {
+          url: `${window.location.origin}/verify-email`,
+          handleCodeInApp: false,
+        };
+        await sendEmailVerification(u, actionCodeSettings);
+      } catch {
+        await sendEmailVerification(u);
+      }
     }
   };
   const refreshUser        = async () => {
