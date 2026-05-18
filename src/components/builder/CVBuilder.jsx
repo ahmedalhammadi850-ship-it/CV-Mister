@@ -101,6 +101,34 @@ const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => (
   </div>
 );
 
+const FreeExpiredModal = ({ isRTL, onClose, onUpgrade }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
+    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-rose-100">
+        <svg className="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+      </div>
+      <h3 className="text-xl font-bold text-slate-900 mb-2">
+        {isRTL ? 'انتهت الفترة المجانية' : 'Free Trial Ended'}
+      </h3>
+      <p className="text-slate-500 text-sm leading-relaxed mb-6">
+        {isRTL
+          ? 'انتهت فترة الشهر المجاني. قم بالترقية إلى Professional للاستمرار في تعديل سيرتك الذاتية.'
+          : 'Your free month has ended. Upgrade to Professional to continue editing your resume.'}
+      </p>
+      <div className="flex flex-col gap-2">
+        <button onClick={onUpgrade} className="w-full py-3 rounded-2xl text-white font-bold text-sm" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+          {isRTL ? '⭐ ترقية الآن — $3/شهر' : '⭐ Upgrade Now — $3/mo'}
+        </button>
+        <button onClick={onClose} className="w-full py-2.5 rounded-2xl text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
+          {isRTL ? 'إغلاق' : 'Close'}
+        </button>
+      </div>
+    </div>
+  </div>
+);
+
 const PAGE_H_PX = 1122;
 
 const CVBuilder = () => {
@@ -113,11 +141,16 @@ const CVBuilder = () => {
   const [saveToast, setSaveToast] = useState(false);
   const [isPrinting, setIsPrinting] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showFreeExpiredModal, setShowFreeExpiredModal] = useState(false);
   const breakDataRef = useRef({ breaks: [], totalHeight: PAGE_H_PX });
 
   const handleSave = async (name) => {
     const result = await saveCurrentCV(name);
     setShowSaveModal(false);
+    if (result?.error?.freeExpired) {
+      setShowFreeExpiredModal(true);
+      return;
+    }
     if (result?.error?.limitReached) {
       setShowLimitModal(true);
       return;
@@ -388,6 +421,14 @@ const CVBuilder = () => {
           plan={currentUser?.plan || 'free'}
           onClose={() => setShowLimitModal(false)}
           onUpgrade={() => { setShowLimitModal(false); navigate('/upgrade'); }}
+        />
+      )}
+
+      {showFreeExpiredModal && (
+        <FreeExpiredModal
+          isRTL={isRTL}
+          onClose={() => setShowFreeExpiredModal(false)}
+          onUpgrade={() => { setShowFreeExpiredModal(false); navigate('/upgrade'); }}
         />
       )}
 

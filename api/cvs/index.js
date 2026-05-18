@@ -35,9 +35,26 @@ export default async function handler(req, res) {
       const cvSnap = await cvRef.get();
       const isNew = !cvSnap.exists;
 
+      const userSnap = await db.collection("users").doc(uid).get();
+      const userData = userSnap.data() || {};
+      const plan = userData.plan || "free";
+
+      // Check free plan monthly expiry (blocks editing existing CVs too)
+      if (plan === "free") {
+        const createdAt = userData.createdAt ? new Date(userData.createdAt) : null;
+        if (createdAt) {
+          const expiryDate = new Date(createdAt);
+          expiryDate.setMonth(expiryDate.getMonth() + 1);
+          if (new Date() > expiryDate) {
+            return res.status(403).json({
+              message: "انتهت فترة الاستخدام المجاني. قم بالترقية للاستمرار.",
+              freeExpired: true,
+            });
+          }
+        }
+      }
+
       if (isNew) {
-        const userSnap = await db.collection("users").doc(uid).get();
-        const plan = userSnap.data()?.plan || "free";
         const limit = plan === "business" ? Infinity : plan === "pro" ? PRO_LIMIT : FREE_LIMIT;
         const countSnap = await db.collection("cvs").where("userId", "==", uid).get();
         const count = countSnap.size;
