@@ -41,7 +41,7 @@ import adminPricing         from "../api/admin/pricing.js";
 import adminNavbar          from "../api/admin/navbar.js";
 
 function makeReq(req: any, params: Record<string, string> = {}) {
-  return { ...req, query: req.query, body: req.body, headers: req.headers, method: req.method, params };
+  return { ...req, query: { ...req.query, ...params }, body: req.body, headers: req.headers, method: req.method, params };
 }
 
 function makeRes(res: any) {
