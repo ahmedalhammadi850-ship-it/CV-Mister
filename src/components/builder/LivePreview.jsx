@@ -172,10 +172,10 @@ const LivePreview = ({ breakDataRef }) => {
 
   const activeBreaks = manualBreaks ?? autoBreaks;
 
-  /* ── expose break data for PDF export ── */
+  /* ── expose break data + capture element for PDF export ── */
   useEffect(() => {
     if (breakDataRef) {
-      breakDataRef.current = { breaks: activeBreaks, totalHeight };
+      breakDataRef.current = { breaks: activeBreaks, totalHeight, captureEl: contentRef.current };
     }
   }, [activeBreaks, totalHeight, breakDataRef]);
 

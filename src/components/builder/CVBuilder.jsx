@@ -5,44 +5,6 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
-import ModernTemplate from '../../templates/ModernTemplate';
-import ClassicTemplate from '../../templates/ClassicTemplate';
-import CreativeTemplate from '../../templates/CreativeTemplate';
-import MinimalTemplate from '../../templates/MinimalTemplate';
-import ExecutiveTemplate from '../../templates/ExecutiveTemplate';
-import ATSCleanTemplate from '../../templates/ATSCleanTemplate';
-import ATSProTemplate from '../../templates/ATSProTemplate';
-import ATSSimpleTemplate from '../../templates/ATSSimpleTemplate';
-import ATSBoldTemplate from '../../templates/ATSBoldTemplate';
-import ATSCompactTemplate from '../../templates/ATSCompactTemplate';
-import ATSModernTemplate from '../../templates/ATSModernTemplate';
-import ATSHarvardTemplate from '../../templates/ATSHarvardTemplate';
-import ATSCenterTemplate from '../../templates/ATSCenterTemplate';
-import ATSElegantTemplate from '../../templates/ATSElegantTemplate';
-import PrestigeTemplate from '../../templates/PrestigeTemplate';
-import ClassicSerifTemplate from '../../templates/ClassicSerifTemplate';
-import AtlanticBlueTemplate from '../../templates/AtlanticBlueTemplate';
-import MercuryFlowTemplate from '../../templates/MercuryFlowTemplate';
-import EditorialRuleTemplate from '../../templates/EditorialRuleTemplate';
-import SidebarLightTemplate from '../../templates/SidebarLightTemplate';
-import ArabicNavyTemplate from '../../templates/ArabicNavyTemplate';
-import ArabicTealSidebarTemplate from '../../templates/ArabicTealSidebarTemplate';
-import ArabicProTemplate from '../../templates/ArabicProTemplate';
-import ArabicSlateSidebarTemplate from '../../templates/ArabicSlateSidebarTemplate';
-import ArabicModernTemplate from '../../templates/ArabicModernTemplate';
-import ArabicCardTemplate from '../../templates/ArabicCardTemplate';
-import ArabicWaveTemplate from '../../templates/ArabicWaveTemplate';
-import ArabicLuxeTemplate from '../../templates/ArabicLuxeTemplate';
-import EnglishHorizonTemplate from '../../templates/EnglishHorizonTemplate';
-import ArabicZafirTemplate from '../../templates/ArabicZafirTemplate';
-import EnglishApexTemplate from '../../templates/EnglishApexTemplate';
-import TealProTemplate from '../../templates/TealProTemplate';
-import RoseElegantTemplate from '../../templates/RoseElegantTemplate';
-import DarkHeaderTemplate from '../../templates/DarkHeaderTemplate';
-import VelvetTemplate from '../../templates/VelvetTemplate';
-import AuroraTemplate from '../../templates/AuroraTemplate';
-import ArabicGemTemplate from '../../templates/ArabicGemTemplate';
-import ArabicEliteTemplate from '../../templates/ArabicEliteTemplate';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -103,65 +65,6 @@ const SaveModal = ({ isRTL, defaultName, onSave, onClose }) => {
     </div>
   );
 };
-
-/* ── Print Layer: full-size CV rendered off-screen for PDF ── */
-const PrintLayer = ({ cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder, isRTL }) => {
-  const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder };
-  const renderTemplate = () => {
-    switch (selectedTemplate) {
-      case 'classic':   return <ClassicTemplate   {...props} />;
-      case 'creative':  return <CreativeTemplate  {...props} />;
-      case 'minimal':   return <MinimalTemplate   {...props} />;
-      case 'executive': return <ExecutiveTemplate {...props} />;
-      case 'atsclean':  return <ATSCleanTemplate  {...props} />;
-      case 'atspro':    return <ATSProTemplate    {...props} />;
-      case 'atssimple':  return <ATSSimpleTemplate  {...props} />;
-      case 'atsbold':    return <ATSBoldTemplate    {...props} />;
-      case 'atscompact':  return <ATSCompactTemplate  {...props} />;
-      case 'atsmodern':   return <ATSModernTemplate   {...props} />;
-      case 'atsharvard':    return <ATSHarvardTemplate   {...props} />;
-      case 'atscenter':     return <ATSCenterTemplate    {...props} />;
-      case 'atselegant':    return <ATSElegantTemplate   {...props} />;
-      case 'prestige':      return <PrestigeTemplate      {...props} />;
-      case 'classicserif':  return <ClassicSerifTemplate  {...props} />;
-      case 'atlanticblue':  return <AtlanticBlueTemplate  {...props} />;
-      case 'mercuryflow':   return <MercuryFlowTemplate   {...props} />;
-      case 'editorialrule': return <EditorialRuleTemplate {...props} />;
-      case 'sidebarlight':  return <SidebarLightTemplate  {...props} />;
-      case 'tealpro':       return <TealProTemplate       {...props} />;
-      case 'roseelegant':   return <RoseElegantTemplate   {...props} />;
-      case 'darkheader':    return <DarkHeaderTemplate    {...props} />;
-      case 'velvet':        return <VelvetTemplate        {...props} />;
-      case 'aurora':        return <AuroraTemplate        {...props} />;
-      case 'arabicgem':     return <ArabicGemTemplate     {...props} />;
-      case 'arabicnavy':         return <ArabicNavyTemplate         {...props} />;
-      case 'arabicpro':          return <ArabicProTemplate          {...props} />;
-      case 'arabictealsidebar':  return <ArabicTealSidebarTemplate  {...props} />;
-      case 'arabicslatesidebar': return <ArabicSlateSidebarTemplate {...props} />;
-      case 'arabicmodern':       return <ArabicModernTemplate       {...props} />;
-      case 'arabiccard':         return <ArabicCardTemplate         {...props} />;
-      case 'arabicelite':        return <ArabicEliteTemplate        {...props} />;
-      case 'arabicwave':         return <ArabicWaveTemplate         {...props} />;
-      case 'arabicluxe':         return <ArabicLuxeTemplate         {...props} />;
-      case 'englishhorizon':     return <EnglishHorizonTemplate     {...props} />;
-      case 'arabiczafir':        return <ArabicZafirTemplate        {...props} />;
-      case 'englishapex':        return <EnglishApexTemplate        {...props} />;
-      default:              return <ModernTemplate        {...props} />;
-    }
-  };
-  return (
-    <div
-      id="cv-print-root"
-      aria-hidden="true"
-      dir={isRTL ? 'rtl' : 'ltr'}
-      style={{ position: 'absolute', top: '-9999px', left: '-9999px', zIndex: -1, pointerEvents: 'none', width: '794px' }}
-    >
-      <div dir={isRTL ? 'rtl' : 'ltr'} style={{ width: '794px' }}>{renderTemplate()}</div>
-    </div>
-  );
-};
-
-const PAGE_H_PX = 1122; // A4 height at 96 dpi
 
 const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => (
   <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
@@ -240,8 +143,9 @@ const CVBuilder = () => {
       // Wait for all fonts to be loaded so text renders identically to the preview
       await document.fonts.ready;
 
-      const printRoot = document.getElementById('cv-print-root');
-      const element = printRoot?.firstElementChild;
+      // Use the same element the LivePreview uses for measurement — guarantees
+      // the captured image is pixel-identical to what the user sees on screen.
+      const element = breakDataRef.current?.captureEl;
       if (!element) return;
 
       const PR = 2; // pixelRatio 2 is sharp enough without freezing the browser
@@ -293,13 +197,10 @@ const CVBuilder = () => {
         im.src = fullDataUrl;
       });
 
-      // Use the PrintLayer's actual scrollHeight as the ground truth for page slicing.
-      // breakDataRef comes from LivePreview which may measure at a slightly different
-      // time; scaling the break positions proportionally prevents a blank last page.
+      // Since we capture from the exact same element used for measurement,
+      // the break positions are already correct — no scaling needed.
       const printH = element.scrollHeight;
-      const { breaks: rawBreaks, totalHeight: previewH } = breakDataRef.current;
-      const scale  = previewH > 0 ? printH / previewH : 1;
-      const breaks = rawBreaks.map(b => Math.round(b * scale));
+      const { breaks } = breakDataRef.current;
 
       const contentRanges = [];
       let prev = 0;
@@ -362,17 +263,6 @@ const CVBuilder = () => {
       className="flex flex-col md:flex-row h-[calc(100vh-80px)] overflow-hidden bg-slate-100"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Hidden print layer */}
-      <PrintLayer
-        cvData={cvData}
-        selectedTemplate={selectedTemplate}
-        theme={theme}
-        visibleSections={visibleSections}
-        visiblePersonalFields={visiblePersonalFields}
-        sectionOrder={sectionOrder}
-        isRTL={isRTL}
-      />
-
       {showLimitModal && (
         <LimitModal
           isRTL={isRTL}
