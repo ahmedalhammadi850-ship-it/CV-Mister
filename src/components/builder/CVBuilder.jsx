@@ -137,8 +137,8 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      const [{ toPng }, { jsPDF }] = await Promise.all([
-        import('html-to-image'),
+      const [html2canvas, { jsPDF }] = await Promise.all([
+        import('html2canvas').then(m => m.default),
         import('jspdf'),
       ]);
 
@@ -147,73 +147,46 @@ const CVBuilder = () => {
       const element = breakDataRef.current?.captureEl;
       if (!element) return;
 
-      const PR = 3;
+      const PR = 2;
       const A4_W_MM = 210;
       const A4_H_MM = 297;
       const CONTENT_W = 794;
 
-      // Temporarily move the live element to a fixed off-screen position so the
-      // browser composites it properly for capture. Keeping z-index -1 and
-      // position absolute at -9999px prevents html-to-image from reading pixels.
-      const savedPos     = element.style.position;
-      const savedTop     = element.style.top;
-      const savedLeft    = element.style.left;
-      const savedZIndex  = element.style.zIndex;
+      // Temporarily reposition the element so html2canvas can render it.
+      // Elements hidden at -9999px with z-index:-1 are skipped by the renderer.
+      const savedPos    = element.style.position;
+      const savedTop    = element.style.top;
+      const savedLeft   = element.style.left;
+      const savedZIndex = element.style.zIndex;
 
       element.style.position = 'fixed';
       element.style.top      = '0';
       element.style.left     = `${-(CONTENT_W + 200)}px`;
       element.style.zIndex   = '9999';
 
-      // Two frames so the browser re-composites at the new position.
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
 
-      // Inject proxied Google Fonts so html-to-image can embed them (same-origin).
-      let injectedFontStyle = null;
-      try {
-        const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
-          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
-        );
-        const res = await fetch(proxyUrl);
-        if (res.ok) {
-          injectedFontStyle = document.createElement('style');
-          injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
-          injectedFontStyle.textContent = await res.text();
-          element.prepend(injectedFontStyle);
-        }
-      } catch (_) {}
-
-      // Give fonts time to resolve, then re-check ready state.
-      await new Promise(r => setTimeout(r, 200));
-      await document.fonts.ready;
-
       const captureH = element.scrollHeight;
-      let fullDataUrl;
+
+      let fullCanvas;
       try {
-        fullDataUrl = await toPng(element, {
+        fullCanvas = await html2canvas(element, {
+          scale: PR,
+          useCORS: true,
+          allowTaint: true,
           backgroundColor: '#ffffff',
           width: CONTENT_W,
           height: captureH,
-          pixelRatio: PR,
-          cacheBust: true,
+          scrollX: 0,
+          scrollY: 0,
+          logging: false,
         });
       } finally {
-        // Always restore the element's original position.
-        if (injectedFontStyle) injectedFontStyle.remove();
         element.style.position = savedPos;
         element.style.top      = savedTop;
         element.style.left     = savedLeft;
         element.style.zIndex   = savedZIndex;
       }
-
-      await new Promise(r => setTimeout(r, 0));
-
-      const fullImg = await new Promise((resolve, reject) => {
-        const im = new Image();
-        im.onload = () => resolve(im);
-        im.onerror = reject;
-        im.src = fullDataUrl;
-      });
 
       const { breaks } = breakDataRef.current;
       const contentRanges = [];
@@ -238,19 +211,19 @@ const CVBuilder = () => {
         const { start, end } = contentRanges[i];
         const sliceH = Math.round((end - start) * PR);
 
-        const a4Canvas = document.createElement('canvas');
-        a4Canvas.width  = imgW;
-        a4Canvas.height = a4H;
-        const ctx = a4Canvas.getContext('2d');
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width  = imgW;
+        pageCanvas.height = a4H;
+        const ctx = pageCanvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, imgW, a4H);
         ctx.drawImage(
-          fullImg,
+          fullCanvas,
           0, Math.round(start * PR), imgW, sliceH,
           0, 0,                       imgW, sliceH
         );
 
-        pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
+        pdf.addImage(pageCanvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
