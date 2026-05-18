@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -7,7 +7,8 @@ import {
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -16,9 +17,10 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [isRTL, setIsRTL] = useState(false);
+  const [currentUser, setCurrentUser]   = useState(null);
+  const [loading, setLoading]           = useState(true);
+  const [isRTL, setIsRTL]               = useState(false);
+  const unsubUserRef                    = useRef(null);
 
   const buildUser = (dbUser) => {
     const planExpiresAt = dbUser.planExpiresAt ? new Date(dbUser.planExpiresAt) : null;
@@ -30,14 +32,14 @@ export function AuthProvider({ children }) {
     }
     const subscriptionExpired = dbUser.plan === 'free' && planExpiresAt && planExpiresAt < now;
     return {
-      uid: dbUser.id,
-      id: dbUser.id,
-      name: dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email,
-      displayName: dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email?.split('@')[0],
-      profileImage: dbUser.profileImageUrl || null,
-      email: dbUser.email,
-      plan: dbUser.plan || 'free',
-      cvCount: dbUser.cvCount || 0,
+      uid:                dbUser.id || dbUser.uid,
+      id:                 dbUser.id || dbUser.uid,
+      name:               dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email,
+      displayName:        dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email?.split('@')[0],
+      profileImage:       dbUser.profileImageUrl || null,
+      email:              dbUser.email,
+      plan:               dbUser.plan || 'free',
+      cvCount:            dbUser.cvCount || 0,
       planExpiresAt,
       daysLeft,
       subscriptionExpired: !!subscriptionExpired,
@@ -61,18 +63,40 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const startUserListener = (uid) => {
+    if (unsubUserRef.current) unsubUserRef.current();
+    const userRef = doc(db, 'users', uid);
+    unsubUserRef.current = onSnapshot(userRef, (snap) => {
+      if (snap.exists()) {
+        setCurrentUser(buildUser({ id: snap.id, ...snap.data() }));
+      }
+    });
+  };
+
+  const stopUserListener = () => {
+    if (unsubUserRef.current) {
+      unsubUserRef.current();
+      unsubUserRef.current = null;
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      stopUserListener();
       if (firebaseUser && firebaseUser.emailVerified) {
         const user = await syncWithBackend(firebaseUser);
         setCurrentUser(user);
+        if (user?.uid) startUserListener(user.uid);
       } else {
         setCurrentUser(null);
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
       }
       setLoading(false);
     });
-    return unsubscribe;
+    return () => {
+      unsubscribe();
+      stopUserListener();
+    };
   }, []);
 
   const signUp = async (firstName, lastName, email, password) => {
@@ -105,10 +129,12 @@ export function AuthProvider({ children }) {
     }
     const user = await syncWithBackend(credential.user);
     setCurrentUser(user);
+    if (user?.uid) startUserListener(user.uid);
     return user;
   };
 
   const signOutUser = async () => {
+    stopUserListener();
     await signOut(auth);
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setCurrentUser(null);
