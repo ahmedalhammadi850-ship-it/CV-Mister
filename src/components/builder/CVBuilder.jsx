@@ -144,55 +144,37 @@ const CVBuilder = () => {
 
       await document.fonts.ready;
 
-      const sourceEl = breakDataRef.current?.captureEl;
-      if (!sourceEl) return;
+      const element = breakDataRef.current?.captureEl;
+      if (!element) return;
 
       const PR = 3;
       const A4_W_MM = 210;
       const A4_H_MM = 297;
       const CONTENT_W = 794;
 
-      // Clone the CV element into a fixed off-screen container.
-      // Using position:fixed (not absolute at -9999px) ensures the browser
-      // renders it through the same pipeline as the visible preview — giving
-      // identical font shaping, colours, and layout in the captured image.
-      const clone = sourceEl.cloneNode(true);
-      clone.style.cssText = [
-        'position:fixed',
-        'top:0',
-        `left:${-(CONTENT_W + 200)}px`,
-        `width:${CONTENT_W}px`,
-        'pointer-events:none',
-        'z-index:-9999',
-      ].join(';');
-      document.body.appendChild(clone);
-
-      // Two animation frames so the browser fully computes layout and styles.
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-
       // Inject proxied Google Fonts so html-to-image can embed them (same-origin).
-      let fontStyle = null;
+      let injectedFontStyle = null;
       try {
         const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
           'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
         );
         const res = await fetch(proxyUrl);
         if (res.ok) {
-          fontStyle = document.createElement('style');
-          fontStyle.setAttribute('data-cv-pdf-fonts', '1');
-          fontStyle.textContent = await res.text();
-          clone.prepend(fontStyle);
+          injectedFontStyle = document.createElement('style');
+          injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
+          injectedFontStyle.textContent = await res.text();
+          element.prepend(injectedFontStyle);
         }
       } catch (_) {}
 
-      // Give fonts time to resolve after injection before capturing.
+      // Give fonts time to resolve after injection, then re-check ready state.
       await new Promise(r => setTimeout(r, 200));
       await document.fonts.ready;
 
-      const captureH = clone.scrollHeight;
+      const captureH = element.scrollHeight;
       let fullDataUrl;
       try {
-        fullDataUrl = await toPng(clone, {
+        fullDataUrl = await toPng(element, {
           backgroundColor: '#ffffff',
           width: CONTENT_W,
           height: captureH,
@@ -200,7 +182,7 @@ const CVBuilder = () => {
           cacheBust: true,
         });
       } finally {
-        document.body.removeChild(clone);
+        if (injectedFontStyle) injectedFontStyle.remove();
       }
 
       await new Promise(r => setTimeout(r, 0));
