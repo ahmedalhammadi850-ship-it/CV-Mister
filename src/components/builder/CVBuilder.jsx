@@ -185,7 +185,7 @@ const CVBuilder = () => {
           width: CONTENT_W,
           height: captureH,
           pixelRatio: PR,
-          cacheBust: true,
+          cacheBust: false,
           style: {
             position: 'relative',
             top: '0',
@@ -195,6 +195,10 @@ const CVBuilder = () => {
         });
       } finally {
         if (injectedFontStyle) injectedFontStyle.remove();
+      }
+
+      if (!fullDataUrl || fullDataUrl === 'data:,') {
+        throw new Error('html-to-image returned an empty result');
       }
 
       await new Promise(r => setTimeout(r, 0));
