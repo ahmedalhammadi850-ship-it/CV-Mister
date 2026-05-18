@@ -152,7 +152,10 @@ const CVBuilder = () => {
       const A4_H_MM = 297;
       const CONTENT_W = 794;
 
-      // Inject proxied Google Fonts so html-to-image can embed them (same-origin).
+      // ── Font pre-loading ──────────────────────────────────────────────────────
+      // Fetch the proxied Google Fonts CSS, then download every font binary and
+      // embed it as a base64 data-URI so html-to-image gets pixel-perfect fonts
+      // regardless of CORS or network timing.
       let injectedFontStyle = null;
       try {
         const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
@@ -160,14 +163,56 @@ const CVBuilder = () => {
         );
         const res = await fetch(proxyUrl);
         if (res.ok) {
+          let css = await res.text();
+
+          // Collect every font-file URL referenced in the CSS
+          const fontUrlMatches = [...css.matchAll(/url\(([^)]+)\)/g)];
+          const uniqueFontUrls = [...new Set(fontUrlMatches.map(m => m[1]))];
+
+          // Fetch every font binary in parallel and convert to base64 data-URI
+          const dataUriMap = {};
+          await Promise.all(uniqueFontUrls.map(async (url) => {
+            try {
+              const fontRes = await fetch(url);
+              if (!fontRes.ok) return;
+              const buffer = await fontRes.arrayBuffer();
+              const bytes  = new Uint8Array(buffer);
+              let binary   = '';
+              const chunk  = 8192;
+              for (let i = 0; i < bytes.length; i += chunk) {
+                binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
+              }
+              const ct = fontRes.headers.get('content-type') || 'font/woff2';
+              dataUriMap[url] = `data:${ct};base64,${btoa(binary)}`;
+            } catch (_) {}
+          }));
+
+          // Replace every proxy URL with the embedded data-URI
+          for (const [url, dataUri] of Object.entries(dataUriMap)) {
+            css = css.split(url).join(dataUri);
+          }
+
           injectedFontStyle = document.createElement('style');
           injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
-          injectedFontStyle.textContent = await res.text();
-          element.prepend(injectedFontStyle);
+          injectedFontStyle.textContent = css;
+          // Inject into <head> so document.styleSheets picks it up for html-to-image
+          document.head.appendChild(injectedFontStyle);
         }
       } catch (_) {}
 
-      await new Promise(r => setTimeout(r, 200));
+      // Force-load every weight so the browser has them in its font cache
+      const FONT_FAMILIES = [
+        'Plus Jakarta Sans', 'DM Sans', 'Merriweather',
+        'Tajawal', 'Cairo', 'Amiri', 'Noto Naskh Arabic', 'Scheherazade New',
+      ];
+      const FONT_WEIGHTS = ['300', '400', '500', '600', '700', '800'];
+      await Promise.all(
+        FONT_FAMILIES.flatMap(family =>
+          FONT_WEIGHTS.map(w =>
+            document.fonts.load(`${w} 16px "${family}"`).catch(() => {})
+          )
+        )
+      );
       await document.fonts.ready;
 
       const captureH = element.scrollHeight;
@@ -201,28 +246,9 @@ const CVBuilder = () => {
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
 
-      // Wait for layout + explicitly force every font family used in the
-      // clone to be loaded so the SVG renders with the correct typefaces.
+      // Wait for layout to settle
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       await document.fonts.ready;
-
-      const usedFamilies = new Set();
-      clone.querySelectorAll('*').forEach(el => {
-        const ff = window.getComputedStyle(el).fontFamily;
-        if (ff) {
-          ff.split(',').forEach(f => {
-            const name = f.trim().replace(/^['"]|['"]$/g, '');
-            if (name) usedFamilies.add(name);
-          });
-        }
-      });
-      await Promise.all(
-        [...usedFamilies].map(name =>
-          document.fonts.load(`400 16px "${name}"`).catch(() => {})
-        )
-      );
-      // Give the browser one more frame to render with the loaded fonts.
-      await new Promise(r => requestAnimationFrame(r));
 
       // Temporarily disable cross-origin stylesheets (e.g. from Google Translate
       // extension) to prevent SecurityError when html-to-image tries to read cssRules.
