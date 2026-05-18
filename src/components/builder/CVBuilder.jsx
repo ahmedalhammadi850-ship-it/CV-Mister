@@ -379,7 +379,7 @@ const CVBuilder = () => {
 
   return (
     <div
-      className="flex flex-col md:flex-row h-[calc(100vh-80px)] overflow-hidden bg-slate-100"
+      className="flex flex-col md:flex-row h-[calc(100svh-64px)] md:h-[calc(100vh-72px)] overflow-hidden bg-slate-100"
       dir={isRTL ? 'rtl' : 'ltr'}
     >
       {showLimitModal && (
@@ -443,7 +443,7 @@ const CVBuilder = () => {
       </div>
 
       {/* ── Editor Sidebar ── */}
-      <div className={`w-full md:w-[420px] lg:w-[460px] flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden no-print ${mobileTab === 'editor' ? 'flex' : 'hidden md:flex'}`}>
+      <div className={`w-full md:w-[420px] lg:w-[460px] flex-1 md:flex-none md:flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden no-print ${mobileTab === 'editor' ? 'flex' : 'hidden md:flex'}`}>
         <div className="flex border-b border-slate-100 bg-white sticky top-0 z-10 flex-shrink-0">
           {PANEL_TABS.map(({ key, enLabel, arLabel, Icon }) => {
             const active = panelTab === key;
