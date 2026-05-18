@@ -172,29 +172,50 @@ const CVBuilder = () => {
 
       const captureH = element.scrollHeight;
 
-      // The element lives at position:absolute top:-9999px left:-9999px to stay
-      // off-screen in the live UI. html-to-image clones the element and copies
-      // all its inline styles into the SVG foreignObject, so those -9999px
-      // offsets carry over and the clone renders blank.
-      // Fix: use the `style` option to override position on the CLONE only —
-      // the original element is never touched, so there's no visible flash.
+      // The element lives at position:absolute top:-9999px inside an
+      // overflow:hidden parent. html-to-image copies all inline styles onto
+      // its internal clone, so those -9999px offsets carry over and the
+      // SVG renders blank.
+      //
+      // Reliable fix: create our own clone with position reset to relative,
+      // attach it to the document body (off-screen via a fixed wrapper so
+      // getComputedStyle works), capture THAT clone, then clean up.
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = [
+        'position:fixed',
+        `top:-${captureH + 200}px`,
+        'left:0',
+        `width:${CONTENT_W}px`,
+        'z-index:99999',
+        'background:#fff',
+        'overflow:visible',
+      ].join(';');
+
+      const clone = element.cloneNode(true);
+      clone.style.position = 'relative';
+      clone.style.top      = '0';
+      clone.style.left     = '0';
+      clone.style.zIndex   = 'auto';
+      clone.style.width    = `${CONTENT_W}px`;
+
+      wrapper.appendChild(clone);
+      document.body.appendChild(wrapper);
+
+      // Two frames so the browser lays out the clone before capture.
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+
       let fullDataUrl;
       try {
-        fullDataUrl = await toPng(element, {
+        fullDataUrl = await toPng(clone, {
           backgroundColor: '#ffffff',
           width: CONTENT_W,
           height: captureH,
           pixelRatio: PR,
           cacheBust: false,
-          style: {
-            position: 'relative',
-            top: '0',
-            left: '0',
-            zIndex: 'auto',
-          },
         });
       } finally {
         if (injectedFontStyle) injectedFontStyle.remove();
+        document.body.removeChild(wrapper);
       }
 
       if (!fullDataUrl || fullDataUrl === 'data:,') {
