@@ -84,13 +84,31 @@ export function AuthProvider({ children }) {
     );
   };
 
+  const buildFallbackUser = (firebaseUser) => ({
+    uid:         firebaseUser.uid,
+    id:          firebaseUser.uid,
+    email:       firebaseUser.email || '',
+    name:        firebaseUser.displayName || firebaseUser.email || '',
+    displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || '',
+    profileImage: firebaseUser.photoURL || null,
+    plan:        'free',
+    cvCount:     0,
+    planExpiresAt: null,
+    daysLeft:    null,
+    subscriptionExpired: false,
+  });
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       stopUserListener();
       if (firebaseUser && firebaseUser.emailVerified) {
         const user = await syncWithBackend(firebaseUser);
-        setCurrentUser(user);
-        if (user?.uid) startUserListener(user.uid);
+        if (user) {
+          setCurrentUser(user);
+          startUserListener(user.uid);
+        } else {
+          setCurrentUser(buildFallbackUser(firebaseUser));
+        }
       } else {
         setCurrentUser(null);
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
@@ -164,11 +182,15 @@ export function AuthProvider({ children }) {
       }
     }
   };
-  const refreshUser        = async () => {
+  const refreshUser = async () => {
     const firebaseUser = auth.currentUser;
     if (firebaseUser && firebaseUser.emailVerified) {
       const user = await syncWithBackend(firebaseUser);
-      if (user) setCurrentUser(user);
+      if (user) {
+        setCurrentUser(user);
+      } else {
+        setCurrentUser(buildFallbackUser(firebaseUser));
+      }
     }
   };
 
