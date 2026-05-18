@@ -224,6 +224,21 @@ const CVBuilder = () => {
       // Give the browser one more frame to render with the loaded fonts.
       await new Promise(r => requestAnimationFrame(r));
 
+      // Temporarily disable cross-origin stylesheets (e.g. from Google Translate
+      // extension) to prevent SecurityError when html-to-image tries to read cssRules.
+      const disabledSheets = [];
+      for (const sheet of Array.from(document.styleSheets)) {
+        try {
+          // Accessing cssRules on a cross-origin sheet throws SecurityError
+          const _ = sheet.cssRules;
+        } catch (_e) {
+          try {
+            sheet.disabled = true;
+            disabledSheets.push(sheet);
+          } catch (_) {}
+        }
+      }
+
       let fullDataUrl;
       try {
         // Call toPng twice — first pass primes the image/font cache inside
@@ -237,6 +252,10 @@ const CVBuilder = () => {
           cacheBust: false,
         });
       } finally {
+        // Restore cross-origin stylesheets
+        for (const sheet of disabledSheets) {
+          try { sheet.disabled = false; } catch (_) {}
+        }
         if (injectedFontStyle) injectedFontStyle.remove();
         document.body.removeChild(wrapper);
       }

@@ -1,0 +1,64 @@
+www&google.com/images/zippy_minus_sm.gif:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+pdf-vendor-t1Q2jBvQ.js:2 Error loading remote stylesheet TypeError: Failed to fetch
+    at ee (pdf-vendor-t1Q2jBvQ.js:2:5431)
+    at pdf-vendor-t1Q2jBvQ.js:2:11207
+    at Array.map (<anonymous>)
+    at W (pdf-vendor-t1Q2jBvQ.js:2:11110)
+    at pdf-vendor-t1Q2jBvQ.js:2:12403
+    at async Promise.all (/index 0)
+    at async je (pdf-vendor-t1Q2jBvQ.js:2:13003)
+    at async Pe (pdf-vendor-t1Q2jBvQ.js:2:13343)
+    at async G (pdf-vendor-t1Q2jBvQ.js:3:70)
+    at async Ie (pdf-vendor-t1Q2jBvQ.js:3:455)
+(anonymous) @ pdf-vendor-t1Q2jBvQ.js:2Understand this error
+pdf-vendor-t1Q2jBvQ.js:2 Error while reading CSS rules from https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.zZZZhVqDDCw.L.W.O/am=BBDg/d=0/rs=AN8SPfobRl8UQM01cRTktRUhaChx5xxdlg/m=el_main_css SecurityError: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+    at pdf-vendor-t1Q2jBvQ.js:2:12656
+    at Array.forEach (<anonymous>)
+    at pdf-vendor-t1Q2jBvQ.js:2:12618
+    at async je (pdf-vendor-t1Q2jBvQ.js:2:13003)
+    at async Pe (pdf-vendor-t1Q2jBvQ.js:2:13343)
+    at async G (pdf-vendor-t1Q2jBvQ.js:3:70)
+    at async Ie (pdf-vendor-t1Q2jBvQ.js:3:455)
+    at async Le (pdf-vendor-t1Q2jBvQ.js:3:570)
+    at async ze (pdf-vendor-t1Q2jBvQ.js:3:1073)
+    at async onClick (index-BB4DTzWr.js:12:528167)
+(anonymous) @ pdf-vendor-t1Q2jBvQ.js:2Understand this error
+www&google.com/images/zippy_plus_sm.gif:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+builder?from=template:1 Access to fetch at 'https://www.gstatic.com/images/branding/product/2x/translate_24dp.png' from origin 'https://cv-mister-ai.vercel.app' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+www.gstatic.com/images/branding/product/2x/translate_24dp.png:1  Failed to load resource: net::ERR_FAILEDUnderstand this error
+pdf-vendor-t1Q2jBvQ.js:2 Error inlining remote css file SecurityError: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+    at pdf-vendor-t1Q2jBvQ.js:2:11936
+    at Array.forEach (<anonymous>)
+    at ke (pdf-vendor-t1Q2jBvQ.js:2:11898)
+    at je (pdf-vendor-t1Q2jBvQ.js:2:13009)
+    at Pe (pdf-vendor-t1Q2jBvQ.js:2:13349)
+    at G (pdf-vendor-t1Q2jBvQ.js:3:76)
+    at Ie (pdf-vendor-t1Q2jBvQ.js:3:461)
+    at async Le (pdf-vendor-t1Q2jBvQ.js:3:570)
+    at async ze (pdf-vendor-t1Q2jBvQ.js:3:1073)
+    at async onClick (index-BB4DTzWr.js:12:528267)
+(anonymous) @ pdf-vendor-t1Q2jBvQ.js:2Understand this error
+www&google.com/images/zippy_minus_sm.gif:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+pdf-vendor-t1Q2jBvQ.js:2 Error loading remote stylesheet TypeError: Failed to fetch
+    at ee (pdf-vendor-t1Q2jBvQ.js:2:5431)
+    at pdf-vendor-t1Q2jBvQ.js:2:11207
+    at Array.map (<anonymous>)
+    at W (pdf-vendor-t1Q2jBvQ.js:2:11110)
+    at pdf-vendor-t1Q2jBvQ.js:2:12403
+    at async Promise.all (/index 0)
+(anonymous) @ pdf-vendor-t1Q2jBvQ.js:2Understand this error
+pdf-vendor-t1Q2jBvQ.js:2 Error while reading CSS rules from https://www.gstatic.com/_/translate_http/_/ss/k=translate_http.tr.zZZZhVqDDCw.L.W.O/am=BBDg/d=0/rs=AN8SPfobRl8UQM01cRTktRUhaChx5xxdlg/m=el_main_css SecurityError: Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules
+    at pdf-vendor-t1Q2jBvQ.js:2:12656
+    at Array.forEach (<anonymous>)
+    at pdf-vendor-t1Q2jBvQ.js:2:12618
+    at async je (pdf-vendor-t1Q2jBvQ.js:2:13003)
+    at async Pe (pdf-vendor-t1Q2jBvQ.js:2:13343)
+    at async G (pdf-vendor-t1Q2jBvQ.js:3:70)
+    at async Ie (pdf-vendor-t1Q2jBvQ.js:3:455)
+    at async Le (pdf-vendor-t1Q2jBvQ.js:3:570)
+    at async ze (pdf-vendor-t1Q2jBvQ.js:3:1073)
+    at async onClick (index-BB4DTzWr.js:12:528267)
+(anonymous) @ pdf-vendor-t1Q2jBvQ.js:2Understand this error
+www&google.com/images/zippy_plus_sm.gif:1  Failed to load resource: net::ERR_NAME_NOT_RESOLVEDUnderstand this error
+builder?from=template:1 Access to fetch at 'https://www.gstatic.com/images/branding/product/2x/translate_24dp.png' from origin 'https://cv-mister-ai.vercel.app' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.Understand this error
+www.gstatic.com/images/branding/product/2x/translate_24dp.png:1  Failed to load resource: net::ERR_FAILED
