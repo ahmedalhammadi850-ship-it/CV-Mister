@@ -21,9 +21,7 @@ export default async function handler(req, res) {
     const data = snap.data();
 
     if (status === "approved" && data.userId) {
-      const cvsSnap = await db.collection("cvs").where("userId", "==", data.userId).get();
-      await Promise.all(cvsSnap.docs.map(d => d.ref.delete()));
-      await db.collection("users").doc(data.userId).update({ plan: "pro", cvCount: 0, updatedAt: now });
+      await db.collection("users").doc(data.userId).update({ plan: "pro", updatedAt: now });
     }
     if (status === "rejected" && data.userId) {
       await db.collection("users").doc(data.userId).update({ plan: "free", updatedAt: now });
