@@ -16,9 +16,10 @@ const EmailActionPage = () => {
     const mode = searchParams.get('mode');
     const oobCode = searchParams.get('oobCode');
 
-    if (mode !== 'verifyEmail' || !oobCode) {
-      setStatus('error');
-      setErrorMsg(isRTL ? 'رابط غير صالح.' : 'Invalid link.');
+    // If no oobCode, Firebase already verified the email and redirected here
+    if (!oobCode) {
+      setStatus('success');
+      setTimeout(() => navigate('/login', { replace: true }), 3000);
       return;
     }
 
