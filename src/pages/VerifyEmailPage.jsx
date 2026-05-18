@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { auth } from '../firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const VerifyEmailPage = () => {
   const { isRTL, resendVerification, signOutUser, currentUser, refreshUser } = useAuth();
@@ -39,14 +40,31 @@ const VerifyEmailPage = () => {
     const user = auth.currentUser;
     if (user) setEmail(user.email || '');
 
-    // Check immediately in case user already verified (e.g. arrived via email link)
+    // Listen for auth state changes — catches the case where verification
+    // happens in another tab or after Firebase finishes initialising
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) return;
+      if (firebaseUser.email) setEmail(firebaseUser.email);
+      // Force-reload to get the latest emailVerified status from Firebase
+      try { await firebaseUser.reload(); } catch { /* ignore */ }
+      if (firebaseUser.emailVerified) {
+        clearInterval(intervalRef.current);
+        await refreshUser();
+        setRedirecting(true);
+      }
+    });
+
+    // Also poll every 3 seconds as a fallback
     checkVerified().then((alreadyVerified) => {
       if (!alreadyVerified) {
         intervalRef.current = setInterval(checkVerified, 3000);
       }
     });
 
-    return () => clearInterval(intervalRef.current);
+    return () => {
+      clearInterval(intervalRef.current);
+      unsubscribe();
+    };
   }, []);
 
   const handleResend = async () => {
