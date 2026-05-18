@@ -10,7 +10,7 @@ export default async function handler(req, res) {
     const { localId: uid, email } = firebaseUser;
     if (!email) return res.status(400).json({ message: "No email in Firebase token" });
 
-    const db = getDb();
+    const db = getDb(idToken);
     const userRef = db.collection("users").doc(uid);
     const userSnap = await userRef.get();
 

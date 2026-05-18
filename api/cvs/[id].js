@@ -1,4 +1,4 @@
-import { getUserFromReq } from "../_lib/token.js";
+import { getUserFromReq, getIdTokenFromReq } from "../_lib/token.js";
 import { getDb } from "../_lib/firebase.js";
 
 export default async function handler(req, res) {
@@ -6,7 +6,8 @@ export default async function handler(req, res) {
   if (!payload?.userId) return res.status(401).json({ message: "غير مصادق" });
   const uid = payload.userId;
   const { id } = req.query;
-  const db = getDb();
+  const idToken = getIdTokenFromReq(req);
+  const db = getDb(idToken);
 
   if (req.method === "GET") {
     try {

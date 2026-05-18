@@ -1,4 +1,4 @@
-import { getUserFromReq } from "../_lib/token.js";
+import { getUserFromReq, getIdTokenFromReq } from "../_lib/token.js";
 import { getDb } from "../_lib/firebase.js";
 
 const FREE_LIMIT = 1;
@@ -8,13 +8,14 @@ export default async function handler(req, res) {
   const payload = getUserFromReq(req);
   if (!payload?.userId) return res.status(401).json({ message: "غير مصادق" });
   const uid = payload.userId;
-  const db = getDb();
+  const idToken = getIdTokenFromReq(req);
+  const db = getDb(idToken);
 
   if (req.method === "GET") {
     try {
       const snap = await db.collection("cvs").where("userId", "==", uid).get();
       const cvs = snap.docs
-        .map(doc => ({ id: doc.id, ...doc.data() }))
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
         .sort((a, b) => {
           const ta = a.lastModified ? new Date(a.lastModified).getTime() : 0;
           const tb = b.lastModified ? new Date(b.lastModified).getTime() : 0;

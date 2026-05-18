@@ -1,6 +1,7 @@
 import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
+import { createRestDb } from "./firestore-rest.js";
 
 const FIREBASE_API_KEY = process.env.VITE_FIREBASE_API_KEY || "AIzaSyAWOigTY6lsunLk6tTgeoXTm4JmwWUR4No";
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "cv-mister-e4bbc";
@@ -10,27 +11,27 @@ function hasAdminCredentials() {
 }
 
 function parsePrivateKey(raw = "") {
-  let key = raw.trim().replace(/^["']|["']$/g, "");
-  key = key.replace(/\\n/g, "\n");
-  return key;
+  return raw.trim().replace(/^["']|["']$/g, "").replace(/\\n/g, "\n");
 }
 
 function ensureInit() {
   if (getApps().length > 0) return;
-  const privateKey  = parsePrivateKey(process.env.FIREBASE_PRIVATE_KEY);
-  const clientEmail = (process.env.FIREBASE_CLIENT_EMAIL || "").trim();
-
   initializeApp({
-    credential: cert({ projectId: PROJECT_ID, clientEmail, privateKey }),
+    credential: cert({
+      projectId: PROJECT_ID,
+      clientEmail: (process.env.FIREBASE_CLIENT_EMAIL || "").trim(),
+      privateKey: parsePrivateKey(process.env.FIREBASE_PRIVATE_KEY),
+    }),
   });
 }
 
-export function getDb() {
-  if (!hasAdminCredentials()) {
-    throw new Error("Firebase Admin credentials not configured");
+export function getDb(idToken) {
+  if (hasAdminCredentials()) {
+    ensureInit();
+    return getFirestore();
   }
-  ensureInit();
-  return getFirestore();
+  if (idToken) return createRestDb(idToken);
+  throw new Error("No Firebase Admin credentials and no ID token provided");
 }
 
 export function getAdminAuth() {
@@ -38,7 +39,6 @@ export function getAdminAuth() {
   return getAuth();
 }
 
-// Verify token via Firebase REST API — works without service account credentials
 async function verifyTokenViaREST(idToken) {
   const res = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${FIREBASE_API_KEY}`,
@@ -49,15 +49,15 @@ async function verifyTokenViaREST(idToken) {
     }
   );
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err?.error?.message || "Token verification failed");
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e?.error?.message || "Token verification failed");
   }
   const data = await res.json();
   const user = data.users?.[0];
   if (!user) throw new Error("User not found");
   return {
-    localId:       user.localId,
-    email:         user.email || "",
+    localId: user.localId,
+    email: user.email || "",
     emailVerified: user.emailVerified === true,
   };
 }
@@ -68,12 +68,12 @@ export async function verifyFirebaseToken(idToken) {
       ensureInit();
       const decoded = await getAdminAuth().verifyIdToken(idToken);
       return {
-        localId:       decoded.uid,
-        email:         decoded.email || "",
+        localId: decoded.uid,
+        email: decoded.email || "",
         emailVerified: decoded.email_verified !== false,
       };
     } catch {
-      // Fall through to REST fallback
+      // fall through to REST
     }
   }
   return verifyTokenViaREST(idToken);

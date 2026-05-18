@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { sampleData, blankData } from '../utils/sampleData';
 import { saveCV, getCVById, getSavedCVs, deleteCV as deleteCVLocal, duplicateCV as duplicateCVLocal } from '../utils/cvStorage';
 import { useAuth } from './AuthContext';
+import { apiFetch } from '../lib/apiFetch';
 
 export const CVContext = createContext();
 
@@ -14,7 +15,7 @@ const ALL_POSSIBLE_SECTIONS = [
 
 async function fetchAPICVs() {
   try {
-    const res = await fetch('/api/cvs', { credentials: 'include' });
+    const res = await apiFetch('/api/cvs');
     if (!res.ok) return [];
     return await res.json();
   } catch {
@@ -24,9 +25,8 @@ async function fetchAPICVs() {
 
 async function saveAPICV(entry) {
   try {
-    const res = await fetch('/api/cvs', {
+    const res = await apiFetch('/api/cvs', {
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     });
@@ -43,10 +43,7 @@ async function saveAPICV(entry) {
 
 async function deleteAPICV(id) {
   try {
-    await fetch(`/api/cvs/${id}`, {
-      method: 'DELETE',
-      credentials: 'include',
-    });
+    await apiFetch(`/api/cvs/${id}`, { method: 'DELETE' });
   } catch (e) {
     console.error('API CV delete failed', e);
   }
@@ -54,9 +51,8 @@ async function deleteAPICV(id) {
 
 async function duplicateAPICV(entry) {
   try {
-    await fetch('/api/cvs', {
+    await apiFetch('/api/cvs', {
       method: 'POST',
-      credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     });

@@ -1,4 +1,4 @@
-import { getUserFromReq } from "../_lib/token.js";
+import { getUserFromReq, getIdTokenFromReq } from "../_lib/token.js";
 import { getDb } from "../_lib/firebase.js";
 
 const cooldowns = new Map();
@@ -20,7 +20,8 @@ export default async function handler(req, res) {
     const { receiptImage } = req.body || {};
     if (!receiptImage) return res.status(400).json({ message: "صورة الحوالة مطلوبة" });
 
-    const db = getDb();
+    const idToken = getIdTokenFromReq(req);
+    const db = getDb(idToken);
     const existingSnap = await db
       .collection("paymentRequests")
       .where("userId", "==", uid)
