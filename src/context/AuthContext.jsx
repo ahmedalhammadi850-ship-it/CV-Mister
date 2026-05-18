@@ -7,7 +7,8 @@ import {
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { auth } from '../firebase';
+import { doc, onSnapshot } from 'firebase/firestore';
+import { auth, db } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -15,14 +16,11 @@ export function useAuth() {
   return useContext(AuthContext);
 }
 
-const POLL_INTERVAL = 30000;
-
 export function AuthProvider({ children }) {
-  const [currentUser, setCurrentUser]   = useState(null);
-  const [loading, setLoading]           = useState(true);
-  const [isRTL, setIsRTL]               = useState(false);
-  const pollTimerRef                    = useRef(null);
-  const loggedInRef                     = useRef(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [loading, setLoading]         = useState(true);
+  const [isRTL, setIsRTL]             = useState(false);
+  const unsubUserRef                  = useRef(null);
 
   const buildUser = (dbUser) => {
     const planExpiresAt = dbUser.planExpiresAt ? new Date(dbUser.planExpiresAt) : null;
@@ -34,14 +32,14 @@ export function AuthProvider({ children }) {
     }
     const subscriptionExpired = dbUser.plan === 'free' && planExpiresAt && planExpiresAt < now;
     return {
-      uid:                dbUser.id || dbUser.uid,
-      id:                 dbUser.id || dbUser.uid,
-      name:               dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email,
-      displayName:        dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email?.split('@')[0],
-      profileImage:       dbUser.profileImageUrl || null,
-      email:              dbUser.email,
-      plan:               dbUser.plan || 'free',
-      cvCount:            dbUser.cvCount || 0,
+      uid:                 dbUser.id || dbUser.uid,
+      id:                  dbUser.id || dbUser.uid,
+      name:                dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email,
+      displayName:         dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email?.split('@')[0],
+      profileImage:        dbUser.profileImageUrl || null,
+      email:               dbUser.email,
+      plan:                dbUser.plan || 'free',
+      cvCount:             dbUser.cvCount || 0,
       planExpiresAt,
       daysLeft,
       subscriptionExpired: !!subscriptionExpired,
@@ -65,60 +63,41 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const fetchUserFromBackend = async () => {
-    try {
-      const res = await fetch('/api/auth/user', { credentials: 'include' });
-      if (!res.ok) return null;
-      const dbUser = await res.json();
-      return buildUser(dbUser);
-    } catch {
-      return null;
+  const stopUserListener = () => {
+    if (unsubUserRef.current) {
+      unsubUserRef.current();
+      unsubUserRef.current = null;
     }
   };
 
-  const startPolling = () => {
-    stopPolling();
-    pollTimerRef.current = setInterval(async () => {
-      if (!loggedInRef.current) return;
-      const updated = await fetchUserFromBackend();
-      if (updated) {
-        setCurrentUser(prev => {
-          if (!prev) return updated;
-          if (prev.plan !== updated.plan || prev.cvCount !== updated.cvCount) {
-            return updated;
-          }
-          return prev;
-        });
-      }
-    }, POLL_INTERVAL);
-  };
-
-  const stopPolling = () => {
-    if (pollTimerRef.current) {
-      clearInterval(pollTimerRef.current);
-      pollTimerRef.current = null;
-    }
+  const startUserListener = (uid) => {
+    stopUserListener();
+    const userRef = doc(db, 'users', uid);
+    unsubUserRef.current = onSnapshot(
+      userRef,
+      (snap) => {
+        if (snap.exists()) {
+          setCurrentUser(buildUser({ id: snap.id, ...snap.data() }));
+        }
+      },
+      () => { /* permission-denied: rules not updated yet, silently ignore */ }
+    );
   };
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      stopPolling();
+      stopUserListener();
       if (firebaseUser && firebaseUser.emailVerified) {
         const user = await syncWithBackend(firebaseUser);
         setCurrentUser(user);
-        loggedInRef.current = true;
-        startPolling();
+        if (user?.uid) startUserListener(user.uid);
       } else {
-        loggedInRef.current = false;
         setCurrentUser(null);
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
       }
       setLoading(false);
     });
-    return () => {
-      unsubscribe();
-      stopPolling();
-    };
+    return () => { unsubscribe(); stopUserListener(); };
   }, []);
 
   const signUp = async (firstName, lastName, email, password) => {
@@ -151,31 +130,25 @@ export function AuthProvider({ children }) {
     }
     const user = await syncWithBackend(credential.user);
     setCurrentUser(user);
-    loggedInRef.current = true;
-    startPolling();
+    if (user?.uid) startUserListener(user.uid);
     return user;
   };
 
   const signOutUser = async () => {
-    stopPolling();
-    loggedInRef.current = false;
+    stopUserListener();
     await signOut(auth);
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setCurrentUser(null);
   };
 
-  const sendPasswordReset = async (email) => {
-    await sendPasswordResetEmail(auth, email);
-  };
-
-  const resendVerification = async () => {
-    const user = auth.currentUser;
-    if (user) await sendEmailVerification(user);
-  };
-
-  const refreshUser = async () => {
-    const updated = await fetchUserFromBackend();
-    if (updated) setCurrentUser(updated);
+  const sendPasswordReset  = async (email) => sendPasswordResetEmail(auth, email);
+  const resendVerification = async () => { const u = auth.currentUser; if (u) await sendEmailVerification(u); };
+  const refreshUser        = async () => {
+    const firebaseUser = auth.currentUser;
+    if (firebaseUser && firebaseUser.emailVerified) {
+      const user = await syncWithBackend(firebaseUser);
+      if (user) setCurrentUser(user);
+    }
   };
 
   const toggleRTL = () => {
@@ -186,21 +159,8 @@ export function AuthProvider({ children }) {
     });
   };
 
-  const value = {
-    currentUser,
-    loading,
-    isRTL,
-    toggleRTL,
-    signIn,
-    signUp,
-    signOutUser,
-    sendPasswordReset,
-    resendVerification,
-    refreshUser,
-  };
-
   return (
-    <AuthContext.Provider value={value}>
+    <AuthContext.Provider value={{ currentUser, loading, isRTL, toggleRTL, signIn, signUp, signOutUser, sendPasswordReset, resendVerification, refreshUser }}>
       {!loading && children}
     </AuthContext.Provider>
   );
