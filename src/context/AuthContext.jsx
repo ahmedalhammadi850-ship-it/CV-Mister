@@ -48,7 +48,7 @@ export function AuthProvider({ children }) {
 
   const syncWithBackend = async (firebaseUser) => {
     try {
-      const idToken = await firebaseUser.getIdToken();
+      const idToken = await firebaseUser.getIdToken(true);
       const res = await fetch('/api/auth/firebase-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
