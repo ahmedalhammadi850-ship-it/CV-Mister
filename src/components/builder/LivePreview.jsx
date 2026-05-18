@@ -183,14 +183,21 @@ const LivePreview = ({ breakDataRef }) => {
   const calcScale = useCallback(() => {
     if (wrapperRef.current) {
       const avail = wrapperRef.current.clientWidth - 32;
-      setScale(Math.min(1, avail / PAGE_W));
+      if (avail > 0) setScale(Math.min(1, avail / PAGE_W));
     }
   }, []);
 
   useEffect(() => {
     calcScale();
     window.addEventListener('resize', calcScale);
-    return () => window.removeEventListener('resize', calcScale);
+    // ResizeObserver fires when the wrapper goes from hidden→visible on mobile
+    // (switching tabs changes clientWidth from 0 → actual width)
+    const ro = new ResizeObserver(calcScale);
+    if (wrapperRef.current) ro.observe(wrapperRef.current);
+    return () => {
+      window.removeEventListener('resize', calcScale);
+      ro.disconnect();
+    };
   }, [calcScale]);
 
   /* ── measure + smart breaks ── */
