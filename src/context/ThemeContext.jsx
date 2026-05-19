@@ -4,19 +4,26 @@ const ThemeContext = createContext(null);
 
 export function ThemeProvider({ children }) {
   const [isDark, setIsDark] = useState(() => {
-    const saved = localStorage.getItem('cv-theme');
-    if (saved) return saved === 'dark';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    try {
+      const saved = localStorage.getItem('cv-theme');
+      if (saved) return saved === 'dark';
+    } catch {}
+    try {
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    } catch {}
+    return false;
   });
 
   useEffect(() => {
-    const root = document.documentElement;
-    if (isDark) {
-      root.classList.add('dark');
-    } else {
-      root.classList.remove('dark');
-    }
-    localStorage.setItem('cv-theme', isDark ? 'dark' : 'light');
+    try {
+      const root = document.documentElement;
+      if (isDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+      localStorage.setItem('cv-theme', isDark ? 'dark' : 'light');
+    } catch {}
   }, [isDark]);
 
   const toggleTheme = () => setIsDark(prev => !prev);
