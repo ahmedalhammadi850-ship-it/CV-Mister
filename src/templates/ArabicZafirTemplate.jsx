@@ -175,7 +175,7 @@ const ArabicZafirTemplate = ({
                 background:'rgba(255,255,255,0.08)', border:`1px solid ${accent}45`,
                 borderRadius:'20pt', padding:'2.5pt 8pt',
                 fontSize:'7pt', color:'rgba(255,255,255,0.82)',
-              }}>{item.name || item}</span>
+              }}>{typeof item === 'string' ? item : item.name}</span>
             ))}
           </div>
         </section>

@@ -184,7 +184,7 @@ const ArabicWaveTemplate = ({
                 fontSize: '7pt', color: '#fff', textAlign: 'center',
                 padding: '3pt', boxSizing: 'border-box', lineHeight: 1.2,
               }}>
-                {(item.name || item).slice(0, 4)}
+                {(typeof item === 'string' ? item : item.name).slice(0, 4)}
               </div>
             ))}
           </div>

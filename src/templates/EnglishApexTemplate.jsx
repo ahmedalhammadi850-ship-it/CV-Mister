@@ -171,7 +171,7 @@ const EnglishApexTemplate = ({
                 background:'rgba(255,255,255,0.08)', border:`1px solid ${accent}40`,
                 borderRadius:'3pt', padding:'2pt 7pt',
                 fontSize:'7pt', color:'rgba(255,255,255,0.8)',
-              }}>{item.name || item}</span>
+              }}>{typeof item === 'string' ? item : item.name}</span>
             ))}
           </div>
         </section>

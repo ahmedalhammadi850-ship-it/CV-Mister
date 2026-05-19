@@ -170,7 +170,7 @@ const AtlanticBlueTemplate = ({
             <div style={sb.divider} />
             <div style={sb.sectionLabel}>{tr('interests', isRTL)}</div>
             <div style={{ fontSize: sz.meta, color: 'rgba(255,255,255,0.85)', lineHeight: 1.6 }}>
-              {data.interests.map(i => i.name || i).join('  •  ')}
+              {data.interests.map(i => typeof i === 'string' ? i : i.name).join('  •  ')}
             </div>
           </section>
         ) : null;

@@ -204,7 +204,7 @@ const DarkHeaderTemplate = ({
           <section key="interests" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('interests', isRTL)}</div>
             <div style={{ fontSize: sz.meta, color: '#3d3452', lineHeight: 1.6 }}>
-              {data.interests.map(i => i.name || i).join('  •  ')}
+              {data.interests.map(i => typeof i === 'string' ? i : i.name).join('  •  ')}
             </div>
           </section>
         ) : null;

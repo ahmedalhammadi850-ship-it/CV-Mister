@@ -418,7 +418,7 @@ const ArabicGemTemplate = ({
                   fontSize: '7pt', color: '#fff',
                   border: `1px solid ${gold}55`, borderRadius: '10pt',
                   padding: '1.5pt 6pt', backgroundColor: 'rgba(255,255,255,0.1)',
-                }}>{item.name || item}</span>
+                }}>{typeof item === 'string' ? item : item.name}</span>
               ))}
             </div>
           </section>

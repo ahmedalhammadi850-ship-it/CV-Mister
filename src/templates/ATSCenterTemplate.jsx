@@ -256,7 +256,7 @@ const ATSCenterTemplate = ({
           <section key="interests" style={BREAK_ITEM}>
             <SectionHead label={tr('interests', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt', justifyContent: 'center' }}>
-              {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
+              {data.interests.map((item, i) => <span key={i} style={s.tag}>{typeof item === 'string' ? item : item.name}</span>)}
             </div>
           </section>
         ) : null;

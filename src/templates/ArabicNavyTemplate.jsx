@@ -152,7 +152,7 @@ const ArabicNavyTemplate = ({
           <section key="interests" style={BREAK_ITEM}>
             <div style={sb.sectionLabel}>{tr('interests', true)}</div>
             <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
-              {data.interests.map((item, i) => <span key={i} style={sb.tag}>{item.name || item}</span>)}
+              {data.interests.map((item, i) => <span key={i} style={sb.tag}>{typeof item === 'string' ? item : item.name}</span>)}
             </div>
           </section>
         ) : null;

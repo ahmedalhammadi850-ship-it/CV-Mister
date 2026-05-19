@@ -197,7 +197,7 @@ const ArabicCardTemplate = ({
         return data.interests?.length > 0 ? (
           <SidebarSection key="interests" label={tr('interests', true)}>
             <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
-              {data.interests.map((item, i) => <span key={i} style={sb.tag}>{item.name || item}</span>)}
+              {data.interests.map((item, i) => <span key={i} style={sb.tag}>{typeof item === 'string' ? item : item.name}</span>)}
             </div>
           </SidebarSection>
         ) : null;

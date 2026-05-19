@@ -284,7 +284,7 @@ const ATSModernTemplate = ({
             <h2 style={s.heading}>{tr('interests', isRTL)}</h2>
             <div style={s.spacer} />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt' }}>
-              {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
+              {data.interests.map((item, i) => <span key={i} style={s.tag}>{typeof item === 'string' ? item : item.name}</span>)}
             </div>
           </section>
         ) : null;

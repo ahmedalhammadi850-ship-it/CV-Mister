@@ -232,7 +232,7 @@ const VelvetTemplate = ({
           <section key="interests" style={BREAK_ITEM}>
             <SectionHeading label={tr('interests', isRTL)} />
             <div style={{ display: 'flex', flexWrap: 'wrap' }}>
-              {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
+              {data.interests.map((item, i) => <span key={i} style={s.tag}>{typeof item === 'string' ? item : item.name}</span>)}
             </div>
           </section>
         ) : null;

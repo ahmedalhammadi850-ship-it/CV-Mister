@@ -187,7 +187,7 @@ const ArabicProTemplate = ({
           <div style={sb.sectionBadge}><span style={sb.sectionLabel}>{tr('interests', true)}</span></div>
           <div style={{ display:'flex', flexWrap:'wrap', flexDirection:'row-reverse', gap:'3pt' }}>
             {data.interests.map((item, i) => (
-              <span key={i} style={sb.tag}>{item.name || item}</span>
+              <span key={i} style={sb.tag}>{typeof item === 'string' ? item : item.name}</span>
             ))}
           </div>
         </section>
@@ -258,7 +258,7 @@ const ArabicProTemplate = ({
           <MNSection label={tr('interests', true)} />
           <div style={{ display:'flex', flexWrap:'wrap', flexDirection:'row-reverse', gap:'4pt' }}>
             {data.interests.map((item, i) => (
-              <span key={i} style={{ background: accentDark + '18', border:`1px solid ${accentDark}44`, borderRadius:'4pt', padding:'2pt 8pt', fontSize:sz.meta, color: accentDark }}>{item.name || item}</span>
+              <span key={i} style={{ background: accentDark + '18', border:`1px solid ${accentDark}44`, borderRadius:'4pt', padding:'2pt 8pt', fontSize:sz.meta, color: accentDark }}>{typeof item === 'string' ? item : item.name}</span>
             ))}
           </div>
         </section>

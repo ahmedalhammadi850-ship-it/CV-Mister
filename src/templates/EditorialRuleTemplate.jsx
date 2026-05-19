@@ -225,7 +225,7 @@ const EditorialRuleTemplate = ({
           <section key="interests" style={s.col}>
             <SectionHead labelKey="interests" />
             <div style={{ fontSize: sz.body, color: '#333', lineHeight: 1.7 }}>
-              {data.interests.map(i => i.name || i).join('  ·  ')}
+              {data.interests.map(i => typeof i === 'string' ? i : i.name).join('  ·  ')}
             </div>
           </section>
         ) : null;

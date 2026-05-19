@@ -262,7 +262,7 @@ const ArabicModernTemplate = ({
           <section key="interests" style={BREAK_ITEM}>
             <h2 style={s.heading}>{tr('interests', true)}</h2>
             <div style={{ display: 'flex', flexWrap: 'wrap', flexDirection: 'row-reverse' }}>
-              {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
+              {data.interests.map((item, i) => <span key={i} style={s.tag}>{typeof item === 'string' ? item : item.name}</span>)}
             </div>
           </section>
         ) : null;

@@ -156,7 +156,7 @@ const ExecutiveTemplate = ({
           <section key="interests" style={BREAK_ITEM}>
             <SectionHeading labelKey="interests" />
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4pt' }}>
-              {data.interests.map((item, i) => <span key={i} style={s.tag}>{item.name || item}</span>)}
+              {data.interests.map((item, i) => <span key={i} style={s.tag}>{typeof item === 'string' ? item : item.name}</span>)}
             </div>
           </section>
         ) : null;

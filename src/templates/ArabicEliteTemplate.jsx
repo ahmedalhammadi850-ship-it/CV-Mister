@@ -276,7 +276,7 @@ const ArabicEliteTemplate = ({
           <SbHeading label={L.interests} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5pt' }}>
             {data.interests.map((item, i) => (
-              <InterestBox key={i} label={item.name || item} />
+              <InterestBox key={i} label={typeof item === 'string' ? item : item.name} />
             ))}
           </div>
         </section>

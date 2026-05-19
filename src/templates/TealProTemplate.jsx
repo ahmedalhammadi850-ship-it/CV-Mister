@@ -222,7 +222,7 @@ const TealProTemplate = ({
         return data.interests?.length > 0 ? (
           <section key="interests" style={BREAK_ITEM}>
             <h2 style={s.heading}>{tr('interests', isRTL)}</h2>
-            <div style={s.body}>{data.interests.map(i => i.name || i).join('  •  ')}</div>
+            <div style={s.body}>{data.interests.map(i => typeof i === 'string' ? i : i.name).join('  •  ')}</div>
           </section>
         ) : null;
 
