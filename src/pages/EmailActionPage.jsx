@@ -19,7 +19,7 @@ const EmailActionPage = () => {
     // If no oobCode, Firebase already verified the email and redirected here
     if (!oobCode) {
       setStatus('success');
-      setTimeout(() => navigate('/login', { replace: true }), 3000);
+      setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
       return;
     }
 
@@ -33,13 +33,13 @@ const EmailActionPage = () => {
           }
         } catch {}
         setStatus('success');
-        setTimeout(() => navigate('/login', { replace: true }), 3000);
+        setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
       })
       .catch((err) => {
         if (err.code === 'auth/invalid-action-code') {
           // Code already used — email was already verified
           setStatus('success');
-          setTimeout(() => navigate('/login', { replace: true }), 3000);
+          setTimeout(() => navigate('/dashboard', { replace: true }), 3000);
         } else {
           setStatus('error');
           setErrorMsg(
@@ -83,19 +83,19 @@ const EmailActionPage = () => {
             </h1>
             <p className="text-slate-500 text-sm">
               {isRTL
-                ? 'حسابك مفعّل الآن. سيتم تحويلك لتسجيل الدخول...'
-                : 'Your account is now active. Redirecting to login...'}
+                ? 'حسابك مفعّل الآن. سيتم تحويلك للوحة التحكم...'
+                : 'Your account is now active. Redirecting to dashboard...'}
             </p>
           </div>
           <div className="flex justify-center pt-1">
             <div className="w-5 h-5 border-2 border-green-400 border-t-transparent rounded-full animate-spin" />
           </div>
           <button
-            onClick={() => navigate('/login', { replace: true })}
+            onClick={() => navigate('/dashboard', { replace: true })}
             className="w-full py-3 rounded-2xl text-white font-bold text-sm"
             style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
           >
-            {isRTL ? 'تسجيل الدخول الآن' : 'Log in now'}
+            {isRTL ? 'الذهاب للوحة التحكم' : 'Go to Dashboard'}
           </button>
         </div>
       </div>
