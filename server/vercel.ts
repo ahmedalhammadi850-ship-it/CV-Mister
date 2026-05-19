@@ -40,6 +40,7 @@ import adminSettings        from "../api/admin/settings.js";
 import adminPricing         from "../api/admin/pricing.js";
 import adminNavbar          from "../api/admin/navbar.js";
 import navbar               from "../api/navbar.js";
+import pricing              from "../api/pricing.js";
 
 function makeReq(req: any, params: Record<string, string> = {}) {
   return { ...req, query: { ...req.query, ...params }, body: req.body, headers: req.headers, method: req.method, params };
@@ -120,6 +121,9 @@ app.get( "/api/payment-requests/my",  wrap(paymentRequestsMy));
 
 // ── Business contact ──
 app.post("/api/business-contact", wrap(businessContact));
+
+// ── Pricing (public) ──
+app.get("/api/pricing", wrap(pricing));
 
 // ── Navbar (public) ──
 app.get("/api/navbar", wrap(navbar));
