@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -7,8 +7,7 @@ import {
   signOut,
   onAuthStateChanged,
 } from 'firebase/auth';
-import { doc, onSnapshot } from 'firebase/firestore';
-import { auth, db } from '../firebase';
+import { auth } from '../firebase';
 
 const AuthContext = createContext();
 
@@ -20,7 +19,6 @@ export function AuthProvider({ children }) {
   const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading]         = useState(true);
   const [isRTL, setIsRTL]             = useState(false);
-  const unsubUserRef                  = useRef(null);
 
   const buildUser = (dbUser) => {
     const planExpiresAt = dbUser.planExpiresAt ? new Date(dbUser.planExpiresAt) : null;
@@ -63,27 +61,6 @@ export function AuthProvider({ children }) {
     }
   };
 
-  const stopUserListener = () => {
-    if (unsubUserRef.current) {
-      unsubUserRef.current();
-      unsubUserRef.current = null;
-    }
-  };
-
-  const startUserListener = (uid) => {
-    stopUserListener();
-    const userRef = doc(db, 'users', uid);
-    unsubUserRef.current = onSnapshot(
-      userRef,
-      (snap) => {
-        if (snap.exists()) {
-          setCurrentUser(buildUser({ id: snap.id, ...snap.data() }));
-        }
-      },
-      () => { /* permission-denied: rules not updated yet, silently ignore */ }
-    );
-  };
-
   const buildFallbackUser = (firebaseUser) => ({
     uid:         firebaseUser.uid,
     id:          firebaseUser.uid,
@@ -100,22 +77,16 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      stopUserListener();
       if (firebaseUser && firebaseUser.emailVerified) {
         const user = await syncWithBackend(firebaseUser);
-        if (user) {
-          setCurrentUser(user);
-          startUserListener(user.uid);
-        } else {
-          setCurrentUser(buildFallbackUser(firebaseUser));
-        }
+        setCurrentUser(user || buildFallbackUser(firebaseUser));
       } else {
         setCurrentUser(null);
         await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
       }
       setLoading(false);
     });
-    return () => { unsubscribe(); stopUserListener(); };
+    return () => unsubscribe();
   }, []);
 
   const signUp = async (firstName, lastName, email, password) => {
@@ -155,13 +126,11 @@ export function AuthProvider({ children }) {
       throw err;
     }
     const user = await syncWithBackend(credential.user);
-    setCurrentUser(user);
-    if (user?.uid) startUserListener(user.uid);
+    setCurrentUser(user || buildFallbackUser(credential.user));
     return user;
   };
 
   const signOutUser = async () => {
-    stopUserListener();
     await signOut(auth);
     await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setCurrentUser(null);
@@ -182,15 +151,13 @@ export function AuthProvider({ children }) {
       }
     }
   };
+
   const refreshUser = async () => {
     const firebaseUser = auth.currentUser;
     if (firebaseUser && firebaseUser.emailVerified) {
       const user = await syncWithBackend(firebaseUser);
-      if (user) {
-        setCurrentUser(user);
-      } else {
-        setCurrentUser(buildFallbackUser(firebaseUser));
-      }
+      if (user) setCurrentUser(user);
+      else setCurrentUser(buildFallbackUser(firebaseUser));
     }
   };
 
