@@ -170,11 +170,12 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
 
-    // Must open the window BEFORE any await — iOS Safari only allows
-    // window.open() as a direct result of a user gesture (synchronous).
-    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    // iOS Safari blocks window.open() after any await, so we must open it
+    // synchronously here (directly from the user gesture).
+    // Android Chrome supports a.download in async context — no pre-open needed.
+    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
     let mobileWindow = null;
-    if (isMobile) {
+    if (isIOS) {
       mobileWindow = window.open('', '_blank');
       if (mobileWindow) {
         mobileWindow.document.write(
@@ -411,16 +412,19 @@ const CVBuilder = () => {
 
       const name = cvData.personalInfo?.fullName || 'Resume';
       const fileName = `${name} - CV.pdf`;
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
 
-      if (isMobile && mobileWindow) {
-        // Write the data URI directly into the pre-opened window —
-        // this bypasses popup-blocker restrictions on iOS Safari.
-        const dataUri = pdf.output('datauristring');
-        mobileWindow.location.href = dataUri;
+      if (isIOS && mobileWindow) {
+        // iOS Safari: navigate the pre-opened window to the blob URL.
+        // Blob URLs are same-origin so Safari allows this; data: URIs
+        // are blocked by Chrome (which is why we don't use datauristring).
+        mobileWindow.location.href = blobUrl;
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
       } else {
+        // Android Chrome + Desktop: a.download works fine in async context
+        // because download links are never treated as popups.
         if (mobileWindow) mobileWindow.close();
-        const pdfBlob = pdf.output('blob');
-        const blobUrl = URL.createObjectURL(pdfBlob);
         const a = document.createElement('a');
         a.href = blobUrl;
         a.download = fileName;
