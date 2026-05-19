@@ -16,12 +16,12 @@ const labels = {
   references:    { en: 'References',          ar: 'المراجع'              },
   present:       { en: 'Present',             ar: 'حتى الآن'             },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages', 'certificates', 'awards'];
 
 const DotsRating = ({ level = 3, accent }) => {
-  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const lvl = level > 5 ? Math.round(level / 20) : level;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>
@@ -35,7 +35,7 @@ const DotsRating = ({ level = 3, accent }) => {
 const EditorialRuleTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent       = theme?.primaryColor || '#2c3e50';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');

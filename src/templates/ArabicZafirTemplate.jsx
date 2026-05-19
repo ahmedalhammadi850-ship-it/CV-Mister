@@ -17,7 +17,6 @@ const L = {
   references:    { ar: 'المراجع',            en: 'References'           },
   present:       { ar: 'حتى الآن',           en: 'Present'              },
 };
-const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const PLUM    = '#2d1040';
 const PLUM2   = '#3d1a55';
@@ -44,7 +43,8 @@ const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>
 
 /* ── Skill fill bar ─────────────────────────────────────────── */
 const SkillBar = ({ level = 3, accent }) => {
-  if ((level ?? 0) <= 0) return null;
+  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    if ((level ?? 0) <= 0) return null;
   const pct = level > 5 ? Math.min(level, 100) : (Math.min(Math.max(level, 1), 5) / 5) * 100;
   return (
     <div style={{ height:'5pt', borderRadius:'3pt', backgroundColor:'rgba(255,255,255,0.1)', marginTop:'3pt', overflow:'hidden' }}>
@@ -116,7 +116,7 @@ const ArabicZafirTemplate = ({
   data, theme,
   isRTL = true,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent = theme?.primaryColor || COPPER;
   const { sz, font, lineHeight } = resolveTheme(theme, isRTL);

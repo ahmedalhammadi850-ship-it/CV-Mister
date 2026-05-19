@@ -16,7 +16,6 @@ const labels = {
   references:    { en: 'References',             ar: 'المراجع والتزكيات'    },
   present:       { en: 'Present',                ar: 'حتى الآن'             },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
 
@@ -32,9 +31,10 @@ const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects
 const ATSSimpleTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
-  const accent = theme?.primaryColor || '#2d6a9f';
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const accent = theme?.primaryColor || '#2d6a9f';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const justifyHeading = headingAlign === 'center' ? 'center' : ((headingAlign === 'right') !== isRTL) ? 'flex-end' : 'flex-start';

@@ -17,7 +17,6 @@ const labels = {
   contact:       { en: 'Contact',              ar: 'الاتصال'              },
   present:       { en: 'Present',              ar: 'حتى الآن'             },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary','experience','education','projects','publications','references','skills','languages','certificates','courses','awards','interests','organisations'];
 
@@ -25,7 +24,8 @@ const SIDEBAR_SECTIONS = new Set(['skills','languages','interests','courses','aw
 const MAIN_SECTIONS    = new Set(['summary','experience','education','projects','publications','references']);
 
 const Bar = ({ level=3, filled, empty }) => {
-  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl),1),5);
   return (
@@ -53,7 +53,7 @@ const Dots = ({ level=3, filled, empty }) => {
 const ArabicSlateSidebarTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent     = theme?.primaryColor || '#1f3c5c';
   const accentMid  = accent + 'dd';

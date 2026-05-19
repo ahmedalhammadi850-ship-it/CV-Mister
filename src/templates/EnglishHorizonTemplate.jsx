@@ -29,7 +29,6 @@ const L = {
   references:    { en: 'References',           ar: 'المراجع'           },
   present:       { en: 'Present',              ar: 'حتى الآن'          },
 };
-const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 /* ── Progress bar ───────────────────────────────────────────── */
 const ProgressBar = ({ level=3, accent }) => {
@@ -95,7 +94,9 @@ const EnglishHorizonTemplate = ({
   isRTL = false,
   visibleSections={}, visiblePersonalFields={},
   sectionOrder=DEFAULT_ORDER,
+  sectionNames={},
 }) => {
+  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
   const accent = theme?.primaryColor || TEAL;
   const { sz, font, lineHeight } = resolveTheme(theme, isRTL);
   const dir   = isRTL ? 'rtl' : 'ltr';

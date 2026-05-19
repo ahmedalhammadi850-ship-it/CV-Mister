@@ -16,16 +16,16 @@ const labels = {
   references:    { en: 'References',            ar: 'المراجع والتزكيات'    },
   present:       { en: 'Present',               ar: 'حتى الآن'             },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'];
 
 const PrestigeTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
-  const accent = theme?.primaryColor || '#1b2a4a';
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const accent = theme?.primaryColor || '#1b2a4a';
   const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;

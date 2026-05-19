@@ -16,7 +16,6 @@ const labels = {
   references:    { ar: 'المراجع',               en: 'References'            },
   present:       { ar: 'حتى الآن',              en: 'Present'               },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary','skills','languages','certificates','courses','awards','interests','experience','education','projects','publications','references','organisations'];
 
@@ -25,7 +24,8 @@ const MAIN_SECTIONS    = new Set(['experience','education','projects','publicati
 
 /* ── 5-segment skill bar ── */
 const SkillBar = ({ level = 3, filled, empty }) => {
-  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
@@ -89,7 +89,7 @@ const GlobeIcon = () => (
 const ArabicGemTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent     = theme?.primaryColor || '#1a6464';
   const gold       = '#c9a56e';

@@ -18,7 +18,6 @@ const L = {
   references:    { ar: 'المراجع',            en: 'References'           },
   present:       { ar: 'حتى الآن',           en: 'Present'              },
 };
-const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const SIDEBAR_W = 210;
 const GOLD      = '#b8892a';
@@ -121,7 +120,9 @@ const ArabicLuxeTemplate = ({
   isRTL = true,
   visibleSections={}, visiblePersonalFields={},
   sectionOrder=DEFAULT_ORDER,
+  sectionNames={},
 }) => {
+  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
   const accent = theme?.primaryColor || GOLD;
   const { sz, font, lineHeight } = resolveTheme(theme, isRTL);
   const dir   = isRTL ? 'rtl' : 'ltr';

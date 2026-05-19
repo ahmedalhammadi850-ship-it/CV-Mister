@@ -17,7 +17,6 @@ const labels = {
   contact:       { en: 'Contact',             ar: 'التواصل'              },
   present:       { en: 'Present',             ar: 'حتى الآن'             },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'certificates', 'courses', 'skills', 'languages', 'awards', 'interests'];
 
@@ -25,7 +24,8 @@ const SIDEBAR_SECTIONS = new Set(['contact_block', 'skills', 'languages', 'inter
 const MAIN_SECTIONS    = new Set(['summary', 'experience', 'education', 'projects', 'publications', 'references']);
 
 const BarRating = ({ level = 3, accent }) => {
-  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
@@ -52,7 +52,7 @@ const DotsRating = ({ level = 3, accent }) => {
 const ArabicCardTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent       = theme?.primaryColor || '#2d6a8a';
   const accentLight  = accent + '15';

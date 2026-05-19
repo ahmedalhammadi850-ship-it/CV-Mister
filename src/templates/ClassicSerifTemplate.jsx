@@ -17,7 +17,6 @@ const labels = {
   present:       { en: 'Present',             ar: 'حتى الآن'             },
   contact:       { en: 'Contact',             ar: 'التواصل'              },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages', 'certificates', 'awards'];
 
@@ -27,9 +26,10 @@ const MAIN_SECTIONS    = new Set(['summary', 'experience', 'education', 'project
 const ClassicSerifTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
-  const accent       = theme?.primaryColor || '#1e3a5f';
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const accent       = theme?.primaryColor || '#1e3a5f';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
   const headerAlign  = theme?.headerAlign  || (isRTL ? 'right' : 'left');
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);

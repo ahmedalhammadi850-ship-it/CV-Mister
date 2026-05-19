@@ -16,7 +16,6 @@ const labels = {
   references:    { en: 'References',           ar: 'المراجع'                 },
   present:       { en: 'Present',              ar: 'حتى الآن'                },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = [
   'summary','experience','education','interests','projects','publications','references',
@@ -29,7 +28,8 @@ const MAIN_SECTIONS    = new Set(['summary','experience','education','projects',
 
 /* ── Skill bar with percentage label ── */
 const SkillBar = ({ level = 3, accent, bg }) => {
-  if ((level ?? 0) <= 0) return null;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    if ((level ?? 0) <= 0) return null;
   const pct = level > 5 ? Math.min(level, 100) : Math.round((Math.min(Math.max(level, 1), 5) / 5) * 100);
   return (
     <div style={{ position:'relative', height:'8pt', borderRadius:'4pt', backgroundColor: bg, overflow:'hidden', marginTop:'2pt' }}>
@@ -55,7 +55,7 @@ const LangBar = ({ level = 3, accent, bg }) => {
 const ArabicProTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent      = theme?.primaryColor || '#2a7f8a';
   const accentDark  = accent;

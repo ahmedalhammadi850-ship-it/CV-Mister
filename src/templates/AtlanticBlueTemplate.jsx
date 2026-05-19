@@ -17,7 +17,6 @@ const labels = {
   profile:       { en: 'Profile',             ar: 'نبذة تعريفية'         },
   present:       { en: 'Present',             ar: 'حتى الآن'             },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages', 'certificates', 'awards'];
 
@@ -25,7 +24,8 @@ const SIDEBAR_SECTIONS = new Set(['skills', 'languages', 'interests', 'certifica
 const MAIN_SECTIONS    = new Set(['summary', 'experience', 'education', 'projects', 'publications', 'references']);
 
 const Dots = ({ level = 3, accent }) => {
-  const filled = Math.min(Math.max(Math.round(level), 1), 5);
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const filled = Math.min(Math.max(Math.round(level), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', marginLeft: '4pt' }}>
       {[1,2,3,4,5].map(i => (
@@ -69,7 +69,7 @@ const CONTACT_ICON_MAP = { phone: <PhoneIcon />, email: <EmailIcon />, location:
 const AtlanticBlueTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent       = theme?.primaryColor || '#1e3d6e';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');

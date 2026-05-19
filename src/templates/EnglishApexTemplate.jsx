@@ -17,7 +17,6 @@ const L = {
   references:    { en: 'References',            ar: 'المراجع'            },
   present:       { en: 'Present',               ar: 'حتى الآن'           },
 };
-const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const NAVY    = '#0f172a';
 const NAVY2   = '#1e293b';
@@ -46,7 +45,8 @@ const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>
 
 /* ── Segmented skill bar ────────────────────────────────────── */
 const SegmentBar = ({ level = 3, accent }) => {
-  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
@@ -109,7 +109,7 @@ const EnglishApexTemplate = ({
   data, theme,
   isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent = theme?.primaryColor || INDIGO;
   const { sz, font, lineHeight } = resolveTheme(theme, isRTL);

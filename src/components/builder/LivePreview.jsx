@@ -160,7 +160,7 @@ const DragHandle = ({ breakIndex, breakY, pageStart, nextPageEnd, scale, isRTL, 
 
 /* ── Main component ── */
 const LivePreview = ({ breakDataRef }) => {
-  const { cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder } = useCV();
+  const { cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder, sectionNames } = useCV();
   const { isRTL } = useAuth();
   const wrapperRef = useRef(null);
   const contentRef = useRef(null);
@@ -239,7 +239,7 @@ const LivePreview = ({ breakDataRef }) => {
   const handleResetAll = () => setManualBreaks(null);
 
   /* ── template renderer ── */
-  const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder };
+  const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder, sectionNames };
   const renderTemplate = () => {
     switch (selectedTemplate) {
       case 'modern':    return <ModernTemplate    {...props} />;

@@ -18,7 +18,6 @@ const labels = {
   present:       { en: 'Present',             ar: 'حتى الآن'             },
   to:            { en: 'to',                  ar: 'إلى'                  },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'certificates', 'courses', 'awards', 'skills', 'languages', 'interests'];
 
@@ -26,7 +25,8 @@ const SIDEBAR_SECTIONS = new Set(['skills', 'languages', 'interests', 'courses',
 const MAIN_SECTIONS    = new Set(['summary', 'experience', 'education', 'projects', 'publications', 'references']);
 
 const BarRating = ({ level = 3, barColor, bgColor }) => {
-  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
@@ -41,7 +41,7 @@ const BarRating = ({ level = 3, barColor, bgColor }) => {
 const ArabicNavyTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent       = theme?.primaryColor || '#1a2744';
   const accentMid    = '#243160';

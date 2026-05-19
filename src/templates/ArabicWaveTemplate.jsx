@@ -17,7 +17,6 @@ const L = {
   references:    { ar: 'المراجع',          en: 'References'      },
   present:       { ar: 'حتى الآن',         en: 'Present'         },
 };
-const tr = (key, isRTL) => L[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const SIDEBAR_W = 205;
 
@@ -39,7 +38,8 @@ const WaveSep = ({ accent }) => (
 
 /* ── Star rating ── */
 const Stars = ({ level = 3 }) => {
-  const lvl = level > 5 ? Math.round(level / 20) : level;
+  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
@@ -119,7 +119,7 @@ const SbHeading = ({ label, accent }) => (
 const ArabicWaveTemplate = ({
   data, theme,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent = theme?.primaryColor || '#2a8a96';
   const DARK   = '#1b2d45';

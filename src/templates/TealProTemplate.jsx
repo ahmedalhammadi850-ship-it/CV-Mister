@@ -16,12 +16,12 @@ const labels = {
   references:    { en: 'References',         ar: 'المراجع'              },
   present:       { en: 'Present',            ar: 'حتى الآن'             },
 };
-const tr = (key, isRTL) => labels[key]?.[isRTL ? 'ar' : 'en'] ?? key;
 
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'languages', 'projects', 'certificates', 'awards'];
 
 const DotsRating = ({ level = 3, accent }) => {
-  const filled = Math.min(Math.max(Math.round(level), 1), 5);
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
+    const filled = Math.min(Math.max(Math.round(level), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>
       {[1,2,3,4,5].map(i => (
@@ -34,7 +34,7 @@ const DotsRating = ({ level = 3, accent }) => {
 const TealProTemplate = ({
   data, theme, isRTL = false,
   visibleSections = {}, visiblePersonalFields = {},
-  sectionOrder = DEFAULT_ORDER,
+  sectionOrder = DEFAULT_ORDER, sectionNames = {},
 }) => {
   const accent       = theme?.primaryColor || '#2a9d8f';
   const headingAlign = theme?.headingAlign || (isRTL ? 'right' : 'left');
