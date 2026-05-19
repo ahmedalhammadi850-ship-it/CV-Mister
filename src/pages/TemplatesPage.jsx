@@ -46,6 +46,15 @@ import { sampleData, arabicSampleData } from '../utils/sampleData';
 
 const templates = [
   {
+    id: 'minimal',
+    name: 'Minimal',        arabicName: 'بسيط',
+    desc: 'Maximum whitespace, light grey dividers, clean typography.',
+    arabicDesc: 'مساحة بيضاء واسعة، فواصل رمادية خفيفة، طباعة نظيفة.',
+    color: '#374151',
+    component: MinimalTemplate,
+    atsScore: null,
+  },
+  {
     id: 'modern',
     name: 'Modern',         arabicName: 'عصري',
     desc: 'Clean single-column layout with accent headings and pill-style dates — ATS-optimized.',
@@ -71,15 +80,6 @@ const templates = [
     color: '#7c3aed',
     component: CreativeTemplate,
     atsScore: 92,
-  },
-  {
-    id: 'minimal',
-    name: 'Minimal',        arabicName: 'بسيط',
-    desc: 'Maximum whitespace, light grey dividers, clean typography.',
-    arabicDesc: 'مساحة بيضاء واسعة، فواصل رمادية خفيفة، طباعة نظيفة.',
-    color: '#374151',
-    component: MinimalTemplate,
-    atsScore: null,
   },
   {
     id: 'executive',
