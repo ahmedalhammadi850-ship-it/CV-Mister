@@ -17,9 +17,9 @@ export default function ExperienceCard({ exp, isRTL, labelClass, inputClass, onC
   const [open, setOpen] = useState(false);
 
   return (
-    <div className="border border-slate-200 bg-white rounded-lg overflow-hidden">
+    <div className="border border-indigo-100 bg-indigo-50/60 rounded-lg overflow-hidden">
       <div
-        className="flex items-center justify-between p-3 cursor-pointer hover:bg-slate-50 transition-colors"
+        className="flex items-center justify-between p-3 cursor-pointer hover:bg-indigo-100/70 transition-colors"
         style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
         onClick={() => setOpen(o => !o)}
       >

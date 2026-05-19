@@ -297,7 +297,7 @@ const AccordionHeader = ({ en, ar, section, isRTL, openSection, onToggle }) => (
 );
 
 const CardWrapper = ({ children, onDelete }) => (
-  <div className="bg-white border border-slate-200 rounded-xl p-3 space-y-2 relative">
+  <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 space-y-2 relative">
     <div className="absolute top-2 right-2">
       <DeleteBtn onClick={onDelete} />
     </div>
