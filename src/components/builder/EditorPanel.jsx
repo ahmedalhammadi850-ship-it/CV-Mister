@@ -278,7 +278,7 @@ const DeleteBtn = ({ onClick }) => (
 );
 
 const AddBtn = ({ onClick, label }) => (
-  <button onClick={onClick} className="w-full py-2 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-medium hover:border-indigo-400 hover:text-indigo-600 transition-colors text-sm">
+  <button onClick={onClick} className="w-full py-2 bg-indigo-50 border border-indigo-200 rounded-lg text-indigo-600 font-medium hover:bg-indigo-100 hover:border-indigo-400 transition-colors text-sm">
     {label}
   </button>
 );
