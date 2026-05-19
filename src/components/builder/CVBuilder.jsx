@@ -334,7 +334,7 @@ const CVBuilder = () => {
           try { sheet.disabled = false; } catch (_) {}
         }
         if (injectedFontStyle) injectedFontStyle.remove();
-        document.body.removeChild(wrapper);
+        wrapper.remove();
       }
 
       if (!fullDataUrl || fullDataUrl === 'data:,') {
