@@ -75,9 +75,10 @@ const Header = () => {
     return () => document.removeEventListener('mousedown', handleClick);
   }, []);
 
-  const handleSignOut = () => {
+  const handleSignOut = async () => {
     setUserMenuOpen(false);
-    window.location.href = '/api/logout';
+    await signOutUser();
+    window.location.href = '/';
   };
 
   const navLinks = [
