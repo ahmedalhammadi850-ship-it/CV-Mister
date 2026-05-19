@@ -14,6 +14,19 @@ const ALLOWED_ORIGINS = [
   "http://localhost:3001",
 ].filter(Boolean);
 
+// In Replit's proxied environment, the Vite dev server forwards API requests
+// from the same origin — allow null/undefined origin (same-origin proxy calls)
+function isCorsAllowed(origin: string | undefined): boolean {
+  if (!origin) return true; // same-origin or server-to-server
+  if (ALLOWED_ORIGINS.includes(origin)) return true;
+  // Allow any *.replit.dev or *.repl.co domain dynamically
+  if (/^https:\/\/[\w-]+(\.[\w-]+)*\.replit\.dev$/.test(origin)) return true;
+  if (/^https:\/\/[\w-]+(\.[\w-]+)*\.repl\.co$/.test(origin)) return true;
+  if (/^https:\/\/[\w-]+(\.[\w-]+)*\.replit\.app$/.test(origin)) return true;
+  console.log("[CORS blocked origin]", origin);
+  return false;
+}
+
 function makeReq(req: any, params: Record<string, string> = {}) {
   return { ...req, query: req.query, body: req.body, headers: req.headers, method: req.method, params };
 }
@@ -59,7 +72,7 @@ async function main() {
 
   app.use(cors({
     origin: (origin, callback) => {
-      if (!origin || ALLOWED_ORIGINS.includes(origin)) callback(null, true);
+      if (isCorsAllowed(origin)) callback(null, true);
       else callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
