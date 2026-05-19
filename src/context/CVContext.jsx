@@ -68,7 +68,7 @@ async function duplicateAPICV(entry) {
 export function CVProvider({ children }) {
   const { currentUser } = useAuth();
   const [cvData, setCvData] = useState(sampleData);
-  const [selectedTemplate, setSelectedTemplate] = useState('modern');
+  const [selectedTemplate, setSelectedTemplate] = useState('minimal');
   const [currentCVId, setCurrentCVId] = useState(null);
   const [currentCVName, setCurrentCVName] = useState('My Resume');
   const [savedCVs, setSavedCVs] = useState(() => getSavedCVs());
@@ -252,7 +252,7 @@ export function CVProvider({ children }) {
 
   const startNewCV = () => {
     setCvData(blankData);
-    setSelectedTemplate('modern');
+    setSelectedTemplate('minimal');
     setTheme({
       primaryColor: '#4f46e5',
       fontFamily: 'Calibri',

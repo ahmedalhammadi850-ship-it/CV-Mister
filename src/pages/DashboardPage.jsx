@@ -540,7 +540,7 @@ const DashboardPage = () => {
                   <div>
                     <p className="text-white/65 text-sm">{isRTL ? 'مرحباً بعودتك،' : 'Welcome back,'}</p>
                     <h1 className="text-2xl font-bold text-white leading-tight">
-                      {currentUser?.firstName || (isRTL ? 'مستخدم' : 'User')}
+                      {currentUser?.displayName || currentUser?.name || (isRTL ? 'مستخدم' : 'User')}
                     </h1>
                   </div>
                 </div>

@@ -169,22 +169,6 @@ const CVBuilder = () => {
 
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
-
-    // iOS Safari blocks window.open() after any await, so we must open it
-    // synchronously here (directly from the user gesture).
-    // Android Chrome supports a.download in async context — no pre-open needed.
-    const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-    let mobileWindow = null;
-    if (isIOS) {
-      mobileWindow = window.open('', '_blank');
-      if (mobileWindow) {
-        mobileWindow.document.write(
-          '<html><body style="display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;color:#555;">' +
-          '<p>' + (isRTL ? 'جارٍ إنشاء ملف PDF...' : 'Generating PDF…') + '</p></body></html>'
-        );
-      }
-    }
-
     try {
       const [{ toPng }, { jsPDF }] = await Promise.all([
         import('html-to-image'),
@@ -411,28 +395,7 @@ const CVBuilder = () => {
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
-      const fileName = `${name} - CV.pdf`;
-      const pdfBlob = pdf.output('blob');
-      const blobUrl = URL.createObjectURL(pdfBlob);
-
-      if (isIOS && mobileWindow) {
-        // iOS Safari: navigate the pre-opened window to the blob URL.
-        // Blob URLs are same-origin so Safari allows this; data: URIs
-        // are blocked by Chrome (which is why we don't use datauristring).
-        mobileWindow.location.href = blobUrl;
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 30000);
-      } else {
-        // Android Chrome + Desktop: a.download works fine in async context
-        // because download links are never treated as popups.
-        if (mobileWindow) mobileWindow.close();
-        const a = document.createElement('a');
-        a.href = blobUrl;
-        a.download = fileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-      }
+      pdf.save(`${name} - CV.pdf`);
 
       if (currentCVId) {
         fetch(`/api/cvs/${currentCVId}/download`, {
@@ -440,7 +403,6 @@ const CVBuilder = () => {
         }).catch(() => {});
       }
     } catch (err) {
-      if (mobileWindow) mobileWindow.close();
       console.error('PDF export failed:', err);
       alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');
     } finally {

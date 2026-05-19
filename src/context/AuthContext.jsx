@@ -34,8 +34,6 @@ export function AuthProvider({ children }) {
     return {
       uid:                 dbUser.id || dbUser.uid,
       id:                  dbUser.id || dbUser.uid,
-      firstName:           dbUser.firstName || null,
-      lastName:            dbUser.lastName || null,
       name:                dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email,
       displayName:         dbUser.firstName ? `${dbUser.firstName} ${dbUser.lastName || ''}`.trim() : dbUser.email?.split('@')[0],
       profileImage:        dbUser.profileImageUrl || null,
