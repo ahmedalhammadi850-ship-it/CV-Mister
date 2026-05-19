@@ -146,12 +146,15 @@ const CVBuilder = () => {
   const breakDataRef = useRef({ breaks: [], totalHeight: PAGE_H_PX });
   const autoSaveTimerRef = useRef(null);
   const isFirstRenderRef = useRef(true);
+  const saveBlockedRef = useRef(false);
 
   useEffect(() => {
     if (isFirstRenderRef.current) { isFirstRenderRef.current = false; return; }
+    if (saveBlockedRef.current) return;
     setAutoSaveStatus('pending');
     clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(async () => {
+      if (saveBlockedRef.current) return;
       setAutoSaveStatus('saving');
       const result = await saveCurrentCV(currentCVName);
       if (!result?.error) {
@@ -159,6 +162,13 @@ const CVBuilder = () => {
         setTimeout(() => setAutoSaveStatus(null), 2000);
       } else {
         setAutoSaveStatus(null);
+        if (result.error?.freeExpired) {
+          saveBlockedRef.current = true;
+          setShowFreeExpiredModal(true);
+        } else if (result.error?.limitReached) {
+          saveBlockedRef.current = true;
+          setShowLimitModal(true);
+        }
       }
     }, 2000);
     return () => clearTimeout(autoSaveTimerRef.current);
