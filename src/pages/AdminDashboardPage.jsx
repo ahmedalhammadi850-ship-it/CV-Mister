@@ -298,6 +298,8 @@ const AdminDashboardPage = () => {
     setPricingMsg('');
     try {
       const body = {
+        pro_price: Number(pricingEdit.pro_price) || 0,
+        business_price: Number(pricingEdit.business_price) || 0,
         free_features: pricingEdit.free_features,
         pro_features: pricingEdit.pro_features,
         business_features: pricingEdit.business_features,
@@ -987,9 +989,12 @@ const AdminDashboardPage = () => {
 
                   {/* Free */}
                   <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
-                      <p className="text-sm font-semibold text-slate-300">الخطة المجانية (Free)</p>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
+                        <p className="text-sm font-semibold text-slate-300">الخطة المجانية (Free)</p>
+                      </div>
+                      <span className="text-xs text-slate-500 bg-slate-800 px-2 py-1 rounded-lg">$0 / شهر</span>
                     </div>
                     <div className="space-y-2">
                       {pricingEdit.free_features.map((f, i) => (
@@ -1013,9 +1018,19 @@ const AdminDashboardPage = () => {
 
                   {/* Pro */}
                   <div className="bg-slate-900/60 rounded-xl p-4 border border-indigo-800/50">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>
-                      <p className="text-sm font-semibold text-indigo-400">الخطة الاحترافية (Pro)</p>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>
+                        <p className="text-sm font-semibold text-indigo-400">الخطة الاحترافية (Pro)</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-slate-500">$</span>
+                        <input type="number" min="0" step="0.5"
+                          value={pricingEdit.pro_price}
+                          onChange={e => setPricingEdit(s => ({ ...s, pro_price: e.target.value }))}
+                          className="w-20 px-2 py-1 rounded-lg bg-slate-800 border border-indigo-700/50 text-indigo-300 text-xs font-mono text-center focus:outline-none focus:ring-1 focus:ring-indigo-500/60" dir="ltr" />
+                        <span className="text-xs text-slate-500">/ شهر</span>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       {pricingEdit.pro_features.map((f, i) => (
@@ -1039,9 +1054,19 @@ const AdminDashboardPage = () => {
 
                   {/* Business */}
                   <div className="bg-slate-900/60 rounded-xl p-4 border border-amber-800/50">
-                    <div className="flex items-center gap-2 mb-3">
-                      <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
-                      <p className="text-sm font-semibold text-amber-400">خطة الأعمال (Business)</p>
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                        <p className="text-sm font-semibold text-amber-400">خطة الأعمال (Business)</p>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <span className="text-xs text-slate-500">$</span>
+                        <input type="number" min="0" step="0.5"
+                          value={pricingEdit.business_price}
+                          onChange={e => setPricingEdit(s => ({ ...s, business_price: e.target.value }))}
+                          className="w-20 px-2 py-1 rounded-lg bg-slate-800 border border-amber-700/50 text-amber-300 text-xs font-mono text-center focus:outline-none focus:ring-1 focus:ring-amber-500/60" dir="ltr" />
+                        <span className="text-xs text-slate-500">/ شهر</span>
+                      </div>
                     </div>
                     <div className="space-y-2">
                       {pricingEdit.business_features.map((f, i) => (
@@ -1065,28 +1090,33 @@ const AdminDashboardPage = () => {
 
                 </div>
 
-                <div className="flex items-center justify-between mt-5">
+                <div className="mt-5">
                   {pricingMsg && (
-                    <span className={`text-sm font-medium ${pricingMsg.startsWith('✓') ? 'text-emerald-400' : 'text-red-400'}`}>
+                    <div className={`mb-3 px-4 py-3 rounded-xl text-sm font-semibold text-center ${pricingMsg.startsWith('✓') ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-700/40' : 'bg-red-500/20 text-red-300 border border-red-700/40'}`}>
                       {pricingMsg}
-                    </span>
+                    </div>
                   )}
                   <button
                     onClick={handleSavePricing}
                     disabled={pricingSaving}
-                    className="mr-auto py-2.5 px-6 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center gap-2"
+                    className="w-full py-3 rounded-xl bg-emerald-600 text-white text-sm font-bold hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed transition flex items-center justify-center gap-2"
                   >
                     {pricingSaving ? (
-                      <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
-                      </svg>
+                      <>
+                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                        </svg>
+                        جاري الحفظ...
+                      </>
                     ) : (
-                      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
+                      <>
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                        حفظ التغييرات
+                      </>
                     )}
-                    حفظ الأسعار كاملاً
                   </button>
                 </div>
               </div>

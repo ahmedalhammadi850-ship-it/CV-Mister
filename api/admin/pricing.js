@@ -4,6 +4,7 @@ import { getDb } from "../_lib/firebase.js";
 const PRICING_DOC = "appConfig/pricing";
 
 const ALLOWED_KEYS = [
+  "pro_price", "business_price",
   "free_features", "pro_features", "business_features",
 ];
 
