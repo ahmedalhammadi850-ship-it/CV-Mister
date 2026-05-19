@@ -488,7 +488,7 @@ export default function AboutPage() {
           <h2 className="text-3xl md:text-4xl font-heading font-bold mb-4" style={{ color: headingColor }}>{t.cta.title}</h2>
           <p className="mb-8 text-lg" style={{ color: subColor }}>{t.cta.sub}</p>
           <Link
-            to="/builder"
+            to="/builder?template=minimal"
             className="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-semibold text-white text-lg transition-all duration-300 hover:opacity-90 hover:-translate-y-0.5"
             style={{
               background: 'linear-gradient(135deg, #4f46e5 0%, #c026d3 100%)',
