@@ -6,18 +6,22 @@ import CVBuilder from '../components/builder/CVBuilder';
 const BuilderPage = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const { loadCVById, startNewCV } = useCV();
+  const { loadCVById, startNewCV, previewTemplate } = useCV();
   const loaded = useRef(false);
 
   useEffect(() => {
     if (loaded.current) return;
     loaded.current = true;
     const fromTemplate = searchParams.get('from') === 'template';
+    const templateParam = searchParams.get('template');
     if (id) {
       const found = loadCVById(id);
       if (!found) startNewCV();
     } else if (!fromTemplate) {
       startNewCV();
+      if (templateParam) {
+        previewTemplate(templateParam);
+      }
     }
     // if fromTemplate=true, data was already set by TemplatesPage before navigation
   }, [id]);
