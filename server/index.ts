@@ -77,7 +77,7 @@ async function main() {
         const params = paramMap ? paramMap(req.params) : {};
         await handler(makeReq(req, params), makeRes(res));
       } catch (err: any) {
-        console.error(`[${handlerPath}]`, err.message);
+        console.error("[handler error]", String(err.message || "Internal server error").slice(0, 200));
         res.status(500).json({ message: err.message || "Internal server error" });
       }
     });
@@ -159,26 +159,28 @@ async function main() {
   app.get("/api/font-proxy", async (req, res) => {
     try {
       const url = req.query.url as string;
-      if (!url || !url.startsWith("https://fonts.googleapis.com/")) return res.status(400).send("Invalid");
+      if (!url || !url.startsWith("https://fonts.googleapis.com/")) return res.status(400).end();
       const response = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 Chrome/120" } });
       const css = await response.text();
       const rewritten = css.replace(/url\((https:\/\/fonts\.gstatic\.com[^)]+)\)/g, "url(/api/font-file?url=$1)");
-      res.setHeader("Content-Type", "text/css");
+      res.setHeader("Content-Type", "text/css; charset=utf-8");
+      res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("Cache-Control", "public, max-age=86400");
-      res.send(rewritten);
-    } catch { res.status(500).send(""); }
+      res.end(rewritten);
+    } catch { res.status(500).end(); }
   });
 
   app.get("/api/font-file", async (req, res) => {
     try {
       const url = req.query.url as string;
-      if (!url || !url.startsWith("https://fonts.gstatic.com/")) return res.status(400).send("Invalid");
+      if (!url || !url.startsWith("https://fonts.gstatic.com/")) return res.status(400).end();
       const response = await fetch(url);
       const buffer = await response.arrayBuffer();
-      res.setHeader("Content-Type", response.headers.get("content-type") || "font/woff2");
+      res.setHeader("Content-Type", "font/woff2");
+      res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("Cache-Control", "public, max-age=604800");
-      res.send(Buffer.from(buffer));
-    } catch { res.status(500).send(""); }
+      res.end(Buffer.from(buffer));
+    } catch { res.status(500).end(); }
   });
 
   if (process.env.NODE_ENV === "production") {

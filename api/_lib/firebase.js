@@ -2,7 +2,7 @@ import { initializeApp, getApps, cert } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import { getAuth } from "firebase-admin/auth";
 
-const FIREBASE_API_KEY = process.env.VITE_FIREBASE_API_KEY || "AIzaSyAWOigTY6lsunLk6tTgeoXTm4JmwWUR4No";
+const FIREBASE_API_KEY = process.env.VITE_FIREBASE_API_KEY;
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "cv-mister-e4bbc";
 
 function hasAdminCredentials() {
