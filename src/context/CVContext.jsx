@@ -202,8 +202,30 @@ export function CVProvider({ children }) {
   };
 
   const saveCurrentCV = async (name) => {
+    const isNew = !currentCVId;
     const id = currentCVId || `cv-${Date.now()}`;
     const cvName = name || currentCVName;
+
+    if (currentUser) {
+      const entry = {
+        id,
+        name: cvName,
+        cvData,
+        template: selectedTemplate,
+        theme,
+        sectionNames,
+        atsScore: 95,
+      };
+      const result = await saveAPICV(entry);
+      if (result?.error) {
+        if (isNew) {
+          deleteCVLocal(id);
+          setSavedCVs(getSavedCVs());
+        }
+        return { error: result.error };
+      }
+    }
+
     const entry = saveCV({
       id,
       name: cvName,
@@ -217,13 +239,6 @@ export function CVProvider({ children }) {
     setCurrentCVName(cvName);
     setSavedCVs(getSavedCVs());
     window.dispatchEvent(new Event('cv_saved'));
-
-    if (currentUser) {
-      const result = await saveAPICV(entry);
-      if (result?.error) {
-        return { error: result.error };
-      }
-    }
 
     return { ok: true, entry };
   };

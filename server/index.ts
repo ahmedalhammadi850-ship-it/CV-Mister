@@ -19,10 +19,10 @@ const ALLOWED_ORIGINS = [
 function isCorsAllowed(origin: string | undefined): boolean {
   if (!origin) return true; // same-origin or server-to-server
   if (ALLOWED_ORIGINS.includes(origin)) return true;
-  // Allow any *.replit.dev or *.repl.co domain dynamically
-  if (/^https:\/\/[\w-]+(\.[\w-]+)*\.replit\.dev$/.test(origin)) return true;
-  if (/^https:\/\/[\w-]+(\.[\w-]+)*\.repl\.co$/.test(origin)) return true;
-  if (/^https:\/\/[\w-]+(\.[\w-]+)*\.replit\.app$/.test(origin)) return true;
+  // Allow any *.replit.dev / *.repl.co / *.replit.app domain (with optional port)
+  if (/^https:\/\/.+\.replit\.dev(:\d+)?$/.test(origin)) return true;
+  if (/^https:\/\/.+\.repl\.co(:\d+)?$/.test(origin)) return true;
+  if (/^https:\/\/.+\.replit\.app(:\d+)?$/.test(origin)) return true;
   console.log("[CORS blocked origin]", origin);
   return false;
 }
