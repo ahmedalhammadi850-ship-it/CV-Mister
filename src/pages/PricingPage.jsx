@@ -79,14 +79,22 @@ const faqs = [
 const PricingPage = () => {
   const { isRTL, currentUser } = useAuth();
   const [openFaq, setOpenFaq] = useState(null);
-  const [pricing, setPricing] = useState(DEFAULTS);
+  const [pricing, setPricing] = useState(null);
 
   useEffect(() => {
     fetch('/api/pricing')
       .then(r => r.ok ? r.json() : null)
-      .then(data => { if (data) setPricing(prev => ({ ...prev, ...data })); })
-      .catch(() => {});
+      .then(data => { setPricing(data ? { ...DEFAULTS, ...data } : DEFAULTS); })
+      .catch(() => { setPricing(DEFAULTS); });
   }, []);
+
+  if (!pricing) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const plans = [
     {

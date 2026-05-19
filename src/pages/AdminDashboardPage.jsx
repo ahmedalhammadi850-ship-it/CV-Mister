@@ -298,23 +298,6 @@ const AdminDashboardPage = () => {
     setPricingMsg('');
     try {
       const body = {
-        pro_price: Number(pricingEdit.pro_price) || 0,
-        pro_name: pricingEdit.pro_name || '',
-        pro_name_en: pricingEdit.pro_name_en || '',
-        pro_desc: pricingEdit.pro_desc || '',
-        pro_desc_en: pricingEdit.pro_desc_en || '',
-        business_price: Number(pricingEdit.business_price) || 0,
-        business_name: pricingEdit.business_name || '',
-        business_name_en: pricingEdit.business_name_en || '',
-        business_desc: pricingEdit.business_desc || '',
-        business_desc_en: pricingEdit.business_desc_en || '',
-        free_name: pricingEdit.free_name || '',
-        free_name_en: pricingEdit.free_name_en || '',
-        free_desc: pricingEdit.free_desc || '',
-        free_desc_en: pricingEdit.free_desc_en || '',
-        payment_account: pricingEdit.payment_account || '',
-        payment_bank: pricingEdit.payment_bank || '',
-        payment_beneficiary: pricingEdit.payment_beneficiary || '',
         free_features: pricingEdit.free_features,
         pro_features: pricingEdit.pro_features,
         business_features: pricingEdit.business_features,
@@ -985,207 +968,101 @@ const AdminDashboardPage = () => {
                 </div>
               </div>
 
-              {/* ── Pricing Control ── */}
+              {/* ── Pricing Restrictions ── */}
               <div className="bg-slate-800 rounded-2xl border border-slate-700 p-6">
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-3 mb-2">
                   <div className="w-9 h-9 rounded-xl bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
                     <svg className="w-5 h-5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
-                    <h3 className="font-bold text-white">التحكم الكامل في الأسعار</h3>
-                    <p className="text-slate-400 text-xs">تعديل أسماء الخطط وأسعارها وأوصافها وبيانات الدفع</p>
+                    <h3 className="font-bold text-white">قيود الخطط</h3>
+                    <p className="text-slate-400 text-xs">تحكم في ما يظهر مضمّناً أو مستبعداً في كل خطة</p>
                   </div>
                 </div>
+                <p className="text-xs text-slate-600 mb-5 mr-12">اضغط ✓ أو ✗ لتغيير الحالة — عدّل النص العربي والإنجليزي لكل ميزة</p>
 
-                <div className="space-y-5">
+                <div className="space-y-4">
 
-                  {/* Free Plan */}
+                  {/* Free */}
                   <div className="bg-slate-900/60 rounded-xl p-4 border border-slate-700">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="w-2.5 h-2.5 rounded-full bg-slate-400 inline-block"></span>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
                       <p className="text-sm font-semibold text-slate-300">الخطة المجانية (Free)</p>
                     </div>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
-                        <input type="text" value={pricingEdit.free_name} onChange={e => setPricingEdit(s => ({ ...s, free_name: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="rtl" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
-                        <input type="text" value={pricingEdit.free_name_en} onChange={e => setPricingEdit(s => ({ ...s, free_name_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="ltr" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الوصف (عربي)</label>
-                        <input type="text" value={pricingEdit.free_desc} onChange={e => setPricingEdit(s => ({ ...s, free_desc: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="rtl" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الوصف (إنجليزي)</label>
-                        <input type="text" value={pricingEdit.free_desc_en} onChange={e => setPricingEdit(s => ({ ...s, free_desc_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/40 transition" dir="ltr" />
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <label className="block text-xs text-slate-500 mb-2">القيود والمميزات</label>
-                      <div className="space-y-2">
-                        {pricingEdit.free_features.map((f, i) => (
-                          <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
-                            <button type="button" onClick={() => updateFeature('free', i, 'included', !f.included)}
-                              className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.included ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                              {f.included
-                                ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                                : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                              }
-                            </button>
-                            <input type="text" value={f.label} onChange={e => updateFeature('free', i, 'label', e.target.value)}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-slate-500/60" dir="rtl" placeholder="عربي" />
-                            <input type="text" value={f.labelEn} onChange={e => updateFeature('free', i, 'labelEn', e.target.value)}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-slate-500/60" dir="ltr" placeholder="English" />
-                          </div>
-                        ))}
-                      </div>
+                    <div className="space-y-2">
+                      {pricingEdit.free_features.map((f, i) => (
+                        <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
+                          <button type="button" onClick={() => updateFeature('free', i, 'included', !f.included)}
+                            title={f.included ? 'مضمّن — اضغط للاستبعاد' : 'مستبعد — اضغط للتضمين'}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors border ${f.included ? 'bg-emerald-500/20 text-emerald-400 border-emerald-700/40' : 'bg-red-500/10 text-red-400 border-red-700/30'}`}>
+                            {f.included
+                              ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                              : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            }
+                          </button>
+                          <input type="text" value={f.label} onChange={e => updateFeature('free', i, 'label', e.target.value)}
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-slate-500/60" dir="rtl" placeholder="عربي" />
+                          <input type="text" value={f.labelEn} onChange={e => updateFeature('free', i, 'labelEn', e.target.value)}
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-slate-500/60" dir="ltr" placeholder="English" />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Pro Plan */}
+                  {/* Pro */}
                   <div className="bg-slate-900/60 rounded-xl p-4 border border-indigo-800/50">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="w-2.5 h-2.5 rounded-full bg-indigo-500 inline-block"></span>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-2 h-2 rounded-full bg-indigo-500 inline-block"></span>
                       <p className="text-sm font-semibold text-indigo-400">الخطة الاحترافية (Pro)</p>
                     </div>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
-                        <input type="text" value={pricingEdit.pro_name} onChange={e => setPricingEdit(s => ({ ...s, pro_name: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="rtl" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
-                        <input type="text" value={pricingEdit.pro_name_en} onChange={e => setPricingEdit(s => ({ ...s, pro_name_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="ltr" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">السعر ($)</label>
-                        <input type="number" min="0" step="0.5" value={pricingEdit.pro_price} onChange={e => setPricingEdit(s => ({ ...s, pro_price: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="ltr" />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-xs text-slate-500 mb-1">الوصف (عربي)</label>
-                        <input type="text" value={pricingEdit.pro_desc} onChange={e => setPricingEdit(s => ({ ...s, pro_desc: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="rtl" />
-                      </div>
-                      <div className="sm:col-span-1">
-                        <label className="block text-xs text-slate-500 mb-1">الوصف (إنجليزي)</label>
-                        <input type="text" value={pricingEdit.pro_desc_en} onChange={e => setPricingEdit(s => ({ ...s, pro_desc_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/40 transition" dir="ltr" />
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <label className="block text-xs text-slate-500 mb-2">القيود والمميزات</label>
-                      <div className="space-y-2">
-                        {pricingEdit.pro_features.map((f, i) => (
-                          <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
-                            <button type="button" onClick={() => updateFeature('pro', i, 'included', !f.included)}
-                              className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.included ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                              {f.included
-                                ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                                : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                              }
-                            </button>
-                            <input type="text" value={f.label} onChange={e => updateFeature('pro', i, 'label', e.target.value)}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/60" dir="rtl" placeholder="عربي" />
-                            <input type="text" value={f.labelEn} onChange={e => updateFeature('pro', i, 'labelEn', e.target.value)}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/60" dir="ltr" placeholder="English" />
-                          </div>
-                        ))}
-                      </div>
+                    <div className="space-y-2">
+                      {pricingEdit.pro_features.map((f, i) => (
+                        <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
+                          <button type="button" onClick={() => updateFeature('pro', i, 'included', !f.included)}
+                            title={f.included ? 'مضمّن — اضغط للاستبعاد' : 'مستبعد — اضغط للتضمين'}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors border ${f.included ? 'bg-emerald-500/20 text-emerald-400 border-emerald-700/40' : 'bg-red-500/10 text-red-400 border-red-700/30'}`}>
+                            {f.included
+                              ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                              : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            }
+                          </button>
+                          <input type="text" value={f.label} onChange={e => updateFeature('pro', i, 'label', e.target.value)}
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/60" dir="rtl" placeholder="عربي" />
+                          <input type="text" value={f.labelEn} onChange={e => updateFeature('pro', i, 'labelEn', e.target.value)}
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/60" dir="ltr" placeholder="English" />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Business Plan */}
+                  {/* Business */}
                   <div className="bg-slate-900/60 rounded-xl p-4 border border-amber-800/50">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span>
+                    <div className="flex items-center gap-2 mb-3">
+                      <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
                       <p className="text-sm font-semibold text-amber-400">خطة الأعمال (Business)</p>
                     </div>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الاسم (عربي)</label>
-                        <input type="text" value={pricingEdit.business_name} onChange={e => setPricingEdit(s => ({ ...s, business_name: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="rtl" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">الاسم (إنجليزي)</label>
-                        <input type="text" value={pricingEdit.business_name_en} onChange={e => setPricingEdit(s => ({ ...s, business_name_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="ltr" />
-                      </div>
-                      <div>
-                        <label className="block text-xs text-slate-500 mb-1">السعر ($)</label>
-                        <input type="number" min="0" step="0.5" value={pricingEdit.business_price} onChange={e => setPricingEdit(s => ({ ...s, business_price: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="ltr" />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-xs text-slate-500 mb-1">الوصف (عربي)</label>
-                        <input type="text" value={pricingEdit.business_desc} onChange={e => setPricingEdit(s => ({ ...s, business_desc: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="rtl" />
-                      </div>
-                      <div className="sm:col-span-1">
-                        <label className="block text-xs text-slate-500 mb-1">الوصف (إنجليزي)</label>
-                        <input type="text" value={pricingEdit.business_desc_en} onChange={e => setPricingEdit(s => ({ ...s, business_desc_en: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500/40 transition" dir="ltr" />
-                      </div>
-                    </div>
-                    <div className="mt-4">
-                      <label className="block text-xs text-slate-500 mb-2">القيود والمميزات</label>
-                      <div className="space-y-2">
-                        {pricingEdit.business_features.map((f, i) => (
-                          <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
-                            <button type="button" onClick={() => updateFeature('business', i, 'included', !f.included)}
-                              className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors ${f.included ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/10 text-red-400'}`}>
-                              {f.included
-                                ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
-                                : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-                              }
-                            </button>
-                            <input type="text" value={f.label} onChange={e => updateFeature('business', i, 'label', e.target.value)}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/60" dir="rtl" placeholder="عربي" />
-                            <input type="text" value={f.labelEn} onChange={e => updateFeature('business', i, 'labelEn', e.target.value)}
-                              className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/60" dir="ltr" placeholder="English" />
-                          </div>
-                        ))}
-                      </div>
+                    <div className="space-y-2">
+                      {pricingEdit.business_features.map((f, i) => (
+                        <div key={i} className="grid grid-cols-[auto_1fr_1fr] gap-2 items-center">
+                          <button type="button" onClick={() => updateFeature('business', i, 'included', !f.included)}
+                            title={f.included ? 'مضمّن — اضغط للاستبعاد' : 'مستبعد — اضغط للتضمين'}
+                            className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 transition-colors border ${f.included ? 'bg-emerald-500/20 text-emerald-400 border-emerald-700/40' : 'bg-red-500/10 text-red-400 border-red-700/30'}`}>
+                            {f.included
+                              ? <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                              : <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                            }
+                          </button>
+                          <input type="text" value={f.label} onChange={e => updateFeature('business', i, 'label', e.target.value)}
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/60" dir="rtl" placeholder="عربي" />
+                          <input type="text" value={f.labelEn} onChange={e => updateFeature('business', i, 'labelEn', e.target.value)}
+                            className="px-2.5 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 text-xs focus:outline-none focus:ring-1 focus:ring-amber-500/60" dir="ltr" placeholder="English" />
+                        </div>
+                      ))}
                     </div>
                   </div>
 
-                  {/* Payment Info */}
-                  <div className="bg-slate-900/60 rounded-xl p-4 border border-emerald-800/50">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span>
-                      <p className="text-sm font-semibold text-emerald-400">بيانات التحويل البنكي</p>
-                      <span className="text-xs text-slate-500 mr-1">— تظهر في صفحة الترقية</span>
-                    </div>
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                      <div className="sm:col-span-1">
-                        <label className="block text-xs text-slate-500 mb-1">رقم الحساب</label>
-                        <input type="text" value={pricingEdit.payment_account} onChange={e => setPricingEdit(s => ({ ...s, payment_account: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition" dir="ltr" />
-                      </div>
-                      <div className="sm:col-span-2">
-                        <label className="block text-xs text-slate-500 mb-1">اسم البنك</label>
-                        <input type="text" value={pricingEdit.payment_bank} onChange={e => setPricingEdit(s => ({ ...s, payment_bank: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition" dir="rtl" />
-                      </div>
-                      <div className="sm:col-span-3">
-                        <label className="block text-xs text-slate-500 mb-1">اسم المستفيد</label>
-                        <input type="text" value={pricingEdit.payment_beneficiary} onChange={e => setPricingEdit(s => ({ ...s, payment_beneficiary: e.target.value }))}
-                          className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/40 transition" dir="rtl" />
-                      </div>
-                    </div>
-                  </div>
                 </div>
 
                 <div className="flex items-center justify-between mt-5">
