@@ -113,6 +113,12 @@ export function CVProvider({ children }) {
     portfolio: true,
   });
 
+  const [sectionNames, setSectionNames] = useState({});
+
+  const renameSectionName = (key, name) => {
+    setSectionNames(prev => ({ ...prev, [key]: name }));
+  };
+
   useEffect(() => {
     if (currentUser) {
       fetchAPICVs().then(apiCVs => {
@@ -204,6 +210,7 @@ export function CVProvider({ children }) {
       cvData,
       template: selectedTemplate,
       theme,
+      sectionNames,
       atsScore: 95,
     });
     setCurrentCVId(id);
@@ -229,6 +236,7 @@ export function CVProvider({ children }) {
     setTheme(cv.theme);
     setCurrentCVId(cv.id);
     setCurrentCVName(cv.name);
+    setSectionNames(cv.sectionNames || {});
     return true;
   };
 
@@ -268,6 +276,7 @@ export function CVProvider({ children }) {
     setSectionOrder(DEFAULT_SECTION_ORDER);
     setCurrentCVId(null);
     setCurrentCVName('My Resume');
+    setSectionNames({});
   };
 
   const previewTemplate = (templateId, templateColor) => {
@@ -317,6 +326,8 @@ export function CVProvider({ children }) {
     addCustomSection,
     updateCustomSection,
     deleteCustomSection,
+    sectionNames,
+    renameSectionName,
   };
 
   return (

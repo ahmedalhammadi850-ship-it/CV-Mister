@@ -283,18 +283,71 @@ const AddBtn = ({ onClick, label }) => (
   </button>
 );
 
-const AccordionHeader = ({ en, ar, section, isRTL, openSection, onToggle }) => (
-  <div
-    className="flex justify-between items-center p-4 bg-white border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors"
-    onClick={() => onToggle(section)}
-    style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
-  >
-    <h3 className="font-medium text-slate-800">{t(en, ar, isRTL)}</h3>
-    <svg className={`w-5 h-5 text-slate-400 transform transition-transform ${openSection === section ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-    </svg>
-  </div>
-);
+const AccordionHeader = ({ en, ar, section, isRTL, openSection, onToggle, sectionNames = {}, onRename }) => {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState('');
+  const inputRef = useRef(null);
+
+  const customName = sectionNames[section];
+  const displayName = customName || t(en, ar, isRTL);
+
+  const startEdit = (e) => {
+    e.stopPropagation();
+    setDraft(customName || t(en, ar, isRTL));
+    setEditing(true);
+    setTimeout(() => inputRef.current?.select(), 0);
+  };
+
+  const commitEdit = () => {
+    const trimmed = draft.trim();
+    onRename(section, trimmed || t(en, ar, isRTL));
+    setEditing(false);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') commitEdit();
+    if (e.key === 'Escape') setEditing(false);
+  };
+
+  return (
+    <div
+      className="group flex justify-between items-center p-4 bg-white border-b border-slate-100 cursor-pointer hover:bg-slate-50 transition-colors"
+      onClick={() => !editing && onToggle(section)}
+      style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}
+    >
+      <div className="flex items-center gap-2 flex-1 min-w-0" style={{ flexDirection: isRTL ? 'row-reverse' : 'row' }}>
+        {editing ? (
+          <input
+            ref={inputRef}
+            value={draft}
+            onChange={e => setDraft(e.target.value)}
+            onBlur={commitEdit}
+            onKeyDown={handleKeyDown}
+            onClick={e => e.stopPropagation()}
+            className="font-medium text-slate-800 bg-indigo-50 border border-indigo-300 rounded px-2 py-0.5 text-sm outline-none focus:ring-2 focus:ring-indigo-400 min-w-0 flex-1"
+            autoFocus
+          />
+        ) : (
+          <h3 className="font-medium text-slate-800 truncate">{displayName}</h3>
+        )}
+        {!editing && (
+          <button
+            onClick={startEdit}
+            title={isRTL ? 'تغيير الاسم' : 'Rename'}
+            className="opacity-0 group-hover:opacity-100 text-slate-400 hover:text-indigo-500 transition-all flex-shrink-0 p-0.5 rounded hover:bg-indigo-50"
+          >
+            <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+            </svg>
+          </button>
+        )}
+      </div>
+      <svg className={`w-5 h-5 text-slate-400 flex-shrink-0 transform transition-transform ${openSection === section ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+      </svg>
+    </div>
+  );
+};
 
 const CardWrapper = ({ children, onDelete }) => (
   <div className="bg-indigo-50/60 border border-indigo-100 rounded-xl p-3 space-y-2 relative">
@@ -306,7 +359,7 @@ const CardWrapper = ({ children, onDelete }) => (
 );
 
 const EditorPanel = () => {
-  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection, visiblePersonalFields, togglePersonalField, selectedTemplate } = useCV();
+  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection, visiblePersonalFields, togglePersonalField, selectedTemplate, sectionNames, renameSectionName } = useCV();
   const { isRTL, currentUser } = useAuth();
   const [openSection, setOpenSection] = useState('personalInfo');
   const [showAddContent, setShowAddContent] = useState(false);
@@ -399,7 +452,7 @@ const EditorPanel = () => {
 
         {/* Personal Info */}
         <div>
-          <AccordionHeader en="Personal Information" ar="المعلومات الشخصية" section="personalInfo" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+          <AccordionHeader en="Personal Information" ar="المعلومات الشخصية" section="personalInfo" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
           {openSection === 'personalInfo' && (
             <div className="p-4 space-y-4 bg-slate-50/50 border-b border-slate-100">
 
@@ -516,7 +569,7 @@ const EditorPanel = () => {
 
         {/* Experience */}
         <div>
-          <AccordionHeader en="Experience" ar="الخبرة العملية" section="experience" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+          <AccordionHeader en="Experience" ar="الخبرة العملية" section="experience" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
           {openSection === 'experience' && (
             <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
               {cvData.experience.map((exp) => (
@@ -533,7 +586,7 @@ const EditorPanel = () => {
 
         {/* Education */}
         <div>
-          <AccordionHeader en="Education" ar="التعليم" section="education" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+          <AccordionHeader en="Education" ar="التعليم" section="education" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
           {openSection === 'education' && (
             <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
               {cvData.education.map((edu) => (
@@ -550,20 +603,20 @@ const EditorPanel = () => {
 
         {/* Skills */}
         <div>
-          <AccordionHeader en="Skills" ar="المهارات" section="skills" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+          <AccordionHeader en="Skills" ar="المهارات" section="skills" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
           {openSection === 'skills' && <SkillsEditor skills={cvData.skills} isRTL={isRTL} updateSection={updateSection} />}
         </div>
 
         {/* Languages */}
         <div>
-          <AccordionHeader en="Languages" ar="اللغات" section="languages" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+          <AccordionHeader en="Languages" ar="اللغات" section="languages" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
           {openSection === 'languages' && <LanguagesEditor languages={cvData.languages} isRTL={isRTL} updateSection={updateSection} />}
         </div>
 
         {/* Projects */}
         {(sectionOrder.includes('projects') || cvData.projects?.length > 0) && (
           <div>
-            <AccordionHeader en="Projects" ar="المشاريع" section="projects" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="Projects" ar="المشاريع" section="projects" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'projects' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.projects || []).map((proj, i) => (
@@ -583,7 +636,7 @@ const EditorPanel = () => {
         {/* Certificates */}
         {sectionOrder.includes('certificates') && (
           <div>
-            <AccordionHeader en="Certificates" ar="الشهادات والاعتمادات" section="certificates" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="Certificates" ar="الشهادات والاعتمادات" section="certificates" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'certificates' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.certificates || []).map((cert) => (
@@ -606,7 +659,7 @@ const EditorPanel = () => {
         {/* Interests */}
         {sectionOrder.includes('interests') && (
           <div>
-            <AccordionHeader en="Interests & Hobbies" ar="الاهتمامات والهوايات" section="interests" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="Interests & Hobbies" ar="الاهتمامات والهوايات" section="interests" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'interests' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.interests || []).map((item) => (
@@ -625,7 +678,7 @@ const EditorPanel = () => {
         {/* Courses */}
         {sectionOrder.includes('courses') && (
           <div>
-            <AccordionHeader en="Courses & Training" ar="الدورات والتدريب" section="courses" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="Courses & Training" ar="الدورات والتدريب" section="courses" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'courses' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.courses || []).map((course) => (
@@ -647,7 +700,7 @@ const EditorPanel = () => {
         {/* Awards */}
         {sectionOrder.includes('awards') && (
           <div>
-            <AccordionHeader en="Awards & Honours" ar="الجوائز والتكريمات" section="awards" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="Awards & Honours" ar="الجوائز والتكريمات" section="awards" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'awards' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.awards || []).map((award) => (
@@ -670,7 +723,7 @@ const EditorPanel = () => {
         {/* Organisations */}
         {sectionOrder.includes('organisations') && (
           <div>
-            <AccordionHeader en="Organisations" ar="المنظمات والجمعيات" section="organisations" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="Organisations" ar="المنظمات والجمعيات" section="organisations" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'organisations' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.organisations || []).map((org) => (
@@ -692,7 +745,7 @@ const EditorPanel = () => {
         {/* Publications */}
         {sectionOrder.includes('publications') && (
           <div>
-            <AccordionHeader en="Publications" ar="المنشورات والأبحاث" section="publications" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="Publications" ar="المنشورات والأبحاث" section="publications" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'publications' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.publications || []).map((pub) => (
@@ -715,7 +768,7 @@ const EditorPanel = () => {
         {/* References */}
         {sectionOrder.includes('references') && (
           <div>
-            <AccordionHeader en="References" ar="المراجع والتزكيات" section="references" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} />
+            <AccordionHeader en="References" ar="المراجع والتزكيات" section="references" isRTL={isRTL} openSection={openSection} onToggle={guardedToggle} sectionNames={sectionNames} onRename={renameSectionName} />
             {openSection === 'references' && (
               <div className="p-4 space-y-3 bg-slate-50/50 border-b border-slate-100">
                 {(cvData.references || []).map((ref) => (
