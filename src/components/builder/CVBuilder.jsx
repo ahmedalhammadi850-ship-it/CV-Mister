@@ -395,7 +395,21 @@ const CVBuilder = () => {
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
-      pdf.save(`${name} - CV.pdf`);
+      const fileName = `${name} - CV.pdf`;
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.open(blobUrl, '_blank');
+      } else {
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
       if (currentCVId) {
         fetch(`/api/cvs/${currentCVId}/download`, {
