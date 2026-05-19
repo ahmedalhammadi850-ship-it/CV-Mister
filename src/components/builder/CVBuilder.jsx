@@ -149,7 +149,6 @@ const CVBuilder = () => {
 
   useEffect(() => {
     if (isFirstRenderRef.current) { isFirstRenderRef.current = false; return; }
-    if (!currentCVId) return;
     setAutoSaveStatus('pending');
     clearTimeout(autoSaveTimerRef.current);
     autoSaveTimerRef.current = setTimeout(async () => {
