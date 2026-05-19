@@ -142,7 +142,28 @@ const CVBuilder = () => {
   const [isPrinting, setIsPrinting] = useState(false);
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showFreeExpiredModal, setShowFreeExpiredModal] = useState(false);
+  const [autoSaveStatus, setAutoSaveStatus] = useState(null);
   const breakDataRef = useRef({ breaks: [], totalHeight: PAGE_H_PX });
+  const autoSaveTimerRef = useRef(null);
+  const isFirstRenderRef = useRef(true);
+
+  useEffect(() => {
+    if (isFirstRenderRef.current) { isFirstRenderRef.current = false; return; }
+    if (!currentCVId) return;
+    setAutoSaveStatus('pending');
+    clearTimeout(autoSaveTimerRef.current);
+    autoSaveTimerRef.current = setTimeout(async () => {
+      setAutoSaveStatus('saving');
+      const result = await saveCurrentCV(currentCVName);
+      if (!result?.error) {
+        setAutoSaveStatus('saved');
+        setTimeout(() => setAutoSaveStatus(null), 2000);
+      } else {
+        setAutoSaveStatus(null);
+      }
+    }, 2000);
+    return () => clearTimeout(autoSaveTimerRef.current);
+  }, [cvData, theme, sectionOrder, visibleSections]);
 
   const handleSave = async (name) => {
     const result = await saveCurrentCV(name);
@@ -510,7 +531,23 @@ const CVBuilder = () => {
               <span className="hidden sm:inline">{isRTL ? 'لوحة التحكم' : 'Dashboard'}</span>
             </button>
           </div>
-          <div className="pointer-events-auto">
+          <div className="pointer-events-auto flex items-center gap-2">
+            {autoSaveStatus === 'saving' && (
+              <span className="hidden sm:flex items-center gap-1.5 text-xs text-slate-400">
+                <svg className="w-3 h-3 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                </svg>
+                {isRTL ? 'جاري الحفظ...' : 'Saving...'}
+              </span>
+            )}
+            {autoSaveStatus === 'saved' && (
+              <span className="hidden sm:flex items-center gap-1.5 text-xs text-emerald-500">
+                <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                {isRTL ? 'تم الحفظ' : 'Saved'}
+              </span>
+            )}
             <button onClick={handleSaveClick}
               className="bg-white border border-slate-200 text-slate-700 shadow-sm px-3 sm:px-4 py-2 rounded-lg font-medium hover:bg-slate-50 transition-colors flex items-center gap-2 text-sm">
               <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
