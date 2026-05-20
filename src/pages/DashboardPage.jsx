@@ -420,7 +420,17 @@ const DashboardPage = () => {
     const cv = cvs.find(c => c.id === id); if (!cv) return;
     const copy = { ...cv, id: `cv-${Date.now()}`, name: cv.name + (isRTL ? ' (نسخة)' : ' (Copy)'), lastModified: new Date().toISOString() };
     const res = await fetch('/api/cvs', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
-    if (res.ok) { const saved = await res.json(); setCvs(prev => [saved, ...prev]); }
+    if (res.ok) {
+      const saved = await res.json();
+      setCvs(prev => [saved, ...prev]);
+    } else {
+      const data = await res.json().catch(() => ({}));
+      if (data.limitReached) {
+        alert(isRTL
+          ? 'وصلت للحد الأقصى من السير الذاتية في خطتك المجانية. قم بالترقية للحصول على المزيد.'
+          : 'You have reached the maximum resumes for your free plan. Upgrade to create more.');
+      }
+    }
   };
   const handleRename    = async (id, name) => {
     const res = await fetch(`/api/cvs/${id}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });

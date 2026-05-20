@@ -54,14 +54,20 @@ async function deleteAPICV(id) {
 
 async function duplicateAPICV(entry) {
   try {
-    await fetch('/api/cvs', {
+    const res = await fetch('/api/cvs', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(entry),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      return { error: data };
+    }
+    return { ok: true };
   } catch (e) {
     console.error('API CV duplicate failed', e);
+    return { error: { message: 'Network error' } };
   }
 }
 
@@ -263,12 +269,17 @@ export function CVProvider({ children }) {
     }
   };
 
-  const duplicateCV = (id) => {
+  const duplicateCV = async (id) => {
     const copy = duplicateCVLocal(id);
     if (!copy) return null;
     setSavedCVs(getSavedCVs());
     if (currentUser) {
-      duplicateAPICV(copy);
+      const result = await duplicateAPICV(copy);
+      if (result?.error) {
+        deleteCVLocal(copy.id);
+        setSavedCVs(getSavedCVs());
+        return { error: result.error };
+      }
     }
     return copy;
   };
