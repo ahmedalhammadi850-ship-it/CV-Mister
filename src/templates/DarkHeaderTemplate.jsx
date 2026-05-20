@@ -24,7 +24,6 @@ const SIDEBAR_SECTIONS = new Set(['summary', 'skills', 'languages', 'interests',
 const MAIN_SECTIONS    = new Set(['experience', 'education', 'projects', 'publications', 'references']);
 
 const DotsRating = ({ level = 3, accent }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
@@ -48,6 +47,7 @@ const DarkHeaderTemplate = ({
   const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
 
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};

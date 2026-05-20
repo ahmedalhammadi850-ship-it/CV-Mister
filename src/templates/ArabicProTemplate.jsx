@@ -28,7 +28,6 @@ const MAIN_SECTIONS    = new Set(['summary','experience','education','projects',
 
 /* ── Skill bar with percentage label ── */
 const SkillBar = ({ level = 3, accent, bg }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     if ((level ?? 0) <= 0) return null;
   const pct = level > 5 ? Math.min(level, 100) : Math.round((Math.min(Math.max(level, 1), 5) / 5) * 100);
   return (
@@ -62,6 +61,7 @@ const ArabicProTemplate = ({
   const lightGray   = '#f4f6f8';
   const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const show = k => visibleSections[k] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
 
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};

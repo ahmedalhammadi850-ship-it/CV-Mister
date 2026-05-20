@@ -155,7 +155,6 @@ const ContactRow = ({ iconKey, text }) => (
 
 /* ─── Diamond rating ──────────────────────────────────────────── */
 const Stars = ({ level = 3 }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
@@ -223,6 +222,7 @@ const ArabicEliteTemplate = ({
   const accent = theme?.primaryColor || '#2a8e9e';
   const { sz, font, lineHeight } = resolveTheme(theme, true);
   const show = k => visibleSections[k] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};
 

@@ -24,7 +24,6 @@ const MAIN_SECTIONS    = new Set(['experience','education','projects','publicati
 
 /* ── 5-segment skill bar ── */
 const SkillBar = ({ level = 3, filled, empty }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
@@ -96,6 +95,7 @@ const ArabicGemTemplate = ({
   const accentDark = accent;
   const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const show = k => visibleSections[k] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
 
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};

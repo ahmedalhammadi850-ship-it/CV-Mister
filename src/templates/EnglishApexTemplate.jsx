@@ -45,7 +45,6 @@ const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>
 
 /* ── Segmented skill bar ────────────────────────────────────── */
 const SegmentBar = ({ level = 3, accent }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const n = Math.min(Math.max(Math.round(lvl), 1), 5);
@@ -116,6 +115,7 @@ const EnglishApexTemplate = ({
   const dir   = isRTL ? 'rtl' : 'ltr';
   const align = isRTL ? 'right' : 'left';
   const show  = k => visibleSections[k] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
   const info  = data?.personalInfo || {};
   const vis   = visiblePersonalFields || {};
   const initials = (info.fullName || '').split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('');

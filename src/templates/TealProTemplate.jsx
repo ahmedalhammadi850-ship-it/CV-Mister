@@ -20,7 +20,6 @@ const labels = {
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'languages', 'projects', 'certificates', 'awards'];
 
 const DotsRating = ({ level = 3, accent }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     const filled = Math.min(Math.max(Math.round(level), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', verticalAlign: 'middle' }}>
@@ -42,6 +41,7 @@ const TealProTemplate = ({
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
 
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};

@@ -20,7 +20,6 @@ const labels = {
 const DEFAULT_ORDER = ['summary', 'experience', 'education', 'skills', 'projects', 'languages', 'certificates', 'awards'];
 
 const DotsRating = ({ level = 3, accent }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     const lvl = level > 5 ? Math.round(level / 20) : level;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
   return (
@@ -43,6 +42,7 @@ const EditorialRuleTemplate = ({
   const { sz, font, padding, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
 
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};

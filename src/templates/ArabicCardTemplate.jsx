@@ -24,7 +24,6 @@ const SIDEBAR_SECTIONS = new Set(['contact_block', 'skills', 'languages', 'inter
 const MAIN_SECTIONS    = new Set(['summary', 'experience', 'education', 'projects', 'publications', 'references']);
 
 const BarRating = ({ level = 3, accent }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     const lvl = level > 5 ? Math.round(level / 20) : level;
   if (lvl <= 0) return null;
   const filled = Math.min(Math.max(Math.round(lvl), 1), 5);
@@ -59,6 +58,7 @@ const ArabicCardTemplate = ({
   const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = 'rtl';
   const show = (key) => visibleSections[key] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
 
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};

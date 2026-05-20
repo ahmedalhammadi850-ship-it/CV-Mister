@@ -24,8 +24,7 @@ const SIDEBAR_SECTIONS = new Set(['skills', 'languages', 'interests', 'certifica
 const MAIN_SECTIONS    = new Set(['summary', 'experience', 'education', 'projects', 'publications', 'references']);
 
 const Dots = ({ level = 3, accent }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (labels[key]?.[isRTL ? 'ar' : 'en'] ?? key);
-    const filled = Math.min(Math.max(Math.round(level), 1), 5);
+  const filled = Math.min(Math.max(Math.round(level), 1), 5);
   return (
     <span style={{ display: 'inline-flex', gap: '3pt', marginLeft: '4pt' }}>
       {[1,2,3,4,5].map(i => (
@@ -77,6 +76,7 @@ const AtlanticBlueTemplate = ({
   const { sz, font, lineHeight, sectionMt } = resolveTheme(theme, isRTL);
   const dir = isRTL ? 'rtl' : 'ltr';
   const show = (key) => visibleSections[key] !== false;
+  const tr = (key, rtl) => sectionNames?.[key] || (labels[key]?.[rtl ? 'ar' : 'en'] ?? key);
 
   const info = data?.personalInfo || {};
   const vis  = visiblePersonalFields || {};

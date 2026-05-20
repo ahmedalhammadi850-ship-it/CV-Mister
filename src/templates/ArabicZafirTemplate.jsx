@@ -43,7 +43,6 @@ const CICON = { phone:<PhoneIcon/>, email:<EmailIcon/>, location:<LocationIcon/>
 
 /* ── Skill fill bar ─────────────────────────────────────────── */
 const SkillBar = ({ level = 3, accent }) => {
-  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
     if ((level ?? 0) <= 0) return null;
   const pct = level > 5 ? Math.min(level, 100) : (Math.min(Math.max(level, 1), 5) / 5) * 100;
   return (
@@ -123,6 +122,7 @@ const ArabicZafirTemplate = ({
   const dir   = isRTL ? 'rtl' : 'ltr';
   const align = isRTL ? 'right' : 'left';
   const show  = k => visibleSections[k] !== false;
+  const tr = (key, isRTL) => sectionNames?.[key] || (L[key]?.[isRTL ? 'ar' : 'en'] ?? key);
   const info  = data?.personalInfo || {};
   const vis   = visiblePersonalFields || {};
   const initials = (info.fullName || '').split(/\s+/).map(w => w[0]).filter(Boolean).slice(0, 2).join('');
