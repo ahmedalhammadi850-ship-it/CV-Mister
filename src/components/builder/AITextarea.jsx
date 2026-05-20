@@ -184,13 +184,13 @@ export default function AITextarea({
               <path strokeLinecap="round" d="M6 4h7M6 8h7M6 12h7M3 4h.01M3 8h.01M3 12h.01" />
             </svg>
           </button>
-          <button type="button" onClick={() => setItalic(v => !v)} title={isRTL ? 'مائل' : 'Italic'}
+          <button type="button" onClick={() => setItalic(!italic)} title={isRTL ? 'مائل' : 'Italic'}
             className={`w-7 h-7 rounded-md flex items-center justify-center text-sm font-serif font-bold italic transition-colors ${
               italic ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
             }`}>
             I
           </button>
-          <button type="button" onClick={() => setBold(v => !v)} title={isRTL ? 'عريض' : 'Bold'}
+          <button type="button" onClick={() => setBold(!bold)} title={isRTL ? 'عريض' : 'Bold'}
             className={`w-7 h-7 rounded-md flex items-center justify-center text-sm font-black transition-colors ${
               bold ? 'bg-slate-200 text-slate-800' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
             }`}>
