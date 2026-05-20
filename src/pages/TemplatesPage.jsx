@@ -142,7 +142,7 @@ const templates = [
     arabicDesc: 'شريط رأسي ملون، تسطير ملون للأقسام، شبكة مهارات ثلاثية الأعمدة.',
     color: '#0d4f6e',
     component: ATSModernTemplate,
-    atsScore: 98,
+    atsScore: 90,
   },
   {
     id: 'atsharvard',
