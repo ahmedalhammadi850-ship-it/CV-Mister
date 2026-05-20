@@ -19,8 +19,42 @@ const TEMPLATE_COLORS = {
 const getColors = (t) => TEMPLATE_COLORS[t?.toLowerCase()] || TEMPLATE_COLORS.modern;
 const ATS_COLOR = (s) => s >= 85 ? '#10b981' : s >= 60 ? '#f59e0b' : '#ef4444';
 
+/* ─────────────────────── Paywall Modal ─────────────────────── */
+const PaywallModal = ({ isRTL, onClose }) => {
+  const navigate = useNavigate();
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+          <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">{isRTL ? 'ميزة مدفوعة' : 'Pro Feature'}</h3>
+        <p className="text-slate-500 text-sm leading-relaxed mb-6">
+          {isRTL
+            ? 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين ذاتيتين وقوالب احترافية.'
+            : "You've used your free CV slot. Upgrade to create up to 2 CVs and access premium templates."}
+        </p>
+        <div className="flex flex-col gap-2">
+          <button
+            onClick={() => { onClose(); navigate('/pricing'); }}
+            className="w-full py-3 rounded-2xl text-white font-bold text-sm transition-all"
+            style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
+          >
+            {isRTL ? '⭐ ترقية الآن — $3/شهر' : '⭐ Upgrade Now — $3/mo'}
+          </button>
+          <button onClick={onClose} className="w-full py-2.5 rounded-2xl text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
+            {isRTL ? 'إلغاء' : 'Cancel'}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 /* ─────────────────────── Sidebar ─────────────────────── */
-const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSideOpen, activeView, setActiveView }) => {
+const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSideOpen, activeView, setActiveView, onNewCV }) => {
   const navigate = useNavigate();
 
   const initials = (() => {
@@ -92,7 +126,7 @@ const Sidebar = ({ isRTL, currentUser, signOutUser, toggleRTL, sideOpen, setSide
 
         <div className="pt-3 mt-3 border-t border-slate-100">
           <button
-            onClick={() => { navigate('/builder'); setSideOpen(false); }}
+            onClick={() => { onNewCV(); setSideOpen(false); }}
             className="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
             style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
           >
@@ -400,6 +434,16 @@ const DashboardPage = () => {
   const [renameTarget, setRenameTarget] = useState(null);
   const [sideOpen, setSideOpen]     = useState(false);
   const [activeView, setActiveView] = useState('cvs');
+  const [showPaywall, setShowPaywall] = useState(false);
+
+  const handleNewCV = () => {
+    const isFree = !currentUser || currentUser.plan === 'free';
+    if (isFree && cvs.length >= 1) {
+      setShowPaywall(true);
+      return;
+    }
+    navigate('/builder');
+  };
 
   const fetchCVs = useCallback(async () => {
     setLoading(true); setError(null);
@@ -417,6 +461,8 @@ const DashboardPage = () => {
 
   const handleDelete    = async (id) => { deleteCV(id); await fetch(`/api/cvs/${id}`, { method: 'DELETE', credentials: 'include' }); setCvs(prev => prev.filter(c => c.id !== id)); };
   const handleDuplicate = async (id) => {
+    const isFree = !currentUser || currentUser.plan === 'free';
+    if (isFree && cvs.length >= 1) { setShowPaywall(true); return; }
     const cv = cvs.find(c => c.id === id); if (!cv) return;
     const copy = { ...cv, id: `cv-${Date.now()}`, name: cv.name + (isRTL ? ' (نسخة)' : ' (Copy)'), lastModified: new Date().toISOString() };
     const res = await fetch('/api/cvs', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
@@ -425,11 +471,7 @@ const DashboardPage = () => {
       setCvs(prev => [saved, ...prev]);
     } else {
       const data = await res.json().catch(() => ({}));
-      if (data.limitReached) {
-        alert(isRTL
-          ? 'وصلت للحد الأقصى من السير الذاتية في خطتك المجانية. قم بالترقية للحصول على المزيد.'
-          : 'You have reached the maximum resumes for your free plan. Upgrade to create more.');
-      }
+      if (data.limitReached) setShowPaywall(true);
     }
   };
   const handleRename    = async (id, name) => {
@@ -460,6 +502,8 @@ const DashboardPage = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50" dir={isRTL ? 'rtl' : 'ltr'}>
 
+      {showPaywall && <PaywallModal isRTL={isRTL} onClose={() => setShowPaywall(false)} />}
+
       {/* Sidebar */}
       <Sidebar
         isRTL={isRTL}
@@ -470,6 +514,7 @@ const DashboardPage = () => {
         setSideOpen={setSideOpen}
         activeView={activeView}
         setActiveView={setActiveView}
+        onNewCV={handleNewCV}
       />
 
       {/* Main scroll area */}
@@ -637,7 +682,7 @@ const DashboardPage = () => {
               )}
 
               {/* Empty */}
-              {!loading && !error && cvs.length === 0 && <EmptyState isRTL={isRTL} onNew={() => navigate('/builder')} />}
+              {!loading && !error && cvs.length === 0 && <EmptyState isRTL={isRTL} onNew={handleNewCV} />}
 
               {/* No results */}
               {!loading && !error && cvs.length > 0 && filtered.length === 0 && (
@@ -654,7 +699,7 @@ const DashboardPage = () => {
                     <CVCard key={cv.id} cv={cv} isRTL={isRTL} onDelete={handleDelete} onDuplicate={handleDuplicate} onRename={setRenameTarget} />
                   ))}
                   <button
-                    onClick={() => navigate('/builder')}
+                    onClick={handleNewCV}
                     className="bg-white rounded-2xl border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all flex flex-col items-center justify-center gap-3 p-8 min-h-[230px] text-slate-400 hover:text-indigo-600 group"
                   >
                     <div className="w-12 h-12 rounded-xl bg-slate-100 group-hover:bg-indigo-100 flex items-center justify-center transition-colors">
