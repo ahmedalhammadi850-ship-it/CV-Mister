@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
 const CHECK = (
@@ -78,6 +78,7 @@ const faqs = [
 
 const PricingPage = () => {
   const { isRTL, currentUser } = useAuth();
+  const navigate = useNavigate();
   const [openFaq, setOpenFaq] = useState(null);
   const [pricing, setPricing] = useState(() => {
     try {
@@ -155,6 +156,24 @@ const PricingPage = () => {
 
   return (
     <div className="min-h-screen bg-slate-50" dir={isRTL ? 'rtl' : 'ltr'}>
+
+      {/* ── Back to Dashboard ── */}
+      {currentUser && (
+        <div className="max-w-5xl mx-auto px-6 pt-6">
+          <button
+            onClick={() => navigate('/dashboard')}
+            className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors group"
+          >
+            <svg
+              className={`w-4 h-4 transition-transform group-hover:-translate-x-1 ${isRTL ? 'rotate-180 group-hover:translate-x-1 group-hover:-translate-x-0' : ''}`}
+              fill="none" viewBox="0 0 24 24" stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            {isRTL ? 'العودة إلى لوحة التحكم' : 'Back to Dashboard'}
+          </button>
+        </div>
+      )}
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden pt-20 pb-16 text-center px-6">
