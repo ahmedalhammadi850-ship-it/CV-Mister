@@ -143,7 +143,6 @@ const CVBuilder = () => {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showFreeExpiredModal, setShowFreeExpiredModal] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState(null);
-  const [previewCollapsed, setPreviewCollapsed] = useState(false);
   const breakDataRef = useRef({ breaks: [], totalHeight: PAGE_H_PX });
   const autoSaveTimerRef = useRef(null);
   const isFirstRenderRef = useRef(true);
@@ -504,7 +503,7 @@ const CVBuilder = () => {
       </div>
 
       {/* ── Editor Sidebar ── */}
-      <div className={`w-full md:w-[420px] lg:w-[460px] flex-1 md:flex-none md:flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden no-print ${mobileTab === 'editor' ? 'flex' : 'hidden md:flex'} relative`}>
+      <div className={`w-full md:w-[420px] lg:w-[460px] flex-1 md:flex-none md:flex-shrink-0 bg-white border-r border-slate-200 flex flex-col overflow-hidden no-print ${mobileTab === 'editor' ? 'flex' : 'hidden md:flex'}`}>
         <div className="flex border-b border-slate-100 bg-white sticky top-0 z-10 flex-shrink-0">
           {PANEL_TABS.map(({ key, enLabel, arLabel, Icon }) => {
             const active = panelTab === key;
@@ -525,25 +524,10 @@ const CVBuilder = () => {
           {panelTab === 'content'   && <EditorPanel />}
           {panelTab === 'customize' && <CustomizePanel />}
         </div>
-
-        {/* ── Preview toggle button — desktop only ── */}
-        <button
-          onClick={() => setPreviewCollapsed(v => !v)}
-          title={previewCollapsed ? (isRTL ? 'إظهار المعاينة' : 'Show preview') : (isRTL ? 'إخفاء المعاينة' : 'Hide preview')}
-          className="hidden md:flex absolute top-1/2 -translate-y-1/2 items-center justify-center w-5 h-12 rounded-full bg-white border border-slate-200 shadow-md text-slate-400 hover:text-indigo-600 hover:border-indigo-300 transition-all z-20 no-print"
-          style={{ [isRTL ? 'left' : 'right']: '-10px' }}
-        >
-          <svg
-            className={`w-3 h-3 transition-transform duration-300 ${previewCollapsed ? (isRTL ? 'rotate-180' : '') : (isRTL ? '' : 'rotate-180')}`}
-            fill="none" viewBox="0 0 24 24" stroke="currentColor"
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
       </div>
 
       {/* ── Live Preview ── */}
-      <div className={`bg-slate-100 overflow-y-auto transition-all duration-300 ${mobileTab === 'preview' ? 'block flex-1' : 'hidden md:block'} ${previewCollapsed ? 'md:hidden' : 'md:flex-1'}`}>
+      <div className={`flex-1 bg-slate-100 overflow-y-auto ${mobileTab === 'preview' ? 'block' : 'hidden md:block'}`}>
 
         {/* Top action bar */}
         <div className="sticky top-0 right-0 p-3 sm:p-4 flex justify-end gap-2 sm:gap-3 z-10 pointer-events-none no-print">
