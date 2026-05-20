@@ -198,7 +198,7 @@ const PrestigeTemplate = ({
           <section key="summary" style={BREAK_ITEM}>
             <SectionHead label={tr('summary', isRTL)} />
             <div style={ta({ ...s.bodyText, textAlign: 'center', fontStyle: 'italic', color: '#444' }, data.personalInfo?.summaryAlign)}>
-              {data.personalInfo.summary}
+              <span style={{fontWeight:data.personalInfo?.summaryBold?700:undefined,fontStyle:data.personalInfo?.summaryItalic?"italic":undefined}}>{data.personalInfo.summary}</span>
             </div>
           </section>
         ) : null;
@@ -214,7 +214,7 @@ const PrestigeTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? `  ·  ${e.location}` : ''}</div>
-                <div style={s.bodyText}>{e.description}</div>
+                <div style={s.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>
               </div>
             ))}
           </section>
@@ -231,7 +231,7 @@ const PrestigeTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}</div>
-                {e.description && <div style={s.bodyText}>{e.description}</div>}
+                {e.description && <div style={s.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -267,7 +267,7 @@ const PrestigeTemplate = ({
               <div key={i} style={s.itemSm}>
                 <h3 style={s.role}>{p.title}</h3>
                 {p.link && <div style={{ ...s.company, fontSize: sz.meta }}>{p.link}</div>}
-                <div style={s.bodyText}>{p.description}</div>
+                <div style={s.bodyText}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>
               </div>
             ))}
           </section>
@@ -284,7 +284,7 @@ const PrestigeTemplate = ({
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
-                {c.description && <div style={s.bodyText}>{c.description}</div>}
+                {c.description && <div style={s.bodyText}><span style={{fontWeight:c?.descriptionBold?700:undefined,fontStyle:c?.descriptionItalic?"italic":undefined}}>{c.description}</span></div>}
               </div>
             ))}
           </section>
@@ -327,7 +327,7 @@ const PrestigeTemplate = ({
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
-                {a.description && <div style={s.bodyText}>{a.description}</div>}
+                {a.description && <div style={s.bodyText}><span style={{fontWeight:a?.descriptionBold?700:undefined,fontStyle:a?.descriptionItalic?"italic":undefined}}>{a.description}</span></div>}
               </div>
             ))}
           </section>
@@ -360,7 +360,7 @@ const PrestigeTemplate = ({
                   {p.date && <div style={s.date}>{p.date}</div>}
                 </div>
                 {p.publisher && <div style={s.company}>{p.publisher}</div>}
-                {p.description && <div style={s.bodyText}>{p.description}</div>}
+                {p.description && <div style={s.bodyText}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>
@@ -391,7 +391,7 @@ const PrestigeTemplate = ({
                 <div key={i} style={s.itemSm}>
                   {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
-                  {item.description && <div style={s.bodyText}>{item.description}</div>}
+                  {item.description && <div style={s.bodyText}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
                 </div>
               ))}
             </div>

@@ -234,7 +234,7 @@ const AtlanticBlueTemplate = ({
                     <div style={mn.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                   </div>
                   <div style={mn.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
-                  {e.description && <div style={mn.body}>{e.description}</div>}
+                  {e.description && <div style={mn.body}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
                 </div>
               </div>
             ))}
@@ -252,7 +252,7 @@ const AtlanticBlueTemplate = ({
                   <div style={mn.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={mn.company}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
-                {e.description && <div style={mn.body}>{e.description}</div>}
+                {e.description && <div style={mn.body}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -266,7 +266,7 @@ const AtlanticBlueTemplate = ({
               <div key={i} style={mn.item}>
                 <div style={mn.role}>{p.name}</div>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.url}</div>}
-                {p.description && <div style={mn.body}>{p.description}</div>}
+                {p.description && <div style={mn.body}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>

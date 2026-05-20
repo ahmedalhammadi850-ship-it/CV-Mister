@@ -358,7 +358,7 @@ const ArabicEliteTemplate = ({
               </div>
               {e.description && (
                 <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
-                  {e.description}
+                  <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
                 </div>
               )}
             </div>
@@ -384,7 +384,7 @@ const ArabicEliteTemplate = ({
               </div>
               {e.description && (
                 <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
-                  {e.description}
+                  <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
                 </div>
               )}
             </div>
@@ -403,7 +403,7 @@ const ArabicEliteTemplate = ({
               {p.link && <div style={{ fontSize: '8pt', color: accent, textAlign: 'right' }}>{p.link}</div>}
               {p.description && (
                 <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
-                  {p.description}
+                  <span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span>
                 </div>
               )}
             </div>
@@ -422,7 +422,7 @@ const ArabicEliteTemplate = ({
                 <div key={idx} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
                   {item.title    && <div style={{ fontSize: sz.body, fontWeight:'700', color:'#1a202c', textAlign:'right', direction:'rtl' }}>{item.title}</div>}
                   {item.subtitle && <div style={{ fontSize:'8pt', color:accent, textAlign:'right', direction:'rtl' }}>{item.subtitle}</div>}
-                  {item.description && <div style={{ fontSize: sz.body, color:'#555', lineHeight, textAlign:'right', direction:'rtl' }}>{item.description}</div>}
+                  {item.description && <div style={{ fontSize: sz.body, color:'#555', lineHeight, textAlign:'right', direction:'rtl' }}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
                 </div>
               ))}
             </div>

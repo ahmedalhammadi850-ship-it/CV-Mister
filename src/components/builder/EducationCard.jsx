@@ -99,6 +99,10 @@ export default function EducationCard({ edu, isRTL, labelClass, inputClass, onCh
                 isRTL={isRTL}
                 align={edu.descriptionAlign}
                 onAlignChange={val => onChange('descriptionAlign', val)}
+                bold={edu.descriptionBold ?? false}
+                onBoldChange={val => onChange('descriptionBold', val)}
+                italic={edu.descriptionItalic ?? false}
+                onItalicChange={val => onChange('descriptionItalic', val)}
               />
             </div>
           </div>

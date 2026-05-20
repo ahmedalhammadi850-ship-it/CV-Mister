@@ -270,7 +270,7 @@ const ArabicLuxeTemplate = ({
               </div>
               {e.description&&(
                 <div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}>
-                  {e.description}
+                  <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
                 </div>
               )}
             </div>
@@ -299,7 +299,7 @@ const ArabicLuxeTemplate = ({
               </div>
               {e.description&&(
                 <div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}>
-                  {e.description}
+                  <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
                 </div>
               )}
             </div>
@@ -319,7 +319,7 @@ const ArabicLuxeTemplate = ({
             }}>
               <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, textAlign:align, direction:dir }}>{p.title||p.name}</div>
               {p.link&&<div style={{ fontSize:'8pt', color:accent, textAlign:align }}>{p.link}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}>{p.description}</div>}
+              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
             </div>
           ))}
         </section>
@@ -335,7 +335,7 @@ const ArabicLuxeTemplate = ({
                 {p.date&&<div style={{ fontSize:'8pt', color:'#888', whiteSpace:'nowrap' }}>{p.date}</div>}
               </div>
               {p.publisher&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:align, direction:dir }}>{p.publisher}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, direction:dir }}>{p.description}</div>}
+              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, direction:dir }}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
             </div>
           ))}
         </section>
@@ -365,7 +365,7 @@ const ArabicLuxeTemplate = ({
                 <div key={idx} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
                   {item.title&&<div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, textAlign:align, direction:dir }}>{item.title}</div>}
                   {item.subtitle&&<div style={{ fontSize:'8pt', color:accent, textAlign:align, direction:dir }}>{item.subtitle}</div>}
-                  {item.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, direction:dir }}>{item.description}</div>}
+                  {item.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, direction:dir }}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
                 </div>
               ))}
             </div>

@@ -79,6 +79,8 @@ const RobotIcon = () => (
 export default function AITextarea({
   value, onChange, rows = 4, className = '', placeholder = '', isRTL = false,
   align: alignProp, onAlignChange,
+  bold: boldProp, onBoldChange,
+  italic: italicProp, onItalicChange,
 }) {
   const { currentUser } = useAuth();
   const isFree = !currentUser || currentUser.plan === 'free';
@@ -86,8 +88,12 @@ export default function AITextarea({
   const [alignLocal, setAlignLocal] = useState(isRTL ? 'right' : 'left');
   const align    = alignProp !== undefined ? alignProp : alignLocal;
   const setAlign = (v) => { setAlignLocal(v); onAlignChange?.(v); };
-  const [bold, setBold]       = useState(false);
-  const [italic, setItalic]   = useState(false);
+  const [boldLocal,   setBoldLocal]   = useState(false);
+  const [italicLocal, setItalicLocal] = useState(false);
+  const bold   = boldProp   !== undefined ? boldProp   : boldLocal;
+  const italic = italicProp !== undefined ? italicProp : italicLocal;
+  const setBold   = (v) => { setBoldLocal(v);   onBoldChange?.(v); };
+  const setItalic = (v) => { setItalicLocal(v); onItalicChange?.(v); };
   const [toast, setToast]     = useState('');
   const [loading, setLoading] = useState('');
 

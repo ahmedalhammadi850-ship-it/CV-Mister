@@ -186,7 +186,7 @@ const ATSCompactTemplate = ({
         return data.personalInfo?.summary ? (
           <section key="summary" style={BREAK_ITEM}>
             <SectionHead label={tr('summary', isRTL)} />
-            <div style={ta(s.body, data.personalInfo?.summaryAlign)}>{data.personalInfo.summary}</div>
+            <div style={ta(s.body, data.personalInfo?.summaryAlign)}><span style={{fontWeight:data.personalInfo?.summaryBold?700:undefined,fontStyle:data.personalInfo?.summaryItalic?"italic":undefined}}>{data.personalInfo.summary}</span></div>
           </section>
         ) : null;
 
@@ -201,7 +201,7 @@ const ATSCompactTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
-                <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>
+                <div style={ta(s.body, e.descriptionAlign)}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>
               </div>
             ))}
           </section>
@@ -218,7 +218,7 @@ const ATSCompactTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}</div>
-                {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
+                {e.description && <div style={ta(s.body, e.descriptionAlign)}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -248,7 +248,7 @@ const ATSCompactTemplate = ({
               <div key={i} style={s.itemSm}>
                 <div style={{ ...s.role, marginTop: '5pt' }}>{p.title}</div>
                 {p.link && <div style={s.company}>{p.link}</div>}
-                <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>
+                <div style={ta(s.body, p.descriptionAlign)}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>
               </div>
             ))}
           </section>
@@ -265,7 +265,7 @@ const ATSCompactTemplate = ({
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
-                {c.description && <div style={ta(s.body, c.descriptionAlign)}>{c.description}</div>}
+                {c.description && <div style={ta(s.body, c.descriptionAlign)}><span style={{fontWeight:c?.descriptionBold?700:undefined,fontStyle:c?.descriptionItalic?"italic":undefined}}>{c.description}</span></div>}
               </div>
             ))}
           </section>
@@ -308,7 +308,7 @@ const ATSCompactTemplate = ({
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
-                {a.description && <div style={ta(s.body, a.descriptionAlign)}>{a.description}</div>}
+                {a.description && <div style={ta(s.body, a.descriptionAlign)}><span style={{fontWeight:a?.descriptionBold?700:undefined,fontStyle:a?.descriptionItalic?"italic":undefined}}>{a.description}</span></div>}
               </div>
             ))}
           </section>
@@ -341,7 +341,7 @@ const ATSCompactTemplate = ({
                   {p.date && <div style={s.date}>{p.date}</div>}
                 </div>
                 {p.publisher && <div style={s.company}>{p.publisher}</div>}
-                {p.description && <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>}
+                {p.description && <div style={ta(s.body, p.descriptionAlign)}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>
@@ -372,7 +372,7 @@ const ATSCompactTemplate = ({
                 <div key={i} style={s.itemSm}>
                   {item.title && <div style={{ ...s.role, marginTop: '5pt' }}>{item.title}</div>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
-                  {item.description && <div style={ta(s.body, item.descriptionAlign)}>{item.description}</div>}
+                  {item.description && <div style={ta(s.body, item.descriptionAlign)}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
                 </div>
               ))}
             </div>

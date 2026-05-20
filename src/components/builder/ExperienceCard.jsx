@@ -124,6 +124,10 @@ export default function ExperienceCard({ exp, isRTL, labelClass, inputClass, onC
                 isRTL={isRTL}
                 align={exp.descriptionAlign}
                 onAlignChange={val => onChange('descriptionAlign', val)}
+                bold={exp.descriptionBold ?? false}
+                onBoldChange={val => onChange('descriptionBold', val)}
+                italic={exp.descriptionItalic ?? false}
+                onItalicChange={val => onChange('descriptionItalic', val)}
               />
             </div>
           </div>

@@ -245,7 +245,7 @@ const EnglishHorizonTemplate = ({
                 </div>
                 {e.description&&(
                   <div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }}>
-                    {e.description}
+                    <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
                   </div>
                 )}
               </div>
@@ -272,7 +272,7 @@ const EnglishHorizonTemplate = ({
                 <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', marginBottom:'3pt', textAlign:align }}>
                   {e.institution}{e.location?` · ${e.location}`:''}
                 </div>
-                {e.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }}>{e.description}</div>}
+                {e.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             </div>
           ))}
@@ -286,7 +286,7 @@ const EnglishHorizonTemplate = ({
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, textAlign:align, direction:dir }}>
               <div style={{ fontSize:sz.body, fontWeight:'800', color:'#1a202c' }}>{p.title||p.name}</div>
               {p.link&&<div style={{ fontSize:'8pt', color:accent }}>{p.link}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line' }}>{p.description}</div>}
+              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line' }}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
             </div>
           ))}
         </section>
@@ -302,7 +302,7 @@ const EnglishHorizonTemplate = ({
                 {p.date&&<div style={{ fontSize:'8pt', color:'#718096', whiteSpace:'nowrap', marginLeft:'8pt' }}>{p.date}</div>}
               </div>
               {p.publisher&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:align }}>{p.publisher}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align }}>{p.description}</div>}
+              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align }}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
             </div>
           ))}
         </section>
@@ -332,7 +332,7 @@ const EnglishHorizonTemplate = ({
                 <div key={idx} style={{ marginBottom:'10pt', ...BREAK_ITEM, textAlign:align, direction:dir }}>
                   {item.title&&<div style={{ fontSize:sz.body, fontWeight:'700', color:'#1a202c' }}>{item.title}</div>}
                   {item.subtitle&&<div style={{ fontSize:'8pt', color:accent }}>{item.subtitle}</div>}
-                  {item.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight }}>{item.description}</div>}
+                  {item.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight }}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
                 </div>
               ))}
             </div>

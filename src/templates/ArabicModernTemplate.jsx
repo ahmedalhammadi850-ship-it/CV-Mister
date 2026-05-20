@@ -157,7 +157,7 @@ const ArabicModernTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', true) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
-                {e.description && <div style={s.bodyText}>{e.description}</div>}
+                {e.description && <div style={s.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -174,7 +174,7 @@ const ArabicModernTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
-                {e.description && <div style={s.bodyText}>{e.description}</div>}
+                {e.description && <div style={s.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -219,7 +219,7 @@ const ArabicModernTemplate = ({
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
-                {c.description && <div style={s.bodyText}>{c.description}</div>}
+                {c.description && <div style={s.bodyText}><span style={{fontWeight:c?.descriptionBold?700:undefined,fontStyle:c?.descriptionItalic?"italic":undefined}}>{c.description}</span></div>}
               </div>
             ))}
           </section>
@@ -275,7 +275,7 @@ const ArabicModernTemplate = ({
               <div key={i} style={s.item}>
                 <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ fontSize: sz.meta, color: accent, textAlign: 'right' }}>{p.link}</div>}
-                {p.description && <div style={s.bodyText}>{p.description}</div>}
+                {p.description && <div style={s.bodyText}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>
@@ -306,7 +306,7 @@ const ArabicModernTemplate = ({
                 <div key={idx} style={s.item}>
                   {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
-                  {item.description && <div style={s.bodyText}>{item.description}</div>}
+                  {item.description && <div style={s.bodyText}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
                 </div>
               ))}
             </div>

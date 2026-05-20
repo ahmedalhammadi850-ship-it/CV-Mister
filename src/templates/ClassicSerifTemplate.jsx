@@ -205,7 +205,7 @@ const ClassicSerifTemplate = ({
                   <div style={main.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={main.company}>{e.company}{e.location ? `, ${e.location}` : ''}</div>
-                {e.description && <div style={main.body}>{e.description}</div>}
+                {e.description && <div style={main.body}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -222,7 +222,7 @@ const ClassicSerifTemplate = ({
                   <div style={main.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={main.company}>{e.institution}{e.location ? `, ${e.location}` : ''}</div>
-                {e.description && <div style={main.body}>{e.description}</div>}
+                {e.description && <div style={main.body}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -236,7 +236,7 @@ const ClassicSerifTemplate = ({
               <div key={i} style={main.item}>
                 <div style={{ ...main.role, marginBottom: '2pt' }}>{p.name}</div>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '3pt' }}>{p.url}</div>}
-                {p.description && <div style={main.body}>{p.description}</div>}
+                {p.description && <div style={main.body}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>

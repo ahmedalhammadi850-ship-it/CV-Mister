@@ -336,7 +336,7 @@ const ArabicGemTemplate = ({
         return data.personalInfo?.summary ? (
           <section key="summary" style={BREAK_ITEM}>
             <SbHeading label={tr('summary', true)} icon="✦" />
-            <div style={ta(sb.bodyText, data.personalInfo?.summaryAlign)}>{data.personalInfo.summary}</div>
+            <div style={ta(sb.bodyText, data.personalInfo?.summaryAlign)}><span style={{fontWeight:data.personalInfo?.summaryBold?700:undefined,fontStyle:data.personalInfo?.summaryItalic?"italic":undefined}}>{data.personalInfo.summary}</span></div>
           </section>
         ) : null;
 
@@ -463,7 +463,7 @@ const ArabicGemTemplate = ({
                   {e.location && <div style={mn.location}>· {e.location}</div>}
                 </div>
                 {e.description && (
-                  <div style={mn.desc}>{e.description}</div>
+                  <div style={mn.desc}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>
                 )}
               </div>
             ))}
@@ -483,7 +483,7 @@ const ArabicGemTemplate = ({
                   )}
                 </div>
                 <div style={mn.institution}>{e.institution}</div>
-                {e.description && <div style={{ ...mn.desc, marginTop: '3pt' }}>{e.description}</div>}
+                {e.description && <div style={{ ...mn.desc, marginTop: '3pt' }}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -497,7 +497,7 @@ const ArabicGemTemplate = ({
               <div key={i} style={mn.eduItem}>
                 <div style={mn.degree}>{p.title}</div>
                 {p.link && <div style={{ ...mn.institution, fontSize: sz.meta }}>{p.link}</div>}
-                {p.description && <div style={mn.desc}>{p.description}</div>}
+                {p.description && <div style={mn.desc}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>
@@ -514,7 +514,7 @@ const ArabicGemTemplate = ({
                   {p.date && <div style={mn.dateBadge}>{p.date}</div>}
                 </div>
                 {p.publisher && <div style={mn.institution}>{p.publisher}</div>}
-                {p.description && <div style={mn.desc}>{p.description}</div>}
+                {p.description && <div style={mn.desc}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>

@@ -139,7 +139,7 @@ const RoseElegantTemplate = ({
                   </div>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
-                {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
+                {e.description && <div style={ta(s.body, e.descriptionAlign)}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -158,7 +158,7 @@ const RoseElegantTemplate = ({
                   </div>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
-                {e.description && <div style={ta(s.body, e.descriptionAlign)}>{e.description}</div>}
+                {e.description && <div style={ta(s.body, e.descriptionAlign)}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
               </div>
             ))}
           </section>
@@ -195,7 +195,7 @@ const RoseElegantTemplate = ({
               <div key={i} style={s.item}>
                 <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ ...s.body, color: accent, fontSize: sz.meta }}>{p.link}</div>}
-                {p.description && <div style={ta(s.body, p.descriptionAlign)}>{p.description}</div>}
+                {p.description && <div style={ta(s.body, p.descriptionAlign)}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
               </div>
             ))}
           </section>
@@ -212,7 +212,7 @@ const RoseElegantTemplate = ({
                   {c.date && <div style={s.date}>{c.date}</div>}
                 </div>
                 {c.issuer && <div style={s.company}>{c.issuer}</div>}
-                {c.description && <div style={ta(s.body, c.descriptionAlign)}>{c.description}</div>}
+                {c.description && <div style={ta(s.body, c.descriptionAlign)}><span style={{fontWeight:c?.descriptionBold?700:undefined,fontStyle:c?.descriptionItalic?"italic":undefined}}>{c.description}</span></div>}
               </div>
             ))}
           </section>
@@ -229,7 +229,7 @@ const RoseElegantTemplate = ({
                   {a.date && <div style={s.date}>{a.date}</div>}
                 </div>
                 {a.issuer && <div style={s.company}>{a.issuer}</div>}
-                {a.description && <div style={ta(s.body, a.descriptionAlign)}>{a.description}</div>}
+                {a.description && <div style={ta(s.body, a.descriptionAlign)}><span style={{fontWeight:a?.descriptionBold?700:undefined,fontStyle:a?.descriptionItalic?"italic":undefined}}>{a.description}</span></div>}
               </div>
             ))}
           </section>
@@ -302,7 +302,7 @@ const RoseElegantTemplate = ({
                 <div key={idx} style={s.item}>
                   {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
-                  {item.description && <div style={ta(s.body, item.descriptionAlign)}>{item.description}</div>}
+                  {item.description && <div style={ta(s.body, item.descriptionAlign)}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
                 </div>
               ))}
             </div>
