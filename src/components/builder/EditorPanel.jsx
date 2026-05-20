@@ -359,7 +359,7 @@ const CardWrapper = ({ children, onDelete }) => (
 );
 
 const EditorPanel = () => {
-  const { cvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection, visiblePersonalFields, togglePersonalField, selectedTemplate, sectionNames, renameSectionName } = useCV();
+  const { cvData, setCvData, updateSection, theme, setTheme, addSection, sectionOrder, addCustomSection, updateCustomSection, deleteCustomSection, visiblePersonalFields, togglePersonalField, selectedTemplate, sectionNames, renameSectionName } = useCV();
   const { isRTL, currentUser } = useAuth();
   const [openSection, setOpenSection] = useState('personalInfo');
   const [showAddContent, setShowAddContent] = useState(false);
@@ -561,9 +561,9 @@ const EditorPanel = () => {
                     align={cvData.personalInfo.summaryAlign}
                     onAlignChange={val => handlePersonalInfoChange({ target: { name: 'summaryAlign', value: val } })}
                     bold={cvData.personalInfo.summaryBold ?? false}
-                    onBoldChange={val => handlePersonalInfoChange({ target: { name: 'summaryBold', value: val } })}
+                    onBoldChange={val => setCvData(prev => ({ ...prev, personalInfo: { ...prev.personalInfo, summaryBold: val } }))}
                     italic={cvData.personalInfo.summaryItalic ?? false}
-                    onItalicChange={val => handlePersonalInfoChange({ target: { name: 'summaryItalic', value: val } })}
+                    onItalicChange={val => setCvData(prev => ({ ...prev, personalInfo: { ...prev.personalInfo, summaryItalic: val } }))}
                   />
                 </div>
               </div>
