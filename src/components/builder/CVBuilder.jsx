@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
@@ -66,8 +67,8 @@ const SaveModal = ({ isRTL, defaultName, onSave, onClose }) => {
   );
 };
 
-const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
+const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => createPortal(
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 ${plan === 'pro' ? 'bg-indigo-100' : 'bg-amber-100'}`}>
         <svg className={`w-8 h-8 ${plan === 'pro' ? 'text-indigo-600' : 'text-amber-600'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -98,11 +99,12 @@ const LimitModal = ({ isRTL, plan, onClose, onUpgrade }) => (
         </button>
       </div>
     </div>
-  </div>
+  </div>,
+  document.body
 );
 
-const FreeExpiredModal = ({ isRTL, onClose, onUpgrade }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }}>
+const FreeExpiredModal = ({ isRTL, onClose, onUpgrade }) => createPortal(
+  <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4" style={{ background: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(6px)' }} onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
     <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-8 text-center" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5 bg-rose-100">
         <svg className="w-8 h-8 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -126,7 +128,8 @@ const FreeExpiredModal = ({ isRTL, onClose, onUpgrade }) => (
         </button>
       </div>
     </div>
-  </div>
+  </div>,
+  document.body
 );
 
 const PAGE_H_PX = 1122;

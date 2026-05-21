@@ -455,7 +455,7 @@ const DashboardPage = () => {
     setLoading(true); setError(null);
     try {
       const res = await fetch('/api/cvs', { credentials: 'include' });
-      if (res.status === 401) { navigate('/login'); return; }
+      if (res.status === 401 || res.status === 403) { navigate('/login'); return; }
       if (!res.ok) throw new Error('Failed');
       setCvs(await res.json());
     } catch {
