@@ -80,21 +80,21 @@ const PaywallModal = ({ isRTL, onClose, reason }) => {
 
   const body = isRTL
     ? (isPro
-        ? 'لقد وصلت للحد الأقصى لخطة Pro (سيرتان). قم بالترقية إلى خطة الأعمال للحصول على سير ذاتية غير محدودة.'
+        ? 'لقد وصلت للحد الأقصى لخطة Pro (سيرتان). جدد اشتراكك أو احذف سيرة قديمة لإنشاء سيرة جديدة.'
         : isExpired
           ? 'انتهت فترة اشتراكك. جدد اشتراكك للاستمرار بإنشاء السير الذاتية.'
           : 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين ذاتيتين وقوالب احترافية.')
     : (isPro
-        ? 'You have reached the Pro plan limit (2 CVs). Upgrade to Business for unlimited resumes.'
+        ? 'You have reached the Pro plan limit (2 CVs). Renew your subscription or delete an old resume to create a new one.'
         : isExpired
           ? 'Your subscription has ended. Renew to continue creating resumes.'
           : "You've used your free CV slot. Upgrade to create up to 2 CVs and access premium templates.");
 
   const buttonLabel = isRTL
-    ? (isPro ? '🚀 الترقية إلى الأعمال — $15/شهر' : '🔄 تجديد الاشتراك — $3/شهر')
-    : (isPro ? '🚀 Upgrade to Business — $15/mo' : '🔄 Renew Subscription — $3/mo');
+    ? '🔄 تجديد الاشتراك — $3/شهر'
+    : '🔄 Renew Subscription — $3/mo';
 
-  const upgradeUrl = isPro ? '/upgrade?plan=business' : '/upgrade';
+  const upgradeUrl = '/upgrade';
 
   return createPortal(
     <div
