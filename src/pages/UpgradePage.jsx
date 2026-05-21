@@ -45,9 +45,11 @@ const UpgradePage = () => {
   const [copied, setCopied]     = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [pricing, setPricing]   = useState(PRICING_DEFAULTS);
-  const inputRef   = useRef();
-  const timerRef   = useRef(null);
-  const pollRef    = useRef(null);
+  const inputRef          = useRef();
+  const timerRef          = useRef(null);
+  const pollRef           = useRef(null);
+  const submittedAtRef    = useRef(null);
+  const prevExpiresAtRef  = useRef(null);
 
   useEffect(() => {
     fetch('/api/pricing')
@@ -68,9 +70,25 @@ const UpgradePage = () => {
         const res = await fetch('/api/auth/user', { credentials: 'include' });
         if (!res.ok) return;
         const data = await res.json();
-        const approved = targetPlan === 'business'
+
+        const planMatch = targetPlan === 'business'
           ? data.plan === 'business'
           : (data.plan === 'pro' || data.plan === 'business');
+
+        const prevExpiry = prevExpiresAtRef.current;
+        const newExpiry  = data.planExpiresAt;
+
+        /* Only consider activated if planExpiresAt is genuinely newer than
+           what it was when the user submitted (prevents false-positive on
+           existing active subscriptions) */
+        const expiryAdvanced = newExpiry && prevExpiry
+          ? new Date(newExpiry) > new Date(prevExpiry)
+          : newExpiry && !prevExpiry;
+
+        /* For a brand-new subscriber (free → pro) plan match is enough */
+        const wasAlreadyPaid = prevExpiresAtRef.current !== null;
+        const approved = planMatch && (wasAlreadyPaid ? expiryAdvanced : true);
+
         if (approved) {
           clearInterval(pollRef.current);
           await refreshUser();
@@ -178,6 +196,8 @@ const UpgradePage = () => {
           setLoading(false);
           return;
         }
+        prevExpiresAtRef.current = currentUser?.planExpiresAt || null;
+        submittedAtRef.current   = new Date().toISOString();
         startCooldown(30);
         setDone(true);
       };
