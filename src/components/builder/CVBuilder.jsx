@@ -155,9 +155,6 @@ const CVBuilder = () => {
     if (currentUser?.subscriptionExpired) {
       saveBlockedRef.current = true;
       setShowFreeExpiredModal(true);
-    } else if (currentUser && !currentUser.subscriptionExpired) {
-      saveBlockedRef.current = false;
-      setShowFreeExpiredModal(false);
     }
   }, [currentUser?.subscriptionExpired]);
 
