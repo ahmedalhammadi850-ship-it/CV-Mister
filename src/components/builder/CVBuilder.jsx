@@ -152,6 +152,13 @@ const CVBuilder = () => {
   const saveBlockedRef = useRef(false);
 
   useEffect(() => {
+    if (currentUser?.subscriptionExpired) {
+      saveBlockedRef.current = true;
+      setShowFreeExpiredModal(true);
+    }
+  }, [currentUser?.subscriptionExpired]);
+
+  useEffect(() => {
     if (isFirstRenderRef.current) { isFirstRenderRef.current = false; return; }
     if (saveBlockedRef.current) return;
     setAutoSaveStatus('pending');

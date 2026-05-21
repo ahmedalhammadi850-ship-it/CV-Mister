@@ -52,6 +52,7 @@ export default async function handler(req, res) {
       plan: userData.plan || "free",
       cvCount: userData.cvCount || 0,
       planExpiresAt: userData.planExpiresAt || null,
+      createdAt: userData.createdAt || null,
     });
   } catch (error) {
     console.error("[firebase-sync]", error.message);

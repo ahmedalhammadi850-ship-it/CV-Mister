@@ -28,7 +28,17 @@ export function AuthProvider({ children }) {
       const diff = planExpiresAt - now;
       daysLeft = Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
     }
-    const subscriptionExpired = dbUser.plan === 'free' && planExpiresAt && planExpiresAt < now;
+    let subscriptionExpired = false;
+    if (dbUser.plan === 'free') {
+      if (planExpiresAt && planExpiresAt < now) {
+        subscriptionExpired = true;
+      } else if (dbUser.createdAt) {
+        const createdAt = new Date(dbUser.createdAt);
+        const freeExpiry = new Date(createdAt);
+        freeExpiry.setMonth(freeExpiry.getMonth() + 1);
+        if (now > freeExpiry) subscriptionExpired = true;
+      }
+    }
     return {
       uid:                 dbUser.id || dbUser.uid,
       id:                  dbUser.id || dbUser.uid,
@@ -40,7 +50,7 @@ export function AuthProvider({ children }) {
       cvCount:             dbUser.cvCount || 0,
       planExpiresAt,
       daysLeft,
-      subscriptionExpired: !!subscriptionExpired,
+      subscriptionExpired,
     };
   };
 

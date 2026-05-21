@@ -443,6 +443,10 @@ const DashboardPage = () => {
   const [showPaywall, setShowPaywall] = useState(false);
 
   const handleNewCV = () => {
+    if (currentUser?.subscriptionExpired) {
+      setShowPaywall(true);
+      return;
+    }
     const isFree = !currentUser || currentUser.plan === 'free';
     if (isFree && cvs.length >= 1) {
       setShowPaywall(true);
@@ -467,6 +471,7 @@ const DashboardPage = () => {
 
   const handleDelete    = async (id) => { deleteCV(id); await fetch(`/api/cvs/${id}`, { method: 'DELETE', credentials: 'include' }); setCvs(prev => prev.filter(c => c.id !== id)); };
   const handleDuplicate = async (id) => {
+    if (currentUser?.subscriptionExpired) { setShowPaywall(true); return; }
     const isFree = !currentUser || currentUser.plan === 'free';
     if (isFree && cvs.length >= 1) { setShowPaywall(true); return; }
     const cv = cvs.find(c => c.id === id); if (!cv) return;
