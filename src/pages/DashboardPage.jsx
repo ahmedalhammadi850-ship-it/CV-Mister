@@ -6,6 +6,50 @@ import { useCV } from '../context/useCV';
 import { formatDate } from '../utils/cvStorage';
 import TemplatesPage from './TemplatesPage';
 
+function usePendingApprovalPoll(currentUser, refreshUser) {
+  const pollRef = useRef(null);
+  const [justActivated, setJustActivated] = useState(false);
+
+  useEffect(() => {
+    if (!currentUser || (currentUser.plan !== 'free' && !currentUser.subscriptionExpired)) return;
+
+    let active = true;
+
+    const checkPending = async () => {
+      try {
+        const res = await fetch('/api/payment-requests/my', { credentials: 'include' });
+        if (!res.ok || !active) return;
+        const requests = await res.json();
+        const hasPending = requests.some(r => r.status === 'pending');
+        if (!hasPending) return;
+
+        pollRef.current = setInterval(async () => {
+          try {
+            const r = await fetch('/api/auth/user', { credentials: 'include' });
+            if (!r.ok) return;
+            const data = await r.json();
+            if (data.plan === 'pro' || data.plan === 'business') {
+              clearInterval(pollRef.current);
+              await refreshUser();
+              if (active) setJustActivated(true);
+              setTimeout(() => { if (active) setJustActivated(false); }, 5000);
+            }
+          } catch { /* silent */ }
+        }, 5000);
+      } catch { /* silent */ }
+    };
+
+    checkPending();
+
+    return () => {
+      active = false;
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, [currentUser?.uid, currentUser?.plan]);
+
+  return justActivated;
+}
+
 const TEMPLATE_COLORS = {
   modern:        { from: '#4f46e5', to: '#818cf8' },
   classic:       { from: '#1e3a5f', to: '#2563eb' },
@@ -447,9 +491,11 @@ const EmptyState = ({ isRTL, onNew }) => (
 
 /* ─────────────────────── Dashboard Page ─────────────────────── */
 const DashboardPage = () => {
-  const { currentUser, isRTL, signOutUser, toggleRTL } = useAuth();
+  const { currentUser, isRTL, signOutUser, toggleRTL, refreshUser } = useAuth();
   const { deleteCV } = useCV();
   const navigate = useNavigate();
+
+  const justActivated = usePendingApprovalPoll(currentUser, refreshUser);
 
   const [cvs, setCvs]               = useState([]);
   const [loading, setLoading]       = useState(true);
@@ -533,6 +579,24 @@ const DashboardPage = () => {
     <div className="flex h-screen overflow-hidden bg-slate-50" dir={isRTL ? 'rtl' : 'ltr'}>
 
       {showPaywall && <PaywallModal isRTL={isRTL} reason={paywallReason} onClose={() => setShowPaywall(false)} />}
+
+      {/* Activation success banner */}
+      {justActivated && createPortal(
+        <div className="fixed top-5 inset-x-0 z-[9999] flex justify-center px-4 pointer-events-none">
+          <div className="bg-white border border-green-200 shadow-2xl rounded-2xl px-6 py-4 flex items-center gap-3 max-w-sm w-full pointer-events-auto">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <p className="font-bold text-slate-900 text-sm">{isRTL ? '🎉 تم تفعيل اشتراكك!' : '🎉 Subscription activated!'}</p>
+              <p className="text-slate-500 text-xs mt-0.5">{isRTL ? 'أصبح حسابك الآن على خطة Pro' : 'Your account is now on the Pro plan'}</p>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
 
       {/* Sidebar */}
       <Sidebar
