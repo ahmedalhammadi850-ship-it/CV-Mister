@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
 import { useTemplateConfig } from '../../context/TemplateConfigContext';
