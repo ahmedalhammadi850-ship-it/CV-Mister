@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createPortal } from 'react-dom';
 
@@ -17,6 +17,13 @@ const PRICING_DEFAULTS = {
   pro_price: 3,
   pro_name: 'احترافي',
   pro_name_en: 'Professional',
+  pro_desc: 'الخيار المثالي للباحثين عن عمل بجدية',
+  pro_desc_en: 'Ideal for serious job seekers',
+  business_price: 15,
+  business_name: 'أعمال',
+  business_name_en: 'Business',
+  business_desc: 'للشركات والفرق التي تحتاج إلى حلول متكاملة',
+  business_desc_en: 'For companies and teams needing complete solutions',
   payment_account: '00154578',
   payment_bank: 'بنك التضامن — Tadhamon Bank',
   payment_beneficiary: 'أحمد عبدالله عقلان الحمادي',
@@ -25,6 +32,8 @@ const PRICING_DEFAULTS = {
 const UpgradePage = () => {
   const { isRTL, currentUser, refreshUser } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const targetPlan = searchParams.get('plan') === 'business' ? 'business' : 'pro';
 
   const [file, setFile]         = useState(null);
   const [preview, setPreview]   = useState(null);
@@ -59,7 +68,10 @@ const UpgradePage = () => {
         const res = await fetch('/api/auth/user', { credentials: 'include' });
         if (!res.ok) return;
         const data = await res.json();
-        if (data.plan === 'pro' || data.plan === 'business') {
+        const approved = targetPlan === 'business'
+          ? data.plan === 'business'
+          : (data.plan === 'pro' || data.plan === 'business');
+        if (approved) {
           clearInterval(pollRef.current);
           await refreshUser();
           setActivated(true);
@@ -69,7 +81,7 @@ const UpgradePage = () => {
     };
     pollRef.current = setInterval(check, 5000);
     return () => clearInterval(pollRef.current);
-  }, [done, navigate, refreshUser]);
+  }, [done, navigate, refreshUser, targetPlan]);
 
   const startCooldown = (seconds = 30) => {
     setCooldown(seconds);
@@ -153,7 +165,7 @@ const UpgradePage = () => {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ receiptImage: base64 }),
+            body: JSON.stringify({ receiptImage: base64, plan: targetPlan }),
           }),
           sendToWebhook(base64, currentUser),
         ]);
@@ -249,20 +261,32 @@ const UpgradePage = () => {
 
         {/* Header card */}
         <div className="rounded-3xl p-6 mb-5 text-white relative overflow-hidden"
-          style={{ background: 'linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#c026d3 100%)' }}>
+          style={{ background: targetPlan === 'business'
+            ? 'linear-gradient(135deg,#0f766e 0%,#0369a1 60%,#4f46e5 100%)'
+            : 'linear-gradient(135deg,#4f46e5 0%,#7c3aed 60%,#c026d3 100%)' }}>
           <div className="absolute -top-8 -left-8 w-32 h-32 rounded-full bg-white/5" />
           <div className="absolute -bottom-6 -right-6 w-24 h-24 rounded-full bg-white/5" />
           <div className="relative">
             <span className="inline-flex items-center gap-1.5 bg-white/20 text-white text-xs font-semibold px-3 py-1 rounded-full mb-3">
-              ⭐ الأكثر شيوعاً
+              {targetPlan === 'business' ? '🚀 سير ذاتية غير محدودة' : '⭐ الأكثر شيوعاً'}
             </span>
             <h1 className="text-2xl font-bold mb-1">
-              {isRTL ? `ترقية إلى ${pricing.pro_name}` : `Upgrade to ${pricing.pro_name_en}`}
+              {targetPlan === 'business'
+                ? (isRTL ? `ترقية إلى ${pricing.business_name}` : `Upgrade to ${pricing.business_name_en}`)
+                : (isRTL ? `ترقية إلى ${pricing.pro_name}` : `Upgrade to ${pricing.pro_name_en}`)
+              }
             </h1>
-            <p className="text-white/70 text-sm">{isRTL ? pricing.pro_desc : pricing.pro_desc_en}</p>
+            <p className="text-white/70 text-sm">
+              {targetPlan === 'business'
+                ? (isRTL ? pricing.business_desc : pricing.business_desc_en)
+                : (isRTL ? pricing.pro_desc : pricing.pro_desc_en)
+              }
+            </p>
             <div className="mt-4 flex items-end gap-1">
               <span className="text-white/70 text-lg">$</span>
-              <span className="text-5xl font-extrabold leading-none">{pricing.pro_price}</span>
+              <span className="text-5xl font-extrabold leading-none">
+                {targetPlan === 'business' ? pricing.business_price : pricing.pro_price}
+              </span>
               <span className="text-white/60 text-sm mb-1">/ {isRTL ? 'شهرياً' : 'month'}</span>
             </div>
           </div>

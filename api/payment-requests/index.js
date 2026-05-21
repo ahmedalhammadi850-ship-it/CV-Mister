@@ -17,8 +17,11 @@ export default async function handler(req, res) {
   cooldowns.set(uid, Date.now());
 
   try {
-    const { receiptImage } = req.body || {};
+    const { receiptImage, plan } = req.body || {};
     if (!receiptImage) return res.status(400).json({ message: "صورة الحوالة مطلوبة" });
+
+    const targetPlan = plan === "business" ? "business" : "pro";
+    const amount = targetPlan === "business" ? 15 : 3;
 
     const db = getDb();
     const existingSnap = await db
@@ -34,8 +37,8 @@ export default async function handler(req, res) {
     await db.collection("paymentRequests").doc(id).set({
       userId: uid,
       receiptImage,
-      plan: "pro",
-      amount: 3,
+      plan: targetPlan,
+      amount,
       status: "pending",
       createdAt: new Date().toISOString(),
       reviewedAt: null,

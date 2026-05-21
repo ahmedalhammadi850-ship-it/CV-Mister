@@ -21,10 +21,11 @@ export default async function handler(req, res) {
     const data = snap.data();
 
     if (status === "approved" && data.userId) {
+      const approvedPlan = data.plan === "business" ? "business" : "pro";
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 1);
       await db.collection("users").doc(data.userId).update({
-        plan: "pro",
+        plan: approvedPlan,
         planExpiresAt: expiresAt.toISOString(),
         updatedAt: now,
       });

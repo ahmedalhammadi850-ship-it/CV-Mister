@@ -71,8 +71,8 @@ const PRO_LIMIT   = 2;
 const PaywallModal = ({ isRTL, onClose, reason }) => {
   const navigate = useNavigate();
 
-  const isPro        = reason === 'pro_limit';
-  const isExpired    = reason === 'expired';
+  const isPro     = reason === 'pro_limit';
+  const isExpired = reason === 'expired';
 
   const title = isRTL
     ? (isPro ? 'وصلت للحد الأقصى' : 'ميزة مدفوعة')
@@ -80,15 +80,21 @@ const PaywallModal = ({ isRTL, onClose, reason }) => {
 
   const body = isRTL
     ? (isPro
-        ? 'لقد وصلت للحد الأقصى لخطة Pro (سيرتان). لإنشاء سيرة جديدة يجب تجديد اشتراكك.'
+        ? 'لقد وصلت للحد الأقصى لخطة Pro (سيرتان). قم بالترقية إلى خطة الأعمال للحصول على سير ذاتية غير محدودة.'
         : isExpired
-          ? 'انتهت فترة اشتراكك المجاني. جدد اشتراكك للاستمرار بإنشاء السير الذاتية.'
+          ? 'انتهت فترة اشتراكك. جدد اشتراكك للاستمرار بإنشاء السير الذاتية.'
           : 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين ذاتيتين وقوالب احترافية.')
     : (isPro
-        ? 'You have reached the Pro plan limit (2 CVs). Renew your subscription to create a new one.'
+        ? 'You have reached the Pro plan limit (2 CVs). Upgrade to Business for unlimited resumes.'
         : isExpired
-          ? 'Your free trial has ended. Renew your subscription to continue.'
+          ? 'Your subscription has ended. Renew to continue creating resumes.'
           : "You've used your free CV slot. Upgrade to create up to 2 CVs and access premium templates.");
+
+  const buttonLabel = isRTL
+    ? (isPro ? '🚀 الترقية إلى الأعمال — $15/شهر' : '🔄 تجديد الاشتراك — $3/شهر')
+    : (isPro ? '🚀 Upgrade to Business — $15/mo' : '🔄 Renew Subscription — $3/mo');
+
+  const upgradeUrl = isPro ? '/upgrade?plan=business' : '/upgrade';
 
   return createPortal(
     <div
@@ -106,11 +112,11 @@ const PaywallModal = ({ isRTL, onClose, reason }) => {
         <p className="text-slate-500 text-sm leading-relaxed mb-6">{body}</p>
         <div className="flex flex-col gap-2">
           <button
-            onClick={() => { onClose(); navigate('/upgrade'); }}
+            onClick={() => { onClose(); navigate(upgradeUrl); }}
             className="w-full py-3 rounded-2xl text-white font-bold text-sm transition-all"
             style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
           >
-            {isRTL ? '🔄 تجديد الاشتراك — $3/شهر' : '🔄 Renew Subscription — $3/mo'}
+            {buttonLabel}
           </button>
           <button onClick={onClose} className="w-full py-2.5 rounded-2xl text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
             {isRTL ? 'إلغاء' : 'Cancel'}
