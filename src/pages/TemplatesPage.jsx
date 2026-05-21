@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useCV } from '../context/useCV';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
-import { useTemplateConfig } from '../context/TemplateConfigContext';
 import ModernTemplate from '../templates/ModernTemplate';
 import ClassicTemplate from '../templates/ClassicTemplate';
 import CreativeTemplate from '../templates/CreativeTemplate';
@@ -407,7 +406,7 @@ const PREVIEW_SCALE = 0.28;
 const PREVIEW_W = 794;
 const PREVIEW_H = 1122;
 
-const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, isLocked, isDark }) => {
+const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, isDark }) => {
   const Component = template.component;
   const previewTheme = { primaryColor: template.color };
 
@@ -456,30 +455,13 @@ const TemplateCard = ({ template, isSelected, isRTL, onSelect, onUse, isFree, is
           </div>
         )}
 
-        {/* Lock overlay for free users on paid templates */}
-        {isLocked && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 z-20"
-            style={{ background: 'rgba(15,23,42,0.55)', backdropFilter: 'blur(2px)' }}>
-            <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-              </svg>
-            </div>
-            <span className="text-white text-xs font-bold px-3 py-1 rounded-full bg-indigo-600/90 shadow">
-              {isRTL ? '⭐ يتطلب Pro' : '⭐ Pro Required'}
-            </span>
-          </div>
-        )}
-
         {/* Hover overlay */}
         <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors duration-300 flex items-center justify-center">
           <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <span className="bg-white text-slate-700 font-semibold text-sm px-4 py-2 rounded-full shadow-md">
-              {isLocked
-                ? (isRTL ? '⭐ ترقية للـ Pro' : '⭐ Upgrade to Pro')
-                : isSelected
-                  ? (isRTL ? '✓ محدد' : '✓ Selected')
-                  : (isRTL ? 'استخدام القالب' : 'Use Template')}
+              {isSelected
+                ? (isRTL ? '✓ محدد' : '✓ Selected')
+                : (isRTL ? 'استخدام القالب' : 'Use Template')}
             </span>
           </div>
         </div>
@@ -525,20 +507,14 @@ const TABS = [
 
 const TemplatesPage = () => {
   const { selectedTemplate, setSelectedTemplate, previewTemplate } = useCV();
-  const { isRTL, currentUser } = useAuth();
+  const { isRTL } = useAuth();
   const { isDark } = useTheme();
-  const { freeTemplates } = useTemplateConfig();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('all');
-  const isFreeUser = !currentUser || currentUser.plan === 'free';
 
   const active = templates.find(t => t.id === selectedTemplate);
 
   const handleUse = (id) => {
-    if (isFreeUser && id !== 'minimal') {
-      navigate('/upgrade');
-      return;
-    }
     const tpl = templates.find(t => t.id === id);
     previewTemplate(id, tpl?.color);
     navigate('/builder?from=template');
@@ -646,7 +622,6 @@ const TemplatesPage = () => {
               onSelect={setSelectedTemplate}
               onUse={handleUse}
               isFree={template.id === 'minimal'}
-              isLocked={isFreeUser && template.id !== 'minimal'}
               isDark={isDark}
             />
           ))}
