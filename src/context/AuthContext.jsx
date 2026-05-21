@@ -85,6 +85,26 @@ export function AuthProvider({ children }) {
     subscriptionExpired: false,
   });
 
+  /* Auto-poll every 15s when subscription is expired — detects admin approval */
+  useEffect(() => {
+    if (!currentUser?.subscriptionExpired) return;
+    const interval = setInterval(async () => {
+      const firebaseUser = auth.currentUser;
+      if (!firebaseUser) return;
+      try {
+        const res = await fetch('/api/auth/user', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.plan === 'pro' || data.plan === 'business') {
+          const user = await syncWithBackend(firebaseUser);
+          if (user) setCurrentUser(user);
+          clearInterval(interval);
+        }
+      } catch { /* silent */ }
+    }, 15000);
+    return () => clearInterval(interval);
+  }, [currentUser?.subscriptionExpired]);
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser && firebaseUser.emailVerified) {
