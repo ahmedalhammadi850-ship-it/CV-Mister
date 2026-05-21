@@ -43,11 +43,11 @@ const PaywallModal = ({ isRTL, onClose }) => {
         </p>
         <div className="flex flex-col gap-2">
           <button
-            onClick={() => { onClose(); navigate('/pricing'); }}
+            onClick={() => { onClose(); navigate('/upgrade'); }}
             className="w-full py-3 rounded-2xl text-white font-bold text-sm transition-all"
             style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
           >
-            {isRTL ? '⭐ ترقية الآن — $3/شهر' : '⭐ Upgrade Now — $3/mo'}
+            {isRTL ? '🔄 تجديد الاشتراك — $3/شهر' : '🔄 Renew Subscription — $3/mo'}
           </button>
           <button onClick={onClose} className="w-full py-2.5 rounded-2xl text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
             {isRTL ? 'إلغاء' : 'Cancel'}

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { createPortal } from 'react-dom';
 
 const Step = ({ n, label, isRTL }) => (
   <div className="flex items-start gap-3">
@@ -22,7 +23,7 @@ const PRICING_DEFAULTS = {
 };
 
 const UpgradePage = () => {
-  const { isRTL, currentUser } = useAuth();
+  const { isRTL, currentUser, refreshUser } = useAuth();
   const navigate = useNavigate();
 
   const [file, setFile]         = useState(null);
@@ -30,20 +31,45 @@ const UpgradePage = () => {
   const [dragging, setDragging] = useState(false);
   const [loading, setLoading]   = useState(false);
   const [done, setDone]         = useState(false);
+  const [activated, setActivated] = useState(false);
   const [error, setError]       = useState('');
   const [copied, setCopied]     = useState(false);
   const [cooldown, setCooldown] = useState(0);
   const [pricing, setPricing]   = useState(PRICING_DEFAULTS);
   const inputRef   = useRef();
   const timerRef   = useRef(null);
+  const pollRef    = useRef(null);
 
   useEffect(() => {
     fetch('/api/pricing')
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setPricing(prev => ({ ...prev, ...data })); })
       .catch(() => {});
-    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
   }, []);
+
+  /* Poll for admin approval every 5 seconds after submission */
+  useEffect(() => {
+    if (!done) return;
+    const check = async () => {
+      try {
+        const res = await fetch('/api/auth/user', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data.plan === 'pro' || data.plan === 'business') {
+          clearInterval(pollRef.current);
+          await refreshUser();
+          setActivated(true);
+          setTimeout(() => navigate('/dashboard'), 2500);
+        }
+      } catch { /* silent */ }
+    };
+    pollRef.current = setInterval(check, 5000);
+    return () => clearInterval(pollRef.current);
+  }, [done, navigate, refreshUser]);
 
   const startCooldown = (seconds = 30) => {
     setCooldown(seconds);
@@ -149,7 +175,28 @@ const UpgradePage = () => {
     }
   };
 
-  /* ── Success state ── */
+  /* ── Activated state (admin approved) ── */
+  if (activated) return (
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir={isRTL ? 'rtl' : 'ltr'}>
+      <div className="bg-white rounded-3xl shadow-xl p-10 max-w-md w-full text-center">
+        <div className="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-5"
+          style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}>
+          <svg className="w-10 h-10 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+        <h2 className="text-2xl font-bold text-slate-900 mb-3">🎉 تم تفعيل اشتراكك!</h2>
+        <p className="text-slate-500 text-sm leading-relaxed mb-6">
+          أصبح حسابك الآن على خطة Pro. جاري توجيهك للوحة التحكم...
+        </p>
+        <div className="flex justify-center">
+          <div className="w-8 h-8 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── Waiting state (submitted, polling for approval) ── */
   if (done) return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6" dir={isRTL ? 'rtl' : 'ltr'}>
       <div className="bg-white rounded-3xl shadow-xl p-10 max-w-md w-full text-center">
@@ -159,16 +206,26 @@ const UpgradePage = () => {
           </svg>
         </div>
         <h2 className="text-2xl font-bold text-slate-900 mb-3">تم استلام طلبك!</h2>
-        <p className="text-slate-500 text-sm leading-relaxed mb-8">
+        <p className="text-slate-500 text-sm leading-relaxed mb-4">
           سنراجع إيصال الحوالة خلال دقائق ونُفعّل اشتراكك فور التأكيد.
-          سيصلك إشعار عند تفعيل الحساب.
         </p>
+
+        {/* Live status indicator */}
+        <div className="bg-indigo-50 rounded-2xl px-5 py-4 mb-6 flex items-center gap-3">
+          <div className="relative flex-shrink-0">
+            <div className="w-3 h-3 rounded-full bg-indigo-500" />
+            <div className="absolute inset-0 w-3 h-3 rounded-full bg-indigo-400 animate-ping" />
+          </div>
+          <p className="text-indigo-700 text-sm font-medium text-right flex-1">
+            في انتظار موافقة الإدارة... سيُفعَّل تلقائياً
+          </p>
+        </div>
+
         <button
           onClick={() => navigate('/dashboard')}
-          className="w-full py-3.5 rounded-2xl text-white font-bold text-sm"
-          style={{ background: 'linear-gradient(135deg,#4f46e5,#7c3aed)' }}
+          className="w-full py-3.5 rounded-2xl text-slate-600 text-sm font-medium border border-slate-200 hover:bg-slate-50 transition-colors"
         >
-          العودة إلى لوحة التحكم
+          العودة إلى لوحة التحكم الآن
         </button>
       </div>
     </div>
