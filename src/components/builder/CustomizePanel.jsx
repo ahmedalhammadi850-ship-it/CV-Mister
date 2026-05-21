@@ -274,47 +274,6 @@ const LockIcon = () => (
   </svg>
 );
 
-const UpgradeModal = ({ isRTL, onClose }) => (
-  <div
-    className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
-    onClick={onClose}
-  >
-    <div
-      className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col items-center gap-4"
-      dir={isRTL ? 'rtl' : 'ltr'}
-      onClick={e => e.stopPropagation()}
-    >
-      <div className="w-14 h-14 rounded-full bg-indigo-100 flex items-center justify-center">
-        <svg className="w-7 h-7 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-        </svg>
-      </div>
-      <div className="text-center">
-        <h3 className="text-lg font-bold text-slate-900 mb-1">
-          {isRTL ? 'هذا القالب للمستخدمين المدفوعين' : 'Pro Template'}
-        </h3>
-        <p className="text-sm text-slate-500">
-          {isRTL
-            ? 'قم بترقية خطتك للوصول إلى جميع القوالب الاحترافية'
-            : 'Upgrade your plan to unlock all professional templates'}
-        </p>
-      </div>
-      <a
-        href="/pricing"
-        className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold text-center hover:bg-indigo-700 transition-colors"
-      >
-        {isRTL ? '⚡ ترقية الآن' : '⚡ Upgrade Now'}
-      </a>
-      <button
-        onClick={onClose}
-        className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
-      >
-        {isRTL ? 'ليس الآن' : 'Maybe later'}
-      </button>
-    </div>
-  </div>
-);
-
 const CustomizePanel = () => {
   const {
     theme, setTheme,
@@ -326,14 +285,9 @@ const CustomizePanel = () => {
   const { isRTL, currentUser } = useAuth();
   const { freeTemplates } = useTemplateConfig();
   const isFreeUser = !currentUser || currentUser.plan === 'free';
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
   return (
     <div className="flex flex-col pb-20" dir={isRTL ? 'rtl' : 'ltr'}>
-
-      {showUpgradeModal && (
-        <UpgradeModal isRTL={isRTL} onClose={() => setShowUpgradeModal(false)} />
-      )}
 
       {/* ── Basics ── */}
       <AccordionSection titleKey="basics" isRTL={isRTL} defaultOpen>
@@ -349,23 +303,18 @@ const CustomizePanel = () => {
           )}
           <div className="grid grid-cols-2 gap-2">
             {TEMPLATES.map(tpl => {
-              const isLocked = isFreeUser && !freeTemplates.has(tpl.value);
+              const isLocked = isFreeUser && tpl.value !== 'minimal';
               const isActive = selectedTemplate === tpl.value;
               return (
                 <button
                   key={tpl.value}
-                  onClick={() => {
-                    if (isLocked) {
-                      setShowUpgradeModal(true);
-                    } else {
-                      setSelectedTemplate(tpl.value);
-                    }
-                  }}
+                  disabled={isLocked}
+                  onClick={() => { if (!isLocked) setSelectedTemplate(tpl.value); }}
                   className={`relative py-2 px-3 rounded-lg text-sm font-medium border transition-all ${
                     isActive
                       ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
                       : isLocked
-                        ? 'bg-slate-50 text-slate-400 border-slate-200 cursor-pointer hover:border-amber-300 hover:bg-amber-50/50'
+                        ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed opacity-60'
                         : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
                   }`}
                 >
