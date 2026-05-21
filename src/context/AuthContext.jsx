@@ -51,6 +51,7 @@ export function AuthProvider({ children }) {
       planExpiresAt,
       daysLeft,
       subscriptionExpired,
+      cvLimit:             dbUser.cvLimit ?? null,
     };
   };
 

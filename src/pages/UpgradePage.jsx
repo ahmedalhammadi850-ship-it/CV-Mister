@@ -229,7 +229,7 @@ const UpgradePage = () => {
             <div className="absolute inset-0 w-3 h-3 rounded-full bg-indigo-400 animate-ping" />
           </div>
           <p className="text-indigo-700 text-sm font-medium text-right flex-1">
-            في انتظار موافقة الإدارة... سيُفعَّل تلقائياً
+            جارٍ معالجة طلبك... سيُفعَّل تلقائياً
           </p>
         </div>
 

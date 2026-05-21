@@ -31,6 +31,7 @@ export default async function handler(req, res) {
       plan,
       cvCount: user.cvCount || 0,
       planExpiresAt: user.planExpiresAt || null,
+      cvLimit: user.cvLimit ?? null,
     });
   } catch (error) {
     console.error("[auth/user]", error.message);

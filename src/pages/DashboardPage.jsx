@@ -516,10 +516,12 @@ const DashboardPage = () => {
 
   const openPaywall = (reason) => { setPaywallReason(reason); setShowPaywall(true); };
 
+  const getProLimit = () => currentUser?.cvLimit ?? PRO_LIMIT;
+
   const handleNewCV = () => {
     if (currentUser?.subscriptionExpired) { openPaywall('expired'); return; }
     const plan = currentUser?.plan || 'free';
-    if (plan === 'pro' && cvs.length >= PRO_LIMIT) { openPaywall('pro_limit'); return; }
+    if (plan === 'pro' && cvs.length >= getProLimit()) { openPaywall('pro_limit'); return; }
     if (plan === 'free' && cvs.length >= FREE_LIMIT) { openPaywall('free_limit'); return; }
     navigate('/builder');
   };
@@ -542,7 +544,7 @@ const DashboardPage = () => {
   const handleDuplicate = async (id) => {
     if (currentUser?.subscriptionExpired) { openPaywall('expired'); return; }
     const plan = currentUser?.plan || 'free';
-    if (plan === 'pro' && cvs.length >= PRO_LIMIT) { openPaywall('pro_limit'); return; }
+    if (plan === 'pro' && cvs.length >= getProLimit()) { openPaywall('pro_limit'); return; }
     if (plan === 'free' && cvs.length >= FREE_LIMIT) { openPaywall('free_limit'); return; }
     const cv = cvs.find(c => c.id === id); if (!cv) return;
     const copy = { ...cv, id: `cv-${Date.now()}`, name: cv.name + (isRTL ? ' (نسخة)' : ' (Copy)'), lastModified: new Date().toISOString() };

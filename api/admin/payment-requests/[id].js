@@ -24,11 +24,21 @@ export default async function handler(req, res) {
       const approvedPlan = data.plan === "business" ? "business" : "pro";
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 1);
-      await db.collection("users").doc(data.userId).update({
+
+      const userSnap = await db.collection("users").doc(data.userId).get();
+      const userData = userSnap.data() || {};
+      const currentCvLimit = userData.cvLimit || 0;
+      const newCvLimit = approvedPlan === "business" ? null : currentCvLimit + 2;
+
+      const updateData = {
         plan: approvedPlan,
         planExpiresAt: expiresAt.toISOString(),
         updatedAt: now,
-      });
+      };
+      if (newCvLimit !== null) updateData.cvLimit = newCvLimit;
+      else updateData.cvLimit = null;
+
+      await db.collection("users").doc(data.userId).update(updateData);
     }
     if (status === "rejected" && data.userId) {
       await db.collection("users").doc(data.userId).update({ plan: "free", planExpiresAt: null, updatedAt: now });
