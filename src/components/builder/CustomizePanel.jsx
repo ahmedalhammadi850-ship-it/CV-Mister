@@ -308,17 +308,18 @@ const CustomizePanel = () => {
               return (
                 <button
                   key={tpl.value}
-                  onClick={() => setSelectedTemplate(tpl.value)}
+                  disabled={isLocked}
+                  onClick={() => { if (!isLocked) setSelectedTemplate(tpl.value); }}
                   className={`relative py-2 px-3 rounded-lg text-sm font-medium border transition-all ${
                     isActive
                       ? 'bg-indigo-600 text-white border-indigo-600 shadow-sm'
                       : isLocked
-                        ? 'bg-slate-50 text-slate-400 border-slate-200 hover:border-amber-300'
+                        ? 'bg-slate-50 text-slate-300 border-slate-200 cursor-not-allowed opacity-60'
                         : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'
                   }`}
                 >
                   <span className="flex items-center justify-center gap-1">
-                    {isLocked && !isActive && <LockIcon />}
+                    {isLocked && <LockIcon />}
                     {isRTL ? tpl.ar : tpl.en}
                   </span>
                 </button>
