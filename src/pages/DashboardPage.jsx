@@ -7,11 +7,12 @@ import { formatDate } from '../utils/cvStorage';
 import TemplatesPage from './TemplatesPage';
 
 function usePendingApprovalPoll(currentUser, refreshUser) {
-  const pollRef = useRef(null);
+  const pollRef        = useRef(null);
+  const prevExpiryRef  = useRef(null);
   const [justActivated, setJustActivated] = useState(false);
 
   useEffect(() => {
-    if (!currentUser || (currentUser.plan !== 'free' && !currentUser.subscriptionExpired)) return;
+    if (!currentUser) return;
 
     let active = true;
 
@@ -23,12 +24,28 @@ function usePendingApprovalPoll(currentUser, refreshUser) {
         const hasPending = requests.some(r => r.status === 'pending');
         if (!hasPending) return;
 
+        /* Snapshot the planExpiresAt before we start polling */
+        prevExpiryRef.current = currentUser.planExpiresAt || null;
+
         pollRef.current = setInterval(async () => {
           try {
             const r = await fetch('/api/auth/user', { credentials: 'include' });
             if (!r.ok) return;
             const data = await r.json();
-            if (data.plan === 'pro' || data.plan === 'business') {
+
+            const planMatch = data.plan === 'pro' || data.plan === 'business';
+            const prevExpiry = prevExpiryRef.current;
+            const newExpiry  = data.planExpiresAt;
+
+            /* For renewals (user was already paid): require expiry to advance.
+               For new upgrades (free → paid): plan match alone is enough. */
+            const wasAlreadyPaid = prevExpiry !== null;
+            const expiryAdvanced = newExpiry && prevExpiry
+              ? new Date(newExpiry) > new Date(prevExpiry)
+              : newExpiry && !prevExpiry;
+            const approved = planMatch && (wasAlreadyPaid ? expiryAdvanced : true);
+
+            if (approved) {
               clearInterval(pollRef.current);
               await refreshUser();
               if (active) setJustActivated(true);
@@ -45,7 +62,7 @@ function usePendingApprovalPoll(currentUser, refreshUser) {
       active = false;
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [currentUser?.uid, currentUser?.plan]);
+  }, [currentUser?.uid, currentUser?.plan, currentUser?.planExpiresAt]);
 
   return justActivated;
 }

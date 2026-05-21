@@ -55,7 +55,8 @@ export default async function handler(req, res) {
       }
 
       if (isNew) {
-        const limit = plan === "business" ? Infinity : plan === "pro" ? PRO_LIMIT : FREE_LIMIT;
+        const proLimit = userData.cvLimit || PRO_LIMIT;
+        const limit = plan === "business" ? Infinity : plan === "pro" ? proLimit : FREE_LIMIT;
         const countSnap = await db.collection("cvs").where("userId", "==", uid).get();
         const count = countSnap.size;
         if (count >= limit) {
@@ -63,7 +64,7 @@ export default async function handler(req, res) {
             message:
               plan === "free"
                 ? `وصلت للحد المجاني (${FREE_LIMIT} سيرة). قم بالترقية للحصول على المزيد.`
-                : `وصلت لحد الخطة المدفوعة (${PRO_LIMIT} سيرة). قم بتجديد الاشتراك.`,
+                : `وصلت لحد الخطة المدفوعة (${proLimit} سيرة). قم بتجديد الاشتراك.`,
             limitReached: true,
             plan,
             limit: isFinite(limit) ? limit : null,
