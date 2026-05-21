@@ -25,18 +25,26 @@ export default async function handler(req, res) {
       const expiresAt = new Date();
       expiresAt.setMonth(expiresAt.getMonth() + 1);
 
-      const userSnap = await db.collection("users").doc(data.userId).get();
-      const userData = userSnap.data() || {};
-      const currentCvLimit = userData.cvLimit || 0;
-      const newCvLimit = approvedPlan === "business" ? null : currentCvLimit + 2;
+      /* Read user doc AND actual CV count in parallel */
+      const [userSnap, cvsSnap] = await Promise.all([
+        db.collection("users").doc(data.userId).get(),
+        db.collection("cvs").where("userId", "==", data.userId).get(),
+      ]);
+      const userData      = userSnap.data() || {};
+      const actualCvCount = cvsSnap.size;
+
+      /* Use the higher of (stored cvLimit, actual CV count) as the baseline,
+         then add 2 — this handles legacy accounts where cvLimit was never set */
+      const storedLimit   = typeof userData.cvLimit === "number" ? userData.cvLimit : 0;
+      const baseline      = Math.max(storedLimit, actualCvCount);
+      const newCvLimit    = approvedPlan === "business" ? null : baseline + 2;
 
       const updateData = {
         plan: approvedPlan,
         planExpiresAt: expiresAt.toISOString(),
         updatedAt: now,
+        cvLimit: newCvLimit,   /* null for business = unlimited */
       };
-      if (newCvLimit !== null) updateData.cvLimit = newCvLimit;
-      else updateData.cvLimit = null;
 
       await db.collection("users").doc(data.userId).update(updateData);
     }

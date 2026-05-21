@@ -7,62 +7,62 @@ import { formatDate } from '../utils/cvStorage';
 import TemplatesPage from './TemplatesPage';
 
 function usePendingApprovalPoll(currentUser, refreshUser) {
-  const pollRef        = useRef(null);
-  const prevExpiryRef  = useRef(null);
+  const pollRef = useRef(null);
   const [justActivated, setJustActivated] = useState(false);
 
   useEffect(() => {
-    if (!currentUser) return;
+    if (!currentUser?.uid) return;
 
-    let active = true;
+    let cancelled = false;
+    /* Capture expiry at the moment this effect runs — before any admin action */
+    const prevExpiry = currentUser.planExpiresAt || null;
+
+    const startPolling = () => {
+      pollRef.current = setInterval(async () => {
+        if (cancelled) return;
+        try {
+          const r = await fetch('/api/auth/user', { credentials: 'include' });
+          if (!r.ok || cancelled) return;
+          const data = await r.json();
+
+          const planMatch = data.plan === 'pro' || data.plan === 'business';
+          const newExpiry  = data.planExpiresAt;
+
+          /* Renewal: expiry must actually advance.  New subscriber: plan match alone. */
+          const wasAlreadyPaid = prevExpiry !== null;
+          const expiryAdvanced = newExpiry && prevExpiry
+            ? new Date(newExpiry) > new Date(prevExpiry)
+            : Boolean(newExpiry) && !prevExpiry;
+          const approved = planMatch && (wasAlreadyPaid ? expiryAdvanced : true);
+
+          if (approved) {
+            clearInterval(pollRef.current);
+            await refreshUser();
+            if (!cancelled) {
+              setJustActivated(true);
+              setTimeout(() => setJustActivated(false), 5000);
+            }
+          }
+        } catch { /* silent */ }
+      }, 5000);
+    };
 
     const checkPending = async () => {
       try {
         const res = await fetch('/api/payment-requests/my', { credentials: 'include' });
-        if (!res.ok || !active) return;
+        if (!res.ok || cancelled) return;
         const requests = await res.json();
-        const hasPending = requests.some(r => r.status === 'pending');
-        if (!hasPending) return;
-
-        /* Snapshot the planExpiresAt before we start polling */
-        prevExpiryRef.current = currentUser.planExpiresAt || null;
-
-        pollRef.current = setInterval(async () => {
-          try {
-            const r = await fetch('/api/auth/user', { credentials: 'include' });
-            if (!r.ok) return;
-            const data = await r.json();
-
-            const planMatch = data.plan === 'pro' || data.plan === 'business';
-            const prevExpiry = prevExpiryRef.current;
-            const newExpiry  = data.planExpiresAt;
-
-            /* For renewals (user was already paid): require expiry to advance.
-               For new upgrades (free → paid): plan match alone is enough. */
-            const wasAlreadyPaid = prevExpiry !== null;
-            const expiryAdvanced = newExpiry && prevExpiry
-              ? new Date(newExpiry) > new Date(prevExpiry)
-              : newExpiry && !prevExpiry;
-            const approved = planMatch && (wasAlreadyPaid ? expiryAdvanced : true);
-
-            if (approved) {
-              clearInterval(pollRef.current);
-              await refreshUser();
-              if (active) setJustActivated(true);
-              setTimeout(() => { if (active) setJustActivated(false); }, 5000);
-            }
-          } catch { /* silent */ }
-        }, 5000);
+        if (requests.some(r => r.status === 'pending')) startPolling();
       } catch { /* silent */ }
     };
 
     checkPending();
 
     return () => {
-      active = false;
+      cancelled = true;
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [currentUser?.uid, currentUser?.plan, currentUser?.planExpiresAt]);
+  }, [currentUser?.uid]); /* only restart on login/logout — NOT on planExpiresAt */
 
   return justActivated;
 }
