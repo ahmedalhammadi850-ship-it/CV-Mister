@@ -249,11 +249,18 @@ export function CVProvider({ children }) {
     return { ok: true, entry };
   };
 
+  const isFreeUser = !currentUser || currentUser.plan === 'free';
+
+  const safeTemplate = (tpl) => {
+    if (isFreeUser && tpl !== 'minimal') return 'minimal';
+    return tpl;
+  };
+
   const loadCVById = (id) => {
     const cv = getCVById(id);
     if (!cv) return false;
     setCvData(cv.cvData);
-    setSelectedTemplate(cv.template);
+    setSelectedTemplate(safeTemplate(cv.template));
     setTheme(cv.theme);
     setCurrentCVId(cv.id);
     setCurrentCVName(cv.name);
@@ -307,7 +314,7 @@ export function CVProvider({ children }) {
 
   const previewTemplate = (templateId, templateColor) => {
     setCvData(sampleData);
-    setSelectedTemplate(templateId || 'modern');
+    setSelectedTemplate(safeTemplate(templateId || 'modern'));
     setTheme({
       primaryColor: templateColor || '#4f46e5',
       fontFamily: 'Calibri',

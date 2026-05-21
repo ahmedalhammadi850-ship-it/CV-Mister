@@ -328,6 +328,12 @@ const CustomizePanel = () => {
   const isFreeUser = !currentUser || currentUser.plan === 'free';
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
 
+  useEffect(() => {
+    if (isFreeUser && !freeTemplates.has(selectedTemplate)) {
+      setSelectedTemplate('minimal');
+    }
+  }, [isFreeUser, selectedTemplate, freeTemplates]);
+
   return (
     <div className="flex flex-col pb-20" dir={isRTL ? 'rtl' : 'ltr'}>
 
