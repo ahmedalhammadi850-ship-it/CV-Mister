@@ -21,8 +21,31 @@ const getColors = (t) => TEMPLATE_COLORS[t?.toLowerCase()] || TEMPLATE_COLORS.mo
 const ATS_COLOR = (s) => s >= 85 ? '#10b981' : s >= 60 ? '#f59e0b' : '#ef4444';
 
 /* ─────────────────────── Paywall Modal ─────────────────────── */
-const PaywallModal = ({ isRTL, onClose }) => {
+const FREE_LIMIT  = 1;
+const PRO_LIMIT   = 2;
+
+const PaywallModal = ({ isRTL, onClose, reason }) => {
   const navigate = useNavigate();
+
+  const isPro        = reason === 'pro_limit';
+  const isExpired    = reason === 'expired';
+
+  const title = isRTL
+    ? (isPro ? 'وصلت للحد الأقصى' : 'ميزة مدفوعة')
+    : (isPro ? 'Limit Reached' : 'Pro Feature');
+
+  const body = isRTL
+    ? (isPro
+        ? 'لقد وصلت للحد الأقصى لخطة Pro (سيرتان). لإنشاء سيرة جديدة يجب تجديد اشتراكك.'
+        : isExpired
+          ? 'انتهت فترة اشتراكك المجاني. جدد اشتراكك للاستمرار بإنشاء السير الذاتية.'
+          : 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين ذاتيتين وقوالب احترافية.')
+    : (isPro
+        ? 'You have reached the Pro plan limit (2 CVs). Renew your subscription to create a new one.'
+        : isExpired
+          ? 'Your free trial has ended. Renew your subscription to continue.'
+          : "You've used your free CV slot. Upgrade to create up to 2 CVs and access premium templates.");
+
   return createPortal(
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
@@ -35,12 +58,8 @@ const PaywallModal = ({ isRTL, onClose }) => {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
           </svg>
         </div>
-        <h3 className="text-xl font-bold text-slate-900 mb-2">{isRTL ? 'ميزة مدفوعة' : 'Pro Feature'}</h3>
-        <p className="text-slate-500 text-sm leading-relaxed mb-6">
-          {isRTL
-            ? 'لقد استخدمت سيرتك الذاتية المجانية. قم بالترقية للحصول على سيرتين ذاتيتين وقوالب احترافية.'
-            : "You've used your free CV slot. Upgrade to create up to 2 CVs and access premium templates."}
-        </p>
+        <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
+        <p className="text-slate-500 text-sm leading-relaxed mb-6">{body}</p>
         <div className="flex flex-col gap-2">
           <button
             onClick={() => { onClose(); navigate('/upgrade'); }}
@@ -441,17 +460,15 @@ const DashboardPage = () => {
   const [sideOpen, setSideOpen]     = useState(false);
   const [activeView, setActiveView] = useState('cvs');
   const [showPaywall, setShowPaywall] = useState(false);
+  const [paywallReason, setPaywallReason] = useState('');
+
+  const openPaywall = (reason) => { setPaywallReason(reason); setShowPaywall(true); };
 
   const handleNewCV = () => {
-    if (currentUser?.subscriptionExpired) {
-      setShowPaywall(true);
-      return;
-    }
-    const isFree = !currentUser || currentUser.plan === 'free';
-    if (isFree && cvs.length >= 1) {
-      setShowPaywall(true);
-      return;
-    }
+    if (currentUser?.subscriptionExpired) { openPaywall('expired'); return; }
+    const plan = currentUser?.plan || 'free';
+    if (plan === 'pro' && cvs.length >= PRO_LIMIT) { openPaywall('pro_limit'); return; }
+    if (plan === 'free' && cvs.length >= FREE_LIMIT) { openPaywall('free_limit'); return; }
     navigate('/builder');
   };
 
@@ -471,9 +488,10 @@ const DashboardPage = () => {
 
   const handleDelete    = async (id) => { deleteCV(id); await fetch(`/api/cvs/${id}`, { method: 'DELETE', credentials: 'include' }); setCvs(prev => prev.filter(c => c.id !== id)); };
   const handleDuplicate = async (id) => {
-    if (currentUser?.subscriptionExpired) { setShowPaywall(true); return; }
-    const isFree = !currentUser || currentUser.plan === 'free';
-    if (isFree && cvs.length >= 1) { setShowPaywall(true); return; }
+    if (currentUser?.subscriptionExpired) { openPaywall('expired'); return; }
+    const plan = currentUser?.plan || 'free';
+    if (plan === 'pro' && cvs.length >= PRO_LIMIT) { openPaywall('pro_limit'); return; }
+    if (plan === 'free' && cvs.length >= FREE_LIMIT) { openPaywall('free_limit'); return; }
     const cv = cvs.find(c => c.id === id); if (!cv) return;
     const copy = { ...cv, id: `cv-${Date.now()}`, name: cv.name + (isRTL ? ' (نسخة)' : ' (Copy)'), lastModified: new Date().toISOString() };
     const res = await fetch('/api/cvs', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
@@ -482,7 +500,8 @@ const DashboardPage = () => {
       setCvs(prev => [saved, ...prev]);
     } else {
       const data = await res.json().catch(() => ({}));
-      if (data.limitReached) setShowPaywall(true);
+      if (data.limitReached) openPaywall(plan === 'pro' ? 'pro_limit' : 'free_limit');
+      if (data.freeExpired) openPaywall('expired');
     }
   };
   const handleRename    = async (id, name) => {
@@ -513,7 +532,7 @@ const DashboardPage = () => {
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50" dir={isRTL ? 'rtl' : 'ltr'}>
 
-      {showPaywall && <PaywallModal isRTL={isRTL} onClose={() => setShowPaywall(false)} />}
+      {showPaywall && <PaywallModal isRTL={isRTL} reason={paywallReason} onClose={() => setShowPaywall(false)} />}
 
       {/* Sidebar */}
       <Sidebar
