@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useCV } from '../../context/useCV';
 import { useAuth } from '../../context/AuthContext';
 import { useTemplateConfig } from '../../context/TemplateConfigContext';
@@ -63,15 +63,6 @@ const TEMPLATES = [
   { value: 'arabicslatesidebar', en: 'Arabic Slate Sidebar', ar: 'شريط كحلي عربي'      },
   { value: 'arabicmodern', en: 'Arabic Modern',   ar: 'عصري عربي'        },
   { value: 'arabiccard',   en: 'Arabic Card',     ar: 'بطاقة عربية'      },
-  { value: 'arabicelite',  en: 'Arabic Elite',    ar: 'النخبة العربي'    },
-  { value: 'arabicwave',   en: 'Arabic Wave',     ar: 'موجة عربية'       },
-  { value: 'arabiczafir',  en: 'Arabic Zafir',    ar: 'الزفير العربي'    },
-  { value: 'arabicluxe',   en: 'Arabic Luxe',     ar: 'الفاخر العربي'    },
-  { value: 'englishapex',  en: 'English Apex',    ar: 'أبيكس الإنجليزي'  },
-  { value: 'englishhorizon', en: 'English Horizon', ar: 'أفق إنجليزي'    },
-  { value: 'velvet',       en: 'Velvet',          ar: 'مخمل'             },
-  { value: 'aurora',       en: 'Aurora',          ar: 'أورورا'           },
-  { value: 'arabicgem',    en: 'Arabic Gem',      ar: 'جوهرة عربية'      },
 ];
 
 const ui = {
@@ -336,12 +327,6 @@ const CustomizePanel = () => {
   const { freeTemplates } = useTemplateConfig();
   const isFreeUser = !currentUser || currentUser.plan === 'free';
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-
-  useEffect(() => {
-    if (isFreeUser && !freeTemplates.has(selectedTemplate)) {
-      setSelectedTemplate('minimal');
-    }
-  }, [isFreeUser, selectedTemplate, freeTemplates]);
 
   return (
     <div className="flex flex-col pb-20" dir={isRTL ? 'rtl' : 'ltr'}>
