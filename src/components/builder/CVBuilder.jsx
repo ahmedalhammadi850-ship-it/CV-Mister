@@ -6,6 +6,7 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
+import { isATSTemplate, generateATSPdf } from '../../utils/atsPdfExport';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -135,7 +136,7 @@ const FreeExpiredModal = ({ isRTL, onClose, onUpgrade }) => createPortal(
 const PAGE_H_PX = 1122;
 
 const CVBuilder = () => {
-  const { selectedTemplate, cvData, theme, visibleSections, visiblePersonalFields, sectionOrder, saveCurrentCV, currentCVId, currentCVName } = useCV();
+  const { selectedTemplate, cvData, theme, visibleSections, visiblePersonalFields, sectionOrder, sectionNames, saveCurrentCV, currentCVId, currentCVName } = useCV();
   const { isRTL, currentUser } = useAuth();
   const navigate = useNavigate();
   const [mobileTab, setMobileTab] = useState('editor');
@@ -210,6 +211,26 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
+      // ── ATS templates: native text-based PDF (no html2canvas / addImage) ──
+      if (isATSTemplate(selectedTemplate)) {
+        const doc = await generateATSPdf(cvData, {
+          isRTL,
+          visibleSections,
+          visiblePersonalFields,
+          sectionOrder,
+          sectionNames,
+        });
+        const name = cvData.personalInfo?.fullName || 'Resume';
+        doc.save(`${name} - CV.pdf`);
+        if (currentCVId) {
+          fetch(`/api/cvs/${currentCVId}/download`, {
+            method: 'POST', credentials: 'include',
+          }).catch(() => {});
+        }
+        return;
+      }
+
+      // ── Non-ATS templates: screenshot-based PDF ───────────────────────────
       const [{ toPng }, { jsPDF }] = await Promise.all([
         import('html-to-image'),
         import('jspdf'),
