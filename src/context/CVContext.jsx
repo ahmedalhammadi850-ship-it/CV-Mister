@@ -136,6 +136,10 @@ export function CVProvider({ children }) {
             template: cv.template,
             theme: cv.theme,
             atsScore: cv.atsScore,
+            sectionOrder: cv.sectionOrder,
+            visibleSections: cv.visibleSections,
+            visiblePersonalFields: cv.visiblePersonalFields,
+            sectionNames: cv.sectionNames,
           }));
           setSavedCVs(getSavedCVs());
         }
@@ -220,6 +224,9 @@ export function CVProvider({ children }) {
         template: selectedTemplate,
         theme,
         sectionNames,
+        sectionOrder,
+        visibleSections,
+        visiblePersonalFields,
         atsScore: 95,
       };
       const result = await saveAPICV(entry);
@@ -239,6 +246,9 @@ export function CVProvider({ children }) {
       template: selectedTemplate,
       theme,
       sectionNames,
+      sectionOrder,
+      visibleSections,
+      visiblePersonalFields,
       atsScore: 95,
     });
     setCurrentCVId(id);
@@ -258,6 +268,9 @@ export function CVProvider({ children }) {
     setCurrentCVId(cv.id);
     setCurrentCVName(cv.name);
     setSectionNames(cv.sectionNames || {});
+    if (cv.sectionOrder) setSectionOrder(cv.sectionOrder);
+    if (cv.visibleSections) setVisibleSections(cv.visibleSections);
+    if (cv.visiblePersonalFields) setVisiblePersonalFields(cv.visiblePersonalFields);
     return true;
   };
 

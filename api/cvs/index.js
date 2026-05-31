@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   if (req.method === "POST") {
     try {
-      const { id, name, cvData, template, theme, atsScore } = req.body || {};
+      const { id, name, cvData, template, theme, atsScore, sectionOrder, visibleSections, visiblePersonalFields, sectionNames } = req.body || {};
 
       const cvRef = db.collection("cvs").doc(id);
       const cvSnap = await cvRef.get();
@@ -81,10 +81,14 @@ export default async function handler(req, res) {
         template,
         theme,
         atsScore,
+        sectionOrder: sectionOrder || null,
+        visibleSections: visibleSections || null,
+        visiblePersonalFields: visiblePersonalFields || null,
+        sectionNames: sectionNames || null,
         lastModified: now,
         downloadCount: cvSnap.data()?.downloadCount || 0,
       });
-      return res.json({ id, userId: uid, name, cvData, template, theme, atsScore, lastModified: now });
+      return res.json({ id, userId: uid, name, cvData, template, theme, atsScore, sectionOrder, visibleSections, visiblePersonalFields, sectionNames, lastModified: now });
     } catch (err) {
       console.error("[cvs POST]", err.message);
       return res.status(500).json({ message: "Failed to save CV" });

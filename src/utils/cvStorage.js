@@ -9,11 +9,11 @@ export function getSavedCVs() {
   }
 }
 
-export function saveCV({ id, name, cvData, template, theme, atsScore = 95 }) {
+export function saveCV({ id, name, cvData, template, theme, atsScore = 95, sectionOrder, visibleSections, visiblePersonalFields, sectionNames }) {
   const cvs = getSavedCVs();
   const now = new Date().toISOString();
   const existing = cvs.findIndex(c => c.id === id);
-  const entry = { id, name, cvData, template, theme, atsScore, lastModified: now };
+  const entry = { id, name, cvData, template, theme, atsScore, lastModified: now, sectionOrder, visibleSections, visiblePersonalFields, sectionNames };
   if (existing >= 0) {
     cvs[existing] = entry;
   } else {
