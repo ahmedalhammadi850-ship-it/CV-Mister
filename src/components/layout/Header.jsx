@@ -128,6 +128,31 @@ const Header = () => {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 md:h-18">
 
+          {/* Back to dashboard arrow — shown only inside the builder */}
+          {location.pathname.startsWith('/builder') && (
+            <button
+              onClick={() => navigate('/dashboard')}
+              aria-label={isRTL ? 'العودة إلى لوحة التحكم' : 'Back to Dashboard'}
+              title={isRTL ? 'لوحة التحكم' : 'Dashboard'}
+              className="flex-shrink-0 w-9 h-9 flex items-center justify-center rounded-xl transition-all duration-200 mr-1"
+              style={{
+                background: isDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.08)',
+                color: isDark ? '#a5b4fc' : '#4f46e5',
+                border: `1px solid ${isDark ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.2)'}`,
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.background = isDark ? 'rgba(99,102,241,0.25)' : 'rgba(99,102,241,0.15)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.background = isDark ? 'rgba(99,102,241,0.12)' : 'rgba(99,102,241,0.08)';
+              }}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+          )}
+
           {/* Logo */}
           <Link to="/" className="flex items-center gap-2.5 flex-shrink-0 group">
             <div
