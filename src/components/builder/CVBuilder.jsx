@@ -7,6 +7,7 @@ import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
 import { isATSTemplate, generateATSPdf } from '../../utils/atsPdfExport';
+import { injectTextLayer } from '../../utils/pdfTextLayer';
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -480,6 +481,15 @@ const CVBuilder = () => {
 
         pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
       }
+
+      // Inject invisible text layer so ATS systems can extract all CV text
+      // without affecting the visual appearance of the PDF.
+      injectTextLayer(pdf, cvData, {
+        isRTL,
+        visibleSections,
+        sectionOrder,
+        sectionNames,
+      });
 
       const name = cvData.personalInfo?.fullName || 'Resume';
       pdf.save(`${name} - CV.pdf`);
