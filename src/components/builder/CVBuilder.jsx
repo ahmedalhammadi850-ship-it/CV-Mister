@@ -419,12 +419,23 @@ const CVBuilder = () => {
           const relX = rect.left - cloneRect.left;
           const relY = rect.top  - cloneRect.top;
           if (relX < 0 || relY < 0) continue;
-          const fontSize = parseFloat(window.getComputedStyle(node.parentElement).fontSize) || 12;
+          const parentStyle   = window.getComputedStyle(node.parentElement);
+          const fontSize      = parseFloat(parentStyle.fontSize) || 12;
+          // Apply the same CSS text-transform so the invisible text matches
+          // the visual text width exactly (avoids selection-box misalignment).
+          const tt = parentStyle.textTransform;
+          let displayText = text;
+          if      (tt === 'uppercase')  displayText = text.toUpperCase();
+          else if (tt === 'lowercase')  displayText = text.toLowerCase();
+          else if (tt === 'capitalize') displayText = text.replace(/(?:^|\s)\S/g, c => c.toUpperCase());
+          // Carry letter-spacing so jsPDF can match rendered width
+          const letterSpacingPx = parseFloat(parentStyle.letterSpacing) || 0;
           domTextItems.push({
-            text,
+            text: displayText,
             xMm: relX * mmPerPxExtract,
             contentYPx: relY,
             fontSizePt: fontSize * 0.75,
+            charSpaceMm: letterSpacingPx * mmPerPxExtract,
           });
         }
       } catch (_e) {
@@ -553,10 +564,14 @@ const CVBuilder = () => {
 
           try {
             pdf.setFontSize(Math.max(item.fontSizePt, 4));
-            pdf.text(item.text, Math.max(item.xMm, 0), yMm, {
+            const textOpts = {
               renderingMode: 'invisible',
               maxWidth: Math.max(A4_W_MM - Math.max(item.xMm, 0) - 1, 10),
-            });
+            };
+            if (item.charSpaceMm && item.charSpaceMm > 0) {
+              textOpts.charSpace = item.charSpaceMm;
+            }
+            pdf.text(item.text, Math.max(item.xMm, 0), yMm, textOpts);
           } catch (_) {}
         }
       } else {
