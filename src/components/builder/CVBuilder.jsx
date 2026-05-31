@@ -212,6 +212,7 @@ const CVBuilder = () => {
     setIsPrinting(true);
     try {
       // ── ATS templates: native text-based PDF (no html2canvas / addImage) ──
+      console.log('[PDF] selectedTemplate =', selectedTemplate, '| isATS =', isATSTemplate(selectedTemplate));
       if (isATSTemplate(selectedTemplate)) {
         console.log('[ATS PDF] Starting text-based export for template:', selectedTemplate);
         let doc;

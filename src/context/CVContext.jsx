@@ -259,19 +259,50 @@ export function CVProvider({ children }) {
     return { ok: true, entry };
   };
 
-  const loadCVById = (id) => {
-    const cv = getCVById(id);
-    if (!cv) return false;
+  const applyCV = (cv) => {
     setCvData(cv.cvData);
-    setSelectedTemplate(cv.template);
-    setTheme(cv.theme);
+    setSelectedTemplate(cv.template || 'minimal');
+    setTheme(cv.theme || {});
     setCurrentCVId(cv.id);
-    setCurrentCVName(cv.name);
+    setCurrentCVName(cv.name || 'My Resume');
     setSectionNames(cv.sectionNames || {});
     if (cv.sectionOrder) setSectionOrder(cv.sectionOrder);
     if (cv.visibleSections) setVisibleSections(cv.visibleSections);
     if (cv.visiblePersonalFields) setVisiblePersonalFields(cv.visiblePersonalFields);
+  };
+
+  const loadCVById = (id) => {
+    const cv = getCVById(id);
+    if (!cv) return false;
+    applyCV(cv);
     return true;
+  };
+
+  // Async fallback: load directly from API when localStorage doesn't have the CV yet
+  const loadCVByIdFromAPI = async (id) => {
+    try {
+      const res = await fetch(`/api/cvs/${id}`, { credentials: 'include' });
+      if (!res.ok) return false;
+      const cv = await res.json();
+      // Also persist to localStorage so future local loads work
+      saveCV({
+        id: cv.id,
+        name: cv.name,
+        cvData: cv.cvData,
+        template: cv.template,
+        theme: cv.theme,
+        atsScore: cv.atsScore,
+        sectionOrder: cv.sectionOrder,
+        visibleSections: cv.visibleSections,
+        visiblePersonalFields: cv.visiblePersonalFields,
+        sectionNames: cv.sectionNames,
+      });
+      applyCV(cv);
+      setSavedCVs(getSavedCVs());
+      return true;
+    } catch {
+      return false;
+    }
   };
 
   const deleteCV = (id) => {
@@ -358,6 +389,7 @@ export function CVProvider({ children }) {
     setSavedCVs,
     saveCurrentCV,
     loadCVById,
+    loadCVByIdFromAPI,
     deleteCV,
     duplicateCV,
     startNewCV,

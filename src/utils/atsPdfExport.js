@@ -13,8 +13,20 @@ export const ATS_TEMPLATE_IDS = new Set([
   'atscompact', 'atsmodern', 'atsharvard', 'atscenter', 'atselegant',
 ]);
 
+/**
+ * Normalise a template ID to a compact lowercase string:
+ *   'ATS Clean'  → 'atsclean'
+ *   'ats-bold'   → 'atsbold'
+ *   'ATSHarvard' → 'atsharvard'
+ */
+function normaliseId(templateId) {
+  return (templateId || '').toLowerCase().replace(/[\s\-_]/g, '');
+}
+
 export function isATSTemplate(templateId) {
-  return ATS_TEMPLATE_IDS.has((templateId || '').toLowerCase());
+  const id = normaliseId(templateId);
+  // Match explicit set OR any id that starts with 'ats'
+  return ATS_TEMPLATE_IDS.has(id) || id.startsWith('ats');
 }
 
 const SECTION_LABELS = {
