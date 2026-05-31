@@ -391,6 +391,46 @@ const CVBuilder = () => {
       await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
       await document.fonts.ready;
 
+      // ── Extract text positions from DOM for accurate text layer ────────────
+      // Must happen here: after layout is final, before wrapper is removed.
+      const domTextItems = [];
+      try {
+        const cloneRect = clone.getBoundingClientRect();
+        const mmPerPxExtract = A4_W_MM / CONTENT_W;
+        const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT, {
+          acceptNode(node) {
+            const t = node.textContent?.trim();
+            if (!t) return NodeFilter.FILTER_REJECT;
+            const p = node.parentElement;
+            if (!p) return NodeFilter.FILTER_REJECT;
+            const s = window.getComputedStyle(p);
+            if (s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') return NodeFilter.FILTER_REJECT;
+            return NodeFilter.FILTER_ACCEPT;
+          },
+        });
+        while (walker.nextNode()) {
+          const node  = walker.currentNode;
+          const text  = node.textContent?.trim();
+          if (!text) continue;
+          const range = document.createRange();
+          range.selectNodeContents(node);
+          const rect = range.getBoundingClientRect();
+          if (rect.width < 1 || rect.height < 1) continue;
+          const relX = rect.left - cloneRect.left;
+          const relY = rect.top  - cloneRect.top;
+          if (relX < 0 || relY < 0) continue;
+          const fontSize = parseFloat(window.getComputedStyle(node.parentElement).fontSize) || 12;
+          domTextItems.push({
+            text,
+            xMm: relX * mmPerPxExtract,
+            contentYPx: relY,
+            fontSizePt: fontSize * 0.75,
+          });
+        }
+      } catch (_e) {
+        // DOM extraction failed — will fall back to content-based layer
+      }
+
       // Temporarily disable cross-origin stylesheets (e.g. from Google Translate
       // extension) to prevent SecurityError when html-to-image tries to read cssRules.
       const disabledSheets = [];
@@ -482,14 +522,52 @@ const CVBuilder = () => {
         pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
       }
 
-      // Inject invisible text layer so ATS systems can extract all CV text
-      // without affecting the visual appearance of the PDF.
-      injectTextLayer(pdf, cvData, {
-        isRTL,
-        visibleSections,
-        sectionOrder,
-        sectionNames,
-      });
+      // ── Invisible text layer for text selection & ATS extraction ─────────
+      // Primary: use DOM-extracted positions so users can click & select text
+      // exactly where they see it visually. Fallback: content-based layer.
+      const mmPerPxFinal = A4_W_MM / CONTENT_W;
+      const PAGE_TOP_MARGIN_MM = PAGE_TOP_MARGIN * mmPerPxFinal;
+
+      if (domTextItems.length > 0) {
+        for (const item of domTextItems) {
+          // Find which page this text belongs to
+          let pageIdx   = contentRanges.length - 1;
+          let yInPagePx = item.contentYPx - contentRanges[pageIdx].start;
+
+          for (let pi = 0; pi < contentRanges.length; pi++) {
+            if (item.contentYPx >= contentRanges[pi].start && item.contentYPx < contentRanges[pi].end) {
+              pageIdx   = pi;
+              yInPagePx = item.contentYPx - contentRanges[pi].start;
+              break;
+            }
+          }
+
+          pdf.setPage(pageIdx + 1);
+          // Convert pixel offset to mm, add page top margin for page 2+,
+          // then add approx. baseline offset (fontSize in mm)
+          const marginMm    = pageIdx > 0 ? PAGE_TOP_MARGIN_MM : 0;
+          const fontSizeMm  = item.fontSizePt * 0.352778;
+          const yMm         = yInPagePx * mmPerPxFinal + marginMm + fontSizeMm;
+
+          if (yMm < 0.5 || yMm > A4_H_MM - 0.5) continue;
+
+          try {
+            pdf.setFontSize(Math.max(item.fontSizePt, 4));
+            pdf.text(item.text, Math.max(item.xMm, 0), yMm, {
+              renderingMode: 'invisible',
+              maxWidth: Math.max(A4_W_MM - Math.max(item.xMm, 0) - 1, 10),
+            });
+          } catch (_) {}
+        }
+      } else {
+        // Fallback when DOM extraction was unavailable
+        injectTextLayer(pdf, cvData, {
+          isRTL,
+          visibleSections,
+          sectionOrder,
+          sectionNames,
+        });
+      }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
       pdf.save(`${name} - CV.pdf`);
