@@ -213,15 +213,40 @@ const CVBuilder = () => {
     try {
       // ── ATS templates: native text-based PDF (no html2canvas / addImage) ──
       if (isATSTemplate(selectedTemplate)) {
-        const doc = await generateATSPdf(cvData, {
-          isRTL,
-          visibleSections,
-          visiblePersonalFields,
-          sectionOrder,
-          sectionNames,
-        });
+        console.log('[ATS PDF] Starting text-based export for template:', selectedTemplate);
+        let doc;
+        try {
+          doc = await generateATSPdf(cvData, {
+            isRTL,
+            visibleSections,
+            visiblePersonalFields,
+            sectionOrder,
+            sectionNames,
+          });
+        } catch (atsErr) {
+          console.error('[ATS PDF] generateATSPdf failed:', atsErr);
+          alert(isRTL
+            ? 'فشل تصدير PDF (ATS). تفاصيل الخطأ في Console.'
+            : `ATS PDF export failed: ${atsErr.message || atsErr}`);
+          return;
+        }
         const name = cvData.personalInfo?.fullName || 'Resume';
-        doc.save(`${name} - CV.pdf`);
+        // Use blob URL for reliable download in all browser environments
+        try {
+          const blob = doc.output('blob');
+          const url  = URL.createObjectURL(blob);
+          const a    = document.createElement('a');
+          a.href     = url;
+          a.download = `${name} - CV.pdf`;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 2000);
+          console.log('[ATS PDF] Download triggered successfully');
+        } catch (saveErr) {
+          console.error('[ATS PDF] Download trigger failed:', saveErr);
+          doc.save(`${name} - CV.pdf`);
+        }
         if (currentCVId) {
           fetch(`/api/cvs/${currentCVId}/download`, {
             method: 'POST', credentials: 'include',
