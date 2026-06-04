@@ -1,0 +1,85 @@
+Commit 922b486
+replit-agent
+replit-agent
+committed
+3 minutes ago
+·
+Update Vercel configuration to use modern syntax for builds
+Switch from legacy `builds` and `routes` syntax to modern `functions` and `rewrites` in `vercel.json`. Adjust `installCommand` and `buildCommand` to ensure proper dependency installation and Vite build execution, resolving previous build failures caused by ignored settings.
+
+Replit-Commit-Author: Agent
+Replit-Commit-Session-Id: 1a12fc2c-84ae-4008-ad1c-66a590bfb54c
+Replit-Commit-Checkpoint-Type: full_checkpoint
+Replit-Commit-Event-Id: 0dd9f4b9-9651-4778-8bba-312f8992c7b3
+Replit-Commit-Screenshot-Url: https://storage.googleapis.com/screenshot-production-us-central1/988df1ea-fe67-4c5e-ab58-48c9e143d263/1a12fc2c-84ae-4008-ad1c-66a590bfb54c/lNwaAnn
+Replit-Helium-Checkpoint-Created: true
+main
+
+1 parent 
+c297090
+ commit 
+922b486
+
+2 files changed
++11-28Lines changed: 11 additions & 28 deletions
+File tree
+
+    attached_assets
+        image_1780615179879.png
+    vercel.json
+
+ 
+‎attached_assets/image_1780615179879.png‎
+803 KB
+
+‎vercel.json‎
++11-28Lines changed: 11 additions & 28 deletions
+Original file line number	Diff line number	Diff line change
+@@ -1,33 +1,16 @@
+{
+  "version": 2,
+  "installCommand": "npm ci",
+  "builds": [
+    {
+      "src": "server/vercel.ts",
+      "use": "@vercel/node",
+      "config": { "maxDuration": 30 }
+    },
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build",
+      "config": { "distDir": "dist" }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "server/vercel.ts"
+    },
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/index.html"
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install --no-fund --no-audit",
+  "functions": {
+    "server/vercel.ts": {
+      "runtime": "@vercel/node",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    { "source": "/api/:path*", "destination": "/server/vercel.ts" },
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
+0 commit comments
+Comments
+0 (0)
