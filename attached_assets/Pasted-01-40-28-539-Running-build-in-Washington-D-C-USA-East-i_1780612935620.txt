@@ -1,0 +1,21 @@
+01:40:28.539 Running build in Washington, D.C., USA (East) – iad1
+01:40:28.539 Build machine configuration: 2 cores, 8 GB
+01:40:28.553 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: 859331a)
+01:40:28.554 Skipping build cache, deployment was triggered without cache.
+01:40:33.822 Cloning completed: 5.269s
+01:40:34.133 Running "vercel build"
+01:40:34.157 Vercel CLI 54.9.0
+01:40:34.236 WARNING! Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply. Learn More: https://vercel.link/unused-build-settings
+01:40:34.896 Installing dependencies...
+01:40:39.062 npm warn deprecated @esbuild-kit/esm-loader@2.6.5: Merged into tsx: https://tsx.is
+01:40:39.087 npm warn deprecated @esbuild-kit/core-utils@3.3.2: Merged into tsx: https://tsx.is
+01:40:39.542 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+01:40:40.522 npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+01:40:40.931 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+01:40:40.946 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+01:40:40.952 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+01:41:46.517 npm error Exit handler never called!
+01:41:46.518 npm error This is an error with npm itself. Please report this error at:
+01:41:46.518 npm error   <https://github.com/npm/cli/issues>
+01:41:46.519 npm error A complete log of this run can be found in: /vercel/.npm/_logs/2026-06-04T22_40_35_019Z-debug-0.log
+01:41:46.589 Error: Command "npm install" exited with 1
