@@ -409,10 +409,16 @@ const CVBuilder = () => {
           else if (tt === 'capitalize') displayText = text.replace(/(?:^|\s)\S/g, c => c.toUpperCase());
           // Carry letter-spacing so jsPDF can match rendered width
           const letterSpacingPx = parseFloat(parentStyle.letterSpacing) || 0;
+          // rect.height is the rendered line-box height; multiplying by 0.72
+          // gives the distance from the top of the line box to the text
+          // baseline — accurate across all line-height / font-size combos.
+          // This replaces the old fontSizePt-based estimate which was off by
+          // ~1 mm for large text and caused click-to-select to miss the text.
           domTextItems.push({
             text: displayText,
             xMm: relX * mmPerPxExtract,
             contentYPx: relY,
+            baselineOffsetMm: rect.height * 0.72 * mmPerPxExtract,
             fontSizePt: fontSize * 0.75,
             charSpaceMm: letterSpacingPx * mmPerPxExtract,
           });
@@ -539,10 +545,11 @@ const CVBuilder = () => {
 
           pdf.setPage(pageIdx + 1);
           // Convert pixel offset to mm, add page top margin for page 2+,
-          // then add approx. baseline offset (fontSize in mm)
-          const marginMm    = pageIdx > 0 ? PAGE_TOP_MARGIN_MM : 0;
-          const fontSizeMm  = item.fontSizePt * 0.352778;
-          const yMm         = yInPagePx * mmPerPxFinal + marginMm + fontSizeMm;
+          // then add the pre-computed baseline offset (rect.height * 0.72
+          // converted to mm, stored at extraction time for accuracy).
+          const marginMm   = pageIdx > 0 ? PAGE_TOP_MARGIN_MM : 0;
+          const baselineMm = item.baselineOffsetMm ?? (item.fontSizePt * 0.352778);
+          const yMm        = yInPagePx * mmPerPxFinal + marginMm + baselineMm;
 
           if (yMm < 0.5 || yMm > A4_H_MM - 0.5) continue;
 
