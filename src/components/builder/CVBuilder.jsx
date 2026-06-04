@@ -211,6 +211,12 @@ const CVBuilder = () => {
 
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
+
+    // ── Prevent accidental tab-close / navigation while PDF is generating ──
+    // Modern browsers show a "Leave site?" dialog if beforeunload returns a value.
+    const _onBeforeUnload = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', _onBeforeUnload);
+
     try {
       // All templates use the screenshot-based approach so the PDF matches
       // the visual preview exactly. The DOM-extracted invisible text layer
@@ -322,8 +328,10 @@ const CVBuilder = () => {
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
 
-      // One frame so the browser lays out the clone, then read true height
-      await new Promise(r => requestAnimationFrame(r));
+      // Short wait so the browser lays out the clone, then read true height.
+      // setTimeout fires even when the tab is in the background (requestAnimationFrame
+      // can silently pause/stop in hidden tabs, which would hang the download).
+      await new Promise(r => setTimeout(r, 50));
       const captureH = clone.scrollHeight || element.scrollHeight || 1122;
 
       // Now move wrapper fully off-screen by the correct amount
@@ -357,8 +365,9 @@ const CVBuilder = () => {
         if (updated !== ff) el.style.fontFamily = updated;
       });
 
-      // Wait for layout to settle
-      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+      // Wait for layout to settle (setTimeout works in background tabs;
+      // requestAnimationFrame silently pauses when the tab is not visible).
+      await new Promise(r => setTimeout(r, 50));
       await document.fonts.ready;
 
       // ── Extract text positions from DOM for accurate text layer ────────────
@@ -450,7 +459,10 @@ const CVBuilder = () => {
         throw new Error('html-to-image returned an empty result');
       }
 
-      await new Promise(r => setTimeout(r, 0));
+      // queueMicrotask has zero background-tab throttling (unlike setTimeout which
+      // is clamped to ≥1 s in hidden tabs).  We only need a brief event-loop yield
+      // so the browser can decode the data-URL before we draw from it.
+      await new Promise(r => queueMicrotask(r));
 
       const fullImg = await new Promise((resolve, reject) => {
         const im = new Image();
@@ -480,7 +492,9 @@ const CVBuilder = () => {
       const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
       for (let i = 0; i < contentRanges.length; i++) {
-        await new Promise(r => setTimeout(r, 0));
+        // queueMicrotask instead of setTimeout so background-tab throttling
+        // (≥1 s per iteration) doesn't slow multi-page exports.
+        await new Promise(r => queueMicrotask(r));
         if (i > 0) pdf.addPage();
 
         const { start, end } = contentRanges[i];
@@ -555,7 +569,20 @@ const CVBuilder = () => {
       }
 
       const name = cvData.personalInfo?.fullName || 'Resume';
-      pdf.save(`${name} - CV.pdf`);
+
+      // Use blob URL download instead of pdf.save() — blob URLs are claimed
+      // by the browser's download manager immediately, so the file continues
+      // downloading even if the user switches tabs or navigates away.
+      const pdfBlob = pdf.output('blob');
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const anchor  = document.createElement('a');
+      anchor.href     = blobUrl;
+      anchor.download = `${name} - CV.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      // Revoke after a short delay — enough for the browser to claim the file.
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
       if (currentCVId) {
         fetch(`/api/cvs/${currentCVId}/download`, {
@@ -566,6 +593,7 @@ const CVBuilder = () => {
       console.error('PDF export failed:', err);
       alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');
     } finally {
+      window.removeEventListener('beforeunload', _onBeforeUnload);
       setIsPrinting(false);
     }
   };
