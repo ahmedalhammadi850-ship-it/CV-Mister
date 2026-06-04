@@ -296,19 +296,11 @@ const CVBuilder = () => {
       );
       await document.fonts.ready;
 
-      const captureH = element.scrollHeight;
-
-      const wrapper = document.createElement('div');
-      wrapper.style.cssText = [
-        'position:fixed',
-        `top:-${captureH + 200}px`,
-        'left:0',
-        `width:${CONTENT_W}px`,
-        'z-index:99999',
-        'background:#fff',
-        'overflow:visible',
-      ].join(';');
-
+      // ── Clone into a fixed off-screen wrapper ────────────────────────────
+      // We clone BEFORE reading the height because on mobile the original
+      // element's parent may be `display:none` (hidden preview tab), causing
+      // element.scrollHeight = 0.  The clone in a position:fixed wrapper is
+      // always laid out, so clone.scrollHeight gives the real content height.
       const clone = element.cloneNode(true);
       clone.style.position = 'relative';
       clone.style.top      = '0';
@@ -316,8 +308,26 @@ const CVBuilder = () => {
       clone.style.zIndex   = 'auto';
       clone.style.width    = `${CONTENT_W}px`;
 
+      const wrapper = document.createElement('div');
+      wrapper.style.cssText = [
+        'position:fixed',
+        'top:-99999px',   // park far off-screen; repositioned after height is known
+        'left:0',
+        `width:${CONTENT_W}px`,
+        'z-index:99999',
+        'background:#fff',
+        'overflow:visible',
+      ].join(';');
+
       wrapper.appendChild(clone);
       document.body.appendChild(wrapper);
+
+      // One frame so the browser lays out the clone, then read true height
+      await new Promise(r => requestAnimationFrame(r));
+      const captureH = clone.scrollHeight || element.scrollHeight || 1122;
+
+      // Now move wrapper fully off-screen by the correct amount
+      wrapper.style.top = `-${captureH + 200}px`;
 
       // ── System-font → web-font substitution ────────────────────────────────
       // html-to-image renders via SVG <foreignObject>, which blocks access to
