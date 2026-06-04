@@ -6,8 +6,13 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
-import { isATSTemplate, generateATSPdf } from '../../utils/atsPdfExport';
+import { isATSTemplate, generateATSPdf, embedArabicFont } from '../../utils/atsPdfExport';
 import { injectTextLayer } from '../../utils/pdfTextLayer';
+
+/** Returns true if the string contains Arabic / Hebrew / RTL characters */
+function containsArabic(text) {
+  return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
+}
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -580,6 +585,18 @@ const CVBuilder = () => {
       const mmPerPxFinal = A4_W_MM / CONTENT_W;
       const PAGE_TOP_MARGIN_MM = PAGE_TOP_MARGIN * mmPerPxFinal;
 
+      // Embed Arabic font into this PDF instance so Arabic characters are
+      // correctly encoded in the content stream and become truly selectable.
+      // We do this whenever the CV is RTL OR any extracted text item contains
+      // Arabic characters (mixed-language CVs).
+      let arabicLayerFontReady = false;
+      try {
+        const needsArabic = isRTL || domTextItems.some(it => containsArabic(it.text));
+        if (needsArabic) {
+          arabicLayerFontReady = await embedArabicFont(pdf);
+        }
+      } catch (_) {}
+
       if (domTextItems.length > 0) {
         for (const item of domTextItems) {
           // Find which page this text belongs to
@@ -605,15 +622,25 @@ const CVBuilder = () => {
           if (yMm < 0.5 || yMm > A4_H_MM - 0.5) continue;
 
           try {
-            pdf.setFontSize(Math.max(item.fontSizePt, 4));
-            const textOpts = {
-              renderingMode: 'invisible',
-              maxWidth: Math.max(A4_W_MM - Math.max(item.xMm, 0) - 1, 10),
-            };
-            if (item.charSpaceMm && item.charSpaceMm > 0) {
-              textOpts.charSpace = item.charSpaceMm;
+            // Set an appropriate font so characters are correctly encoded.
+            // – Arabic text: use Amiri (embedded above) so glyphs are real
+            //   PDF text operators, not broken Helvetica substitutions.
+            // – Latin text: use helvetica (always available in jsPDF).
+            // We do NOT specify maxWidth here — each item is already a single
+            // visual line extracted from the DOM. Specifying maxWidth would
+            // cause jsPDF to re-wrap the text based on Helvetica metrics
+            // (different from the actual rendered font), placing invisible
+            // text at wrong Y positions and breaking selection entirely.
+            const isArabicItem = containsArabic(item.text);
+            if (isArabicItem && arabicLayerFontReady) {
+              pdf.setFont('Amiri', 'normal');
+            } else {
+              pdf.setFont('helvetica', 'normal');
             }
-            pdf.text(item.text, Math.max(item.xMm, 0), yMm, textOpts);
+            pdf.setFontSize(Math.max(item.fontSizePt, 4));
+            pdf.text(item.text, Math.max(item.xMm, 0), yMm, {
+              renderingMode: 'invisible',
+            });
           } catch (_) {}
         }
       } else {

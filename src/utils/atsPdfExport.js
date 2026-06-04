@@ -68,7 +68,7 @@ function safe(v) {
 }
 
 /** Fetch an Arabic TTF font via the app's font proxy and embed it in jsPDF. */
-async function embedArabicFont(doc) {
+export async function embedArabicFont(doc) {
   try {
     const cssUrl = 'https://fonts.googleapis.com/css2?family=Amiri:wght@400&display=swap';
     const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(cssUrl);
