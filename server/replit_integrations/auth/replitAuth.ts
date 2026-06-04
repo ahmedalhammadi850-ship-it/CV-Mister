@@ -4,19 +4,22 @@ import { Strategy, type VerifyFunction } from "openid-client/passport";
 import passport from "passport";
 import session from "express-session";
 import type { Express, RequestHandler } from "express";
-import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 import { authStorage } from "./storage";
 
-const getOidcConfig = memoize(
-  async () => {
-    return await client.discovery(
-      new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
-    );
-  },
-  { maxAge: 3600 * 1000 }
-);
+let _oidcConfig: Awaited<ReturnType<typeof client.discovery>> | null = null;
+let _oidcConfigExpiry = 0;
+
+const getOidcConfig = async () => {
+  const now = Date.now();
+  if (_oidcConfig && now < _oidcConfigExpiry) return _oidcConfig;
+  _oidcConfig = await client.discovery(
+    new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
+    process.env.REPL_ID!
+  );
+  _oidcConfigExpiry = now + 3600 * 1000;
+  return _oidcConfig;
+};
 
 function getCallbackDomain(req: any): string {
   // Prefer the Replit dev domain env var — req.hostname can resolve to

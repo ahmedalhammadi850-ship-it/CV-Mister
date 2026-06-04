@@ -21,7 +21,6 @@
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.19.0",
-    "@types/memoizee": "^0.4.12",
     "@types/passport": "^1.0.17",
     "@types/pg": "^8.20.0",
     "@vercel/node": "^5.8.2",
@@ -42,16 +41,15 @@
     "html2canvas": "^1.4.1",
     "jspdf": "^4.2.1",
     "lucide-react": "^1.17.0",
-    "memoizee": "^0.4.17",
     "mongodb": "^7.2.0",
     "openid-client": "^6.8.4",
     "p-limit": "^7.3.0",
     "p-retry": "^7.1.1",
     "passport": "^0.7.0",
-    "pg": "^8.20.0",
-    "react": "^19.2.6",
-    "react-dom": "^19.2.6",
-    "react-router-dom": "^7.16.0",
+    "pg": "^8.21.0",
+    "react": "^19.2.7",
+    "react-dom": "^19.2.7",
+    "react-router-dom": "^7.17.0",
     "sonner": "^2.0.7",
     "tsx": "^4.22.4",
     "zod": "^4.4.3",
@@ -77,6 +75,6 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.6.0",
     "tailwindcss": "^4.3.0",
-    "vite": "^8.0.14"
+    "vite": "^8.0.16"
   }
 }
