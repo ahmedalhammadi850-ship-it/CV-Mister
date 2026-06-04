@@ -387,41 +387,92 @@ const CVBuilder = () => {
             return NodeFilter.FILTER_ACCEPT;
           },
         });
+        // Helper: apply CSS text-transform to a string
+        const applyTransform = (str, tt) => {
+          if (tt === 'uppercase')  return str.toUpperCase();
+          if (tt === 'lowercase')  return str.toLowerCase();
+          if (tt === 'capitalize') return str.replace(/(?:^|\s)\S/g, c => c.toUpperCase());
+          return str;
+        };
+
+        // Helper: push one line-level text item
+        const pushLine = (lineText, lr, fontSizePt, charSpaceMm) => {
+          const rx = lr.left - cloneRect.left;
+          const ry = lr.top  - cloneRect.top;
+          if (rx < 0 || ry < 0 || !lineText.trim()) return;
+          domTextItems.push({
+            text:             lineText.trim(),
+            xMm:              rx * mmPerPxExtract,
+            contentYPx:       ry,
+            // rect.height * 0.72 ≈ distance from line-box top to text baseline,
+            // which is what jsPDF expects as the Y coordinate for pdf.text().
+            baselineOffsetMm: lr.height * 0.72 * mmPerPxExtract,
+            fontSizePt,
+            charSpaceMm,
+          });
+        };
+
         while (walker.nextNode()) {
-          const node  = walker.currentNode;
-          const text  = node.textContent?.trim();
-          if (!text) continue;
+          const node = walker.currentNode;
+          const raw  = node.textContent;
+          if (!raw?.trim()) continue;
+
           const range = document.createRange();
           range.selectNodeContents(node);
-          const rect = range.getBoundingClientRect();
-          if (rect.width < 1 || rect.height < 1) continue;
-          const relX = rect.left - cloneRect.left;
-          const relY = rect.top  - cloneRect.top;
-          if (relX < 0 || relY < 0) continue;
-          const parentStyle   = window.getComputedStyle(node.parentElement);
-          const fontSize      = parseFloat(parentStyle.fontSize) || 12;
-          // Apply the same CSS text-transform so the invisible text matches
-          // the visual text width exactly (avoids selection-box misalignment).
-          const tt = parentStyle.textTransform;
-          let displayText = text;
-          if      (tt === 'uppercase')  displayText = text.toUpperCase();
-          else if (tt === 'lowercase')  displayText = text.toLowerCase();
-          else if (tt === 'capitalize') displayText = text.replace(/(?:^|\s)\S/g, c => c.toUpperCase());
-          // Carry letter-spacing so jsPDF can match rendered width
-          const letterSpacingPx = parseFloat(parentStyle.letterSpacing) || 0;
-          // rect.height is the rendered line-box height; multiplying by 0.72
-          // gives the distance from the top of the line box to the text
-          // baseline — accurate across all line-height / font-size combos.
-          // This replaces the old fontSizePt-based estimate which was off by
-          // ~1 mm for large text and caused click-to-select to miss the text.
-          domTextItems.push({
-            text: displayText,
-            xMm: relX * mmPerPxExtract,
-            contentYPx: relY,
-            baselineOffsetMm: rect.height * 0.72 * mmPerPxExtract,
-            fontSizePt: fontSize * 0.75,
-            charSpaceMm: letterSpacingPx * mmPerPxExtract,
-          });
+
+          // getClientRects() returns ONE rect per VISUAL LINE — crucial for
+          // placing invisible text at the correct Y for every wrapped line so
+          // clicking anywhere in a paragraph selects the right line.
+          const lineRects = Array.from(range.getClientRects())
+            .filter(r => r.width > 1 && r.height > 1);
+          if (lineRects.length === 0) continue;
+
+          const parentStyle      = window.getComputedStyle(node.parentElement);
+          const fontSize         = parseFloat(parentStyle.fontSize) || 12;
+          const fontSizePt       = fontSize * 0.75;
+          const letterSpacingPx  = parseFloat(parentStyle.letterSpacing) || 0;
+          const charSpaceMm      = letterSpacingPx * mmPerPxExtract;
+          const tt               = parentStyle.textTransform;
+
+          if (lineRects.length === 1) {
+            // Single-line node — fast path
+            pushLine(applyTransform(raw.trim(), tt), lineRects[0], fontSizePt, charSpaceMm);
+            continue;
+          }
+
+          // Multi-line node: binary-search each visual line boundary so each
+          // line gets the correct text slice AND correct Y position.
+          let lineStart = 0;
+          for (let li = 0; li < lineRects.length; li++) {
+            const lr = lineRects[li];
+            let lineEnd;
+
+            if (li === lineRects.length - 1) {
+              lineEnd = raw.length;
+            } else {
+              // Find the character index that ends this visual line.
+              // Invariant: raw[lineStart..hi) spills into the next line.
+              const nextTop = lineRects[li + 1].top;
+              let lo = lineStart, hi = raw.length;
+              while (lo < hi - 1) {
+                const mid = (lo + hi) >> 1;
+                const tr  = document.createRange();
+                tr.setStart(node, lineStart);
+                tr.setEnd(node, mid);
+                const tRects = tr.getClientRects();
+                const last   = tRects[tRects.length - 1];
+                // If the last rect's top is still on (or before) the current
+                // line (< nextLineTop), mid is within this line → expand lo.
+                if (last && last.top < nextTop - 1) lo = mid;
+                else hi = mid;
+              }
+              lineEnd = lo;
+            }
+
+            const slice = raw.slice(lineStart, lineEnd);
+            lineStart = lineEnd;
+            pushLine(applyTransform(slice, tt), lr, fontSizePt, charSpaceMm);
+          }
         }
       } catch (_e) {
         // DOM extraction failed — will fall back to content-based layer
