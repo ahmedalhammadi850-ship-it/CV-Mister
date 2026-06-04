@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
 
 const CHAT_API = '/api/chat';
@@ -57,7 +58,7 @@ export default function ChatWidget() {
     try {
       const fallbackText = isRTL ? 'حدث خطأ، يرجى المحاولة مجدداً.' : 'Something went wrong. Please try again.';
 
-      const response = await fetch(CHAT_API, {
+      const response = await apiFetch(CHAT_API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

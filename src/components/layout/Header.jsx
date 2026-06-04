@@ -1,4 +1,5 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useState, useEffect, useRef } from 'react';
@@ -17,7 +18,7 @@ async function fetchNavbarLabels() {
   const now = Date.now();
   if (_navbarCache && now - _navbarFetchedAt < 60000) return _navbarCache;
   try {
-    const res = await fetch('/api/navbar');
+    const res = await apiFetch('/api/navbar');
     if (res.ok) {
       _navbarCache = { ...NAV_DEFAULTS, ...await res.json() };
       _navbarFetchedAt = now;

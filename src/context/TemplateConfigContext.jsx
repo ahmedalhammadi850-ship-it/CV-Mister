@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 
 const TemplateConfigContext = createContext({ freeTemplates: new Set(['minimal']), loading: true, refresh: () => {} });
 
@@ -8,7 +9,7 @@ export const TemplateConfigProvider = ({ children }) => {
 
   const refresh = async () => {
     try {
-      const res = await fetch('/api/templates/config');
+      const res = await apiFetch('/api/templates/config');
       if (!res.ok) return;
       const config = await res.json();
       const freeSet = new Set(Object.entries(config).filter(([, v]) => v).map(([k]) => k));

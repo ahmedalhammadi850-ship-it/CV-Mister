@@ -39,18 +39,18 @@ export function getAdminFromReq(req) {
 
 export function setUserCookie(res, userId) {
   const token = signToken({ userId });
-  res.setHeader("Set-Cookie", `cv_auth=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=604800`);
+  res.setHeader("Set-Cookie", `cv_auth=${token}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=604800`);
 }
 
 export function setAdminCookie(res, adminId, adminUsername) {
   const token = signToken({ adminId, adminUsername });
-  res.setHeader("Set-Cookie", `cv_admin=${token}; HttpOnly; SameSite=Lax; Path=/; Max-Age=86400`);
+  res.setHeader("Set-Cookie", `cv_admin=${token}; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=86400`);
 }
 
 export function clearUserCookie(res) {
-  res.setHeader("Set-Cookie", "cv_auth=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0");
+  res.setHeader("Set-Cookie", "cv_auth=; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=0");
 }
 
 export function clearAdminCookie(res) {
-  res.setHeader("Set-Cookie", "cv_admin=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0");
+  res.setHeader("Set-Cookie", "cv_admin=; HttpOnly; SameSite=None; Secure; Path=/; Max-Age=0");
 }

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 const AdminLoginPage = () => {
@@ -14,7 +15,7 @@ const AdminLoginPage = () => {
     setError('');
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/login', {
+      const res = await apiFetch('/api/admin/login', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },

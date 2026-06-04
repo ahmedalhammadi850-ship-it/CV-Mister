@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { apiFetch } from '../utils/api';
 
 export function usePageRateLimit() {
   const [blocked, setBlocked] = useState(false);
@@ -6,7 +7,7 @@ export function usePageRateLimit() {
 
   const checkRateLimit = useCallback(async () => {
     try {
-      const res = await fetch('/api/ping');
+      const res = await apiFetch('/api/ping');
       const data = await res.json();
       if (res.status === 429 || data.blocked) {
         setBlocked(true);

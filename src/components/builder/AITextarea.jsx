@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { apiFetch } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
 const AI_ACTIONS = [
@@ -109,7 +110,7 @@ export default function AITextarea({
     }
     setLoading(key);
     try {
-      const res = await fetch('/api/ai/rewrite', {
+      const res = await apiFetch('/api/ai/rewrite', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: value, action: key, language: isRTL ? 'ar' : 'en' }),

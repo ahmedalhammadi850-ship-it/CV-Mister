@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 import { sampleData, blankData } from '../utils/sampleData';
 import { saveCV, getCVById, getSavedCVs, deleteCV as deleteCVLocal, duplicateCV as duplicateCVLocal } from '../utils/cvStorage';
 import { useAuth } from './AuthContext';
@@ -14,7 +15,7 @@ const ALL_POSSIBLE_SECTIONS = [
 
 async function fetchAPICVs() {
   try {
-    const res = await fetch('/api/cvs', { credentials: 'include' });
+    const res = await apiFetch('/api/cvs', { credentials: 'include' });
     if (!res.ok) return [];
     return await res.json();
   } catch {
@@ -24,7 +25,7 @@ async function fetchAPICVs() {
 
 async function saveAPICV(entry) {
   try {
-    const res = await fetch('/api/cvs', {
+    const res = await apiFetch('/api/cvs', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -43,7 +44,7 @@ async function saveAPICV(entry) {
 
 async function deleteAPICV(id) {
   try {
-    await fetch(`/api/cvs/${id}`, {
+    await apiFetch(`/api/cvs/${id}`, {
       method: 'DELETE',
       credentials: 'include',
     });
@@ -54,7 +55,7 @@ async function deleteAPICV(id) {
 
 async function duplicateAPICV(entry) {
   try {
-    const res = await fetch('/api/cvs', {
+    const res = await apiFetch('/api/cvs', {
       method: 'POST',
       credentials: 'include',
       headers: { 'Content-Type': 'application/json' },
@@ -281,7 +282,7 @@ export function CVProvider({ children }) {
   // Async fallback: load directly from API when localStorage doesn't have the CV yet
   const loadCVByIdFromAPI = async (id) => {
     try {
-      const res = await fetch(`/api/cvs/${id}`, { credentials: 'include' });
+      const res = await apiFetch(`/api/cvs/${id}`, { credentials: 'include' });
       if (!res.ok) return false;
       const cv = await res.json();
       // Also persist to localStorage so future local loads work

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { API_BASE } from '../utils/api';
 import { useNavigate } from 'react-router-dom';
 
 /* ─── helpers ─── */
@@ -39,7 +40,7 @@ const ChangePasswordModal = ({ onClose }) => {
     if (form.newPassword.length < 6) { setError('كلمة المرور يجب أن تكون 6 أحرف على الأقل'); return; }
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/password', {
+      const res = await fetch(`${API_BASE}/api/admin/password`, {
         method: 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword: form.currentPassword, newPassword: form.newPassword }),
@@ -214,7 +215,7 @@ const AdminDashboardPage = () => {
   const [navbarMsg, setNavbarMsg]             = useState('');
 
   const apiFetch = useCallback(async (url) => {
-    const res = await fetch(url, { credentials: 'include' });
+    const res = await fetch(`${API_BASE}${url}`, { credentials: 'include' });
     if (res.status === 401) { navigate('/admin/login'); throw new Error('Unauthorized'); }
     if (!res.ok) throw new Error('Error');
     return res.json();
@@ -230,7 +231,7 @@ const AdminDashboardPage = () => {
           apiFetch('/api/admin/cvs'),
           apiFetch('/api/admin/payment-requests'),
           apiFetch('/api/admin/business-contacts'),
-          fetch('/api/templates/config').then(r => r.json()),
+          fetch(`${API_BASE}/api/templates/config`).then(r => r.json()),
           apiFetch('/api/admin/settings'),
           apiFetch('/api/admin/pricing').catch(() => ({})),
           apiFetch('/api/admin/navbar').catch(() => ({})),
@@ -254,7 +255,7 @@ const AdminDashboardPage = () => {
   const handleToggleTemplate = async (id, currentFree) => {
     setTplSaving(s => ({ ...s, [id]: true }));
     try {
-      const res = await fetch(`/api/admin/templates/${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/templates/${id}`, {
         method: 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ is_free: !currentFree }),
@@ -271,7 +272,7 @@ const AdminDashboardPage = () => {
     setNavbarSaving(true);
     setNavbarMsg('');
     try {
-      const res = await fetch('/api/admin/navbar', {
+      const res = await fetch(`${API_BASE}/api/admin/navbar`, {
         method: 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(navbarEdit),
@@ -304,7 +305,7 @@ const AdminDashboardPage = () => {
         pro_features: pricingEdit.pro_features,
         business_features: pricingEdit.business_features,
       };
-      const res = await fetch('/api/admin/pricing', {
+      const res = await fetch(`${API_BASE}/api/admin/pricing`, {
         method: 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
@@ -322,7 +323,7 @@ const AdminDashboardPage = () => {
     setN8nSaving(s => ({ ...s, [key]: true }));
     setN8nMsg(m => ({ ...m, [key]: '' }));
     try {
-      const res = await fetch('/api/admin/settings', {
+      const res = await fetch(`${API_BASE}/api/admin/settings`, {
         method: 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key, value: n8nEditing[key] }),
@@ -337,14 +338,14 @@ const AdminDashboardPage = () => {
   };
 
   const handleLogout = async () => {
-    await fetch('/api/admin/logout', { method: 'POST', credentials: 'include' });
+    await fetch(`${API_BASE}/api/admin/logout`, { method: 'POST', credentials: 'include' });
     navigate('/admin/login');
   };
 
   const handlePaymentAction = async (id, status) => {
     setActionLoading(l => ({ ...l, [id]: true }));
     try {
-      const res = await fetch(`/api/admin/payment-requests/${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/payment-requests/${id}`, {
         method: 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -358,7 +359,7 @@ const AdminDashboardPage = () => {
   const handleBizAction = async (id, status) => {
     setActionLoading(l => ({ ...l, [id]: true }));
     try {
-      const res = await fetch(`/api/admin/business-contacts/${id}`, {
+      const res = await fetch(`${API_BASE}/api/admin/business-contacts/${id}`, {
         method: 'PATCH', credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status }),
@@ -372,7 +373,7 @@ const AdminDashboardPage = () => {
   const handleDeleteUser = async (id) => {
     if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم وجميع بياناته؟')) return;
     try {
-      const res = await fetch(`/api/admin/users/${id}`, { method: 'DELETE', credentials: 'include' });
+      const res = await fetch(`${API_BASE}/api/admin/users/${id}`, { method: 'DELETE', credentials: 'include' });
       if (res.ok) setUsers(prev => prev.filter(u => u.id !== id));
     } catch { alert('حدث خطأ أثناء الحذف'); }
   };

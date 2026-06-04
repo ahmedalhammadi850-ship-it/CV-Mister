@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
+import { apiFetch } from '../utils/api';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -71,7 +72,7 @@ const BusinessContactPage = () => {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64 = e.target.result;
-        const res = await fetch('/api/business-contact', {
+        const res = await apiFetch('/api/business-contact', {
           method: 'POST',
           credentials: 'include',
           headers: { 'Content-Type': 'application/json' },

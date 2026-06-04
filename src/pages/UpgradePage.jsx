@@ -1,4 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createPortal } from 'react-dom';
@@ -52,7 +53,7 @@ const UpgradePage = () => {
   const prevExpiresAtRef  = useRef(null);
 
   useEffect(() => {
-    fetch('/api/pricing')
+    apiFetch('/api/pricing')
       .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setPricing(prev => ({ ...prev, ...data })); })
       .catch(() => {});
@@ -67,7 +68,7 @@ const UpgradePage = () => {
     if (!done) return;
     const check = async () => {
       try {
-        const res = await fetch('/api/auth/user', { credentials: 'include' });
+        const res = await apiFetch('/api/auth/user', { credentials: 'include' });
         if (!res.ok) return;
         const data = await res.json();
 
@@ -151,7 +152,7 @@ const UpgradePage = () => {
 
   const sendToWebhook = async (base64, userInfo) => {
     try {
-      await fetch('/api/payment-webhook', {
+      await apiFetch('/api/payment-webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -179,7 +180,7 @@ const UpgradePage = () => {
 
         /* Send to n8n webhook and internal API in parallel */
         const [res] = await Promise.all([
-          fetch('/api/payment-requests', {
+          apiFetch('/api/payment-requests', {
             method: 'POST',
             credentials: 'include',
             headers: { 'Content-Type': 'application/json' },

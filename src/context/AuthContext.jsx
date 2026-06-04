@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -58,7 +59,7 @@ export function AuthProvider({ children }) {
   const syncWithBackend = async (firebaseUser) => {
     try {
       const idToken = await firebaseUser.getIdToken(true);
-      const res = await fetch('/api/auth/firebase-sync', {
+      const res = await apiFetch('/api/auth/firebase-sync', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -93,7 +94,7 @@ export function AuthProvider({ children }) {
         setCurrentUser(user || buildFallbackUser(firebaseUser));
       } else {
         setCurrentUser(null);
-        await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+        await apiFetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
       }
       setLoading(false);
     });
@@ -102,7 +103,7 @@ export function AuthProvider({ children }) {
 
   const signUp = async (firstName, lastName, email, password) => {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
-    await fetch('/api/auth/firebase-register', {
+    await apiFetch('/api/auth/firebase-register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
@@ -143,7 +144,7 @@ export function AuthProvider({ children }) {
 
   const signOutUser = async () => {
     await signOut(auth);
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    await apiFetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setCurrentUser(null);
   };
 

@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { apiFetch } from '../utils/api';
 import { createPortal } from 'react-dom';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -21,7 +22,7 @@ function usePendingApprovalPoll(currentUser, refreshUser) {
       pollRef.current = setInterval(async () => {
         if (cancelled) return;
         try {
-          const r = await fetch('/api/auth/user', { credentials: 'include' });
+          const r = await apiFetch('/api/auth/user', { credentials: 'include' });
           if (!r.ok || cancelled) return;
           const data = await r.json();
 
@@ -49,7 +50,7 @@ function usePendingApprovalPoll(currentUser, refreshUser) {
 
     const checkPending = async () => {
       try {
-        const res = await fetch('/api/payment-requests/my', { credentials: 'include' });
+        const res = await apiFetch('/api/payment-requests/my', { credentials: 'include' });
         if (!res.ok || cancelled) return;
         const requests = await res.json();
         if (requests.some(r => r.status === 'pending')) startPolling();
@@ -546,7 +547,7 @@ const DashboardPage = () => {
   const fetchCVs = useCallback(async () => {
     setLoading(true); setError(null);
     try {
-      const res = await fetch('/api/cvs', { credentials: 'include' });
+      const res = await apiFetch('/api/cvs', { credentials: 'include' });
       if (res.status === 401 || res.status === 403) { navigate('/login'); return; }
       if (!res.ok) throw new Error('Failed');
       setCvs(await res.json());
@@ -557,7 +558,7 @@ const DashboardPage = () => {
 
   useEffect(() => { fetchCVs(); }, [fetchCVs]);
 
-  const handleDelete    = async (id) => { deleteCV(id); await fetch(`/api/cvs/${id}`, { method: 'DELETE', credentials: 'include' }); setCvs(prev => prev.filter(c => c.id !== id)); };
+  const handleDelete    = async (id) => { deleteCV(id); await apiFetch(`/api/cvs/${id}`, { method: 'DELETE', credentials: 'include' }); setCvs(prev => prev.filter(c => c.id !== id)); };
   const handleDuplicate = async (id) => {
     if (currentUser?.subscriptionExpired) { openPaywall('expired'); return; }
     const plan = currentUser?.plan || 'free';
@@ -565,7 +566,7 @@ const DashboardPage = () => {
     if (plan === 'free' && cvs.length >= FREE_LIMIT) { openPaywall('free_limit'); return; }
     const cv = cvs.find(c => c.id === id); if (!cv) return;
     const copy = { ...cv, id: `cv-${Date.now()}`, name: cv.name + (isRTL ? ' (نسخة)' : ' (Copy)'), lastModified: new Date().toISOString() };
-    const res = await fetch('/api/cvs', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
+    const res = await apiFetch('/api/cvs', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
     if (res.ok) {
       const saved = await res.json();
       setCvs(prev => [saved, ...prev]);
@@ -576,7 +577,7 @@ const DashboardPage = () => {
     }
   };
   const handleRename    = async (id, name) => {
-    const res = await fetch(`/api/cvs/${id}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+    const res = await apiFetch(`/api/cvs/${id}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
     if (res.ok) { const updated = await res.json(); setCvs(prev => prev.map(c => c.id === id ? { ...c, name: updated.name } : c)); }
   };
 
