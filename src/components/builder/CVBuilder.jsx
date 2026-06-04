@@ -320,10 +320,15 @@ const CVBuilder = () => {
       clone.style.width    = `${CONTENT_W}px`;
 
       const wrapper = document.createElement('div');
+      // Park off-screen to the LEFT, not above. Keeping top:0 means Y
+      // coordinates from getBoundingClientRect() stay near 0→contentHeight
+      // (accurate, positive values). Parking far above produces large negative
+      // Y values that some browsers clamp or handle imprecisely, which causes
+      // the invisible text layer to drift away from the visual text in the PDF.
       wrapper.style.cssText = [
         'position:fixed',
-        'top:-99999px',   // park far off-screen; repositioned after height is known
-        'left:0',
+        'top:0',
+        `left:-${CONTENT_W + 50}px`,
         `width:${CONTENT_W}px`,
         'z-index:99999',
         'background:#fff',
@@ -338,9 +343,6 @@ const CVBuilder = () => {
       // can silently pause/stop in hidden tabs, which would hang the download).
       await new Promise(r => setTimeout(r, 50));
       const captureH = clone.scrollHeight || element.scrollHeight || 1122;
-
-      // Now move wrapper fully off-screen by the correct amount
-      wrapper.style.top = `-${captureH + 200}px`;
 
       // ── System-font → web-font substitution ────────────────────────────────
       // html-to-image renders via SVG <foreignObject>, which blocks access to
@@ -401,17 +403,22 @@ const CVBuilder = () => {
         };
 
         // Helper: push one line-level text item
-        const pushLine = (lineText, lr, fontSizePt, charSpaceMm) => {
+        // fontSizePx is in CSS pixels; used for an accurate baseline calculation.
+        // Baseline from line-box top = half the leading + 80% of the font-size.
+        // (80% = typical ascender ratio for Latin/Arabic fonts.)
+        // This is more accurate than the old "height * 0.72" which drifts when
+        // line-height is large (e.g. 1.5× or 2×).
+        const pushLine = (lineText, lr, fontSizePx, fontSizePt, charSpaceMm) => {
           const rx = lr.left - cloneRect.left;
           const ry = lr.top  - cloneRect.top;
           if (rx < 0 || ry < 0 || !lineText.trim()) return;
+          const leading         = Math.max(lr.height - fontSizePx, 0);
+          const baselinePx      = leading / 2 + fontSizePx * 0.80;
           domTextItems.push({
             text:             lineText.trim(),
             xMm:              rx * mmPerPxExtract,
             contentYPx:       ry,
-            // rect.height * 0.72 ≈ distance from line-box top to text baseline,
-            // which is what jsPDF expects as the Y coordinate for pdf.text().
-            baselineOffsetMm: lr.height * 0.72 * mmPerPxExtract,
+            baselineOffsetMm: baselinePx * mmPerPxExtract,
             fontSizePt,
             charSpaceMm,
           });
@@ -441,7 +448,7 @@ const CVBuilder = () => {
 
           if (lineRects.length === 1) {
             // Single-line node — fast path
-            pushLine(applyTransform(raw.trim(), tt), lineRects[0], fontSizePt, charSpaceMm);
+            pushLine(applyTransform(raw.trim(), tt), lineRects[0], fontSize, fontSizePt, charSpaceMm);
             continue;
           }
 
@@ -476,7 +483,7 @@ const CVBuilder = () => {
 
             const slice = raw.slice(lineStart, lineEnd);
             lineStart = lineEnd;
-            pushLine(applyTransform(slice, tt), lr, fontSizePt, charSpaceMm);
+            pushLine(applyTransform(slice, tt), lr, fontSize, fontSizePt, charSpaceMm);
           }
         }
       } catch (_e) {
