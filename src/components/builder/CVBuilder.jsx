@@ -212,52 +212,12 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      // ── ATS templates: native text-based PDF (no html2canvas / addImage) ──
-      console.log('[PDF] selectedTemplate =', selectedTemplate, '| isATS =', isATSTemplate(selectedTemplate));
-      if (isATSTemplate(selectedTemplate)) {
-        console.log('[ATS PDF] Starting text-based export for template:', selectedTemplate);
-        let doc;
-        try {
-          doc = await generateATSPdf(cvData, {
-            isRTL,
-            visibleSections,
-            visiblePersonalFields,
-            sectionOrder,
-            sectionNames,
-          });
-        } catch (atsErr) {
-          console.error('[ATS PDF] generateATSPdf failed:', atsErr);
-          alert(isRTL
-            ? 'فشل تصدير PDF (ATS). تفاصيل الخطأ في Console.'
-            : `ATS PDF export failed: ${atsErr.message || atsErr}`);
-          return;
-        }
-        const name = cvData.personalInfo?.fullName || 'Resume';
-        // Use blob URL for reliable download in all browser environments
-        try {
-          const blob = doc.output('blob');
-          const url  = URL.createObjectURL(blob);
-          const a    = document.createElement('a');
-          a.href     = url;
-          a.download = `${name} - CV.pdf`;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(url), 2000);
-          console.log('[ATS PDF] Download triggered successfully');
-        } catch (saveErr) {
-          console.error('[ATS PDF] Download trigger failed:', saveErr);
-          doc.save(`${name} - CV.pdf`);
-        }
-        if (currentCVId) {
-          fetch(`/api/cvs/${currentCVId}/download`, {
-            method: 'POST', credentials: 'include',
-          }).catch(() => {});
-        }
-        return;
-      }
+      // All templates use the screenshot-based approach so the PDF matches
+      // the visual preview exactly. The DOM-extracted invisible text layer
+      // (added after the image pages) ensures text is fully selectable and
+      // ATS-parsable — same benefit as the old native-text path.
 
-      // ── Non-ATS templates: screenshot-based PDF ───────────────────────────
+      // ── Screenshot-based PDF (all templates) ─────────────────────────────
       const [{ toPng }, { jsPDF }] = await Promise.all([
         import('html-to-image'),
         import('jspdf'),
