@@ -215,11 +215,10 @@ const CVBuilder = () => {
     // Temporary nodes added to document.body — cleaned up in finally
     let screenClone = null;   // on-screen clone for visual capture
     let textClone   = null;   // off-screen clone for text-rect extraction
-    let overlay     = null;   // white overlay that hides screenClone from user
 
     try {
-      const { jsPDF }    = await import('jspdf');
-      const { toCanvas } = await import('html-to-image');
+      const { jsPDF }     = await import('jspdf');
+      const html2canvas   = (await import('html2canvas')).default;
 
       const captureEl   = breakDataRef.current?.captureEl;
       if (!captureEl) throw new Error('Preview element not ready');
@@ -233,57 +232,98 @@ const CVBuilder = () => {
       const PAGE_H_MM   = 297;
       const PIXEL_RATIO = 2;     // 2× = crisp retina output
 
-      // ── 1. Visual capture ─────────────────────────────────────────────────
-      // Strategy: clone the element fully on-screen (browsers only paint what
-      // is inside the viewport bounds), hidden from the user by a white overlay.
-      // Off-screen elements (top/left: -9999px) are paint-optimized away →
-      // blank canvas. On-screen elements behind an overlay are fully painted.
+      // ── 1. Visual capture via html2canvas ────────────────────────────────
+      // html2canvas traverses the DOM and draws directly to canvas without
+      // going through SVG/data-URL, which is what was causing blank output.
+      //
+      // html2canvas doesn't parse oklch/lab/lch colors, so we pre-convert
+      // them to rgb using the Canvas 2D fillStyle trick (the browser does
+      // the conversion for us when we set fillStyle and read getImageData).
 
-      // White overlay — sits above the whole UI so the user sees nothing
-      overlay = document.createElement('div');
-      Object.assign(overlay.style, {
-        position:   'fixed',
-        inset:      '0',
-        background: '#ffffff',
-        zIndex:     '999998',
-        pointerEvents: 'none',
-      });
-      document.body.appendChild(overlay);
+      // ── 1a. Color converter helper ────────────────────────────────────────
+      const colorProxy = document.createElement('canvas');
+      colorProxy.width = 1; colorProxy.height = 1;
+      const colorCtx = colorProxy.getContext('2d');
+      function toRgb(cssColor) {
+        if (!cssColor || cssColor === 'transparent' || cssColor === 'none') return cssColor;
+        try {
+          colorCtx.clearRect(0, 0, 1, 1);
+          colorCtx.fillStyle = '#000'; // reset
+          colorCtx.fillStyle = cssColor;
+          colorCtx.fillRect(0, 0, 1, 1);
+          const [r, g, b, a] = colorCtx.getImageData(0, 0, 1, 1).data;
+          if (a === 0) return 'transparent';
+          return a === 255 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${+(a/255).toFixed(3)})`;
+        } catch { return cssColor; }
+      }
 
-      // Clone placed fully on-screen at z-index below the overlay
+      // ── 1b. Walk clone, inline computed styles, fix oklch colors ─────────
       screenClone = captureEl.cloneNode(true);
       Object.assign(screenClone.style, {
         position:      'fixed',
         top:           '0px',
-        left:          '0px',
+        left:          '-9999px',   // off-screen so user never sees it
         width:         `${CONTENT_W}px`,
         height:        `${totalHeight}px`,
-        zIndex:        '999997',
+        zIndex:        '999999',
         pointerEvents: 'none',
         overflow:      'visible',
       });
       document.body.appendChild(screenClone);
 
-      // Four rAF ticks — browser must fully lay out and paint before capture
-      await new Promise(r => requestAnimationFrame(r));
-      await new Promise(r => requestAnimationFrame(r));
+      // Collect original elements in source order to pair with clones
+      const srcEls   = Array.from(captureEl.querySelectorAll('*'));
+      const cloneEls = Array.from(screenClone.querySelectorAll('*'));
+
+      const COLOR_PROPS = [
+        'color', 'backgroundColor',
+        'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
+        'outlineColor', 'textDecorationColor', 'caretColor',
+      ];
+
+      srcEls.forEach((src, i) => {
+        const clone = cloneEls[i];
+        if (!clone) return;
+        const cs = getComputedStyle(src);
+        for (const prop of COLOR_PROPS) {
+          const val = cs[prop];
+          if (val && (val.includes('oklch') || val.includes('oklab') || val.includes('color('))) {
+            clone.style[prop] = toRgb(val);
+          }
+        }
+      });
+
+      // Two rAF to let the browser lay out the clone
       await new Promise(r => requestAnimationFrame(r));
       await new Promise(r => requestAnimationFrame(r));
 
       let fullCanvas;
       try {
-        fullCanvas = await toCanvas(screenClone, {
-          pixelRatio:      PIXEL_RATIO,
+        fullCanvas = await html2canvas(screenClone, {
+          scale:           PIXEL_RATIO,
           backgroundColor: '#ffffff',
+          useCORS:         true,
+          allowTaint:      true,
           width:           CONTENT_W,
           height:          totalHeight,
-          skipFonts:       false,
-          cacheBust:       false,
+          windowWidth:     CONTENT_W,
+          windowHeight:    totalHeight,
+          x:               0,
+          y:               0,
+          scrollX:         0,
+          scrollY:         0,
+          logging:         false,
         });
       } finally {
-        if (overlay)      { try { document.body.removeChild(overlay);      } catch (_) {} overlay      = null; }
-        if (screenClone)  { try { document.body.removeChild(screenClone);  } catch (_) {} screenClone  = null; }
+        if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} screenClone = null; }
       }
+
+      // Sanity check
+      const dbgCtx  = fullCanvas.getContext('2d');
+      const px      = dbgCtx.getImageData(Math.round(fullCanvas.width / 2), Math.round(fullCanvas.height / 4), 1, 1).data;
+      const isBlank = px[0] > 250 && px[1] > 250 && px[2] > 250;
+      console.log('[PDF] canvas:', fullCanvas.width, 'x', fullCanvas.height, '— pixel:', Array.from(px), '— blank?', isBlank);
+      if (isBlank) throw new Error('BLANK_CANVAS');
 
       // ── 2. Off-screen clone for accurate text-rect extraction ─────────────
       // Uses visibility:hidden (not display:none) so getClientRects() works.
@@ -404,9 +444,15 @@ const CVBuilder = () => {
 
     } catch (err) {
       console.error('[PDF export]', err);
-      alert(isRTL
-        ? 'فشل تصدير PDF. حاول مرة أخرى.'
-        : 'PDF export failed. Please try again.');
+      if (err.message === 'BLANK_CANVAS') {
+        alert(isRTL
+          ? 'المعاينة فارغة — تأكد أن السيرة الذاتية تحتوي على بيانات ثم حاول مجدداً.'
+          : 'Preview appears blank — make sure your CV has content, then try again.');
+      } else {
+        alert(isRTL
+          ? 'فشل تصدير PDF: ' + err.message
+          : 'PDF export failed: ' + err.message);
+      }
     } finally {
       if (overlay)     { try { document.body.removeChild(overlay);     } catch (_) {} }
       if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} }
