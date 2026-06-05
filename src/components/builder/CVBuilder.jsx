@@ -7,6 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
+import { embedArabicFont } from '../../utils/atsPdfExport';
 
 
 const OverviewIcon = () => (
@@ -308,6 +309,16 @@ const CVBuilder = () => {
 
       const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
+      // Embed Arabic font so the invisible text layer preserves Arabic Unicode.
+      // Without this, jsPDF's default Helvetica (Latin-1) mangles Arabic
+      // codepoints (U+0600–U+06FF) into garbage like "þ« þâþô…".
+      let arabicFontReady = false;
+      if (isRTL) {
+        arabicFontReady = await embedArabicFont(doc);
+        if (arabicFontReady) doc.setR2L(true);
+      }
+      const textFont = arabicFontReady ? 'Amiri' : 'helvetica';
+
       for (let pageIdx = 0; pageIdx < pageStarts.length; pageIdx++) {
         if (pageIdx > 0) doc.addPage();
 
@@ -372,6 +383,9 @@ const CVBuilder = () => {
               const fsPt  = fsPx * (72 / 96) * (PAGE_H_MM / sliceH) * (96 / 25.4);
 
               doc.setFontSize(Math.max(1, fsPt));
+              // Use the embedded Arabic font so Unicode glyphs survive encoding.
+              // Helvetica is Latin-1 only — Arabic codepoints get corrupted.
+              doc.setFont(textFont, 'normal');
 
               // jsPDF v4: renderingMode:'invisible' = PDF text mode 3
               // Invisible to the eye but fully selectable / ATS-readable

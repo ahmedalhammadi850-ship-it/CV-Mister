@@ -22,7 +22,7 @@ function dateRange(start, end, current, isRTL) {
 /**
  * @param {import('jspdf').jsPDF} pdf   - The jsPDF instance (pages already added)
  * @param {object}               cvData - CV data object
- * @param {object}               opts   - { isRTL, visibleSections, sectionOrder, sectionNames }
+ * @param {object}               opts   - { isRTL, visibleSections, sectionOrder, sectionNames, arabicFontEmbedded }
  */
 export function injectTextLayer(pdf, cvData, opts = {}) {
   const {
@@ -30,6 +30,10 @@ export function injectTextLayer(pdf, cvData, opts = {}) {
     visibleSections = {},
     sectionOrder = ['summary', 'experience', 'education', 'skills', 'languages', 'projects'],
     sectionNames: _sectionNames = {},
+    // Pass true if embedArabicFont() was already called on this pdf instance.
+    // This ensures Arabic Unicode is preserved rather than being corrupted by
+    // Helvetica's Latin-1 encoding (which produces "þ« þâþô…" artifacts).
+    arabicFontEmbedded = false,
   } = opts;
 
   const show = (k) => visibleSections[k] !== false;
@@ -44,9 +48,13 @@ export function injectTextLayer(pdf, cvData, opts = {}) {
   let currentPage = 1;
   let y = 8;
 
+  // Use Amiri when Arabic is active — Helvetica is Latin-1 only and will
+  // corrupt Arabic Unicode codepoints (U+0600–U+06FF) into garbage bytes.
+  const fontFamily = (isRTL && arabicFontEmbedded) ? 'Amiri' : 'helvetica';
+
   pdf.setPage(1);
   pdf.setFontSize(9);
-  pdf.setFont('helvetica', 'normal');
+  pdf.setFont(fontFamily, 'normal');
 
   /** Write one string as invisible text, wrapping at ~100 chars */
   const write = (text) => {
