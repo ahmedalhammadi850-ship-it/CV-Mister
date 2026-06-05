@@ -16,6 +16,7 @@
     "seed:firestore": "node scripts/seed-firestore.mjs"
   },
   "dependencies": {
+    "@replit/vite-plugin-runtime-error-modal": "^0.0.6",
     "@tailwindcss/vite": "^4.3.0",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.6",
@@ -23,6 +24,7 @@
     "@types/passport": "^1.0.17",
     "@vercel/node": "^5.8.12",
     "bcryptjs": "^3.0.3",
+    "chokidar": "^5.0.0",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "express-session": "^1.19.0",
