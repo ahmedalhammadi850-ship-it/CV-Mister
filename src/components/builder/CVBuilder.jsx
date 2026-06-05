@@ -211,8 +211,12 @@ const CVBuilder = () => {
 
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
+
+    // Temporary clone used for reliable text-rect extraction (off-screen but laid out)
+    let textClone = null;
+
     try {
-      const { jsPDF }   = await import('jspdf');
+      const { jsPDF }    = await import('jspdf');
       const { toCanvas } = await import('html-to-image');
 
       const captureEl   = breakDataRef.current?.captureEl;
@@ -221,108 +225,152 @@ const CVBuilder = () => {
       const breaks      = breakDataRef.current?.breaks ?? [];
       const totalHeight = breakDataRef.current?.totalHeight ?? PAGE_H_PX;
 
-      const SCALE       = 2;
-      const PAGE_W_PX   = 794;
-      const PAGE_H_PX_A4 = 1122;
+      const CONTENT_W   = 794;   // A4 width at 96 dpi
+      const CONTENT_H   = 1122;  // A4 height at 96 dpi
       const PAGE_W_MM   = 210;
       const PAGE_H_MM   = 297;
+      const PIXEL_RATIO = 2;     // 2× = crisp retina output
 
-      // html-to-image supports modern CSS (oklch, etc.) unlike html2canvas
+      // ── 1. Visual capture ─────────────────────────────────────────────────
+      // html-to-image handles modern CSS (oklch, lch, lab, etc.) that
+      // html2canvas cannot parse.
       const fullCanvas = await toCanvas(captureEl, {
-        pixelRatio:      SCALE,
+        pixelRatio:      PIXEL_RATIO,
         backgroundColor: '#ffffff',
-        width:           PAGE_W_PX,
+        width:           CONTENT_W,
         height:          totalHeight,
         skipFonts:       false,
+        cacheBust:       false,
       });
 
-      // Snapshot the element rect AFTER capture (for text layer positioning)
-      const elRect = captureEl.getBoundingClientRect();
+      // ── 2. Visible clone for accurate text-rect extraction ────────────────
+      // The original captureEl sits at top:-9999px which makes getClientRects()
+      // unreliable in some browsers. A fixed clone at left:-9999px (y=0)
+      // gives a proper layout while staying invisible to the user.
+      textClone = captureEl.cloneNode(true);
+      Object.assign(textClone.style, {
+        position:      'fixed',
+        top:           '0px',
+        left:          '-9999px',
+        width:         `${CONTENT_W}px`,
+        height:        `${totalHeight}px`,
+        overflow:      'visible',
+        pointerEvents: 'none',
+        zIndex:        '-1',
+        visibility:    'hidden',
+      });
+      document.body.appendChild(textClone);
+      // Two rAF ticks let the browser fully lay out the clone
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => requestAnimationFrame(r));
 
+      const cloneRect = textClone.getBoundingClientRect();
+
+      // ── 3. Build PDF ──────────────────────────────────────────────────────
       const pageStarts = [0, ...breaks];
       const pageEnds   = [...breaks, totalHeight];
 
       const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
-      for (let i = 0; i < pageStarts.length; i++) {
-        if (i > 0) doc.addPage();
+      for (let pageIdx = 0; pageIdx < pageStarts.length; pageIdx++) {
+        if (pageIdx > 0) doc.addPage();
 
-        const sliceStart = pageStarts[i];
-        const sliceEnd   = pageEnds[i];
+        const sliceStart = pageStarts[pageIdx];
+        const sliceEnd   = pageEnds[pageIdx];
+        const sliceH     = sliceEnd - sliceStart;
 
-        // ── Visual layer: sliced image ────────────────────────────────────
-        const srcY = Math.round(sliceStart * SCALE);
-        const srcH = Math.round((sliceEnd - sliceStart) * SCALE);
-        const srcW = Math.round(PAGE_W_PX * SCALE);
+        // ── 3a. Image layer ──────────────────────────────────────────────
+        const srcX  = 0;
+        const srcY  = Math.round(sliceStart * PIXEL_RATIO);
+        const srcW  = Math.round(CONTENT_W  * PIXEL_RATIO);
+        const srcH  = Math.round(sliceH     * PIXEL_RATIO);
 
-        const pageCanvas = document.createElement('canvas');
-        pageCanvas.width  = srcW;
-        pageCanvas.height = Math.round(PAGE_H_PX_A4 * SCALE);
-        const ctx = pageCanvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
+        const pageCanvas       = document.createElement('canvas');
+        pageCanvas.width       = srcW;
+        pageCanvas.height      = Math.round(CONTENT_H * PIXEL_RATIO);
+        const ctx              = pageCanvas.getContext('2d');
+        ctx.fillStyle          = '#ffffff';
         ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-        ctx.drawImage(fullCanvas, 0, srcY, srcW, srcH, 0, 0, srcW, srcH);
+        ctx.drawImage(fullCanvas, srcX, srcY, srcW, srcH, 0, 0, srcW, srcH);
 
-        doc.addImage(pageCanvas.toDataURL('image/jpeg', 0.96), 'JPEG', 0, 0, PAGE_W_MM, PAGE_H_MM);
+        doc.addImage(
+          pageCanvas.toDataURL('image/jpeg', 0.96),
+          'JPEG', 0, 0, PAGE_W_MM, PAGE_H_MM
+        );
 
-        // ── Invisible text layer for copy/paste selectability ─────────────
-        const sliceH   = sliceEnd - sliceStart;
-        const scaleX   = PAGE_W_MM / PAGE_W_PX;
-        const scaleY   = PAGE_H_MM / sliceH;
+        // ── 3b. Invisible text layer (ATS-compatible, fully selectable) ──
+        // Scale factors: content-px → PDF mm
+        const scaleX = PAGE_W_MM / CONTENT_W;
+        const scaleY = PAGE_H_MM / sliceH;
 
-        const walker = document.createTreeWalker(captureEl, NodeFilter.SHOW_TEXT);
+        // Walk every text node in the clone
+        const walker = document.createTreeWalker(textClone, NodeFilter.SHOW_TEXT);
         let node;
         while ((node = walker.nextNode())) {
-          const text = node.nodeValue?.trim();
-          if (!text) continue;
+          const raw = node.nodeValue;
+          if (!raw || !raw.trim()) continue;
+
           try {
-            const range = document.createRange();
+            const range     = document.createRange();
             range.selectNode(node);
-            const rects = Array.from(range.getClientRects());
-            for (const r of rects) {
+            const clientRects = Array.from(range.getClientRects());
+
+            for (const r of clientRects) {
               if (r.width < 1 || r.height < 1) continue;
-              // Position relative to the capture element
-              const relTop  = r.top  - elRect.top;
-              const relLeft = r.left - elRect.left;
-              // Skip if outside this page slice
+
+              // Position relative to clone top-left
+              const relTop  = r.top  - cloneRect.top;
+              const relLeft = r.left - cloneRect.left;
+
+              // Skip if this rect belongs to a different page slice
               if (relTop + r.height < sliceStart || relTop > sliceEnd) continue;
 
-              const yOnPage   = relTop - sliceStart;
-              const xMm       = Math.max(0, relLeft * scaleX);
-              const yMm       = Math.min(PAGE_H_MM, (yOnPage + r.height * 0.82) * scaleY);
-              const style     = window.getComputedStyle(node.parentElement);
-              const fsPx      = parseFloat(style.fontSize) || 12;
-              const fsPt      = fsPx * scaleY * (72 / 25.4);
+              // Convert to PDF coordinates
+              const xMm  = Math.max(0, relLeft * scaleX);
+              const yMm  = Math.min(PAGE_H_MM,
+                             ((relTop - sliceStart) + r.height * 0.80) * scaleY);
+
+              // Font size: px → pt, then scale to fit this page slice
+              const computedStyle = window.getComputedStyle(node.parentElement);
+              const fsPx  = parseFloat(computedStyle.fontSize) || 12;
+              const fsPt  = fsPx * (72 / 96) * (PAGE_H_MM / sliceH) * (96 / 25.4);
 
               doc.setFontSize(Math.max(1, fsPt));
-              doc.setTextColor(0, 0, 0);
-              // PDF text rendering mode 3 = invisible (not drawn but selectable)
-              doc.internal.write('3 Tr');
-              doc.text(text, xMm, yMm);
-              doc.internal.write('0 Tr');
+
+              // jsPDF v4: renderingMode:'invisible' = PDF text mode 3
+              // Invisible to the eye but fully selectable / ATS-readable
+              doc.text(raw.trim(), xMm, yMm, { renderingMode: 'invisible' });
             }
-          } catch (_) { /* skip unresolvable nodes */ }
+          } catch (_) { /* skip nodes that can't be measured */ }
         }
       }
 
+      // ── 4. Save ───────────────────────────────────────────────────────────
       const name    = cvData.personalInfo?.fullName || 'Resume';
       const pdfBlob = doc.output('blob');
       const blobUrl = URL.createObjectURL(pdfBlob);
-      const anchor  = document.createElement('a');
-      anchor.href     = blobUrl;
-      anchor.download = `${name} - CV.pdf`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+      const link    = document.createElement('a');
+      link.href     = blobUrl;
+      link.download = `${name} - CV.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
 
       if (currentCVId) {
-        apiFetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
+        apiFetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' })
+          .catch(() => {});
       }
+
     } catch (err) {
-      console.error('PDF export failed:', err);
-      alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');
+      console.error('[PDF export]', err);
+      alert(isRTL
+        ? 'فشل تصدير PDF. حاول مرة أخرى.'
+        : 'PDF export failed. Please try again.');
     } finally {
+      if (textClone) {
+        try { document.body.removeChild(textClone); } catch (_) {}
+      }
       setIsPrinting(false);
     }
   };
