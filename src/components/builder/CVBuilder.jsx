@@ -7,13 +7,8 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
-import { isATSTemplate, generateATSPdf, embedArabicFont } from '../../utils/atsPdfExport';
-import { injectTextLayer } from '../../utils/pdfTextLayer';
+import { isATSTemplate, generateATSPdf } from '../../utils/atsPdfExport';
 
-/** Returns true if the string contains Arabic / Hebrew / RTL characters */
-function containsArabic(text) {
-  return /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/.test(text);
-}
 
 const OverviewIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -217,12 +212,6 @@ const CVBuilder = () => {
 
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
-
-    // ── Prevent accidental tab-close / navigation while PDF is generating ──
-    // Modern browsers show a "Leave site?" dialog if beforeunload returns a value.
-    const _onBeforeUnload = (e) => { e.preventDefault(); e.returnValue = ''; };
-    window.addEventListener('beforeunload', _onBeforeUnload);
-
     try {
       // ── ATS templates → real text-based PDF (fully selectable) ───────────
       if (isATSTemplate(selectedTemplate)) {
@@ -249,464 +238,49 @@ const CVBuilder = () => {
         return;
       }
 
-      // ── Screenshot-based PDF (all non-ATS templates) ──────────────────────
-      const [{ toPng }, { jsPDF }] = await Promise.all([
-        import('html-to-image'),
-        import('jspdf'),
-      ]);
-
-      await document.fonts.ready;
-
+      // ── Print-based PDF (all non-ATS templates) ───────────────────────────
+      // Uses the browser's native print engine — produces fully selectable,
+      // searchable text instead of a flattened image.
       const element = breakDataRef.current?.captureEl;
       if (!element) return;
 
-      const PR = 2;
-      const A4_W_MM = 210;
-      const A4_H_MM = 297;
-      const CONTENT_W = 794;
-
-      // ── Font pre-loading ──────────────────────────────────────────────────────
-      // Fetch the proxied Google Fonts CSS, then download every font binary and
-      // embed it as a base64 data-URI so html-to-image gets pixel-perfect fonts
-      // regardless of CORS or network timing.
-      let injectedFontStyle = null;
-      try {
-        const proxyUrl = '/api/font-proxy?url=' + encodeURIComponent(
-          'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap'
-        );
-        const res = await fetch(proxyUrl);
-        if (res.ok) {
-          let css = await res.text();
-
-          // Collect every font-file URL referenced in the CSS
-          const fontUrlMatches = [...css.matchAll(/url\(([^)]+)\)/g)];
-          const uniqueFontUrls = [...new Set(fontUrlMatches.map(m => m[1]))];
-
-          // Fetch every font binary in parallel and convert to base64 data-URI
-          const dataUriMap = {};
-          await Promise.all(uniqueFontUrls.map(async (url) => {
-            try {
-              const fontRes = await fetch(url);
-              if (!fontRes.ok) return;
-              const buffer = await fontRes.arrayBuffer();
-              const bytes  = new Uint8Array(buffer);
-              let binary   = '';
-              const chunk  = 8192;
-              for (let i = 0; i < bytes.length; i += chunk) {
-                binary += String.fromCharCode(...bytes.subarray(i, i + chunk));
-              }
-              const ct = fontRes.headers.get('content-type') || 'font/woff2';
-              dataUriMap[url] = `data:${ct};base64,${btoa(binary)}`;
-            } catch (_) {}
-          }));
-
-          // Replace every proxy URL with the embedded data-URI
-          for (const [url, dataUri] of Object.entries(dataUriMap)) {
-            css = css.split(url).join(dataUri);
-          }
-
-          injectedFontStyle = document.createElement('style');
-          injectedFontStyle.setAttribute('data-cv-pdf-fonts', '1');
-          injectedFontStyle.textContent = css;
-          // Inject into <head> so document.styleSheets picks it up for html-to-image
-          document.head.appendChild(injectedFontStyle);
-        }
-      } catch (_) {}
-
-      // Force-load every weight so the browser has them in its font cache
-      const FONT_FAMILIES = [
-        'Plus Jakarta Sans', 'DM Sans', 'Merriweather',
-        'Tajawal', 'Cairo', 'Amiri', 'Noto Naskh Arabic', 'Scheherazade New',
-      ];
-      const FONT_WEIGHTS = ['300', '400', '500', '600', '700', '800'];
-      await Promise.all(
-        FONT_FAMILIES.flatMap(family =>
-          FONT_WEIGHTS.map(w =>
-            document.fonts.load(`${w} 16px "${family}"`).catch(() => {})
-          )
-        )
-      );
       await document.fonts.ready;
 
-      // ── Clone into a fixed off-screen wrapper ────────────────────────────
-      // We clone BEFORE reading the height because on mobile the original
-      // element's parent may be `display:none` (hidden preview tab), causing
-      // element.scrollHeight = 0.  The clone in a position:fixed wrapper is
-      // always laid out, so clone.scrollHeight gives the real content height.
+      // Clone the full-resolution template content and reset its positioning
       const clone = element.cloneNode(true);
       clone.style.position = 'relative';
-      clone.style.top      = '0';
-      clone.style.left     = '0';
-      clone.style.zIndex   = 'auto';
-      clone.style.width    = `${CONTENT_W}px`;
+      clone.style.top = '0';
+      clone.style.left = '0';
+      clone.style.zIndex = 'auto';
+      clone.style.pointerEvents = 'auto';
+      clone.style.width = '794px';
+      clone.style.transform = 'none';
 
-      const wrapper = document.createElement('div');
-      // Park off-screen to the LEFT, not above. Keeping top:0 means Y
-      // coordinates from getBoundingClientRect() stay near 0→contentHeight
-      // (accurate, positive values). Parking far above produces large negative
-      // Y values that some browsers clamp or handle imprecisely, which causes
-      // the invisible text layer to drift away from the visual text in the PDF.
-      wrapper.style.cssText = [
-        'position:fixed',
-        'top:0',
-        `left:-${CONTENT_W + 50}px`,
-        `width:${CONTENT_W}px`,
-        'z-index:99999',
-        'background:#fff',
-        'overflow:visible',
-      ].join(';');
+      // Mount into #cv-print-root — @media print CSS hides everything else
+      const printRoot = document.createElement('div');
+      printRoot.id = 'cv-print-root';
+      printRoot.appendChild(clone);
+      document.body.appendChild(printRoot);
 
-      wrapper.appendChild(clone);
-      document.body.appendChild(wrapper);
-
-      // Short wait so the browser lays out the clone, then read true height.
-      // setTimeout fires even when the tab is in the background (requestAnimationFrame
-      // can silently pause/stop in hidden tabs, which would hang the download).
-      await new Promise(r => setTimeout(r, 50));
-      const captureH = clone.scrollHeight || element.scrollHeight || 1122;
-
-      // ── System-font → web-font substitution ────────────────────────────────
-      // html-to-image renders via SVG <foreignObject>, which blocks access to
-      // OS system fonts (Calibri, Arial, Georgia, etc.) for security reasons.
-      // We replace every system font in the clone's inline styles with the
-      // nearest Google Font we have embedded, so the PDF stays pixel-perfect.
-      const SYSTEM_FONT_MAP = {
-        'calibri':         '"DM Sans"',
-        'inter':           '"DM Sans"',
-        'outfit':          '"Plus Jakarta Sans"',
-        'trebuchet ms':    '"DM Sans"',
-        'verdana':         '"DM Sans"',
-        'arial':           '"DM Sans"',
-        'georgia':         '"Merriweather"',
-        'times new roman': '"Merriweather"',
-      };
-      clone.querySelectorAll('*').forEach(el => {
-        const ff = el.style.fontFamily;
-        if (!ff) return;
-        let updated = ff;
-        for (const [system, web] of Object.entries(SYSTEM_FONT_MAP)) {
-          updated = updated.replace(
-            new RegExp(`'${system}'|"${system}"`, 'gi'),
-            web
-          );
-        }
-        if (updated !== ff) el.style.fontFamily = updated;
-      });
-
-      // Wait for layout to settle (setTimeout works in background tabs;
-      // requestAnimationFrame silently pauses when the tab is not visible).
-      await new Promise(r => setTimeout(r, 50));
-      await document.fonts.ready;
-
-      // ── Extract text positions from DOM for accurate text layer ────────────
-      // Must happen here: after layout is final, before wrapper is removed.
-      const domTextItems = [];
-      try {
-        const cloneRect = clone.getBoundingClientRect();
-        const mmPerPxExtract = A4_W_MM / CONTENT_W;
-        const walker = document.createTreeWalker(clone, NodeFilter.SHOW_TEXT, {
-          acceptNode(node) {
-            const t = node.textContent?.trim();
-            if (!t) return NodeFilter.FILTER_REJECT;
-            const p = node.parentElement;
-            if (!p) return NodeFilter.FILTER_REJECT;
-            const s = window.getComputedStyle(p);
-            if (s.display === 'none' || s.visibility === 'hidden' || s.opacity === '0') return NodeFilter.FILTER_REJECT;
-            return NodeFilter.FILTER_ACCEPT;
-          },
-        });
-        // Helper: apply CSS text-transform to a string
-        const applyTransform = (str, tt) => {
-          if (tt === 'uppercase')  return str.toUpperCase();
-          if (tt === 'lowercase')  return str.toLowerCase();
-          if (tt === 'capitalize') return str.replace(/(?:^|\s)\S/g, c => c.toUpperCase());
-          return str;
+      await new Promise(resolve => {
+        const done = () => {
+          try { document.body.removeChild(printRoot); } catch (_) {}
+          window.removeEventListener('afterprint', done);
+          resolve();
         };
-
-        // Helper: push one line-level text item
-        // fontSizePx is in CSS pixels; used for an accurate baseline calculation.
-        // Baseline from line-box top = half the leading + 80% of the font-size.
-        // (80% = typical ascender ratio for Latin/Arabic fonts.)
-        // This is more accurate than the old "height * 0.72" which drifts when
-        // line-height is large (e.g. 1.5× or 2×).
-        const pushLine = (lineText, lr, fontSizePx, fontSizePt, charSpaceMm) => {
-          const rx = lr.left - cloneRect.left;
-          const ry = lr.top  - cloneRect.top;
-          if (rx < 0 || ry < 0 || !lineText.trim()) return;
-          const leading         = Math.max(lr.height - fontSizePx, 0);
-          const baselinePx      = leading / 2 + fontSizePx * 0.80;
-          domTextItems.push({
-            text:             lineText.trim(),
-            xMm:              rx * mmPerPxExtract,
-            contentYPx:       ry,
-            baselineOffsetMm: baselinePx * mmPerPxExtract,
-            fontSizePt,
-            charSpaceMm,
-          });
-        };
-
-        while (walker.nextNode()) {
-          const node = walker.currentNode;
-          const raw  = node.textContent;
-          if (!raw?.trim()) continue;
-
-          const range = document.createRange();
-          range.selectNodeContents(node);
-
-          // getClientRects() returns ONE rect per VISUAL LINE — crucial for
-          // placing invisible text at the correct Y for every wrapped line so
-          // clicking anywhere in a paragraph selects the right line.
-          const lineRects = Array.from(range.getClientRects())
-            .filter(r => r.width > 1 && r.height > 1);
-          if (lineRects.length === 0) continue;
-
-          const parentStyle      = window.getComputedStyle(node.parentElement);
-          const fontSize         = parseFloat(parentStyle.fontSize) || 12;
-          const fontSizePt       = fontSize * 0.75;
-          const letterSpacingPx  = parseFloat(parentStyle.letterSpacing) || 0;
-          const charSpaceMm      = letterSpacingPx * mmPerPxExtract;
-          const tt               = parentStyle.textTransform;
-
-          if (lineRects.length === 1) {
-            // Single-line node — fast path
-            pushLine(applyTransform(raw.trim(), tt), lineRects[0], fontSize, fontSizePt, charSpaceMm);
-            continue;
-          }
-
-          // Multi-line node: binary-search each visual line boundary so each
-          // line gets the correct text slice AND correct Y position.
-          let lineStart = 0;
-          for (let li = 0; li < lineRects.length; li++) {
-            const lr = lineRects[li];
-            let lineEnd;
-
-            if (li === lineRects.length - 1) {
-              lineEnd = raw.length;
-            } else {
-              // Find the character index that ends this visual line.
-              // Invariant: raw[lineStart..hi) spills into the next line.
-              const nextTop = lineRects[li + 1].top;
-              let lo = lineStart, hi = raw.length;
-              while (lo < hi - 1) {
-                const mid = (lo + hi) >> 1;
-                const tr  = document.createRange();
-                tr.setStart(node, lineStart);
-                tr.setEnd(node, mid);
-                const tRects = tr.getClientRects();
-                const last   = tRects[tRects.length - 1];
-                // If the last rect's top is still on (or before) the current
-                // line (< nextLineTop), mid is within this line → expand lo.
-                if (last && last.top < nextTop - 1) lo = mid;
-                else hi = mid;
-              }
-              lineEnd = lo;
-            }
-
-            const slice = raw.slice(lineStart, lineEnd);
-            lineStart = lineEnd;
-            pushLine(applyTransform(slice, tt), lr, fontSize, fontSizePt, charSpaceMm);
-          }
-        }
-      } catch (_e) {
-        // DOM extraction failed — will fall back to content-based layer
-      }
-
-      // Temporarily disable cross-origin stylesheets (e.g. from Google Translate
-      // extension) to prevent SecurityError when html-to-image tries to read cssRules.
-      const disabledSheets = [];
-      for (const sheet of Array.from(document.styleSheets)) {
-        try {
-          const _ = sheet.cssRules;
-        } catch (_e) {
-          try {
-            sheet.disabled = true;
-            disabledSheets.push(sheet);
-          } catch (_) {}
-        }
-      }
-
-      let fullDataUrl;
-      try {
-        // Call toPng twice — first pass primes the image/font cache inside
-        // html-to-image; second pass produces a clean consistent result.
-        await toPng(clone, { backgroundColor: '#ffffff', width: CONTENT_W, height: captureH, pixelRatio: PR, cacheBust: false }).catch(() => {});
-        fullDataUrl = await toPng(clone, {
-          backgroundColor: '#ffffff',
-          width: CONTENT_W,
-          height: captureH,
-          pixelRatio: PR,
-          cacheBust: false,
-        });
-      } finally {
-        for (const sheet of disabledSheets) {
-          try { sheet.disabled = false; } catch (_) {}
-        }
-        if (injectedFontStyle) injectedFontStyle.remove();
-        wrapper.remove();
-      }
-
-      if (!fullDataUrl || fullDataUrl === 'data:,') {
-        throw new Error('html-to-image returned an empty result');
-      }
-
-      // queueMicrotask has zero background-tab throttling (unlike setTimeout which
-      // is clamped to ≥1 s in hidden tabs).  We only need a brief event-loop yield
-      // so the browser can decode the data-URL before we draw from it.
-      await new Promise(r => queueMicrotask(r));
-
-      const fullImg = await new Promise((resolve, reject) => {
-        const im = new Image();
-        im.onload = () => resolve(im);
-        im.onerror = reject;
-        im.src = fullDataUrl;
+        window.addEventListener('afterprint', done);
+        // Safety fallback — resolve after 60 s if afterprint never fires
+        setTimeout(done, 60000);
+        window.print();
       });
-
-      const { breaks } = breakDataRef.current;
-      const contentRanges = [];
-      let prev = 0;
-      for (const brk of breaks) {
-        if (brk > prev && brk < captureH) {
-          contentRanges.push({ start: prev, end: brk });
-          prev = brk;
-        }
-      }
-      contentRanges.push({ start: prev, end: captureH });
-
-      const imgW = CONTENT_W * PR;
-      const a4H  = Math.round((A4_H_MM / A4_W_MM) * imgW);
-
-      // Must match the MARGIN constant in LivePreview.jsx (48px) so the PDF
-      // top-of-page white gap looks identical to the browser preview.
-      const PAGE_TOP_MARGIN = 48;
-
-      const pdf = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-
-      for (let i = 0; i < contentRanges.length; i++) {
-        // queueMicrotask instead of setTimeout so background-tab throttling
-        // (≥1 s per iteration) doesn't slow multi-page exports.
-        await new Promise(r => queueMicrotask(r));
-        if (i > 0) pdf.addPage();
-
-        const { start, end } = contentRanges[i];
-        const sliceH    = Math.round((end - start) * PR);
-        // Pages 2+ get a top margin to match the live-preview white gap
-        const marginTop = i > 0 ? Math.round(PAGE_TOP_MARGIN * PR) : 0;
-
-        const a4Canvas = document.createElement('canvas');
-        a4Canvas.width  = imgW;
-        a4Canvas.height = a4H;
-        const ctx = a4Canvas.getContext('2d');
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, imgW, a4H);
-        ctx.drawImage(
-          fullImg,
-          0, Math.round(start * PR), imgW, sliceH,
-          0, marginTop,               imgW, sliceH
-        );
-
-        pdf.addImage(a4Canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, A4_W_MM, A4_H_MM);
-      }
-
-      // ── Invisible text layer for text selection & ATS extraction ─────────
-      // Primary: use DOM-extracted positions so users can click & select text
-      // exactly where they see it visually. Fallback: content-based layer.
-      const mmPerPxFinal = A4_W_MM / CONTENT_W;
-      const PAGE_TOP_MARGIN_MM = PAGE_TOP_MARGIN * mmPerPxFinal;
-
-      // Embed Arabic font into this PDF instance so Arabic characters are
-      // correctly encoded in the content stream and become truly selectable.
-      // We do this whenever the CV is RTL OR any extracted text item contains
-      // Arabic characters (mixed-language CVs).
-      let arabicLayerFontReady = false;
-      try {
-        const needsArabic = isRTL || domTextItems.some(it => containsArabic(it.text));
-        if (needsArabic) {
-          arabicLayerFontReady = await embedArabicFont(pdf);
-        }
-      } catch (_) {}
-
-      if (domTextItems.length > 0) {
-        for (const item of domTextItems) {
-          // Find which page this text belongs to
-          let pageIdx   = contentRanges.length - 1;
-          let yInPagePx = item.contentYPx - contentRanges[pageIdx].start;
-
-          for (let pi = 0; pi < contentRanges.length; pi++) {
-            if (item.contentYPx >= contentRanges[pi].start && item.contentYPx < contentRanges[pi].end) {
-              pageIdx   = pi;
-              yInPagePx = item.contentYPx - contentRanges[pi].start;
-              break;
-            }
-          }
-
-          pdf.setPage(pageIdx + 1);
-          // Convert pixel offset to mm, add page top margin for page 2+,
-          // then add the pre-computed baseline offset (rect.height * 0.72
-          // converted to mm, stored at extraction time for accuracy).
-          const marginMm   = pageIdx > 0 ? PAGE_TOP_MARGIN_MM : 0;
-          const baselineMm = item.baselineOffsetMm ?? (item.fontSizePt * 0.352778);
-          const yMm        = yInPagePx * mmPerPxFinal + marginMm + baselineMm;
-
-          if (yMm < 0.5 || yMm > A4_H_MM - 0.5) continue;
-
-          try {
-            // Set an appropriate font so characters are correctly encoded.
-            // – Arabic text: use Amiri (embedded above) so glyphs are real
-            //   PDF text operators, not broken Helvetica substitutions.
-            // – Latin text: use helvetica (always available in jsPDF).
-            // We do NOT specify maxWidth here — each item is already a single
-            // visual line extracted from the DOM. Specifying maxWidth would
-            // cause jsPDF to re-wrap the text based on Helvetica metrics
-            // (different from the actual rendered font), placing invisible
-            // text at wrong Y positions and breaking selection entirely.
-            const isArabicItem = containsArabic(item.text);
-            if (isArabicItem && arabicLayerFontReady) {
-              pdf.setFont('Amiri', 'normal');
-            } else {
-              pdf.setFont('helvetica', 'normal');
-            }
-            pdf.setFontSize(Math.max(item.fontSizePt, 4));
-            pdf.text(item.text, Math.max(item.xMm, 0), yMm, {
-              renderingMode: 'invisible',
-            });
-          } catch (_) {}
-        }
-      } else {
-        // Fallback when DOM extraction was unavailable
-        injectTextLayer(pdf, cvData, {
-          isRTL,
-          visibleSections,
-          sectionOrder,
-          sectionNames,
-        });
-      }
-
-      const name = cvData.personalInfo?.fullName || 'Resume';
-
-      // Use blob URL download instead of pdf.save() — blob URLs are claimed
-      // by the browser's download manager immediately, so the file continues
-      // downloading even if the user switches tabs or navigates away.
-      const pdfBlob = pdf.output('blob');
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const anchor  = document.createElement('a');
-      anchor.href     = blobUrl;
-      anchor.download = `${name} - CV.pdf`;
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      // Revoke after a short delay — enough for the browser to claim the file.
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
       if (currentCVId) {
-        apiFetch(`/api/cvs/${currentCVId}/download`, {
-          method: 'POST', credentials: 'include',
-        }).catch(() => {});
+        apiFetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
       }
     } catch (err) {
       console.error('PDF export failed:', err);
       alert(isRTL ? 'فشل تصدير PDF. حاول مرة أخرى.' : 'PDF export failed. Please try again.');
     } finally {
-      window.removeEventListener('beforeunload', _onBeforeUnload);
       setIsPrinting(false);
     }
   };

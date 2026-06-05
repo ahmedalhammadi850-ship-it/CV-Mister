@@ -344,15 +344,13 @@
   }
   #cv-print-root {
     display: block !important;
-    position: fixed !important;
-    top: 0;
-    left: 0;
+    position: static !important;
     width: 100%;
   }
   #cv-print-root > div {
     transform: none !important;
     box-shadow: none !important;
-    margin: 0 !important;
+    margin: 0 auto !important;
     padding: 0 !important;
     width: 210mm !important;
   }
