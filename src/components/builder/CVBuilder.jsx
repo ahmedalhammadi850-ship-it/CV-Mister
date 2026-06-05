@@ -234,14 +234,45 @@ const CVBuilder = () => {
       // ── 1. Visual capture ─────────────────────────────────────────────────
       // html-to-image handles modern CSS (oklch, lch, lab, etc.) that
       // html2canvas cannot parse.
-      const fullCanvas = await toCanvas(captureEl, {
-        pixelRatio:      PIXEL_RATIO,
-        backgroundColor: '#ffffff',
-        width:           CONTENT_W,
-        height:          totalHeight,
-        skipFonts:       false,
-        cacheBust:       false,
+      // We temporarily move captureEl to position:fixed so the browser
+      // fully renders backgrounds/gradients (off-screen absolute elements
+      // are often paint-optimized away, producing a blank canvas).
+      const prevPosition   = captureEl.style.position;
+      const prevTop        = captureEl.style.top;
+      const prevLeft       = captureEl.style.left;
+      const prevVisibility = captureEl.style.visibility;
+      const prevZIndex     = captureEl.style.zIndex;
+      Object.assign(captureEl.style, {
+        position:   'fixed',
+        top:        '0px',
+        left:       '-9999px',
+        visibility: 'hidden',
+        zIndex:     '-1',
       });
+      // Two rAF ticks so the browser lays out and paints the element
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => requestAnimationFrame(r));
+
+      let fullCanvas;
+      try {
+        fullCanvas = await toCanvas(captureEl, {
+          pixelRatio:      PIXEL_RATIO,
+          backgroundColor: '#ffffff',
+          width:           CONTENT_W,
+          height:          totalHeight,
+          skipFonts:       false,
+          cacheBust:       false,
+        });
+      } finally {
+        // Restore original styles regardless of success or failure
+        Object.assign(captureEl.style, {
+          position:   prevPosition,
+          top:        prevTop,
+          left:       prevLeft,
+          visibility: prevVisibility,
+          zIndex:     prevZIndex,
+        });
+      }
 
       // ── 2. Visible clone for accurate text-rect extraction ────────────────
       // The original captureEl sits at top:-9999px which makes getClientRects()
