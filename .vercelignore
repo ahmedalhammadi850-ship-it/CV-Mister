@@ -1,4 +1,6 @@
-api/
 server/
 scripts/
 artifacts/
+.local/
+.agents/
+attached_assets/
