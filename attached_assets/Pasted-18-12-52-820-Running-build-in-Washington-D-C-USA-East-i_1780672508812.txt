@@ -1,0 +1,31 @@
+18:12:52.820 Running build in Washington, D.C., USA (East) – iad1
+18:12:52.821 Build machine configuration: 2 cores, 8 GB
+18:12:52.834 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: 43d4aa6)
+18:12:52.835 Skipping build cache, deployment was triggered without cache.
+18:13:00.937 Cloning completed: 8.103s
+18:13:01.002 Found .vercelignore
+18:13:01.022 Removed 139 ignored files defined in .vercelignore
+18:13:01.022   /.replit_integration_files/server/replit_integrations/auth/index.ts
+18:13:01.023   /.replit_integration_files/server/replit_integrations/auth/replitAuth.ts
+18:13:01.023   /.replit_integration_files/server/replit_integrations/auth/routes.ts
+18:13:01.023   /.replit_integration_files/server/replit_integrations/auth/storage.ts
+18:13:01.023   /api/_lib/db.js
+18:13:01.023   /api/_lib/firebase.js
+18:13:01.023   /api/_lib/n8nSettings.js
+18:13:01.023   /api/_lib/token.js
+18:13:01.024   /api/admin/business-contacts/[id].js
+18:13:01.024   /api/admin/business-contacts/index.js
+18:13:01.838 Running "vercel build"
+18:13:01.855 Vercel CLI 54.9.0
+18:13:02.386 Warning: Detected "engines": { "node": ">=20.19.0" } in your `package.json` that will automatically upgrade when a new major Node.js Version is released. Learn More: https://vercel.link/node-version
+18:13:02.393 Running "install" command: `npm install --no-fund --no-audit`...
+18:13:12.282 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+18:13:13.019 npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+18:13:13.462 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+18:13:13.469 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+18:13:13.480 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+18:14:18.926 npm error Exit handler never called!
+18:14:18.926 npm error This is an error with npm itself. Please report this error at:
+18:14:18.927 npm error   <https://github.com/npm/cli/issues>
+18:14:18.928 npm error A complete log of this run can be found in: /vercel/.npm/_logs/2026-06-05T15_13_02_520Z-debug-0.log
+18:14:18.987 Error: Command "npm install --no-fund --no-audit" exited with 1
