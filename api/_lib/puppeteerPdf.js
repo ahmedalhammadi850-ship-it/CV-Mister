@@ -72,10 +72,15 @@ export async function generatePdfFromHtml(html) {
   const page = await browser.newPage();
   try {
     await page.setContent(html, { waitUntil: "networkidle0", timeout: 30000 });
+    // Wait for all fonts to be fully loaded so Chromium embeds them as real
+    // text (Type2/CIDFont) in the PDF rather than converting glyphs to bezier
+    // paths (Type3), which would make text unselectable.
+    await page.evaluate(() => document.fonts.ready);
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
       preferCSSPageSize: true,
+      tagged: true,
       margin: { top: "0mm", right: "0mm", bottom: "0mm", left: "0mm" },
     });
     return pdf;
