@@ -1,8 +1,8 @@
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { apiFetch } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 import { useTheme } from '../../context/ThemeContext';
 import { useState, useEffect, useRef } from 'react';
-import { getNavbar } from '../../lib/firestore';
 
 const NAV_DEFAULTS = {
   home_ar: 'الرئيسية', home_en: 'Home',
@@ -10,6 +10,23 @@ const NAV_DEFAULTS = {
   pricing_ar: 'الأسعار', pricing_en: 'Pricing',
   about_ar: 'من نحن', about_en: 'About',
 };
+
+let _navbarCache = null;
+let _navbarFetchedAt = 0;
+
+async function fetchNavbarLabels() {
+  const now = Date.now();
+  if (_navbarCache && now - _navbarFetchedAt < 60000) return _navbarCache;
+  try {
+    const res = await apiFetch('/api/navbar');
+    if (res.ok) {
+      _navbarCache = { ...NAV_DEFAULTS, ...await res.json() };
+      _navbarFetchedAt = now;
+      return _navbarCache;
+    }
+  } catch {}
+  return NAV_DEFAULTS;
+}
 
 const SunIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -36,7 +53,7 @@ const Header = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    getNavbar().then(labels => setNavLabels({ ...NAV_DEFAULTS, ...labels })).catch(() => {});
+    fetchNavbarLabels().then(setNavLabels);
   }, []);
 
   useEffect(() => {

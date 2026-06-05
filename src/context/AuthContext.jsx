@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
@@ -8,7 +9,6 @@ import {
   onAuthStateChanged,
 } from 'firebase/auth';
 import { auth } from '../firebase';
-import { getOrCreateUser, registerUserProfile, getUser } from '../lib/firestore';
 
 const AuthContext = createContext();
 
@@ -56,9 +56,17 @@ export function AuthProvider({ children }) {
     };
   };
 
-  const syncWithFirestore = async (firebaseUser) => {
+  const syncWithBackend = async (firebaseUser) => {
     try {
-      const dbUser = await getOrCreateUser(firebaseUser.uid, firebaseUser.email || '');
+      const idToken = await firebaseUser.getIdToken(true);
+      const res = await apiFetch('/api/auth/firebase-sync', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ idToken }),
+      });
+      if (!res.ok) return null;
+      const dbUser = await res.json();
       return buildUser(dbUser);
     } catch {
       return null;
@@ -66,26 +74,27 @@ export function AuthProvider({ children }) {
   };
 
   const buildFallbackUser = (firebaseUser) => ({
-    uid:                 firebaseUser.uid,
-    id:                  firebaseUser.uid,
-    email:               firebaseUser.email || '',
-    name:                firebaseUser.displayName || firebaseUser.email || '',
-    displayName:         firebaseUser.displayName || firebaseUser.email?.split('@')[0] || '',
-    profileImage:        firebaseUser.photoURL || null,
-    plan:                'free',
-    cvCount:             0,
-    planExpiresAt:       null,
-    daysLeft:            null,
+    uid:         firebaseUser.uid,
+    id:          firebaseUser.uid,
+    email:       firebaseUser.email || '',
+    name:        firebaseUser.displayName || firebaseUser.email || '',
+    displayName: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || '',
+    profileImage: firebaseUser.photoURL || null,
+    plan:        'free',
+    cvCount:     0,
+    planExpiresAt: null,
+    daysLeft:    null,
     subscriptionExpired: false,
   });
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser && firebaseUser.emailVerified) {
-        const user = await syncWithFirestore(firebaseUser);
+        const user = await syncWithBackend(firebaseUser);
         setCurrentUser(user || buildFallbackUser(firebaseUser));
       } else {
         setCurrentUser(null);
+        await apiFetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
       }
       setLoading(false);
     });
@@ -94,7 +103,16 @@ export function AuthProvider({ children }) {
 
   const signUp = async (firstName, lastName, email, password) => {
     const credential = await createUserWithEmailAndPassword(auth, email, password);
-    await registerUserProfile(credential.user.uid, email, firstName, lastName);
+    await apiFetch('/api/auth/firebase-register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({
+        idToken: await credential.user.getIdToken(),
+        firstName,
+        lastName,
+      }),
+    });
     try {
       const actionCodeSettings = {
         url: `${window.location.origin}/email-action`,
@@ -119,26 +137,27 @@ export function AuthProvider({ children }) {
       err.code = 'auth/email-not-verified';
       throw err;
     }
-    const user = await syncWithFirestore(credential.user);
+    const user = await syncWithBackend(credential.user);
     setCurrentUser(user || buildFallbackUser(credential.user));
     return user;
   };
 
   const signOutUser = async () => {
     await signOut(auth);
+    await apiFetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
     setCurrentUser(null);
   };
 
   const sendPasswordReset  = async (email) => sendPasswordResetEmail(auth, email);
-
   const resendVerification = async () => {
     const u = auth.currentUser;
     if (u) {
       try {
-        await sendEmailVerification(u, {
+        const actionCodeSettings = {
           url: `${window.location.origin}/email-action`,
           handleCodeInApp: true,
-        });
+        };
+        await sendEmailVerification(u, actionCodeSettings);
       } catch {
         await sendEmailVerification(u);
       }
@@ -148,13 +167,9 @@ export function AuthProvider({ children }) {
   const refreshUser = async () => {
     const firebaseUser = auth.currentUser;
     if (firebaseUser && firebaseUser.emailVerified) {
-      try {
-        const dbUser = await getUser(firebaseUser.uid);
-        if (dbUser) setCurrentUser(buildUser(dbUser));
-        else setCurrentUser(buildFallbackUser(firebaseUser));
-      } catch {
-        setCurrentUser(buildFallbackUser(firebaseUser));
-      }
+      const user = await syncWithBackend(firebaseUser);
+      if (user) setCurrentUser(user);
+      else setCurrentUser(buildFallbackUser(firebaseUser));
     }
   };
 

@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { getPricing, submitPaymentRequest, getUser } from '../lib/firestore';
+import { apiFetch } from '../utils/api';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { createPortal } from 'react-dom';
@@ -53,7 +53,8 @@ const UpgradePage = () => {
   const prevExpiresAtRef  = useRef(null);
 
   useEffect(() => {
-    getPricing()
+    apiFetch('/api/pricing')
+      .then(r => r.ok ? r.json() : null)
       .then(data => { if (data) setPricing(prev => ({ ...prev, ...data })); })
       .catch(() => {});
     return () => {
@@ -64,11 +65,12 @@ const UpgradePage = () => {
 
   /* Poll for admin approval every 5 seconds after submission */
   useEffect(() => {
-    if (!done || !currentUser?.uid) return;
+    if (!done) return;
     const check = async () => {
       try {
-        const data = await getUser(currentUser.uid);
-        if (!data) return;
+        const res = await apiFetch('/api/auth/user', { credentials: 'include' });
+        if (!res.ok) return;
+        const data = await res.json();
 
         const planMatch = targetPlan === 'business'
           ? data.plan === 'business'
@@ -150,16 +152,14 @@ const UpgradePage = () => {
 
   const sendToWebhook = async (base64, userInfo) => {
     try {
-      const webhookUrl = import.meta.env.VITE_N8N_PAYMENT_WEBHOOK_URL;
-      if (!webhookUrl) return;
-      await fetch(webhookUrl, {
+      await apiFetch('/api/payment-webhook', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           receiptImage: base64,
           fileName: file?.name || 'receipt',
           fileType: file?.type || 'image/jpeg',
-          userName: userInfo?.name || userInfo?.displayName || userInfo?.email || '',
+          userName: userInfo?.name || userInfo?.email || '',
           userEmail: userInfo?.email || '',
           submittedAt: new Date().toISOString(),
         }),
@@ -178,12 +178,25 @@ const UpgradePage = () => {
       reader.onload = async (e) => {
         const base64 = e.target.result;
 
-        /* Save to Firestore and notify n8n in parallel */
-        await Promise.all([
-          submitPaymentRequest(currentUser.uid, { receiptImage: base64, plan: targetPlan }),
+        /* Send to n8n webhook and internal API in parallel */
+        const [res] = await Promise.all([
+          apiFetch('/api/payment-requests', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ receiptImage: base64, plan: targetPlan }),
+          }),
           sendToWebhook(base64, currentUser),
         ]);
 
+        const data = await res.json();
+        if (!res.ok) {
+          const remaining = data.remaining || 30;
+          if (res.status === 429) { startCooldown(remaining); }
+          setError(data.message || 'حدث خطأ');
+          setLoading(false);
+          return;
+        }
         prevExpiresAtRef.current = currentUser?.planExpiresAt || null;
         submittedAtRef.current   = new Date().toISOString();
         startCooldown(30);

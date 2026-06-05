@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
 import { useAuth } from '../context/AuthContext';
+
+const CHAT_API = '/api/chat';
 
 export default function ChatWidget() {
   const { isRTL } = useAuth();
@@ -55,20 +58,15 @@ export default function ChatWidget() {
     try {
       const fallbackText = isRTL ? 'حدث خطأ، يرجى المحاولة مجدداً.' : 'Something went wrong. Please try again.';
 
-      const chatWebhookUrl = import.meta.env.VITE_N8N_CHAT_WEBHOOK_URL;
-      const response = chatWebhookUrl
-        ? await fetch(chatWebhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              chatInput: text,
-              message: text,
-              input: text,
-              language: isRTL ? 'ar' : 'en',
-              sessionId: 'chat-session',
-            }),
-          })
-        : null;
+      const response = await apiFetch(CHAT_API, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          language: isRTL ? 'ar' : 'en',
+          sessionId: 'chat-session',
+        }),
+      });
       const botText = await parseResponse(response, fallbackText);
 
       setMessages((prev) => [

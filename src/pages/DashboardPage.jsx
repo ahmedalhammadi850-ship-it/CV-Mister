@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { getUserPaymentRequests, getUser, getUserCVs, saveUserCV, deleteUserCV, renameUserCV } from '../lib/firestore';
+import { apiFetch } from '../utils/api';
 import { createPortal } from 'react-dom';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -22,8 +22,9 @@ function usePendingApprovalPoll(currentUser, refreshUser) {
       pollRef.current = setInterval(async () => {
         if (cancelled) return;
         try {
-          const data = await getUser(currentUser.uid);
-          if (!data || cancelled) return;
+          const r = await apiFetch('/api/auth/user', { credentials: 'include' });
+          if (!r.ok || cancelled) return;
+          const data = await r.json();
 
           const planMatch = data.plan === 'pro' || data.plan === 'business';
           const newExpiry  = data.planExpiresAt;
@@ -49,8 +50,10 @@ function usePendingApprovalPoll(currentUser, refreshUser) {
 
     const checkPending = async () => {
       try {
-        const requests = await getUserPaymentRequests(currentUser.uid);
-        if (!cancelled && requests.some(r => r.status === 'pending')) startPolling();
+        const res = await apiFetch('/api/payment-requests/my', { credentials: 'include' });
+        if (!res.ok || cancelled) return;
+        const requests = await res.json();
+        if (requests.some(r => r.status === 'pending')) startPolling();
       } catch { /* silent */ }
     };
 
@@ -542,23 +545,20 @@ const DashboardPage = () => {
   };
 
   const fetchCVs = useCallback(async () => {
-    if (!currentUser?.uid) return;
     setLoading(true); setError(null);
     try {
-      const cvList = await getUserCVs(currentUser.uid);
-      setCvs(cvList);
+      const res = await apiFetch('/api/cvs', { credentials: 'include' });
+      if (res.status === 401 || res.status === 403) { navigate('/login'); return; }
+      if (!res.ok) throw new Error('Failed');
+      setCvs(await res.json());
     } catch {
       setError(isRTL ? 'فشل تحميل السير الذاتية' : 'Failed to load resumes');
     } finally { setLoading(false); }
-  }, [isRTL, currentUser?.uid]);
+  }, [isRTL, navigate]);
 
   useEffect(() => { fetchCVs(); }, [fetchCVs]);
 
-  const handleDelete    = async (id) => {
-    deleteCV(id);
-    deleteUserCV(id).catch(() => {});
-    setCvs(prev => prev.filter(c => c.id !== id));
-  };
+  const handleDelete    = async (id) => { deleteCV(id); await apiFetch(`/api/cvs/${id}`, { method: 'DELETE', credentials: 'include' }); setCvs(prev => prev.filter(c => c.id !== id)); };
   const handleDuplicate = async (id) => {
     if (currentUser?.subscriptionExpired) { openPaywall('expired'); return; }
     const plan = currentUser?.plan || 'free';
@@ -566,19 +566,19 @@ const DashboardPage = () => {
     if (plan === 'free' && cvs.length >= FREE_LIMIT) { openPaywall('free_limit'); return; }
     const cv = cvs.find(c => c.id === id); if (!cv) return;
     const copy = { ...cv, id: `cv-${Date.now()}`, name: cv.name + (isRTL ? ' (نسخة)' : ' (Copy)'), lastModified: new Date().toISOString() };
-    const result = await saveUserCV(currentUser.uid, copy);
-    if (result?.error) {
-      if (result.error.limitReached) openPaywall(plan === 'pro' ? 'pro_limit' : 'free_limit');
-      if (result.error.freeExpired) openPaywall('expired');
+    const res = await apiFetch('/api/cvs', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(copy) });
+    if (res.ok) {
+      const saved = await res.json();
+      setCvs(prev => [saved, ...prev]);
     } else {
-      setCvs(prev => [copy, ...prev]);
+      const data = await res.json().catch(() => ({}));
+      if (data.limitReached) openPaywall(plan === 'pro' ? 'pro_limit' : 'free_limit');
+      if (data.freeExpired) openPaywall('expired');
     }
   };
   const handleRename    = async (id, name) => {
-    try {
-      await renameUserCV(id, name);
-      setCvs(prev => prev.map(c => c.id === id ? { ...c, name } : c));
-    } catch { /* silent */ }
+    const res = await apiFetch(`/api/cvs/${id}`, { method: 'PATCH', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name }) });
+    if (res.ok) { const updated = await res.json(); setCvs(prev => prev.map(c => c.id === id ? { ...c, name: updated.name } : c)); }
   };
 
   const topAts    = cvs.length ? Math.max(...cvs.map(c => c.atsScore || 0)) : null;
