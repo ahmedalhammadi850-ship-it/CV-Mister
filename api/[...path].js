@@ -15,7 +15,7 @@ function wrap(importFn, paramMap) {
         _code: 200,
         status(c) { this._code = c; res.status(c); return this; },
         json(d) { res.status(this._code).json(d); },
-        end() { res.status(this._code).end(); },
+        end(d) { d !== undefined ? res.status(this._code).end(d) : res.status(this._code).end(); },
         setHeader(k, v) { res.setHeader(k, v); return this; },
         send(d) { res.status(this._code).send(d); },
       };
