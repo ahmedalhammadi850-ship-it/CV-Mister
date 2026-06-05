@@ -4,6 +4,7 @@
   "outputDirectory": "dist",
   "installCommand": "npm install --no-fund --no-audit --omit=optional",
   "framework": null,
+  "nodeVersion": "22.x",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
