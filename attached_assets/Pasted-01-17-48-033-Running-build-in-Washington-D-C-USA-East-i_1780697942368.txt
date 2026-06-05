@@ -1,0 +1,40 @@
+01:17:48.033 Running build in Washington, D.C., USA (East) – iad1
+01:17:48.034 Build machine configuration: 2 cores, 8 GB
+01:17:48.046 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: 566fbe7)
+01:17:48.047 Skipping build cache, deployment was triggered without cache.
+01:17:57.936 Cloning completed: 9.889s
+01:17:58.012 Found .vercelignore
+01:17:58.074 Removed 429 ignored files defined in .vercelignore
+01:17:58.074   /.agents/agent_assets_metadata.toml
+01:17:58.074   /.agents/memory/firebase-migration.md
+01:17:58.074   /.agents/memory/MEMORY.md
+01:17:58.074   /.agents/memory/pdf-export-approach.md
+01:17:58.075   /.agents/memory/pdf-print-approach.md
+01:17:58.075   /.agents/memory/puppeteer-ats-pdf.md
+01:17:58.075   /.agents/memory/vite8-node-requirement.md
+01:17:58.075   /.replit_integration_files/server/replit_integrations/auth/index.ts
+01:17:58.075   /.replit_integration_files/server/replit_integrations/auth/replitAuth.ts
+01:17:58.075   /.replit_integration_files/server/replit_integrations/auth/routes.ts
+01:17:58.309 Running "vercel build"
+01:17:58.332 Vercel CLI 54.9.0
+01:17:58.959 Warning: Detected "engines": { "node": ">=20.19.0" } in your `package.json` that will automatically upgrade when a new major Node.js Version is released. Learn More: https://vercel.link/node-version
+01:17:58.966 Running "install" command: `node scripts/vercel-install.js && npm install --legacy-peer-deps`...
+01:17:59.002 node:internal/modules/cjs/loader:1479
+01:17:59.003   throw err;
+01:17:59.003   ^
+01:17:59.003 
+01:17:59.003 Error: Cannot find module '/vercel/path0/scripts/vercel-install.js'
+01:17:59.003     at Module._resolveFilename (node:internal/modules/cjs/loader:1476:15)
+01:17:59.003     at wrapResolveFilename (node:internal/modules/cjs/loader:1049:27)
+01:17:59.004     at defaultResolveImplForCJSLoading (node:internal/modules/cjs/loader:1073:10)
+01:17:59.004     at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1094:12)
+01:17:59.004     at Module._load (node:internal/modules/cjs/loader:1262:25)
+01:17:59.004     at wrapModuleLoad (node:internal/modules/cjs/loader:255:19)
+01:17:59.004     at Module.executeUserEntryPoint [as runMain] (node:internal/modules/run_main:154:5)
+01:17:59.005     at node:internal/main/run_main_module:33:47 {
+01:17:59.005   code: 'MODULE_NOT_FOUND',
+01:17:59.005   requireStack: []
+01:17:59.005 }
+01:17:59.005 
+01:17:59.005 Node.js v24.15.0
+01:17:59.012 Error: Command "node scripts/vercel-install.js && npm install --legacy-peer-deps" exited with 1
