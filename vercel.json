@@ -1,8 +1,9 @@
 {
   "version": 2,
+  "nodeVersion": "22.x",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "node -e \"const fs=require('fs');const p=JSON.parse(fs.readFileSync('package.json','utf8'));const skip=new Set(['firebase-admin','express','express-session','cors','helmet','bcryptjs','openid-client','passport','tsx','connect-pg-simple','pg','puppeteer-core','@types/cors','@types/express','@types/express-session','@types/passport','@types/bcryptjs']);for(const s of['dependencies','devDependencies','optionalDependencies']){if(p[s])for(const k of Object.keys(p[s]))if(skip.has(k))delete p[s][k];}delete p.optionalDependencies;fs.writeFileSync('package.json',JSON.stringify(p));\" && npm install --legacy-peer-deps",
+  "installCommand": "npm install --legacy-peer-deps",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
