@@ -217,8 +217,8 @@ const CVBuilder = () => {
     let textClone   = null;   // off-screen clone for text-rect extraction
 
     try {
-      const { jsPDF }     = await import('jspdf');
-      const html2canvas   = (await import('html2canvas')).default;
+      const { jsPDF }    = await import('jspdf');
+      const { toCanvas } = await import('html-to-image');
 
       const captureEl   = breakDataRef.current?.captureEl;
       if (!captureEl) throw new Error('Preview element not ready');
@@ -232,95 +232,54 @@ const CVBuilder = () => {
       const PAGE_H_MM   = 297;
       const PIXEL_RATIO = 2;     // 2× = crisp retina output
 
-      // ── 1. Visual capture via html2canvas + getComputedStyle patch ───────
-      // html2canvas doesn't understand oklch/oklab colors. It calls
-      // getComputedStyle() on each element and crashes when it sees oklch.
-      // Fix: temporarily monkey-patch window.getComputedStyle so that any
-      // oklch value is converted to rgb before html2canvas reads it.
-      // The Canvas 2D fillStyle trick lets the browser do the conversion.
+      // ── 1. Visual capture via html-to-image ──────────────────────────────
+      // html-to-image uses SVG foreignObject + inlines all computed styles,
+      // so it correctly handles Tailwind v4 Constructable Stylesheets and
+      // modern CSS colors (oklch, oklab, color()) without any monkey-patching.
 
-      // ── 1a. Color converter using Canvas fillStyle ─────────────────────
-      const colorProxy = document.createElement('canvas');
-      colorProxy.width = 1; colorProxy.height = 1;
-      const colorCtx   = colorProxy.getContext('2d');
-      const oklchRE    = /oklch\s*\([^)]*\)|oklab\s*\([^)]*\)|color\s*\([^)]+\)/gi;
-      function toRgb(cssColor) {
-        try {
-          colorCtx.clearRect(0, 0, 1, 1);
-          colorCtx.fillStyle = '#000';
-          colorCtx.fillStyle = cssColor;
-          colorCtx.fillRect(0, 0, 1, 1);
-          const [r, g, b, a] = colorCtx.getImageData(0, 0, 1, 1).data;
-          if (a === 0) return 'transparent';
-          return a === 255 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${+(a/255).toFixed(3)})`;
-        } catch { return cssColor; }
-      }
-      function patchColorValue(val) {
-        if (typeof val !== 'string' || !val.includes('oklch') && !val.includes('oklab') && !val.includes('color(')) return val;
-        return val.replace(oklchRE, match => toRgb(match));
-      }
+      // Place a full-viewport white overlay so the user sees a loading screen,
+      // then render the clone at (0,0) so html-to-image can capture it properly.
+      // html-to-image requires the element to be within the visible viewport.
+      const captureOverlay = document.createElement('div');
+      Object.assign(captureOverlay.style, {
+        position: 'fixed', inset: '0', zIndex: '999997',
+        background: '#ffffff', pointerEvents: 'none',
+      });
+      document.body.appendChild(captureOverlay);
 
-      // ── 1b. Patch getComputedStyle to intercept oklch before html2canvas ─
-      const _origGCS = window.getComputedStyle.bind(window);
-      window.getComputedStyle = (el, pseudo) => {
-        const cs = _origGCS(el, pseudo);
-        return new Proxy(cs, {
-          get(target, prop) {
-            const val = target[prop];
-            if (typeof val === 'function') {
-              // Wrap methods too so getPropertyValue() results are also patched
-              return function(...args) {
-                const result = val.apply(target, args);
-                return patchColorValue(result);
-              };
-            }
-            return patchColorValue(val);
-          },
-        });
-      };
-
-      // ── 1c. Place clone off-screen for html2canvas to read ─────────────
       screenClone = captureEl.cloneNode(true);
       Object.assign(screenClone.style, {
         position:      'fixed',
         top:           '0px',
-        left:          '-9999px',
+        left:          '0px',
         width:         `${CONTENT_W}px`,
         height:        `${totalHeight}px`,
-        zIndex:        '999999',
+        zIndex:        '999998',
         pointerEvents: 'none',
         overflow:      'visible',
+        background:    '#ffffff',
       });
       document.body.appendChild(screenClone);
+
+      // Three rAF ticks — lets the browser fully paint the clone
+      await new Promise(r => requestAnimationFrame(r));
       await new Promise(r => requestAnimationFrame(r));
       await new Promise(r => requestAnimationFrame(r));
 
       let fullCanvas;
       try {
-        fullCanvas = await html2canvas(screenClone, {
-          scale:           PIXEL_RATIO,
+        fullCanvas = await toCanvas(screenClone, {
+          pixelRatio:      PIXEL_RATIO,
           backgroundColor: '#ffffff',
-          useCORS:         true,
-          allowTaint:      true,
           width:           CONTENT_W,
           height:          totalHeight,
-          windowWidth:     CONTENT_W,
-          windowHeight:    totalHeight,
-          scrollX:         0,
-          scrollY:         0,
-          logging:         false,
+          skipFonts:       true,
+          useCORS:         true,
         });
       } finally {
-        window.getComputedStyle = _origGCS;  // always restore original
         if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} screenClone = null; }
+        try { document.body.removeChild(captureOverlay); } catch (_) {}
       }
-
-      // Sanity check
-      const dbgCtx  = fullCanvas.getContext('2d');
-      const px      = dbgCtx.getImageData(Math.round(fullCanvas.width / 2), Math.round(fullCanvas.height / 4), 1, 1).data;
-      const isBlank = px[0] > 250 && px[1] > 250 && px[2] > 250;
-      console.log('[PDF] canvas:', fullCanvas.width, 'x', fullCanvas.height, '— pixel:', Array.from(px), '— blank?', isBlank);
-      if (isBlank) throw new Error('BLANK_CANVAS');
 
       // ── 2. Off-screen clone for accurate text-rect extraction ─────────────
       // Uses visibility:hidden (not display:none) so getClientRects() works.
