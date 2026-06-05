@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "nodeVersion": "22.x",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
   "installCommand": "cp package.vercel.json package.json && rm -f package-lock.json && npm install --legacy-peer-deps",
