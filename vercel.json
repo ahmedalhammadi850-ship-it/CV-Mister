@@ -4,14 +4,7 @@
   "outputDirectory": "dist",
   "installCommand": "cp package.vercel.json package.json && rm -f package-lock.json && npm install --legacy-peer-deps",
   "framework": null,
-  "functions": {
-    "api/[...path].js": {
-      "includeFiles": "api/**"
-    }
-  },
-  "routes": [
-    { "src": "/api/(.*)", "dest": "/api/[...path]" },
-    { "handle": "filesystem" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
