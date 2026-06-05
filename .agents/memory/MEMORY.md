@@ -1,2 +1,2 @@
 - [Firebase Direct Migration](firebase-migration.md) — frontend now talks to Firebase SDK directly; no Express backend calls from the browser.
-- [PDF Export: Print-based for non-ATS templates](pdf-print-approach.md) — non-ATS templates use window.print() via #cv-print-root; ATS templates use jsPDF text-based export.
+- [PDF Export approach](pdf-export-approach.md) — all templates use real text-based jsPDF (no images, no window.print). ATS: generateATSPdf. Non-ATS: generateStyledPdf with coloured header band.

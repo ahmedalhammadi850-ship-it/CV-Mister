@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
-import { isATSTemplate, generateATSPdf } from '../../utils/atsPdfExport';
+import { isATSTemplate, generateATSPdf, generateStyledPdf } from '../../utils/atsPdfExport';
 
 
 const OverviewIcon = () => (
@@ -238,41 +238,28 @@ const CVBuilder = () => {
         return;
       }
 
-      // ── Print-based PDF (all non-ATS templates) ───────────────────────────
-      // Uses the browser's native print engine — produces fully selectable,
-      // searchable text instead of a flattened image.
-      const element = breakDataRef.current?.captureEl;
-      if (!element) return;
-
-      await document.fonts.ready;
-
-      // Clone the full-resolution template content and reset its positioning
-      const clone = element.cloneNode(true);
-      clone.style.position = 'relative';
-      clone.style.top = '0';
-      clone.style.left = '0';
-      clone.style.zIndex = 'auto';
-      clone.style.pointerEvents = 'auto';
-      clone.style.width = '794px';
-      clone.style.transform = 'none';
-
-      // Mount into #cv-print-root — @media print CSS hides everything else
-      const printRoot = document.createElement('div');
-      printRoot.id = 'cv-print-root';
-      printRoot.appendChild(clone);
-      document.body.appendChild(printRoot);
-
-      await new Promise(resolve => {
-        const done = () => {
-          try { document.body.removeChild(printRoot); } catch (_) {}
-          window.removeEventListener('afterprint', done);
-          resolve();
-        };
-        window.addEventListener('afterprint', done);
-        // Safety fallback — resolve after 60 s if afterprint never fires
-        setTimeout(done, 60000);
-        window.print();
+      // ── Styled text-based PDF (all non-ATS templates) ────────────────────
+      // Generates a real text PDF (no images) with a coloured header band
+      // matching the template's primary colour. Text is fully selectable,
+      // copyable and searchable — direct download, no print dialog.
+      const doc = await generateStyledPdf(cvData, {
+        isRTL,
+        visibleSections,
+        visiblePersonalFields,
+        sectionOrder,
+        sectionNames,
+        accentColor: theme?.primaryColor || '#4f46e5',
       });
+      const pdfBlob = doc.output('blob');
+      const name    = cvData.personalInfo?.fullName || 'Resume';
+      const blobUrl = URL.createObjectURL(pdfBlob);
+      const anchor  = document.createElement('a');
+      anchor.href     = blobUrl;
+      anchor.download = `${name} - CV.pdf`;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
       if (currentCVId) {
         apiFetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});

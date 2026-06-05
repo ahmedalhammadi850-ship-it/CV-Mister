@@ -423,3 +423,322 @@ export async function generateATSPdf(cvData, options = {}) {
 
   return doc;
 }
+
+// ─────────────────────────────────────────────────────────────────────────────
+// generateStyledPdf — real text PDF for non-ATS visual templates.
+//
+// Produces a fully text-based, selectable PDF with:
+//   • A solid coloured header band (template's primaryColor)
+//   • Name, job title and contact info in the header
+//   • Section headings coloured with the same accent
+//   • All body content as genuine PDF text operators (no images)
+// ─────────────────────────────────────────────────────────────────────────────
+export async function generateStyledPdf(cvData, options = {}) {
+  const { jsPDF } = await import('jspdf');
+
+  const {
+    isRTL                = false,
+    visibleSections      = {},
+    visiblePersonalFields = {},
+    sectionOrder         = ['summary','experience','education','skills','projects','languages'],
+    sectionNames         = {},
+    accentColor          = '#4f46e5',
+  } = options;
+
+  // ── Colour helpers ─────────────────────────────────────────────────────────
+  function hexToRgb(hex) {
+    const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return r ? [parseInt(r[1],16), parseInt(r[2],16), parseInt(r[3],16)] : [79,70,229];
+  }
+  function luminance(r,g,b) { return (0.299*r + 0.587*g + 0.114*b) / 255; }
+  function lighten([r,g,b], amt) { return [Math.min(255,r+amt), Math.min(255,g+amt), Math.min(255,b+amt)]; }
+  function darken([r,g,b],  amt) { return [Math.max(0,r-amt),   Math.max(0,g-amt),   Math.max(0,b-amt)  ]; }
+
+  const accentRgb   = hexToRgb(accentColor);
+  const [ar,ag,ab]  = accentRgb;
+  const onLight     = luminance(ar,ag,ab) > 0.55;
+  const headerText  = onLight ? darken(accentRgb, 80) : [255,255,255];
+  const headerSub   = onLight ? darken(accentRgb,120) : lighten(accentRgb, 60);
+
+  // ── Page geometry ──────────────────────────────────────────────────────────
+  const PAGE_W  = 210;
+  const PAGE_H  = 297;
+  const ML      = 15;
+  const MR      = 15;
+  const CW      = PAGE_W - ML - MR;
+  const HEADER_H = 38;
+  const MB      = 12;
+  const BOTTOM  = PAGE_H - MB;
+
+  const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+  // ── Arabic font (RTL) ──────────────────────────────────────────────────────
+  let arabicReady = false;
+  if (isRTL) {
+    arabicReady = await embedArabicFont(doc);
+    if (arabicReady) doc.setR2L(true);
+  }
+  const FF  = arabicReady ? 'Amiri'    : 'helvetica';
+  const B   = arabicReady ? 'bold'     : 'bold';
+  const N   = arabicReady ? 'normal'   : 'normal';
+
+  const show = (k) => visibleSections[k] !== false;
+  const pi   = cvData?.personalInfo ?? {};
+  const L    = (k) => CONTACT_LABELS[k]?.[isRTL ? 'ar' : 'en'] ?? k;
+
+  // ── Coloured header band ───────────────────────────────────────────────────
+  doc.setFillColor(ar, ag, ab);
+  doc.rect(0, 0, PAGE_W, HEADER_H, 'F');
+
+  const hx    = isRTL ? (PAGE_W - ML) : ML;
+  const hAlign = isRTL ? 'right' : 'left';
+
+  if (pi.fullName) {
+    doc.setFont(FF, B);
+    doc.setFontSize(22);
+    doc.setTextColor(...headerText);
+    doc.text(pi.fullName, hx, 16, { align: hAlign });
+  }
+  if (pi.jobTitle) {
+    doc.setFont(FF, N);
+    doc.setFontSize(11);
+    doc.setTextColor(...headerSub);
+    doc.text(pi.jobTitle, hx, 25, { align: hAlign });
+  }
+
+  const cParts = [];
+  if (visiblePersonalFields.email     !== false && pi.email)     cParts.push(pi.email);
+  if (visiblePersonalFields.phone     !== false && pi.phone)     cParts.push(pi.phone);
+  if (visiblePersonalFields.location  !== false && pi.location)  cParts.push(pi.location);
+  if (visiblePersonalFields.linkedin  !== false && pi.linkedin)  cParts.push(pi.linkedin);
+  if (visiblePersonalFields.portfolio !== false && pi.portfolio) cParts.push(pi.portfolio);
+
+  if (cParts.length) {
+    doc.setFont(FF, N);
+    doc.setFontSize(8);
+    doc.setTextColor(...headerSub);
+    const contactLine = doc.splitTextToSize(cParts.join('  |  '), CW)[0];
+    doc.text(contactLine, hx, 33, { align: hAlign });
+  }
+
+  // ── Body helpers ───────────────────────────────────────────────────────────
+  let y = HEADER_H + 8;
+
+  function needsPage(n) { return y + n > BOTTOM; }
+  function ensurePage(n = 6) {
+    if (needsPage(n)) { doc.addPage(); y = 15; }
+  }
+
+  const TX    = isRTL ? (ML + CW) : ML;
+  const ALIGN = isRTL ? 'right'   : 'left';
+
+  function writeLine(text, { size=10, style=N, color=[20,20,20] } = {}) {
+    if (!text) return;
+    const lh = size * 0.35 + 1.8;
+    ensurePage(lh);
+    doc.setFontSize(size); doc.setFont(FF, style); doc.setTextColor(...color);
+    doc.text(String(text), TX, y, { align: ALIGN });
+    y += lh;
+  }
+
+  function writeWrapped(text, { size=10, style=N, color=[30,30,30] } = {}) {
+    if (!text) return;
+    const lh = size * 0.35 + 1.8;
+    doc.setFontSize(size); doc.setFont(FF, style); doc.setTextColor(...color);
+    for (const line of doc.splitTextToSize(String(text), CW)) {
+      ensurePage(lh);
+      doc.text(line, TX, y, { align: ALIGN });
+      y += lh;
+    }
+  }
+
+  function writeTwoCol(left, right, { size=10 } = {}) {
+    if (!left && !right) return;
+    const lh = size * 0.35 + 1.8;
+    ensurePage(lh);
+    doc.setFontSize(size);
+    if (isRTL) {
+      if (left)  { doc.setFont(FF,B); doc.setTextColor(10,10,10); doc.text(String(left),  ML+CW, y, { align:'right' }); }
+      if (right) { doc.setFont(FF,N); doc.setTextColor(80,80,80); doc.text(String(right), ML,    y, { align:'left'  }); }
+    } else {
+      if (left)  { doc.setFont(FF,B); doc.setTextColor(10,10,10); doc.text(doc.splitTextToSize(String(left),CW*0.72)[0]??'', ML, y); }
+      if (right) { doc.setFont(FF,N); doc.setTextColor(80,80,80); doc.text(String(right), ML+CW, y, { align:'right' }); }
+    }
+    y += lh;
+  }
+
+  function heading(label) {
+    y += 3;
+    ensurePage(10);
+    doc.setFontSize(10.5); doc.setFont(FF, B); doc.setTextColor(ar,ag,ab);
+    doc.text(String(label), TX, y, { align: ALIGN });
+    y += 4.5;
+    doc.setDrawColor(ar,ag,ab); doc.setLineWidth(0.4);
+    doc.line(ML, y, ML+CW, y);
+    y += 3.5;
+  }
+
+  function gap(mm=3) { y += mm; }
+
+  // ── Sections ───────────────────────────────────────────────────────────────
+  const renderSection = (key) => {
+    if (!show(key)) return;
+    switch (key) {
+
+      case 'summary': {
+        if (!pi.summary) return;
+        heading(sectionLabel('summary', isRTL, sectionNames));
+        writeWrapped(pi.summary);
+        break;
+      }
+
+      case 'experience': {
+        if (!cvData.experience?.length) return;
+        heading(sectionLabel('experience', isRTL, sectionNames));
+        cvData.experience.forEach((e, i) => {
+          if (i > 0) gap(3);
+          writeTwoCol(safe(e.jobTitle), dateRange(e.startDate, e.endDate, e.current, isRTL));
+          const sub = [safe(e.company), safe(e.location)].filter(Boolean).join(' · ');
+          if (sub) writeLine(sub, { size:9, color:[80,80,80] });
+          if (e.description) { gap(0.5); writeWrapped(safe(e.description)); }
+        });
+        break;
+      }
+
+      case 'education': {
+        if (!cvData.education?.length) return;
+        heading(sectionLabel('education', isRTL, sectionNames));
+        cvData.education.forEach((e, i) => {
+          if (i > 0) gap(3);
+          writeTwoCol(safe(e.degree), dateRange(e.startDate, e.endDate, false, isRTL));
+          if (e.institution) writeLine(safe(e.institution), { size:9, color:[80,80,80] });
+          if (e.description) writeWrapped(safe(e.description));
+        });
+        break;
+      }
+
+      case 'skills': {
+        if (!cvData.skills?.length) return;
+        heading(sectionLabel('skills', isRTL, sectionNames));
+        writeWrapped(cvData.skills.map(sk => safe(sk.name || sk)).filter(Boolean).join('  ·  '));
+        break;
+      }
+
+      case 'languages': {
+        if (!cvData.languages?.length) return;
+        heading(sectionLabel('languages', isRTL, sectionNames));
+        writeWrapped(cvData.languages.map(l => `${safe(l.name)} (${safe(l.level)})`).filter(s => s !== ' ()').join('  ·  '));
+        break;
+      }
+
+      case 'projects': {
+        if (!cvData.projects?.length) return;
+        heading(sectionLabel('projects', isRTL, sectionNames));
+        cvData.projects.forEach((p, i) => {
+          if (i > 0) gap(3);
+          writeLine(safe(p.title), { size:10, style:B });
+          if (p.link)        writeLine(safe(p.link),        { size:9, color:[80,80,80] });
+          if (p.description) writeWrapped(safe(p.description));
+        });
+        break;
+      }
+
+      case 'certificates': {
+        if (!cvData.certificates?.length) return;
+        heading(sectionLabel('certificates', isRTL, sectionNames));
+        cvData.certificates.forEach((c, i) => {
+          if (i > 0) gap(3);
+          writeTwoCol(safe(c.name), safe(c.date));
+          if (c.issuer)      writeLine(safe(c.issuer),      { size:9, color:[80,80,80] });
+          if (c.description) writeWrapped(safe(c.description));
+        });
+        break;
+      }
+
+      case 'interests': {
+        if (!cvData.interests?.length) return;
+        heading(sectionLabel('interests', isRTL, sectionNames));
+        writeWrapped(cvData.interests.map(item => safe(typeof item === 'string' ? item : item.name)).filter(Boolean).join('  ·  '));
+        break;
+      }
+
+      case 'courses': {
+        if (!cvData.courses?.length) return;
+        heading(sectionLabel('courses', isRTL, sectionNames));
+        cvData.courses.forEach((c, i) => {
+          if (i > 0) gap(3);
+          writeTwoCol(safe(c.name), safe(c.date));
+          if (c.institution) writeLine(safe(c.institution), { size:9, color:[80,80,80] });
+        });
+        break;
+      }
+
+      case 'awards': {
+        if (!cvData.awards?.length) return;
+        heading(sectionLabel('awards', isRTL, sectionNames));
+        cvData.awards.forEach((a, i) => {
+          if (i > 0) gap(3);
+          writeTwoCol(safe(a.title), safe(a.date));
+          if (a.issuer)      writeLine(safe(a.issuer),      { size:9, color:[80,80,80] });
+          if (a.description) writeWrapped(safe(a.description));
+        });
+        break;
+      }
+
+      case 'organisations': {
+        if (!cvData.organisations?.length) return;
+        heading(sectionLabel('organisations', isRTL, sectionNames));
+        cvData.organisations.forEach((o, i) => {
+          if (i > 0) gap(3);
+          writeTwoCol(safe(o.name), safe(o.date));
+          if (o.role) writeLine(safe(o.role), { size:9, color:[80,80,80] });
+        });
+        break;
+      }
+
+      case 'publications': {
+        if (!cvData.publications?.length) return;
+        heading(sectionLabel('publications', isRTL, sectionNames));
+        cvData.publications.forEach((p, i) => {
+          if (i > 0) gap(3);
+          writeTwoCol(safe(p.title), safe(p.date));
+          if (p.publisher)   writeLine(safe(p.publisher),   { size:9, color:[80,80,80] });
+          if (p.description) writeWrapped(safe(p.description));
+        });
+        break;
+      }
+
+      case 'references': {
+        if (!cvData.references?.length) return;
+        heading(sectionLabel('references', isRTL, sectionNames));
+        cvData.references.forEach((r, i) => {
+          if (i > 0) gap(3);
+          writeLine(safe(r.name), { size:10, style:B });
+          const sub = [safe(r.title), safe(r.company)].filter(Boolean).join(' — ');
+          if (sub)     writeLine(sub, { size:9, color:[80,80,80] });
+          const cont = [safe(r.email), safe(r.phone)].filter(Boolean).join('  |  ');
+          if (cont)    writeLine(cont, { size:9, color:[80,80,80] });
+        });
+        break;
+      }
+
+      default: {
+        if (key.startsWith('csec-') && cvData.customSections) {
+          const sec = cvData.customSections.find(s => s.id === key);
+          if (!sec?.items?.length) return;
+          heading(safe(sec.title).toUpperCase());
+          sec.items.forEach((item, i) => {
+            if (i > 0) gap(3);
+            if (item.title)       writeLine(safe(item.title),       { size:10, style:B });
+            if (item.subtitle)    writeLine(safe(item.subtitle),    { size:9,  color:[80,80,80] });
+            if (item.description) writeWrapped(safe(item.description));
+          });
+        }
+      }
+    }
+  };
+
+  for (const key of sectionOrder) renderSection(key);
+
+  return doc;
+}
