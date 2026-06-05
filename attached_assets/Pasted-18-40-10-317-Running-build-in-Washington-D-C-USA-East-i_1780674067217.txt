@@ -1,0 +1,185 @@
+18:40:10.317 Running build in Washington, D.C., USA (East) – iad1
+18:40:10.317 Build machine configuration: 2 cores, 8 GB
+18:40:10.330 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: 1b4885a)
+18:40:10.331 Skipping build cache, deployment was triggered without cache.
+18:40:18.342 Cloning completed: 8.011s
+18:40:18.408 Found .vercelignore
+18:40:18.459 Removed 373 ignored files defined in .vercelignore
+18:40:18.459   /.agents/agent_assets_metadata.toml
+18:40:18.459   /.agents/memory/firebase-migration.md
+18:40:18.459   /.agents/memory/MEMORY.md
+18:40:18.459   /.agents/memory/pdf-export-approach.md
+18:40:18.459   /.agents/memory/pdf-print-approach.md
+18:40:18.460   /.agents/memory/vite8-node-requirement.md
+18:40:18.460   /.replit_integration_files/server/replit_integrations/auth/index.ts
+18:40:18.460   /.replit_integration_files/server/replit_integrations/auth/replitAuth.ts
+18:40:18.460   /.replit_integration_files/server/replit_integrations/auth/routes.ts
+18:40:18.460   /.replit_integration_files/server/replit_integrations/auth/storage.ts
+18:40:18.891 Running "vercel build"
+18:40:19.013 Vercel CLI 54.9.0
+18:40:19.719 Warning: Detected "engines": { "node": ">=20.19.0" } in your `package.json` that will automatically upgrade when a new major Node.js Version is released. Learn More: https://vercel.link/node-version
+18:40:19.730 Running "install" command: `npm ci --no-fund --no-audit`...
+18:40:25.374 npm error code EUSAGE
+18:40:25.388 npm error
+18:40:25.389 npm error `npm ci` can only install packages when your package.json and package-lock.json or npm-shrinkwrap.json are in sync. Please update your lock file with `npm install` before continuing.
+18:40:25.389 npm error
+18:40:25.389 npm error Missing: @tailwindcss/oxide-android-arm64@4.3.0 from lock file
+18:40:25.390 npm error Missing: @tailwindcss/oxide-darwin-arm64@4.3.0 from lock file
+18:40:25.390 npm error Missing: @tailwindcss/oxide-darwin-x64@4.3.0 from lock file
+18:40:25.390 npm error Missing: @tailwindcss/oxide-freebsd-x64@4.3.0 from lock file
+18:40:25.391 npm error Missing: @tailwindcss/oxide-linux-arm-gnueabihf@4.3.0 from lock file
+18:40:25.391 npm error Missing: @tailwindcss/oxide-linux-arm64-gnu@4.3.0 from lock file
+18:40:25.391 npm error Missing: @tailwindcss/oxide-linux-arm64-musl@4.3.0 from lock file
+18:40:25.392 npm error Missing: @tailwindcss/oxide-wasm32-wasi@4.3.0 from lock file
+18:40:25.392 npm error Missing: @tailwindcss/oxide-win32-arm64-msvc@4.3.0 from lock file
+18:40:25.393 npm error Missing: @tailwindcss/oxide-win32-x64-msvc@4.3.0 from lock file
+18:40:25.394 npm error Missing: @esbuild/aix-ppc64@0.27.0 from lock file
+18:40:25.394 npm error Missing: @esbuild/android-arm@0.27.0 from lock file
+18:40:25.394 npm error Missing: @esbuild/android-arm64@0.27.0 from lock file
+18:40:25.395 npm error Missing: @esbuild/android-x64@0.27.0 from lock file
+18:40:25.395 npm error Missing: @esbuild/darwin-arm64@0.27.0 from lock file
+18:40:25.396 npm error Missing: @esbuild/darwin-x64@0.27.0 from lock file
+18:40:25.396 npm error Missing: @esbuild/freebsd-arm64@0.27.0 from lock file
+18:40:25.396 npm error Missing: @esbuild/freebsd-x64@0.27.0 from lock file
+18:40:25.396 npm error Missing: @esbuild/linux-arm@0.27.0 from lock file
+18:40:25.397 npm error Missing: @esbuild/linux-arm64@0.27.0 from lock file
+18:40:25.397 npm error Missing: @esbuild/linux-ia32@0.27.0 from lock file
+18:40:25.397 npm error Missing: @esbuild/linux-loong64@0.27.0 from lock file
+18:40:25.397 npm error Missing: @esbuild/linux-mips64el@0.27.0 from lock file
+18:40:25.397 npm error Missing: @esbuild/linux-ppc64@0.27.0 from lock file
+18:40:25.397 npm error Missing: @esbuild/linux-riscv64@0.27.0 from lock file
+18:40:25.398 npm error Missing: @esbuild/linux-s390x@0.27.0 from lock file
+18:40:25.398 npm error Missing: @esbuild/netbsd-arm64@0.27.0 from lock file
+18:40:25.398 npm error Missing: @esbuild/netbsd-x64@0.27.0 from lock file
+18:40:25.398 npm error Missing: @esbuild/openbsd-arm64@0.27.0 from lock file
+18:40:25.399 npm error Missing: @esbuild/openbsd-x64@0.27.0 from lock file
+18:40:25.399 npm error Missing: @esbuild/openharmony-arm64@0.27.0 from lock file
+18:40:25.399 npm error Missing: @esbuild/sunos-x64@0.27.0 from lock file
+18:40:25.399 npm error Missing: @esbuild/win32-arm64@0.27.0 from lock file
+18:40:25.399 npm error Missing: @esbuild/win32-ia32@0.27.0 from lock file
+18:40:25.399 npm error Missing: @esbuild/win32-x64@0.27.0 from lock file
+18:40:25.400 npm error Missing: lightningcss-android-arm64@1.32.0 from lock file
+18:40:25.400 npm error Missing: lightningcss-darwin-arm64@1.32.0 from lock file
+18:40:25.400 npm error Missing: lightningcss-darwin-x64@1.32.0 from lock file
+18:40:25.400 npm error Missing: lightningcss-freebsd-x64@1.32.0 from lock file
+18:40:25.400 npm error Missing: lightningcss-linux-arm-gnueabihf@1.32.0 from lock file
+18:40:25.401 npm error Missing: lightningcss-linux-arm64-gnu@1.32.0 from lock file
+18:40:25.401 npm error Missing: lightningcss-linux-arm64-musl@1.32.0 from lock file
+18:40:25.401 npm error Missing: lightningcss-win32-arm64-msvc@1.32.0 from lock file
+18:40:25.401 npm error Missing: lightningcss-win32-x64-msvc@1.32.0 from lock file
+18:40:25.401 npm error Missing: @rolldown/binding-android-arm64@1.0.3 from lock file
+18:40:25.402 npm error Missing: @rolldown/binding-darwin-arm64@1.0.3 from lock file
+18:40:25.402 npm error Missing: @rolldown/binding-darwin-x64@1.0.3 from lock file
+18:40:25.402 npm error Missing: @rolldown/binding-freebsd-x64@1.0.3 from lock file
+18:40:25.402 npm error Missing: @rolldown/binding-linux-arm-gnueabihf@1.0.3 from lock file
+18:40:25.411 npm error Missing: @rolldown/binding-linux-arm64-gnu@1.0.3 from lock file
+18:40:25.412 npm error Missing: @rolldown/binding-linux-arm64-musl@1.0.3 from lock file
+18:40:25.412 npm error Missing: @rolldown/binding-linux-ppc64-gnu@1.0.3 from lock file
+18:40:25.412 npm error Missing: @rolldown/binding-linux-s390x-gnu@1.0.3 from lock file
+18:40:25.412 npm error Missing: @rolldown/binding-openharmony-arm64@1.0.3 from lock file
+18:40:25.412 npm error Missing: @rolldown/binding-wasm32-wasi@1.0.3 from lock file
+18:40:25.413 npm error Missing: @rolldown/binding-win32-arm64-msvc@1.0.3 from lock file
+18:40:25.413 npm error Missing: @rolldown/binding-win32-x64-msvc@1.0.3 from lock file
+18:40:25.413 npm error Missing: @emnapi/core@1.10.0 from lock file
+18:40:25.413 npm error Missing: @emnapi/runtime@1.10.0 from lock file
+18:40:25.413 npm error Missing: @napi-rs/wasm-runtime@1.1.4 from lock file
+18:40:25.413 npm error Missing: @emnapi/wasi-threads@1.2.1 from lock file
+18:40:25.414 npm error Missing: @tybys/wasm-util@0.10.2 from lock file
+18:40:25.414 npm error Missing: @esbuild/aix-ppc64@0.28.0 from lock file
+18:40:25.414 npm error Missing: @esbuild/android-arm@0.28.0 from lock file
+18:40:25.414 npm error Missing: @esbuild/android-arm64@0.28.0 from lock file
+18:40:25.414 npm error Missing: @esbuild/android-x64@0.28.0 from lock file
+18:40:25.414 npm error Missing: @esbuild/darwin-arm64@0.28.0 from lock file
+18:40:25.415 npm error Missing: @esbuild/darwin-x64@0.28.0 from lock file
+18:40:25.415 npm error Missing: @esbuild/freebsd-arm64@0.28.0 from lock file
+18:40:25.415 npm error Missing: @esbuild/freebsd-x64@0.28.0 from lock file
+18:40:25.415 npm error Missing: @esbuild/linux-arm@0.28.0 from lock file
+18:40:25.415 npm error Missing: @esbuild/linux-arm64@0.28.0 from lock file
+18:40:25.422 npm error Missing: @esbuild/linux-ia32@0.28.0 from lock file
+18:40:25.422 npm error Missing: @esbuild/linux-loong64@0.28.0 from lock file
+18:40:25.422 npm error Missing: @esbuild/linux-mips64el@0.28.0 from lock file
+18:40:25.422 npm error Missing: @esbuild/linux-ppc64@0.28.0 from lock file
+18:40:25.423 npm error Missing: @esbuild/linux-riscv64@0.28.0 from lock file
+18:40:25.423 npm error Missing: @esbuild/linux-s390x@0.28.0 from lock file
+18:40:25.423 npm error Missing: @esbuild/netbsd-arm64@0.28.0 from lock file
+18:40:25.423 npm error Missing: @esbuild/netbsd-x64@0.28.0 from lock file
+18:40:25.424 npm error Missing: @esbuild/openbsd-arm64@0.28.0 from lock file
+18:40:25.424 npm error Missing: @esbuild/openbsd-x64@0.28.0 from lock file
+18:40:25.424 npm error Missing: @esbuild/openharmony-arm64@0.28.0 from lock file
+18:40:25.424 npm error Missing: @esbuild/sunos-x64@0.28.0 from lock file
+18:40:25.425 npm error Missing: @esbuild/win32-arm64@0.28.0 from lock file
+18:40:25.425 npm error Missing: @esbuild/win32-ia32@0.28.0 from lock file
+18:40:25.425 npm error Missing: @esbuild/win32-x64@0.28.0 from lock file
+18:40:25.425 npm error
+18:40:25.426 npm error Clean install a project
+18:40:25.426 npm error
+18:40:25.426 npm error Usage:
+18:40:25.426 npm error npm ci
+18:40:25.426 npm error
+18:40:25.427 npm error Options:
+18:40:25.427 npm error [--install-strategy <hoisted|nested|shallow|linked>] [--legacy-bundling]
+18:40:25.427 npm error [--global-style] [--omit <dev|optional|peer> [--omit <dev|optional|peer> ...]]
+18:40:25.427 npm error [--include <prod|dev|optional|peer> [--include <prod|dev|optional|peer> ...]]
+18:40:25.427 npm error [--strict-peer-deps] [--foreground-scripts] [--ignore-scripts]
+18:40:25.428 npm error [--allow-git <all|none|root>] [--no-audit] [--no-bin-links] [--no-fund]
+18:40:25.428 npm error [--dry-run]
+18:40:25.428 npm error [-w|--workspace <workspace-name> [-w|--workspace <workspace-name> ...]]
+18:40:25.428 npm error [--workspaces] [--include-workspace-root] [--install-links]
+18:40:25.428 npm error
+18:40:25.429 npm error   --install-strategy
+18:40:25.429 npm error     Sets the strategy for installing packages in node_modules.
+18:40:25.429 npm error
+18:40:25.429 npm error   --legacy-bundling
+18:40:25.429 npm error     Instead of hoisting package installs in `node_modules`, install packages
+18:40:25.430 npm error
+18:40:25.430 npm error   --global-style
+18:40:25.430 npm error     Only install direct dependencies in the top level `node_modules`,
+18:40:25.430 npm error
+18:40:25.430 npm error   --omit
+18:40:25.430 npm error     Dependency types to omit from the installation tree on disk.
+18:40:25.431 npm error
+18:40:25.431 npm error   --include
+18:40:25.431 npm error     Option that allows for defining which types of dependencies to install.
+18:40:25.431 npm error
+18:40:25.431 npm error   --strict-peer-deps
+18:40:25.432 npm error     If set to `true`, and `--legacy-peer-deps` is not set, then _any_
+18:40:25.432 npm error
+18:40:25.432 npm error   --foreground-scripts
+18:40:25.432 npm error     Run all build scripts (ie, `preinstall`, `install`, and
+18:40:25.432 npm error
+18:40:25.432 npm error   --ignore-scripts
+18:40:25.432 npm error     If true, npm does not run scripts specified in package.json files.
+18:40:25.432 npm error
+18:40:25.433 npm error   --allow-git
+18:40:25.433 npm error     Limits the ability for npm to fetch dependencies from git references.
+18:40:25.433 npm error
+18:40:25.433 npm error   --audit
+18:40:25.433 npm error     When "true" submit audit reports alongside the current npm command to the
+18:40:25.433 npm error
+18:40:25.433 npm error   --bin-links
+18:40:25.433 npm error     Tells npm to create symlinks (or `.cmd` shims on Windows) for package
+18:40:25.433 npm error
+18:40:25.434 npm error   --fund
+18:40:25.434 npm error     When "true" displays the message at the end of each `npm install`
+18:40:25.434 npm error
+18:40:25.434 npm error   --dry-run
+18:40:25.434 npm error     Indicates that you don't want npm to make any changes and that it should
+18:40:25.434 npm error
+18:40:25.434 npm error   -w|--workspace
+18:40:25.434 npm error     Enable running a command in the context of the configured workspaces of the
+18:40:25.434 npm error
+18:40:25.434 npm error   --workspaces
+18:40:25.434 npm error     Set to true to run the command in the context of **all** configured
+18:40:25.435 npm error
+18:40:25.435 npm error   --include-workspace-root
+18:40:25.435 npm error     Include the workspace root when workspaces are enabled for a command.
+18:40:25.435 npm error
+18:40:25.435 npm error   --install-links
+18:40:25.435 npm error     When set file: protocol dependencies will be packed and installed as
+18:40:25.435 npm error
+18:40:25.436 npm error
+18:40:25.436 npm error aliases: clean-install, ic, install-clean, isntall-clean
+18:40:25.436 npm error
+18:40:25.436 npm error Run "npm help ci" for more info
+18:40:25.440 npm error A complete log of this run can be found in: /vercel/.npm/_logs/2026-06-05T15_40_19_858Z-debug-0.log
+18:40:25.449 Error: Command "npm ci --no-fund --no-audit" exited with 1
