@@ -3,6 +3,7 @@
  *
  * Server-side ATS PDF generation via Puppeteer.
  * Accepts CV data + options, returns a binary PDF.
+ * Auth is optional — unauthenticated users can still export (download log skipped).
  *
  * Body:
  *   { cvData, options: { templateId, isRTL, theme, visibleSections,
@@ -16,8 +17,8 @@ import { generatePdfFromHtml } from "../_lib/puppeteerPdf.js";
 export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).end();
 
+  // Auth is optional for PDF generation — we only use it to log the download
   const user = getUserFromReq(req);
-  if (!user?.userId) return res.status(401).json({ message: "غير مصادق" });
 
   try {
     const { cvData, options = {} } = req.body || {};

@@ -37,7 +37,7 @@ function makeRes(res: any) {
     _headers: {} as Record<string, string>,
     status(code: number) { r.statusCode = code; res.status(code); return r; },
     json(data: any) { res.status(r.statusCode).json(data); },
-    end() { res.status(r.statusCode).end(); },
+    end(data?: any) { data !== undefined ? res.status(r.statusCode).end(data) : res.status(r.statusCode).end(); },
     setHeader(k: string, v: string) { r._headers[k] = v; res.setHeader(k, v); return r; },
     send(data: any) { res.status(r.statusCode).send(data); },
   };
