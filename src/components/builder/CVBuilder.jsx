@@ -7,7 +7,6 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
-import { isATSTemplate, generateATSPdf, generateStyledPdf } from '../../utils/atsPdfExport';
 
 
 const OverviewIcon = () => (
@@ -213,45 +212,63 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
     try {
-      // ── ATS templates → real text-based PDF (fully selectable) ───────────
-      if (isATSTemplate(selectedTemplate)) {
-        const doc     = await generateATSPdf(cvData, {
-          isRTL,
-          visibleSections,
-          visiblePersonalFields,
-          sectionOrder,
-          sectionNames,
-        });
-        const pdfBlob = doc.output('blob');
-        const name    = cvData.personalInfo?.fullName || 'Resume';
-        const blobUrl = URL.createObjectURL(pdfBlob);
-        const anchor  = document.createElement('a');
-        anchor.href     = blobUrl;
-        anchor.download = `${name} - CV.pdf`;
-        document.body.appendChild(anchor);
-        anchor.click();
-        document.body.removeChild(anchor);
-        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
-        if (currentCVId) {
-          apiFetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
-        }
-        return;
+      const { jsPDF }   = await import('jspdf');
+      const html2canvas = (await import('html2canvas')).default;
+
+      const captureEl   = breakDataRef.current?.captureEl;
+      if (!captureEl) throw new Error('Preview element not ready');
+
+      const breaks      = breakDataRef.current?.breaks ?? [];
+      const totalHeight = breakDataRef.current?.totalHeight ?? PAGE_H_PX;
+
+      // Render at 3× for crisp high-DPI output
+      const SCALE    = 3;
+      const PAGE_W_PX = 794;
+      const PAGE_H_PX_CONST = 1122;
+
+      const fullCanvas = await html2canvas(captureEl, {
+        scale:           SCALE,
+        useCORS:         true,
+        allowTaint:      true,
+        backgroundColor: '#ffffff',
+        width:           PAGE_W_PX,
+        height:          totalHeight,
+        scrollX:         0,
+        scrollY:         0,
+        logging:         false,
+      });
+
+      // Page slice boundaries (in unscaled px)
+      const pageStarts = [0, ...breaks];
+      const pageEnds   = [...breaks, totalHeight];
+
+      const PAGE_W_MM = 210;
+      const PAGE_H_MM = 297;
+
+      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
+
+      for (let i = 0; i < pageStarts.length; i++) {
+        if (i > 0) doc.addPage();
+
+        const srcY = Math.round(pageStarts[i] * SCALE);
+        const srcH = Math.round((pageEnds[i] - pageStarts[i]) * SCALE);
+        const srcW = Math.round(PAGE_W_PX * SCALE);
+
+        // Slice canvas for this page
+        const pageCanvas = document.createElement('canvas');
+        pageCanvas.width  = srcW;
+        pageCanvas.height = Math.round(PAGE_H_PX_CONST * SCALE);
+        const ctx = pageCanvas.getContext('2d');
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
+        ctx.drawImage(fullCanvas, 0, srcY, srcW, srcH, 0, 0, srcW, srcH);
+
+        const imgData = pageCanvas.toDataURL('image/jpeg', 0.97);
+        doc.addImage(imgData, 'JPEG', 0, 0, PAGE_W_MM, PAGE_H_MM);
       }
 
-      // ── Styled text-based PDF (all non-ATS templates) ────────────────────
-      // Generates a real text PDF (no images) with a coloured header band
-      // matching the template's primary colour. Text is fully selectable,
-      // copyable and searchable — direct download, no print dialog.
-      const doc = await generateStyledPdf(cvData, {
-        isRTL,
-        visibleSections,
-        visiblePersonalFields,
-        sectionOrder,
-        sectionNames,
-        accentColor: theme?.primaryColor || '#4f46e5',
-      });
-      const pdfBlob = doc.output('blob');
       const name    = cvData.personalInfo?.fullName || 'Resume';
+      const pdfBlob = doc.output('blob');
       const blobUrl = URL.createObjectURL(pdfBlob);
       const anchor  = document.createElement('a');
       anchor.href     = blobUrl;
