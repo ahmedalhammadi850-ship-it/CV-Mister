@@ -5,7 +5,6 @@
   "installCommand": "cp package.vercel.json package.json && rm -f package-lock.json && npm install --legacy-peer-deps",
   "framework": null,
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
