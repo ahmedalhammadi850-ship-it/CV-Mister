@@ -1,0 +1,42 @@
+08:29:25.167 Running build in Washington, D.C., USA (East) – iad1
+08:29:25.168 Build machine configuration: 2 cores, 8 GB
+08:29:25.180 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: 14d2f56)
+08:29:25.181 Skipping build cache, deployment was triggered without cache.
+08:29:31.720 Cloning completed: 6.540s
+08:29:32.012 Running "vercel build"
+08:29:32.034 Vercel CLI 54.9.0
+08:29:32.905 Running "install" command: `npm install --no-fund --no-audit`...
+08:29:42.184 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+08:29:43.223 npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+08:29:43.666 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+08:29:43.681 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+08:29:43.687 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+08:29:50.412 
+08:29:50.413 added 612 packages in 17s
+08:29:51.385 
+08:29:51.386 > cv-mister@0.0.0 build
+08:29:51.387 > npx vite build
+08:29:51.387 
+08:29:51.897 vite v8.0.16 building client environment for production...
+08:29:53.064 transforming...✓ 332 modules transformed.
+08:29:53.233 rendering chunks...
+08:29:53.513 computing gzip size...
+08:29:53.535 dist/index.html                             2.88 kB │ gzip:   1.27 kB
+08:29:53.536 dist/assets/index-Dtf3RM-h.css            153.49 kB │ gzip:  24.28 kB
+08:29:53.536 dist/assets/rolldown-runtime-QTnfLwEv.js    0.69 kB │ gzip:   0.42 kB
+08:29:53.536 dist/assets/purify.es-6-uFcs4-.js          24.94 kB │ gzip:   9.78 kB
+08:29:53.536 dist/assets/index.es-Dkv4zxFR.js          151.42 kB │ gzip:  48.90 kB
+08:29:53.536 dist/assets/react-vendor-CaWmUrn3.js      230.61 kB │ gzip:  73.85 kB
+08:29:53.537 dist/assets/firebase-vendor-DnRer91N.js   278.69 kB │ gzip:  85.37 kB
+08:29:53.537 dist/assets/pdf-vendor-KSnl9ErW.js        614.15 kB │ gzip: 181.90 kB
+08:29:53.537 dist/assets/index-BHeBPXCS.js             881.73 kB │ gzip: 136.46 kB
+08:29:53.537 
+08:29:53.537 ✓ built in 1.64s
+08:29:53.619 Installing dependencies...
+08:29:54.576 
+08:29:54.577 up to date in 890ms
+08:29:54.577 
+08:29:54.578 102 packages are looking for funding
+08:29:54.578   run `npm fund` for details
+08:31:03.103 Build Completed in /vercel/output [2m]
+08:31:05.475 Deploying outputs...
