@@ -1,2 +1,3 @@
 - [Firebase Direct Migration](firebase-migration.md) — frontend now talks to Firebase SDK directly; no Express backend calls from the browser.
-- [PDF Export approach](pdf-export-approach.md) — all templates use real text-based jsPDF (no images, no window.print). ATS: generateATSPdf. Non-ATS: generateStyledPdf with coloured header band.
+- [PDF Export approach](pdf-export-approach.md) — capture layer uses html-to-image (not html2canvas); Tailwind v4 Constructable Stylesheets are invisible to html2canvas causing blank PDFs.
+- [Vite 8 Node.js requirement](vite8-node-requirement.md) — Vite 8 requires Node >=20.19.0 or >=22.12.0; set engines in package.json and .node-version to 22 for Vercel compatibility.
