@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { apiFetch } from '../../utils/api';
 import { useAuth } from '../../context/AuthContext';
 
 const AI_ACTIONS = [
@@ -110,14 +109,17 @@ export default function AITextarea({
     }
     setLoading(key);
     try {
-      const res = await apiFetch('/api/ai/rewrite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: value, action: key, language: isRTL ? 'ar' : 'en' }),
-      });
+      const webhookUrl = import.meta.env.VITE_N8N_AI_WEBHOOK_URL;
+      const res = webhookUrl
+        ? await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: value, action: key, language: isRTL ? 'ar' : 'en' }),
+          })
+        : null;
 
       let result = null;
-      if (res.ok) {
+      if (res?.ok) {
         try {
           const data = await res.json();
           if (typeof data === 'string') result = data;

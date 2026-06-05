@@ -1,0 +1,1 @@
+- [Firebase Direct Migration](firebase-migration.md) — frontend now talks to Firebase SDK directly; no Express backend calls from the browser.

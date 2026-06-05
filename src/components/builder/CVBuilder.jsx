@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { apiFetch } from '../../utils/api';
+import { incrementCVDownload } from '../../lib/firestore';
 import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { useCV } from '../../context/useCV';
@@ -678,9 +678,7 @@ const CVBuilder = () => {
       setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
 
       if (currentCVId) {
-        apiFetch(`/api/cvs/${currentCVId}/download`, {
-          method: 'POST', credentials: 'include',
-        }).catch(() => {});
+        incrementCVDownload(currentCVId);
       }
     } catch (err) {
       console.error('PDF export failed:', err);

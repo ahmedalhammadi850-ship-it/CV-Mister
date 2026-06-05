@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback } from 'react';
-import { apiFetch } from '../utils/api';
+import { submitBusinessContact } from '../lib/firestore';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -72,22 +72,20 @@ const BusinessContactPage = () => {
       const reader = new FileReader();
       reader.onload = async (e) => {
         const base64 = e.target.result;
-        const res = await apiFetch('/api/business-contact', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
+        try {
+          await submitBusinessContact(currentUser.uid, {
             name: currentUser.displayName || currentUser.name,
             email: currentUser.email,
             company: 'business',
             receiptImage: base64,
             plan: 'business',
             amount: 15,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok) { setError(data.message || 'حدث خطأ'); setLoading(false); return; }
-        setDone(true);
+          });
+          setDone(true);
+        } catch (err) {
+          setError(err.message || 'حدث خطأ');
+          setLoading(false);
+        }
       };
       reader.readAsDataURL(file);
     } catch {

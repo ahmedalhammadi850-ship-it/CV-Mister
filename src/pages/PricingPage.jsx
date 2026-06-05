@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { apiFetch } from '../utils/api';
+import { getPricing } from '../lib/firestore';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 
@@ -90,18 +90,14 @@ const PricingPage = () => {
   });
 
   useEffect(() => {
-    const controller = new AbortController();
-    const tid = setTimeout(() => controller.abort(), 8000);
-    apiFetch('/api/pricing', { signal: controller.signal })
-      .then(r => r.ok ? r.json() : null)
+    getPricing()
       .then(data => {
         if (data) {
           try { localStorage.setItem('cv_pricing', JSON.stringify(data)); } catch {}
           setPricing({ ...DEFAULTS, ...data });
         }
       })
-      .catch(() => {})
-      .finally(() => clearTimeout(tid));
+      .catch(() => {});
   }, []);
 
   const plans = [

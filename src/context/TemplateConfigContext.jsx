@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { apiFetch } from '../utils/api';
+import { getTemplateConfig } from '../lib/firestore';
 
 const TemplateConfigContext = createContext({ freeTemplates: new Set(['minimal']), loading: true, refresh: () => {} });
 
@@ -9,9 +9,7 @@ export const TemplateConfigProvider = ({ children }) => {
 
   const refresh = async () => {
     try {
-      const res = await apiFetch('/api/templates/config');
-      if (!res.ok) return;
-      const config = await res.json();
+      const config  = await getTemplateConfig();
       const freeSet = new Set(Object.entries(config).filter(([, v]) => v).map(([k]) => k));
       setFreeTemplates(freeSet);
     } catch {
