@@ -224,12 +224,32 @@ const CVBuilder = () => {
     window.addEventListener('beforeunload', _onBeforeUnload);
 
     try {
-      // All templates use the screenshot-based approach so the PDF matches
-      // the visual preview exactly. The DOM-extracted invisible text layer
-      // (added after the image pages) ensures text is fully selectable and
-      // ATS-parsable — same benefit as the old native-text path.
+      // ── ATS templates → real text-based PDF (fully selectable) ───────────
+      if (isATSTemplate(selectedTemplate)) {
+        const doc     = await generateATSPdf(cvData, {
+          isRTL,
+          visibleSections,
+          visiblePersonalFields,
+          sectionOrder,
+          sectionNames,
+        });
+        const pdfBlob = doc.output('blob');
+        const name    = cvData.personalInfo?.fullName || 'Resume';
+        const blobUrl = URL.createObjectURL(pdfBlob);
+        const anchor  = document.createElement('a');
+        anchor.href     = blobUrl;
+        anchor.download = `${name} - CV.pdf`;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+        if (currentCVId) {
+          apiFetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
+        }
+        return;
+      }
 
-      // ── Screenshot-based PDF (all templates) ─────────────────────────────
+      // ── Screenshot-based PDF (all non-ATS templates) ──────────────────────
       const [{ toPng }, { jsPDF }] = await Promise.all([
         import('html-to-image'),
         import('jspdf'),
