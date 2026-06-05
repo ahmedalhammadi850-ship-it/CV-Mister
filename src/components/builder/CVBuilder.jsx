@@ -232,23 +232,22 @@ const CVBuilder = () => {
       const PAGE_H_MM   = 297;
       const PIXEL_RATIO = 2;     // 2× = crisp retina output
 
-      // ── 1. Visual capture via html2canvas ────────────────────────────────
-      // html2canvas traverses the DOM and draws directly to canvas without
-      // going through SVG/data-URL, which is what was causing blank output.
-      //
-      // html2canvas doesn't parse oklch/lab/lch colors, so we pre-convert
-      // them to rgb using the Canvas 2D fillStyle trick (the browser does
-      // the conversion for us when we set fillStyle and read getImageData).
+      // ── 1. Visual capture via html2canvas + getComputedStyle patch ───────
+      // html2canvas doesn't understand oklch/oklab colors. It calls
+      // getComputedStyle() on each element and crashes when it sees oklch.
+      // Fix: temporarily monkey-patch window.getComputedStyle so that any
+      // oklch value is converted to rgb before html2canvas reads it.
+      // The Canvas 2D fillStyle trick lets the browser do the conversion.
 
-      // ── 1a. Color converter helper ────────────────────────────────────────
+      // ── 1a. Color converter using Canvas fillStyle ─────────────────────
       const colorProxy = document.createElement('canvas');
       colorProxy.width = 1; colorProxy.height = 1;
-      const colorCtx = colorProxy.getContext('2d');
+      const colorCtx   = colorProxy.getContext('2d');
+      const oklchRE    = /oklch\s*\([^)]*\)|oklab\s*\([^)]*\)|color\s*\([^)]+\)/gi;
       function toRgb(cssColor) {
-        if (!cssColor || cssColor === 'transparent' || cssColor === 'none') return cssColor;
         try {
           colorCtx.clearRect(0, 0, 1, 1);
-          colorCtx.fillStyle = '#000'; // reset
+          colorCtx.fillStyle = '#000';
           colorCtx.fillStyle = cssColor;
           colorCtx.fillRect(0, 0, 1, 1);
           const [r, g, b, a] = colorCtx.getImageData(0, 0, 1, 1).data;
@@ -256,13 +255,36 @@ const CVBuilder = () => {
           return a === 255 ? `rgb(${r},${g},${b})` : `rgba(${r},${g},${b},${+(a/255).toFixed(3)})`;
         } catch { return cssColor; }
       }
+      function patchColorValue(val) {
+        if (typeof val !== 'string' || !val.includes('oklch') && !val.includes('oklab') && !val.includes('color(')) return val;
+        return val.replace(oklchRE, match => toRgb(match));
+      }
 
-      // ── 1b. Walk clone, inline computed styles, fix oklch colors ─────────
+      // ── 1b. Patch getComputedStyle to intercept oklch before html2canvas ─
+      const _origGCS = window.getComputedStyle.bind(window);
+      window.getComputedStyle = (el, pseudo) => {
+        const cs = _origGCS(el, pseudo);
+        return new Proxy(cs, {
+          get(target, prop) {
+            const val = target[prop];
+            if (typeof val === 'function') {
+              // Wrap methods too so getPropertyValue() results are also patched
+              return function(...args) {
+                const result = val.apply(target, args);
+                return patchColorValue(result);
+              };
+            }
+            return patchColorValue(val);
+          },
+        });
+      };
+
+      // ── 1c. Place clone off-screen for html2canvas to read ─────────────
       screenClone = captureEl.cloneNode(true);
       Object.assign(screenClone.style, {
         position:      'fixed',
         top:           '0px',
-        left:          '-9999px',   // off-screen so user never sees it
+        left:          '-9999px',
         width:         `${CONTENT_W}px`,
         height:        `${totalHeight}px`,
         zIndex:        '999999',
@@ -270,30 +292,6 @@ const CVBuilder = () => {
         overflow:      'visible',
       });
       document.body.appendChild(screenClone);
-
-      // Collect original elements in source order to pair with clones
-      const srcEls   = Array.from(captureEl.querySelectorAll('*'));
-      const cloneEls = Array.from(screenClone.querySelectorAll('*'));
-
-      const COLOR_PROPS = [
-        'color', 'backgroundColor',
-        'borderTopColor', 'borderRightColor', 'borderBottomColor', 'borderLeftColor',
-        'outlineColor', 'textDecorationColor', 'caretColor',
-      ];
-
-      srcEls.forEach((src, i) => {
-        const clone = cloneEls[i];
-        if (!clone) return;
-        const cs = getComputedStyle(src);
-        for (const prop of COLOR_PROPS) {
-          const val = cs[prop];
-          if (val && (val.includes('oklch') || val.includes('oklab') || val.includes('color('))) {
-            clone.style[prop] = toRgb(val);
-          }
-        }
-      });
-
-      // Two rAF to let the browser lay out the clone
       await new Promise(r => requestAnimationFrame(r));
       await new Promise(r => requestAnimationFrame(r));
 
@@ -308,13 +306,12 @@ const CVBuilder = () => {
           height:          totalHeight,
           windowWidth:     CONTENT_W,
           windowHeight:    totalHeight,
-          x:               0,
-          y:               0,
           scrollX:         0,
           scrollY:         0,
           logging:         false,
         });
       } finally {
+        window.getComputedStyle = _origGCS;  // always restore original
         if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} screenClone = null; }
       }
 
@@ -454,7 +451,6 @@ const CVBuilder = () => {
           : 'PDF export failed: ' + err.message);
       }
     } finally {
-      if (overlay)     { try { document.body.removeChild(overlay);     } catch (_) {} }
       if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} }
       if (textClone)   { try { document.body.removeChild(textClone);   } catch (_) {} }
       setIsPrinting(false);
