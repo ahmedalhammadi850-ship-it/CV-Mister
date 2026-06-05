@@ -2,7 +2,7 @@ import { getUserFromReq } from "./_lib/token.js";
 import { getDb } from "./_lib/firebase.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   try {
     const { name, email, company, teamSize, message, receiptImage, plan, amount } = req.body || {};
     if (!receiptImage) return res.status(400).json({ message: "صورة الحوالة مطلوبة" });

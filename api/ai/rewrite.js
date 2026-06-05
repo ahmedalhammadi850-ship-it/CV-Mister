@@ -1,7 +1,7 @@
 import { getN8nSettings } from "../_lib/n8nSettings.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   const { text, action, language } = req.body || {};
   if (!text || !action) return res.status(400).json({ message: "text and action are required" });
 

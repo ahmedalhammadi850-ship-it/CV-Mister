@@ -2,7 +2,7 @@ import { verifyFirebaseToken, getDb } from "../_lib/firebase.js";
 import { setUserCookie } from "../_lib/token.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   try {
     const { idToken } = req.body || {};
     if (!idToken) return res.status(400).json({ message: "Missing idToken" });

@@ -189,7 +189,8 @@ const UpgradePage = () => {
           sendToWebhook(base64, currentUser),
         ]);
 
-        const data = await res.json();
+        let data = {};
+        try { data = await res.json(); } catch { /* empty or non-JSON body */ }
         if (!res.ok) {
           const remaining = data.remaining || 30;
           if (res.status === 429) { startCooldown(remaining); }

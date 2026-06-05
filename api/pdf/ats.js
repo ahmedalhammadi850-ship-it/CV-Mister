@@ -15,7 +15,7 @@ import { buildAtsHtml   } from "../_lib/atsHtmlTemplate.js";
 import { generatePdfFromHtml } from "../_lib/puppeteerPdf.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
 
   // Auth is optional for PDF generation — we only use it to log the download
   const user = getUserFromReq(req);

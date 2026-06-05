@@ -4,7 +4,7 @@ import { getDb } from "../_lib/firebase.js";
 const cooldowns = new Map();
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   const payload = getUserFromReq(req);
   if (!payload?.userId) return res.status(401).json({ message: "غير مصادق" });
   const uid = payload.userId;

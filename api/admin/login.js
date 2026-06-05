@@ -3,7 +3,7 @@ import { getDb } from "../_lib/firebase.js";
 import { setAdminCookie } from "../_lib/token.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   try {
     const { username, password } = req.body || {};
     if (!username || !password) return res.status(400).json({ message: "اسم المستخدم وكلمة المرور مطلوبان" });

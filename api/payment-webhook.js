@@ -1,7 +1,7 @@
 import { getN8nSettings } from "./_lib/n8nSettings.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return res.status(405).end();
+  if (req.method !== "POST") return res.status(405).json({ message: "Method not allowed" });
   const settings = await getN8nSettings();
   const webhookUrl = settings.N8N_PAYMENT_WEBHOOK_URL;
   if (!webhookUrl) return res.json({ success: false });
