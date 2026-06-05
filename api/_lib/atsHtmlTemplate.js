@@ -12,10 +12,32 @@
  *  - Theme-aware: primaryColor, fontSize, pagePadding, lineHeight, sectionSpacing
  */
 
+import { readFileSync } from "fs";
+
 // ── Font cache ─────────────────────────────────────────────────────────────────
 let _arabicFontB64 = null;
 let _arabicFontFetching = false;
 let _arabicFontWaiters = [];
+
+// Latin font (DejaVu Sans) — read once from the Nix system at startup so
+// Chromium always has a real embedded font (Type2/CIDFont) instead of
+// converting glyphs to bezier paths (Type3), which makes text unselectable.
+let _latinFontRegularB64 = null;
+let _latinFontBoldB64    = null;
+
+function loadLatinFonts() {
+  if (_latinFontRegularB64) return; // already loaded
+  try {
+    _latinFontRegularB64 = readFileSync(
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    ).toString("base64");
+    _latinFontBoldB64 = readFileSync(
+      "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
+    ).toString("base64");
+  } catch (e) {
+    console.warn("[atsHtmlTemplate] Latin font load failed:", e.message);
+  }
+}
 
 async function fetchArabicFontBase64() {
   // Return cached
@@ -383,8 +405,11 @@ export async function buildAtsHtml(cvData, options = {}) {
   const resolvedHeaderAlign = (isRTL && headerAlign === "left") ? "right" : headerAlign;
   const resolvedHeadAlign   = isRTL ? "right" : "left";
 
-  // Arabic font embedding
+  // Font embedding — always embed a real font so Chromium outputs Type2/CIDFont
+  // in the PDF (selectable text) instead of converting glyphs to bezier paths
+  // (Type3, which looks identical but cannot be selected or copied).
   let fontFaceBlock = "";
+
   if (isRTL) {
     const b64 = await fetchArabicFontBase64();
     if (b64) {
@@ -393,26 +418,57 @@ export async function buildAtsHtml(cvData, options = {}) {
       font-family: 'Noto Naskh Arabic';
       font-style: normal;
       font-weight: 400;
-      src: url('data:font/woff2;base64,${b64}') format('woff2');
+      src: url('data:font/ttf;base64,${b64}') format('truetype');
     }
     @font-face {
       font-family: 'Noto Naskh Arabic';
       font-style: normal;
       font-weight: 600;
-      src: url('data:font/woff2;base64,${b64}') format('woff2');
+      src: url('data:font/ttf;base64,${b64}') format('truetype');
     }
     @font-face {
       font-family: 'Noto Naskh Arabic';
       font-style: normal;
       font-weight: 700;
-      src: url('data:font/woff2;base64,${b64}') format('woff2');
+      src: url('data:font/ttf;base64,${b64}') format('truetype');
+    }`;
+    }
+  } else {
+    // Latin — embed DejaVu Sans (always present on Nix) as a real TTF so
+    // Chromium/Puppeteer writes proper embedded text to the PDF.
+    loadLatinFonts();
+    if (_latinFontRegularB64) {
+      fontFaceBlock = `
+    @font-face {
+      font-family: 'CVFont';
+      font-style: normal;
+      font-weight: 400;
+      src: url('data:font/ttf;base64,${_latinFontRegularB64}') format('truetype');
+    }
+    @font-face {
+      font-family: 'CVFont';
+      font-style: normal;
+      font-weight: 600;
+      src: url('data:font/ttf;base64,${_latinFontBoldB64 || _latinFontRegularB64}') format('truetype');
+    }
+    @font-face {
+      font-family: 'CVFont';
+      font-style: normal;
+      font-weight: 700;
+      src: url('data:font/ttf;base64,${_latinFontBoldB64 || _latinFontRegularB64}') format('truetype');
+    }
+    @font-face {
+      font-family: 'CVFont';
+      font-style: normal;
+      font-weight: 800;
+      src: url('data:font/ttf;base64,${_latinFontBoldB64 || _latinFontRegularB64}') format('truetype');
     }`;
     }
   }
 
   const effectiveFontFamily = isRTL
-    ? `'Noto Naskh Arabic', 'Arial', sans-serif`
-    : `'${fontFam}', 'Helvetica Neue', Arial, sans-serif`;
+    ? `'Noto Naskh Arabic', sans-serif`
+    : (_latinFontRegularB64 ? `'CVFont', 'DejaVu Sans', sans-serif` : `'${fontFam}', sans-serif`);
 
   const pi          = cvData?.personalInfo ?? {};
   const contactLine = buildContactLine(pi, visiblePersonalFields, isRTL);
