@@ -64,6 +64,5 @@
   "optionalDependencies": {
     "puppeteer-core": "^24.43.1"
   },
-  "_buildDate": "2026-06-05",
-  "_deployTrigger": "2026-06-05T20:09"
+  "_buildDate": "2026-06-05"
 }
