@@ -212,8 +212,10 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
 
-    // Temporary clone used for reliable text-rect extraction (off-screen but laid out)
-    let textClone = null;
+    // Temporary nodes added to document.body — cleaned up in finally
+    let screenClone = null;   // on-screen clone for visual capture
+    let textClone   = null;   // off-screen clone for text-rect extraction
+    let overlay     = null;   // white overlay that hides screenClone from user
 
     try {
       const { jsPDF }    = await import('jspdf');
@@ -232,30 +234,45 @@ const CVBuilder = () => {
       const PIXEL_RATIO = 2;     // 2× = crisp retina output
 
       // ── 1. Visual capture ─────────────────────────────────────────────────
-      // html-to-image handles modern CSS (oklch, lch, lab, etc.) that
-      // html2canvas cannot parse.
-      // We temporarily move captureEl to position:fixed so the browser
-      // fully renders backgrounds/gradients (off-screen absolute elements
-      // are often paint-optimized away, producing a blank canvas).
-      const prevPosition   = captureEl.style.position;
-      const prevTop        = captureEl.style.top;
-      const prevLeft       = captureEl.style.left;
-      const prevVisibility = captureEl.style.visibility;
-      const prevZIndex     = captureEl.style.zIndex;
-      Object.assign(captureEl.style, {
+      // Strategy: clone the element fully on-screen (browsers only paint what
+      // is inside the viewport bounds), hidden from the user by a white overlay.
+      // Off-screen elements (top/left: -9999px) are paint-optimized away →
+      // blank canvas. On-screen elements behind an overlay are fully painted.
+
+      // White overlay — sits above the whole UI so the user sees nothing
+      overlay = document.createElement('div');
+      Object.assign(overlay.style, {
         position:   'fixed',
-        top:        '0px',
-        left:       '-9999px',
-        visibility: 'hidden',
-        zIndex:     '-1',
+        inset:      '0',
+        background: '#ffffff',
+        zIndex:     '999998',
+        pointerEvents: 'none',
       });
-      // Two rAF ticks so the browser lays out and paints the element
+      document.body.appendChild(overlay);
+
+      // Clone placed fully on-screen at z-index below the overlay
+      screenClone = captureEl.cloneNode(true);
+      Object.assign(screenClone.style, {
+        position:      'fixed',
+        top:           '0px',
+        left:          '0px',
+        width:         `${CONTENT_W}px`,
+        height:        `${totalHeight}px`,
+        zIndex:        '999997',
+        pointerEvents: 'none',
+        overflow:      'visible',
+      });
+      document.body.appendChild(screenClone);
+
+      // Four rAF ticks — browser must fully lay out and paint before capture
+      await new Promise(r => requestAnimationFrame(r));
+      await new Promise(r => requestAnimationFrame(r));
       await new Promise(r => requestAnimationFrame(r));
       await new Promise(r => requestAnimationFrame(r));
 
       let fullCanvas;
       try {
-        fullCanvas = await toCanvas(captureEl, {
+        fullCanvas = await toCanvas(screenClone, {
           pixelRatio:      PIXEL_RATIO,
           backgroundColor: '#ffffff',
           width:           CONTENT_W,
@@ -264,25 +281,17 @@ const CVBuilder = () => {
           cacheBust:       false,
         });
       } finally {
-        // Restore original styles regardless of success or failure
-        Object.assign(captureEl.style, {
-          position:   prevPosition,
-          top:        prevTop,
-          left:       prevLeft,
-          visibility: prevVisibility,
-          zIndex:     prevZIndex,
-        });
+        if (overlay)      { try { document.body.removeChild(overlay);      } catch (_) {} overlay      = null; }
+        if (screenClone)  { try { document.body.removeChild(screenClone);  } catch (_) {} screenClone  = null; }
       }
 
-      // ── 2. Visible clone for accurate text-rect extraction ────────────────
-      // The original captureEl sits at top:-9999px which makes getClientRects()
-      // unreliable in some browsers. A fixed clone at left:-9999px (y=0)
-      // gives a proper layout while staying invisible to the user.
+      // ── 2. Off-screen clone for accurate text-rect extraction ─────────────
+      // Uses visibility:hidden (not display:none) so getClientRects() works.
       textClone = captureEl.cloneNode(true);
       Object.assign(textClone.style, {
         position:      'fixed',
         top:           '0px',
-        left:          '-9999px',
+        left:          '0px',
         width:         `${CONTENT_W}px`,
         height:        `${totalHeight}px`,
         overflow:      'visible',
@@ -399,9 +408,9 @@ const CVBuilder = () => {
         ? 'فشل تصدير PDF. حاول مرة أخرى.'
         : 'PDF export failed. Please try again.');
     } finally {
-      if (textClone) {
-        try { document.body.removeChild(textClone); } catch (_) {}
-      }
+      if (overlay)     { try { document.body.removeChild(overlay);     } catch (_) {} }
+      if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} }
+      if (textClone)   { try { document.body.removeChild(textClone);   } catch (_) {} }
       setIsPrinting(false);
     }
   };
