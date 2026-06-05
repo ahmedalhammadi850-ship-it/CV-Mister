@@ -213,7 +213,7 @@ const CVBuilder = () => {
     setIsPrinting(true);
     try {
       const { jsPDF }   = await import('jspdf');
-      const html2canvas = (await import('html2canvas')).default;
+      const { toCanvas } = await import('html-to-image');
 
       const captureEl   = breakDataRef.current?.captureEl;
       if (!captureEl) throw new Error('Preview element not ready');
@@ -221,50 +221,88 @@ const CVBuilder = () => {
       const breaks      = breakDataRef.current?.breaks ?? [];
       const totalHeight = breakDataRef.current?.totalHeight ?? PAGE_H_PX;
 
-      // Render at 3× for crisp high-DPI output
-      const SCALE    = 3;
-      const PAGE_W_PX = 794;
-      const PAGE_H_PX_CONST = 1122;
+      const SCALE       = 2;
+      const PAGE_W_PX   = 794;
+      const PAGE_H_PX_A4 = 1122;
+      const PAGE_W_MM   = 210;
+      const PAGE_H_MM   = 297;
 
-      const fullCanvas = await html2canvas(captureEl, {
-        scale:           SCALE,
-        useCORS:         true,
-        allowTaint:      true,
+      // html-to-image supports modern CSS (oklch, etc.) unlike html2canvas
+      const fullCanvas = await toCanvas(captureEl, {
+        pixelRatio:      SCALE,
         backgroundColor: '#ffffff',
         width:           PAGE_W_PX,
         height:          totalHeight,
-        scrollX:         0,
-        scrollY:         0,
-        logging:         false,
+        skipFonts:       false,
       });
 
-      // Page slice boundaries (in unscaled px)
+      // Snapshot the element rect AFTER capture (for text layer positioning)
+      const elRect = captureEl.getBoundingClientRect();
+
       const pageStarts = [0, ...breaks];
       const pageEnds   = [...breaks, totalHeight];
-
-      const PAGE_W_MM = 210;
-      const PAGE_H_MM = 297;
 
       const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
 
       for (let i = 0; i < pageStarts.length; i++) {
         if (i > 0) doc.addPage();
 
-        const srcY = Math.round(pageStarts[i] * SCALE);
-        const srcH = Math.round((pageEnds[i] - pageStarts[i]) * SCALE);
+        const sliceStart = pageStarts[i];
+        const sliceEnd   = pageEnds[i];
+
+        // ── Visual layer: sliced image ────────────────────────────────────
+        const srcY = Math.round(sliceStart * SCALE);
+        const srcH = Math.round((sliceEnd - sliceStart) * SCALE);
         const srcW = Math.round(PAGE_W_PX * SCALE);
 
-        // Slice canvas for this page
         const pageCanvas = document.createElement('canvas');
         pageCanvas.width  = srcW;
-        pageCanvas.height = Math.round(PAGE_H_PX_CONST * SCALE);
+        pageCanvas.height = Math.round(PAGE_H_PX_A4 * SCALE);
         const ctx = pageCanvas.getContext('2d');
         ctx.fillStyle = '#ffffff';
         ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
         ctx.drawImage(fullCanvas, 0, srcY, srcW, srcH, 0, 0, srcW, srcH);
 
-        const imgData = pageCanvas.toDataURL('image/jpeg', 0.97);
-        doc.addImage(imgData, 'JPEG', 0, 0, PAGE_W_MM, PAGE_H_MM);
+        doc.addImage(pageCanvas.toDataURL('image/jpeg', 0.96), 'JPEG', 0, 0, PAGE_W_MM, PAGE_H_MM);
+
+        // ── Invisible text layer for copy/paste selectability ─────────────
+        const sliceH   = sliceEnd - sliceStart;
+        const scaleX   = PAGE_W_MM / PAGE_W_PX;
+        const scaleY   = PAGE_H_MM / sliceH;
+
+        const walker = document.createTreeWalker(captureEl, NodeFilter.SHOW_TEXT);
+        let node;
+        while ((node = walker.nextNode())) {
+          const text = node.nodeValue?.trim();
+          if (!text) continue;
+          try {
+            const range = document.createRange();
+            range.selectNode(node);
+            const rects = Array.from(range.getClientRects());
+            for (const r of rects) {
+              if (r.width < 1 || r.height < 1) continue;
+              // Position relative to the capture element
+              const relTop  = r.top  - elRect.top;
+              const relLeft = r.left - elRect.left;
+              // Skip if outside this page slice
+              if (relTop + r.height < sliceStart || relTop > sliceEnd) continue;
+
+              const yOnPage   = relTop - sliceStart;
+              const xMm       = Math.max(0, relLeft * scaleX);
+              const yMm       = Math.min(PAGE_H_MM, (yOnPage + r.height * 0.82) * scaleY);
+              const style     = window.getComputedStyle(node.parentElement);
+              const fsPx      = parseFloat(style.fontSize) || 12;
+              const fsPt      = fsPx * scaleY * (72 / 25.4);
+
+              doc.setFontSize(Math.max(1, fsPt));
+              doc.setTextColor(0, 0, 0);
+              // PDF text rendering mode 3 = invisible (not drawn but selectable)
+              doc.internal.write('3 Tr');
+              doc.text(text, xMm, yMm);
+              doc.internal.write('0 Tr');
+            }
+          } catch (_) { /* skip unresolvable nodes */ }
+        }
       }
 
       const name    = cvData.personalInfo?.fullName || 'Resume';
