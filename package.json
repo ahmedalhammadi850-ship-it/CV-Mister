@@ -36,6 +36,7 @@
     "lucide-react": "^1.17.0",
     "openid-client": "^6.8.4",
     "passport": "^0.7.0",
+    "puppeteer-core": "^24.43.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.17.0",

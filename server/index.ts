@@ -135,6 +135,9 @@ async function main() {
   // ── Debug ──
   route("get", "/api/debug", "debug");
 
+  // ── Puppeteer PDF (ATS templates) ──
+  route("post", "/api/pdf/ats", "pdf/ats");
+
   // ── Admin Settings (n8n) ──
   route("get",   "/api/admin/settings", "admin/settings");
   route("patch", "/api/admin/settings", "admin/settings");

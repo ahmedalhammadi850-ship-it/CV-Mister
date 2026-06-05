@@ -7,7 +7,7 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
-import { embedArabicFont } from '../../utils/atsPdfExport';
+import { embedArabicFont, isATSTemplate } from '../../utils/atsPdfExport';
 
 
 const OverviewIcon = () => (
@@ -213,6 +213,55 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
 
+    // ATS templates → server-side Puppeteer PDF (real text, no image layer)
+    if (isATSTemplate(selectedTemplate)) {
+      try {
+        const name = cvData.personalInfo?.fullName || 'Resume';
+        const response = await fetch('/api/pdf/ats', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            cvData,
+            options: {
+              templateId: selectedTemplate,
+              isRTL,
+              theme,
+              visibleSections,
+              visiblePersonalFields,
+              sectionOrder,
+              sectionNames,
+            },
+          }),
+        });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.message || 'PDF generation failed');
+        }
+        const blob   = await response.blob();
+        const url    = URL.createObjectURL(blob);
+        const link   = document.createElement('a');
+        link.href     = url;
+        link.download = `${name} - CV.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 15000);
+        if (currentCVId) {
+          fetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
+        }
+      } catch (err) {
+        console.error('[ATS PDF]', err);
+        alert(isRTL
+          ? 'فشل تصدير PDF: ' + err.message
+          : 'PDF export failed: ' + err.message);
+      } finally {
+        setIsPrinting(false);
+      }
+      return;
+    }
+
+    // Non-ATS templates → client-side html-to-image + jsPDF with text overlay
     // Temporary nodes added to document.body — cleaned up in finally
     let screenClone = null;   // on-screen clone for visual capture
     let textClone   = null;   // off-screen clone for text-rect extraction
