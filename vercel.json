@@ -3,7 +3,7 @@
   "nodeVersion": "22.x",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
-  "installCommand": "npm install --legacy-peer-deps",
+  "installCommand": "cp package.vercel.json package.json && rm -f package-lock.json && npm install --legacy-peer-deps",
   "framework": null,
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
