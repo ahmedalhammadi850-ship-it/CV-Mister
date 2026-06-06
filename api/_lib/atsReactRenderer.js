@@ -301,48 +301,56 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   // ── Multi-page ─────────────────────────────────────────────────────────────
   // One container per page. Each container:
   //   • height = distance between consecutive break points (dynamic, NOT fixed 1122px)
-  //     Using a fixed 1122px would make each slice overlap the next slice by
-  //     (1122 - breakDelta) px — content would appear duplicated on adjacent pages.
   //   • overflow: hidden — clips to exactly the declared slice height
   //   • translateY(-pageStart px) — shifts template so only this slice is visible
   //   • break-after: page — forces a new PDF page after each slice
-  //     The remainder of the A4 page (1122 - sliceHeight px) is white space from
-  //     the page background — exactly matching the white overlay the browser preview
-  //     paints over the content below each page break line.
   //
-  // PAGE 2+ TOP MARGIN
-  //   The first page has the template's own top padding (default medium = 36pt ≈ 48px).
-  //   Subsequent pages would start with content at y=0 (no margin) without this fix.
-  //   We push the template-wrap down by PAGE_TOP_MARGIN on non-first pages and expand
-  //   the slice height by the same amount so the visual top margin is preserved.
-  const PAGE_TOP_MARGIN = 48; // px — matches template's default medium top padding (36pt @ 96dpi)
+  // PAGE 2+ TOP MARGIN  (mirrors LivePreview.jsx exactly)
+  //   LivePreview renders page 2+ with:
+  //     clipStart = start - MARGIN  (48px before the break point)
+  //     white overlay of MARGIN px covering the top of the frame
+  //   This makes pages 2+ show a clean MARGIN px of white at the top, then
+  //   content from exactly `start`.  We replicate this in the PDF using a
+  //   nested overflow:hidden inner container so NO template content bleeds
+  //   into the white margin area — matching the preview pixel-for-pixel.
+  //
+  //   Structure for pages 2+:
+  //     .page-slice  (height = sliceHeight + MARGIN, overflow:hidden)
+  //       inner-clip  (position:absolute, top=MARGIN, height=sliceHeight, overflow:hidden)
+  //         template-wrap  (translateY(-start))
+  //
+  //   The inner-clip sits BELOW the MARGIN px white zone and tightly clips
+  //   content from template y=start to y=(start+sliceHeight).  No template
+  //   content can bleed upward into the white margin.
+  const MARGIN = 48; // px — matches LivePreview.jsx MARGIN constant (≈ 36pt at 96dpi)
 
   const pageStarts = [0, ...pageBreaks];
 
   const pageContainers = pageStarts.map((start, i) => {
     const isFirst = i === 0;
     const isLast  = i === pageStarts.length - 1;
-    // Slice shows content from 'start' to 'end' — no overlap with next slice.
     const end = isLast ? totalHeight : pageBreaks[i];
     const sliceHeight = Math.max(1, Math.round(end - start));
 
     if (isFirst) {
-      // Page 1: template has its own padding — no extra margin needed.
+      // Page 1: template renders with its own padding — no extra margin needed.
       return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${sliceHeight}px">
-  <div class="template-wrap" style="top:0;transform:translateY(-${Math.round(start)}px)">
+  <div class="template-wrap" style="transform:translateY(0px)">
     ${bodyHtml}
   </div>
 </div>`;
     }
 
-    // Pages 2+: push template-wrap down by PAGE_TOP_MARGIN so the top of the
-    // page shows white space matching the template's own top padding on page 1.
-    // The page-slice is made taller by PAGE_TOP_MARGIN to accommodate this.
-    const topOffset = PAGE_TOP_MARGIN;
-    const totalSliceHeight = sliceHeight + topOffset;
+    // Pages 2+: mirror LivePreview's clip+overlay approach.
+    // Outer page-slice = MARGIN (white) + sliceHeight (content).
+    // Inner clip container is offset by MARGIN and has its own overflow:hidden,
+    // so absolutely NO template content appears in the top MARGIN px zone.
+    const totalSliceHeight = sliceHeight + MARGIN;
     return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${totalSliceHeight}px">
-  <div class="template-wrap" style="top:${topOffset}px;transform:translateY(-${Math.round(start)}px)">
-    ${bodyHtml}
+  <div style="position:absolute;top:${MARGIN}px;left:0;width:794px;height:${sliceHeight}px;overflow:hidden">
+    <div style="position:absolute;top:0;left:0;width:794px;transform:translateY(-${Math.round(start)}px)">
+      ${bodyHtml}
+    </div>
   </div>
 </div>`;
   }).join('\n');

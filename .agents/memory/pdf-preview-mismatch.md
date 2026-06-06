@@ -89,6 +89,22 @@ consecutive break points). Each slice shows only its own content band. The remai
 page (1122px - sliceHeight) becomes white space — matching the browser's white overlay behavior.
 Removed `height: 1122px` from `.page-slice` CSS; height now set via inline style per slice.
 
+## Root Cause 8: Page 2+ top margin — template content bleeding into white zone
+**File:** `api/_lib/atsReactRenderer.js` — multi-page `pageContainers` builder
+
+LivePreview renders pages 2+ with `clipStart = start - MARGIN` (48px before break) and an absolute white overlay covering the top MARGIN px. A simple `top: MARGIN + translateY(-start)` in the PDF still shows template content from y=(start-MARGIN) to y=start in the "white" zone — because the template is positioned there and only the page-slice background (not a real overlay) would hide it. Template backgrounds aren't always opaque at every pixel.
+
+**Fix:** Use nested `overflow:hidden` inner container for pages 2+:
+```
+.page-slice (height = sliceHeight + MARGIN, overflow:hidden)
+  inner-clip (position:absolute, top=MARGIN, height=sliceHeight, overflow:hidden)
+    template-div (position:absolute, top=0, translateY(-start))
+      ${bodyHtml}
+```
+The inner-clip at `top=MARGIN` physically cannot show any content above y=MARGIN in the page-slice — no bleed, no white-overlay needed. Matches LivePreview pixel-for-pixel.
+
+**MARGIN constant (48px)** must match `LivePreview.jsx` MARGIN constant exactly.
+
 ## Critical "DO NOT" rules
 
 ### ❌ DO NOT add `address { font-style: normal }` to the Puppeteer CSS reset
