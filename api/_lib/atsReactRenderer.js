@@ -5,15 +5,19 @@
  *
  * Two entry points:
  *
- *  buildHtmlFromRendered(bodyHtml, options)  [PRIMARY]
- *    Takes the exact outerHTML captured from the browser's live preview and
- *    wraps it in a Puppeteer-ready document.  No re-rendering → no font or
- *    layout mismatch.  The PDF is pixel-identical to what the user sees.
+ *  buildAtsHtmlFromReact(cvData, options)  [PRIMARY]
+ *    Server-renders the selected React template via react-dom/server renderToStaticMarkup.
+ *    ALWAYS used when cvData is present (which the client always sends).
+ *    Guarantees the CORRECT template — no template-mismatch bugs.
+ *    Templates use 100% inline React styles so SSR output is identical to
+ *    the browser preview.  Fonts are loaded in Puppeteer via /api/font-proxy
+ *    (same URL the browser uses) → identical glyph metrics → identical layout.
+ *    Page-break positions (options.pageBreaks + totalHeight) come from the
+ *    browser's smart-break algorithm and are forwarded for multi-page layout.
  *
- *  buildAtsHtmlFromReact(cvData, options)  [FALLBACK]
- *    Server-renders the React template from raw CV data.  Used when the client
- *    cannot supply pre-rendered HTML (e.g. old clients / direct API calls).
- *    Font substitution is applied so the result is as close as possible.
+ *  buildHtmlFromRendered(bodyHtml, options)  [FALLBACK]
+ *    Takes pre-rendered HTML from the browser (legacy / direct API callers).
+ *    Used only when cvData is absent.
  */
 
 import * as React from 'react';
