@@ -1,35 +1,39 @@
 /**
  * POST /api/pdf/ats
  *
- * Pixel-perfect PDF generation using server-side React rendering + Puppeteer.
+ * Pixel-perfect PDF generation using Puppeteer.
  *
  * RENDERING STRATEGY (primary → fallback):
  *
- *  1. SSR PRIMARY — buildAtsHtmlFromReact(cvData, options)
- *     Always used when cvData is available (which the client always sends).
- *     Renders the EXACT selected template via react-dom/server renderToStaticMarkup.
- *     Templates use 100% inline styles so SSR output is identical to the browser
- *     preview.  Page-break positions (options.pageBreaks + totalHeight) come from
- *     the browser's smart-break algorithm and are forwarded here for multi-page layout.
- *     Fonts are loaded in Puppeteer via the same /api/font-proxy the browser uses,
- *     guaranteeing identical glyph metrics.
+ *  1. BROWSER-CAPTURED HTML PRIMARY — buildHtmlFromRendered(renderedHtml, options)
+ *     Used when the client supplies renderedHtml (which it always does).
+ *     The client captures the innerHTML of the EXACT off-screen DOM element that
+ *     was used to measure totalHeight and pageBreaks — so the HTML, the page-break
+ *     positions, and the total height are all perfectly consistent with each other.
+ *     This guarantees the PDF layout is pixel-for-pixel identical to the preview.
  *
- *  2. HTML FALLBACK — buildHtmlFromRendered(renderedHtml, options)
- *     Used only when cvData is absent but the client supplies pre-rendered HTML
- *     (backward-compatible / direct API calls from old clients).
+ *     WHY THIS IS NOW PRIMARY (was previously secondary):
+ *       SSR (react-dom/server renderToStaticMarkup) re-renders the template from
+ *       raw data on the server.  Even with identical fonts, sub-pixel differences
+ *       in line-height rounding, em-unit resolution, and React hook behaviour
+ *       (useEffect doesn't run in SSR) can produce a layout that is 50–200 px
+ *       taller or shorter than the browser's live DOM.  When the server's layout
+ *       differs from the browser's, content that was on page 1 in the preview
+ *       spills onto page 2 in the PDF — or the last section gets clipped.
+ *       Using the browser-captured HTML eliminates this class of bug entirely.
  *
- * WHY SSR AS PRIMARY (not browser-captured innerHTML):
- *  • Works on every environment (Vercel serverless, Replit, bare Node).
- *  • No dependency on the browser's DOM capture timing or off-screen rendering.
- *  • Guaranteed to use the user's SELECTED template — no template mismatch.
- *  • Templates use inline React styles exclusively, so SSR == browser rendering.
+ *  2. SSR FALLBACK — buildAtsHtmlFromReact(cvData, options)
+ *     Used only when renderedHtml is absent (e.g. direct API calls, old clients,
+ *     or if captureEl ref is null at download time).
+ *     Still perfectly usable — just may have minor layout differences vs preview
+ *     on templates that rely on browser-only font metrics.
  *
  * Body shape:
  *  {
- *    cvData:        object,   // CV data (always required for SSR primary)
- *    renderedHtml?: string,   // browser innerHTML — used only when cvData absent
+ *    cvData:        object,   // CV data — used for filename + SSR fallback
+ *    renderedHtml?: string,   // browser innerHTML — primary PDF source
  *    options: {
- *      templateId,            // MUST match the template shown in the preview
+ *      templateId,
  *      isRTL, theme,
  *      visibleSections, visiblePersonalFields, sectionOrder, sectionNames,
  *      pageBreaks,   // number[] — pixel y-positions from browser smart-break algo
@@ -60,23 +64,27 @@ export default async function handler(req, res) {
 
     let html;
 
-    if (cvData) {
-      // ── PRIMARY PATH: SSR via React renderToStaticMarkup ───────────────────
-      // Always preferred over browser-captured HTML because:
-      //   • Guaranteed correct template (templateId from selectedTemplate state)
-      //   • Works on every hosting environment
-      //   • Templates use inline styles → SSR == browser rendering
-      //   • Page-break positions from the browser are forwarded in options.pageBreaks
-      console.log('[PDF] source: SSR primary — template:', templateId, '— pageBreaks:', pageBreaks.length);
-      html = await buildAtsHtmlFromReact(cvData, options);
-
-    } else if (renderedHtml) {
-      // ── FALLBACK: pre-rendered HTML (old clients / direct API calls) ────────
-      console.log('[PDF] source: browser-rendered HTML fallback — size:', renderedHtml.length, 'chars');
+    if (renderedHtml) {
+      // ── PRIMARY PATH: browser-captured HTML ───────────────────────────────
+      // The client sends the innerHTML of the hidden off-screen measurement div —
+      // the same element whose scrollHeight = totalHeight and whose DOM was used
+      // by the smart-break algorithm to compute pageBreaks.
+      // All three values (HTML, totalHeight, pageBreaks) are mutually consistent,
+      // so the PDF slices are guaranteed to fall at the same positions as the
+      // preview page-frame boundaries.
+      console.log('[PDF] source: browser-captured HTML — size:', renderedHtml.length, 'chars — pageBreaks:', pageBreaks.length);
       html = buildHtmlFromRendered(renderedHtml, { isRTL, pageBreaks, totalHeight });
 
+    } else if (cvData) {
+      // ── FALLBACK: SSR via React renderToStaticMarkup ───────────────────────
+      // Used when renderedHtml is absent (direct API calls / old clients).
+      // Layout may differ slightly from the browser preview due to SSR vs live-DOM
+      // rendering differences (font metrics, hook side-effects, etc.).
+      console.log('[PDF] source: SSR fallback — template:', templateId, '— pageBreaks:', pageBreaks.length);
+      html = await buildAtsHtmlFromReact(cvData, options);
+
     } else {
-      return res.status(400).json({ message: 'cvData or renderedHtml is required' });
+      return res.status(400).json({ message: 'renderedHtml or cvData is required' });
     }
 
     const pdf = await generatePdfFromHtml(html, {
@@ -94,7 +102,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(name)}.pdf"`);
     res.setHeader('Content-Length',       pdf.length);
     res.setHeader('Cache-Control',        'no-store');
-    res.setHeader('X-PDF-Source',         cvData ? 'ssr-primary' : 'browser-rendered');
+    res.setHeader('X-PDF-Source',         renderedHtml ? 'browser-captured' : 'ssr-fallback');
     res.status(200).end(Buffer.from(pdf));
   } catch (err) {
     console.error('[PDF] ERROR:', err.message, err.stack?.slice(0, 500));
