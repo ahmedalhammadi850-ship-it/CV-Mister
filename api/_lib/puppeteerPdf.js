@@ -71,13 +71,23 @@ process.on("exit", () => { if (_browser) _browser.close().catch(() => {}); });
 
 /**
  * Generate a PDF buffer from an HTML string.
- * @param {string} html - Complete HTML document
+ *
+ * @param {string} html          - Complete HTML document
+ * @param {object} [opts]
+ * @param {number} [opts.viewportWidth=794] - Viewport width in px.
+ *   The React ATS templates use width:794px (A4 at 96 dpi), so we match
+ *   that exactly so layout is computed at the same breakpoint as the preview.
  * @returns {Promise<Buffer>}
  */
-export async function generatePdfFromHtml(html) {
+export async function generatePdfFromHtml(html, opts = {}) {
+  const { viewportWidth = 794 } = opts;
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
+    // Set viewport to match the React templates' width:794px so the layout
+    // engine computes identical dimensions to the browser preview.
+    await page.setViewport({ width: viewportWidth, height: 1122, deviceScaleFactor: 1 });
+
     await page.setContent(html, { waitUntil: "networkidle0", timeout: 30000 });
 
     // Ensure every @font-face is fully loaded and flushed into Chromium's
