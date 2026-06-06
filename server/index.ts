@@ -61,11 +61,12 @@ async function main() {
         fontSrc: ["'self'", "https://fonts.gstatic.com", "data:"],
         imgSrc: ["'self'", "data:", "blob:", "https:"],
         connectSrc: ["'self'", "https:"],
-        frameSrc: ["'none'"],
+        frameSrc: ["https://*.replit.dev", "https://*.repl.co", "https://*.replit.app"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
       },
     },
+    frameguard: false,
     crossOriginEmbedderPolicy: false,
     crossOriginResourcePolicy: { policy: "cross-origin" },
   }));
