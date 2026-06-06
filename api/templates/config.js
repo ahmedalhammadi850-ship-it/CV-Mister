@@ -23,6 +23,6 @@ export default async function handler(req, res) {
     });
     return res.json(config);
   } catch (err) {
-    return res.status(500).json({ message: "حدث خطأ" });
+    return res.json(DEFAULT_CONFIG);
   }
 }
