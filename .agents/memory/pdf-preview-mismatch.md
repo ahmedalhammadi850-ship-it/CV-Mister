@@ -73,6 +73,22 @@ The off-screen element at `top: -9999px` may still have fallback font metrics
 **Fix:** Added `await document.fonts.ready` + force-load all pending font faces + 80ms
 layout settle time before capturing `captureEl.innerHTML`.
 
+## Root Cause 7: Fixed 1122px slice height → content duplicated across PDF pages
+**File:** `api/_lib/atsReactRenderer.js` — multi-page `pageContainers` builder
+
+Every page-slice was hardcoded to `height: 1122px`. With page breaks less than 1122px apart
+(e.g. break at y=900), slice 1 (translateY=0, h=1122) showed y=0→1122, and slice 2
+(translateY=-900, h=1122) showed y=900→2022. Content y=900→1122 appeared in BOTH PDF
+pages — a visible duplicate strip.
+
+The browser preview hides this overlap with white overlays (bottom overlay on non-last pages,
+top overlay on non-first pages). The PDF has no such overlays → content duplication was visible.
+
+**Fix:** Set slice height dynamically = `pageBreaks[i] - pageBreaks[i-1]` (the exact gap between
+consecutive break points). Each slice shows only its own content band. The remainder of the A4
+page (1122px - sliceHeight) becomes white space — matching the browser's white overlay behavior.
+Removed `height: 1122px` from `.page-slice` CSS; height now set via inline style per slice.
+
 ## Critical "DO NOT" rules
 
 ### ❌ DO NOT add `address { font-style: normal }` to the Puppeteer CSS reset

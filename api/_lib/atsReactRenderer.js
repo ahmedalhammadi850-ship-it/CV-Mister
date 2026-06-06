@@ -286,15 +286,24 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   }
 
   // ── Multi-page ─────────────────────────────────────────────────────────────
-  // One 794 × 1122 px container per page. Each container:
-  //   • overflow: hidden — clips to exactly one A4 page height
-  //   • translateY(-pageStart px) — shifts template to show only this slice
-  //   • break-after: page — forces a new PDF page after each container
+  // One container per page. Each container:
+  //   • height = distance between consecutive break points (dynamic, NOT fixed 1122px)
+  //     Using a fixed 1122px would make each slice overlap the next slice by
+  //     (1122 - breakDelta) px — content would appear duplicated on adjacent pages.
+  //   • overflow: hidden — clips to exactly the declared slice height
+  //   • translateY(-pageStart px) — shifts template so only this slice is visible
+  //   • break-after: page — forces a new PDF page after each slice
+  //     The remainder of the A4 page (1122 - sliceHeight px) is white space from
+  //     the page background — exactly matching the white overlay the browser preview
+  //     paints over the content below each page break line.
   const pageStarts = [0, ...pageBreaks];
 
   const pageContainers = pageStarts.map((start, i) => {
     const isLast = i === pageStarts.length - 1;
-    return `<div class="page-slice${isLast ? ' last-slice' : ''}">
+    // Slice shows content from 'start' to 'end' — no overlap with next slice.
+    const end = isLast ? totalHeight : pageBreaks[i];
+    const sliceHeight = Math.max(1, Math.round(end - start));
+    return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${sliceHeight}px">
   <div class="template-wrap" style="transform:translateY(-${Math.round(start)}px)">
     ${bodyHtml}
   </div>
@@ -312,7 +321,8 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
 
     .page-slice {
       width: 794px;
-      height: 1122px;
+      /* height is set dynamically per slice (inline style) — do NOT put a
+         fixed 1122px here or every slice would overflow and duplicate content */
       overflow: hidden;
       position: relative;
       break-after: page;
