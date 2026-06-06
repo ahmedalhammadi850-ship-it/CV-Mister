@@ -12,61 +12,81 @@
  *  - Theme-aware: primaryColor, fontSize, pagePadding, lineHeight, sectionSpacing
  */
 
-import { readFileSync } from "fs";
+import { readFileSync, existsSync } from "fs";
+import { fileURLToPath } from "url";
+import path from "path";
+
+// Absolute path to server/fonts/ — works whether running from project root,
+// api/, or any subdirectory.  Fonts bundled here are committed to the repo so
+// they are available on every runtime (Replit, Vercel, Docker, etc.) without
+// relying on OS-level font packages.
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const FONTS_DIR = path.resolve(__dirname, "../../server/fonts");
 
 // ── Font cache ─────────────────────────────────────────────────────────────────
 let _arabicFontB64 = null;
 let _arabicFontFetching = false;
 let _arabicFontWaiters = [];
 
-// Latin font (DejaVu Sans) — read once from the Nix system at startup so
-// Chromium always has a real embedded font (Type2/CIDFont) instead of
-// converting glyphs to bezier paths (Type3), which makes text unselectable.
+// Latin font (DejaVu Sans)
+// Priority: 1) bundled server/fonts/  2) Nix system path
+// Bundled fonts guarantee CIDFontType2 (selectable text) on every platform.
 let _latinFontRegularB64 = null;
 let _latinFontBoldB64    = null;
 
+function tryReadFont(...candidates) {
+  for (const p of candidates) {
+    try {
+      if (existsSync(p)) return readFileSync(p).toString("base64");
+    } catch (_) {}
+  }
+  return null;
+}
+
 function loadLatinFonts() {
-  if (_latinFontRegularB64) return; // already loaded
-  try {
-    _latinFontRegularB64 = readFileSync(
-      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
-    ).toString("base64");
-    _latinFontBoldB64 = readFileSync(
-      "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"
-    ).toString("base64");
-  } catch (e) {
-    console.warn("[atsHtmlTemplate] Latin font load failed:", e.message);
+  if (_latinFontRegularB64) return;
+  _latinFontRegularB64 = tryReadFont(
+    path.join(FONTS_DIR, "DejaVuSans.ttf"),
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+  );
+  _latinFontBoldB64 = tryReadFont(
+    path.join(FONTS_DIR, "DejaVuSans-Bold.ttf"),
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+  );
+  if (!_latinFontRegularB64) {
+    console.warn("[atsHtmlTemplate] Latin fonts not found — text may not be selectable in PDF");
   }
 }
 
+// Arabic font (Noto Naskh Arabic)
+// Priority: 1) bundled server/fonts/  2) Google Fonts network fetch
 async function fetchArabicFontBase64() {
-  // Return cached
   if (_arabicFontB64) return _arabicFontB64;
-
-  // Coalesce concurrent callers
-  if (_arabicFontFetching) {
-    return new Promise((res) => _arabicFontWaiters.push(res));
-  }
+  if (_arabicFontFetching) return new Promise((res) => _arabicFontWaiters.push(res));
   _arabicFontFetching = true;
 
   try {
-    const cssUrl =
-      "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap";
-    const cssRes = await fetch(cssUrl, {
-      headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) Chrome/120" },
-    });
+    // 1. Try bundled file first — fast, no network, works on all runtimes
+    const bundled = tryReadFont(path.join(FONTS_DIR, "NotoNaskhArabic-Regular.ttf"));
+    if (bundled) {
+      _arabicFontB64 = bundled;
+      return _arabicFontB64;
+    }
+
+    // 2. Fallback: fetch from Google Fonts at runtime
+    const cssRes = await fetch(
+      "https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap",
+      { headers: { "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) Chrome/120" } },
+    );
     if (!cssRes.ok) throw new Error(`CSS fetch failed: ${cssRes.status}`);
     const css = await cssRes.text();
-
     const match = css.match(/url\((https:\/\/fonts\.gstatic\.com[^)]+)\)/);
     if (!match) throw new Error("Font URL not found in CSS");
-
     const fontRes = await fetch(match[1]);
     if (!fontRes.ok) throw new Error(`Font file fetch failed: ${fontRes.status}`);
-    const buf = await fontRes.arrayBuffer();
-    _arabicFontB64 = Buffer.from(buf).toString("base64");
+    _arabicFontB64 = Buffer.from(await fontRes.arrayBuffer()).toString("base64");
   } catch (e) {
-    console.warn("[atsHtmlTemplate] Arabic font fetch failed:", e.message);
+    console.warn("[atsHtmlTemplate] Arabic font load failed:", e.message);
     _arabicFontB64 = null;
   } finally {
     _arabicFontFetching = false;
