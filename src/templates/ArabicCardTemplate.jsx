@@ -69,6 +69,7 @@ const ArabicCardTemplate = ({
     vis.location  !== false && info.location  && { icon: '⌖', text: info.location },
     vis.linkedin  !== false && info.linkedin  && { icon: 'in', text: info.linkedin },
     vis.portfolio !== false && info.portfolio && { icon: '⬡', text: info.portfolio },
+    vis.github    !== false && info.github    && { icon: 'gh', text: info.github },
   ].filter(Boolean);
 
   /* ── Sidebar (RIGHT side, RTL) ── */

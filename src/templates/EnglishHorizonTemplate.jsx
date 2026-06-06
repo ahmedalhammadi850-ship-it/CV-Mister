@@ -1,5 +1,7 @@
 import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
 
+const GitHubIcon = () => <svg width="9" height="9" viewBox="0 0 16 16" fill="rgba(255,255,255,0.85)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>;
+
 const TEAL  = '#0e5f6e';
 const TEAL2 = '#1a7a8a';
 const LIGHT = '#e8f4f6';
@@ -117,6 +119,7 @@ const EnglishHorizonTemplate = ({
     vis.location  !==false && info.location  && { key:'location',  text:info.location  },
     vis.portfolio !==false && info.portfolio && { key:'portfolio', text:info.portfolio  },
     vis.linkedin  !==false && info.linkedin  && { key:'linkedin',  text:info.linkedin   },
+    vis.github    !==false && info.github    && { key:'github',    text:info.github     },
   ].filter(Boolean);
 
   /* ── SIDEBAR ─────────────────────────────────────────────── */
@@ -423,6 +426,7 @@ const EnglishHorizonTemplate = ({
                 {row.key==='email'    &&<svg width="9" height="9" viewBox="0 0 14 14" fill="none"><rect x="1" y="2.5" width="12" height="9" rx="1" stroke="#fff" strokeWidth="1.3"/><path d="M1 3.5l6 4.5 6-4.5" stroke="#fff" strokeWidth="1.3"/></svg>}
                 {row.key==='location' &&<svg width="9" height="9" viewBox="0 0 14 14" fill="none"><path d="M7 1a4 4 0 0 1 4 4c0 3-4 8-4 8S3 8 3 5a4 4 0 0 1 4-4z" stroke="#fff" strokeWidth="1.3"/><circle cx="7" cy="5" r="1.5" fill="#fff"/></svg>}
                 {row.key==='portfolio'&&<svg width="9" height="9" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5.5" stroke="#fff" strokeWidth="1.3"/><path d="M7 1.5c-1.5 1.5-2.5 3.3-2.5 5.5S5.5 11 7 12.5M7 1.5c1.5 1.5 2.5 3.3 2.5 5.5S8.5 11 7 12.5M1.5 7h11" stroke="#fff" strokeWidth="1.1"/></svg>}
+                {row.key==='github'  &&<svg width="9" height="9" viewBox="0 0 16 16" fill="rgba(255,255,255,0.85)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>}
                 {row.key==='linkedin' &&<svg width="9" height="9" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" rx="2" stroke="#fff" strokeWidth="1.3"/><path d="M4 6v4M4 4.5v.5M7 10V8a1.5 1.5 0 0 1 3 0v2M7 6v4" stroke="#fff" strokeWidth="1.3" strokeLinecap="round"/></svg>}
               </div>
               <span style={{ fontSize:'7.5pt', color:'rgba(255,255,255,0.85)', wordBreak:'break-all', lineHeight:1.3 }}>

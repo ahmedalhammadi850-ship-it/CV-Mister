@@ -7,6 +7,7 @@ export const arabicSampleData = {
     location: "الرياض، السعودية",
     linkedin: "",
     portfolio: "Web.site.com",
+    github: "",
     summary: "إذا كنت لا تزال غير قادر على إلغاء تأمين الملف، فتأكد من أن التطبيق الذي يقفل الملف قد أُغلق بالكامل ولا يعمل في الخلفية. يمكنك التحقق من ذلك عبر إدارة المهام أو مراقب النشاط على نظام ماك.",
   },
   experience: [
@@ -87,6 +88,7 @@ export const blankData = {
     location: '',
     linkedin: '',
     portfolio: '',
+    github: '',
     summary: '',
   },
   experience: [],
@@ -113,6 +115,7 @@ export const sampleData = {
     location: "New York, USA",
     linkedin: "linkedin.com/in/johndoe",
     portfolio: "johndoe.dev",
+    github: "github.com/johndoe",
     summary: "Passionate Frontend Developer with 5+ years of experience building scalable web applications. Proficient in React, TypeScript, and modern CSS frameworks. Strong advocate for clean code, web accessibility, and excellent user experiences."
   },
   experience: [

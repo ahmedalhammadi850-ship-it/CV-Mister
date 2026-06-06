@@ -53,6 +53,7 @@ const EditorialRuleTemplate = ({
     vis.location  !== false && info.location  && info.location,
     vis.linkedin  !== false && info.linkedin  && info.linkedin,
     vis.portfolio !== false && info.portfolio && info.portfolio,
+    vis.github    !== false && info.github    && info.github,
   ].filter(Boolean);
 
   const BOTTOM_SECTIONS = new Set(['skills', 'languages', 'interests', 'certificates', 'courses', 'awards', 'organisations']);

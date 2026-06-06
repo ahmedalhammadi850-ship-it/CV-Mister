@@ -550,7 +550,9 @@ const EditorPanel = () => {
                 <div className="col-span-2 sm:col-span-1"><label className={lbl}>{t('Email','البريد الإلكتروني',isRTL)}</label><input type="email" name="email" value={cvData.personalInfo.email} onChange={handlePersonalInfoChange} className={inp} /></div>
                 <div className="col-span-2 sm:col-span-1"><label className={lbl}>{t('Phone','الهاتف',isRTL)}</label><input type="text" name="phone" value={cvData.personalInfo.phone} onChange={handlePersonalInfoChange} className={inp} /></div>
                 <div className="col-span-2"><label className={lbl}>{t('Location','الموقع',isRTL)}</label><input type="text" name="location" value={cvData.personalInfo.location} onChange={handlePersonalInfoChange} className={inp} /></div>
-                <div className="col-span-2"><label className={lbl}>LinkedIn</label><input type="text" name="linkedin" value={cvData.personalInfo.linkedin || ''} onChange={handlePersonalInfoChange} className={inp} /></div>
+                <div className="col-span-2"><label className={lbl}>LinkedIn</label><input type="text" name="linkedin" value={cvData.personalInfo.linkedin || ''} onChange={handlePersonalInfoChange} className={inp} placeholder="linkedin.com/in/username" /></div>
+                <div className="col-span-2 sm:col-span-1"><label className={lbl}>GitHub</label><input type="text" name="github" value={cvData.personalInfo.github || ''} onChange={handlePersonalInfoChange} className={inp} placeholder="github.com/username" /></div>
+                <div className="col-span-2 sm:col-span-1"><label className={lbl}>{t('Personal Website / Portfolio','الموقع الشخصي / البورتفوليو',isRTL)}</label><input type="text" name="portfolio" value={cvData.personalInfo.portfolio || ''} onChange={handlePersonalInfoChange} className={inp} placeholder="yourwebsite.com" /></div>
                 <div className="col-span-2">
                   <label className={lbl}>{t('Professional Summary','الملخص المهني',isRTL)}</label>
                   <AITextarea
