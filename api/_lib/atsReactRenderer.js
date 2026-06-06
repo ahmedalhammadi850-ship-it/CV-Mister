@@ -253,7 +253,21 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
       display: block;
       vertical-align: middle;
     }
-    img, video { max-width: 100%; height: auto; }`;
+    img, video { max-width: 100%; height: auto; }
+
+    /* ── Resume template class rules (mirror of src/index.css) ──────────────
+     * Templates may apply these class names for page-break control.
+     * Without them, Puppeteer ignores the break directives and page breaks
+     * land mid-section, producing a PDF that differs from the browser preview.
+     */
+    .cv-section, .cv-item {
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    .cv-heading {
+      break-after: avoid;
+      page-break-after: avoid;
+    }`;
 
   // ── Single-page ────────────────────────────────────────────────────────────
   if (!pageBreaks || pageBreaks.length === 0) {

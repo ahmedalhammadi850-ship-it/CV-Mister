@@ -48,7 +48,9 @@ const MIN_PAGE_CONTENT = 200; // minimum content pixels per page
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
   const candidates = Array.from(container.querySelectorAll('*')).filter(el => {
-    const s = el.style;
+    // Use getComputedStyle to catch BOTH inline styles AND CSS class-based rules
+    // (e.g. .cv-section, .cv-item set break-inside:avoid via stylesheet, not inline)
+    const s = getComputedStyle(el);
     return (
       s.breakInside === 'avoid' ||
       s.pageBreakInside === 'avoid' ||

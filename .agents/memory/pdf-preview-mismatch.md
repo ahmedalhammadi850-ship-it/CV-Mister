@@ -37,14 +37,41 @@ The font-proxy returns CSS with `/api/font-file?url=...` (relative) which also r
 ## Root Cause 3: Font URL mismatch between browser and Puppeteer
 **File:** `api/_lib/atsReactRenderer.js`
 
-`ALL_GOOGLE_FONTS_URL` had different font weight sets than `index.html` FONTS_URL:
-- `Tajawal`: browser had `300;400;500;700`, renderer had `400;500;700;800`
-- `Cairo`: browser had `300;400;600;700`, renderer had `400;600;700;800`
-- `Noto Naskh Arabic`: browser had `400;500;600;700`, renderer had `400;600;700`
-
-Different URLs → different Google Fonts CSS → different font files → different glyph metrics.
+`ALL_GOOGLE_FONTS_URL` had different font weight sets than `index.html` FONTS_URL.
 
 **Fix:** `ALL_GOOGLE_FONTS_URL` must be IDENTICAL to `FONTS_URL` in `index.html`. If either changes, update both simultaneously.
+
+## Root Cause 4: `computeSmartBreaks` only checked inline styles, missed CSS class-based break rules
+**File:** `src/components/builder/LivePreview.jsx`
+
+`computeSmartBreaks` used `el.style.breakInside` (inline style object) which misses elements
+styled via CSS classes like `.cv-section { break-inside: avoid }`. The page break calculation
+therefore ignored section boundaries defined by class names → wrong page cut positions.
+
+**Fix:** Changed to `getComputedStyle(el).breakInside` to catch both inline AND class-based break rules.
+
+## Root Cause 5: Missing `.cv-section`, `.cv-item`, `.cv-heading` CSS rules in Puppeteer document
+**File:** `api/_lib/atsReactRenderer.js` — `baseStyles`
+
+`src/index.css` defines:
+```css
+.cv-section, .cv-item { break-inside: avoid; page-break-inside: avoid; }
+.cv-heading { break-after: avoid; page-break-after: avoid; }
+```
+Templates use these class names for page-break control. Without these rules in Puppeteer,
+the PDF ignores section break-avoidance → sections get split across pages mid-content.
+
+**Fix:** Added these CSS class rules to `baseStyles` in `_buildDocument()`.
+
+## Root Cause 6: Fonts not awaited in browser before capturing innerHTML
+**File:** `src/components/builder/CVBuilder.jsx` — `handleDownloadPDF`
+
+`captureEl.innerHTML` was captured without waiting for fonts to fully load.
+The off-screen element at `top: -9999px` may still have fallback font metrics
+(different character widths → different text wrapping → different total height → page break mismatch).
+
+**Fix:** Added `await document.fonts.ready` + force-load all pending font faces + 80ms
+layout settle time before capturing `captureEl.innerHTML`.
 
 ## Critical "DO NOT" rules
 
@@ -56,6 +83,9 @@ Adding `address { font-style: normal }` to the Puppeteer reset makes PDF ≠ Pre
 
 ### ❌ DO NOT use font UA string without `Chrome/120` in font-proxy requests
 The proxy sends `User-Agent: Mozilla/5.0 Chrome/120` to get woff2 files. Without this, Google Fonts returns older formats with different metrics.
+
+### ❌ DO NOT check `el.style` for break detection — use `getComputedStyle(el)`
+`el.style` only sees inline styles. CSS class-based rules (`.cv-section`, etc.) are invisible to `el.style`.
 
 ## Tailwind v4 preflight — what it actually resets (verified from source)
 ```
@@ -72,6 +102,3 @@ img/svg/video/canvas/…      → display:block; vertical-align:middle
 ## What Tailwind v4 does NOT reset (UA stylesheet survives)
 - `address { font-style: italic }` — UA default survives in both environments
 - `summary { display: list-item }` — added explicitly in preflight (not a UA default)
-
-## Why `page.goto()` vs `page.setContent(html, { baseURL })` are equivalent for fonts
-Both resolve relative `<link href="/api/font-proxy?...">` to the base URL. CSS from an external stylesheet resolves its own `url()` relative to the stylesheet URL (not the document base), so `/api/font-file?url=...` in the proxy's CSS resolves to `http://localhost:PORT/api/font-file?url=...` correctly in both cases.

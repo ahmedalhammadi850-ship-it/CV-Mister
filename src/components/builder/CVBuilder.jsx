@@ -228,6 +228,18 @@ const CVBuilder = () => {
       // that LivePreview uses for measurements. Its innerHTML is the template's actual DOM.
       // Sending this to the server means Puppeteer renders the SAME HTML the user sees —
       // same fonts, same computed styles, same layout — giving a pixel-perfect PDF.
+      // Wait for all fonts to fully load before capturing the off-screen element.
+      // Without this, the hidden div at -9999px may still use fallback font metrics
+      // (different character widths → different text wrapping → layout mismatch in PDF).
+      await document.fonts.ready;
+      const pendingFonts = [];
+      document.fonts.forEach(face => {
+        if (face.status !== 'loaded') pendingFonts.push(face.load().catch(() => {}));
+      });
+      if (pendingFonts.length) await Promise.all(pendingFonts);
+      // One extra frame so the browser re-lays out text with correct font metrics
+      await new Promise(resolve => setTimeout(resolve, 80));
+
       const captureEl   = breakDataRef.current?.captureEl;
       const renderedHtml = captureEl?.innerHTML || null;
 
