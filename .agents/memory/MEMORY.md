@@ -1,4 +1,4 @@
 - [Firebase Direct Migration](firebase-migration.md) — frontend now talks to Firebase SDK directly; no Express backend calls from the browser.
 - [PDF Export approach](pdf-export-approach.md) — capture layer uses html-to-image (not html2canvas); Tailwind v4 Constructable Stylesheets are invisible to html2canvas causing blank PDFs.
-- [ATS PDF — PDFKit server-side](ats-pdf-pdfkit.md) — ATS PDFs use PDFKit (replaced jsPDF); jsPDF embeds wrong glyph widths for custom TTF fonts causing misaligned selection boxes ("fragmented blue blocks"). PDFKit's fontkit reads actual TTF metrics into CIDFontType2 /W arrays, fixing selection perfectly.
+- [ATS PDF — Puppeteer + HTML template](ats-pdf-puppeteer.md) — ATS PDFs use Puppeteer + buildAtsHtml (atsHtmlTemplate.js), NOT jsPDF/PDFKit. HTML template metrics must exactly mirror templateUtils.js (font sizes, page padding, line heights, section margins) for preview/PDF visual parity.
 - [Vite 8 Node.js requirement](vite8-node-requirement.md) — Vite 8 requires Node >=20.19.0 or >=22.12.0; set engines in package.json and .node-version to 22 for Vercel compatibility.

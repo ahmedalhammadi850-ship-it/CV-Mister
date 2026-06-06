@@ -114,25 +114,26 @@ const TEMPLATE_VARIANTS = {
 };
 
 // ── Theme resolution (mirrors resolveTheme in templateUtils.js) ───────────────
+// Values must exactly match templateUtils.js so preview and PDF render identically.
 const FONT_SIZES = {
-  small:  { name: "18pt", heading: "10.5pt", body: "9.5pt",  meta: "8.5pt"  },
-  medium: { name: "20pt", heading: "11pt",   body: "10.5pt", meta: "9.5pt"  },
-  large:  { name: "22pt", heading: "12pt",   body: "11.5pt", meta: "10.5pt" },
+  small:  { name: "18pt", heading: "12pt", body: "10pt", meta: "9pt"  },
+  medium: { name: "20pt", heading: "14pt", body: "11pt", meta: "10pt" },
+  large:  { name: "22pt", heading: "16pt", body: "13pt", meta: "11pt" },
 };
 const PAGE_PADDING = {
-  narrow: "18mm 20mm",
-  medium: "15mm 18mm",
-  wide:   "20mm 25mm",
+  narrow: "24pt 28pt",
+  medium: "36pt 42pt",
+  wide:   "48pt 56pt",
 };
 const LINE_HEIGHTS = {
-  compact: { ltr: "1.25", rtl: "1.55" },
-  normal:  { ltr: "1.40", rtl: "1.75" },
-  relaxed: { ltr: "1.65", rtl: "2.00" },
+  compact: { ltr: "1.20", rtl: "1.50" },
+  normal:  { ltr: "1.40", rtl: "1.80" },
+  relaxed: { ltr: "1.70", rtl: "2.10" },
 };
 const SECTION_MARGINS = {
-  compact: "8pt",
+  compact: "6pt",
   medium:  "14pt",
-  relaxed: "20pt",
+  relaxed: "22pt",
 };
 
 const ARABIC_FONTS = new Set(["Tajawal","Cairo","Amiri","Noto Naskh Arabic","Scheherazade New"]);
@@ -194,7 +195,7 @@ function secLabel(key, isRTL, sectionNames) {
 
 // ── HTML section renderers ────────────────────────────────────────────────────
 function renderHeading(label, accent, rulerPos) {
-  const borderStyle = `2px solid ${esc(accent)}`;
+  const borderStyle = `1.5px solid ${esc(accent)}`;
   if (rulerPos === "top") {
     return `
       <div class="section-heading" style="border-top:${borderStyle};padding-top:5pt;">${esc(label)}</div>`;
@@ -288,8 +289,11 @@ function renderSections(cvData, opts, accent, rulerPos) {
 
       case "interests":
         if (!cvData.interests?.length) break;
-        section("interests", `<div class="body-text skills-text">${
-          cvData.interests.map((i) => esc(typeof i === "string" ? i : i.name)).filter(Boolean).join("  ·  ")
+        section("interests", `<div class="tags-row">${
+          cvData.interests.map((i) => {
+            const name = esc(typeof i === "string" ? i : i.name);
+            return name ? `<span class="tag">${name}</span>` : "";
+          }).filter(Boolean).join("")
         }</div>`);
         break;
 
@@ -547,9 +551,6 @@ export async function buildAtsHtml(cvData, options = {}) {
     /* ── Header ── */
     .header {
       text-align: ${resolvedHeaderAlign};
-      margin-bottom: 10pt;
-      padding-bottom: 10pt;
-      border-bottom: 2px solid ${esc(accent)};
     }
 
     .cv-name {
@@ -568,9 +569,13 @@ export async function buildAtsHtml(cvData, options = {}) {
       margin-bottom: 6pt;
     }
 
+    /* Border sits on the contact line itself — same as the React preview */
     .cv-contact {
       font-size: ${fsSz.meta};
       color: #444444;
+      padding-bottom: 10pt;
+      margin-bottom: 10pt;
+      border-bottom: 2px solid ${esc(accent)};
     }
 
     /* ── Sections ── */
@@ -584,7 +589,7 @@ export async function buildAtsHtml(cvData, options = {}) {
       font-weight: 800;
       color: #0d0d0d;
       text-transform: uppercase;
-      letter-spacing: 0.07em;
+      letter-spacing: 0.08em;
       text-align: ${resolvedHeadAlign};
       margin-bottom: 3pt;
       break-after: avoid;
@@ -646,6 +651,22 @@ export async function buildAtsHtml(cvData, options = {}) {
 
     .skills-text {
       line-height: 1.7;
+    }
+
+    /* ── Interests tag chips (matches React preview flex-wrap layout) ── */
+    .tags-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4pt;
+    }
+
+    .tag {
+      display: inline-block;
+      border: 1px solid ${esc(accent)};
+      color: #333333;
+      border-radius: 2pt;
+      padding: 1pt 5pt;
+      font-size: ${fsSz.meta};
     }
   </style>
 </head>
