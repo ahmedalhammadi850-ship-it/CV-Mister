@@ -203,6 +203,33 @@ async function main() {
     const distPath = path.resolve(__dirname, "../dist");
     app.use(express.static(distPath));
     app.get("*", (_req, res) => { res.sendFile(path.join(distPath, "index.html")); });
+  } else {
+    // In dev mode, proxy all non-API requests to Vite (port 5000).
+    // This prevents MIME-type errors when Replit routes external traffic to
+    // port 3001 instead of 5000 — Express returns HTML for unknown paths,
+    // which the browser rejects as a JavaScript module.
+    const VITE_PORT = 5000;
+    app.use(async (req: any, res: any) => {
+      try {
+        const url = `http://localhost:${VITE_PORT}${req.url}`;
+        const response = await fetch(url, {
+          method: req.method,
+          headers: { ...req.headers, host: `localhost:${VITE_PORT}` } as any,
+          body: ["GET", "HEAD"].includes(req.method) ? undefined : JSON.stringify(req.body),
+          // @ts-ignore
+          signal: AbortSignal.timeout(10000),
+        });
+        const contentType = response.headers.get("content-type") || "";
+        res.status(response.status);
+        response.headers.forEach((value: string, key: string) => {
+          if (!["transfer-encoding", "connection"].includes(key)) res.setHeader(key, value);
+        });
+        const buffer = await response.arrayBuffer();
+        res.end(Buffer.from(buffer));
+      } catch {
+        res.status(502).end();
+      }
+    });
   }
 
   const PORT = parseInt(process.env.PORT || "3001");
