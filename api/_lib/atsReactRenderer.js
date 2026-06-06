@@ -309,15 +309,39 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   //     The remainder of the A4 page (1122 - sliceHeight px) is white space from
   //     the page background — exactly matching the white overlay the browser preview
   //     paints over the content below each page break line.
+  //
+  // PAGE 2+ TOP MARGIN
+  //   The first page has the template's own top padding (default medium = 36pt ≈ 48px).
+  //   Subsequent pages would start with content at y=0 (no margin) without this fix.
+  //   We push the template-wrap down by PAGE_TOP_MARGIN on non-first pages and expand
+  //   the slice height by the same amount so the visual top margin is preserved.
+  const PAGE_TOP_MARGIN = 48; // px — matches template's default medium top padding (36pt @ 96dpi)
+
   const pageStarts = [0, ...pageBreaks];
 
   const pageContainers = pageStarts.map((start, i) => {
-    const isLast = i === pageStarts.length - 1;
+    const isFirst = i === 0;
+    const isLast  = i === pageStarts.length - 1;
     // Slice shows content from 'start' to 'end' — no overlap with next slice.
     const end = isLast ? totalHeight : pageBreaks[i];
     const sliceHeight = Math.max(1, Math.round(end - start));
-    return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${sliceHeight}px">
-  <div class="template-wrap" style="transform:translateY(-${Math.round(start)}px)">
+
+    if (isFirst) {
+      // Page 1: template has its own padding — no extra margin needed.
+      return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${sliceHeight}px">
+  <div class="template-wrap" style="top:0;transform:translateY(-${Math.round(start)}px)">
+    ${bodyHtml}
+  </div>
+</div>`;
+    }
+
+    // Pages 2+: push template-wrap down by PAGE_TOP_MARGIN so the top of the
+    // page shows white space matching the template's own top padding on page 1.
+    // The page-slice is made taller by PAGE_TOP_MARGIN to accommodate this.
+    const topOffset = PAGE_TOP_MARGIN;
+    const totalSliceHeight = sliceHeight + topOffset;
+    return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${totalSliceHeight}px">
+  <div class="template-wrap" style="top:${topOffset}px;transform:translateY(-${Math.round(start)}px)">
     ${bodyHtml}
   </div>
 </div>`;
