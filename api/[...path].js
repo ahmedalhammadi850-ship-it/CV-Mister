@@ -908,6 +908,29 @@ app.patch("/api/admin/business-contacts/:id", async (req, res) => {
   }
 });
 
+// ── pdf/ats ───────────────────────────────────────────────────────────────────
+// Server-side ATS PDF using jsPDF native text operators.
+// No Puppeteer / Chromium — works on every serverless runtime.
+app.post("/api/pdf/ats", async (req, res) => {
+  try {
+    const { generateATSPdfBuffer } = await import("./_lib/atsServerPdf.js");
+    const { cvData, options = {} } = req.body || {};
+    if (!cvData) return res.status(400).json({ message: "cvData is required" });
+    const pdf = await generateATSPdfBuffer(cvData, options);
+    const name = cvData?.personalInfo?.fullName
+      ? `${cvData.personalInfo.fullName} - CV`
+      : "CV";
+    res.setHeader("Content-Type",        "application/pdf");
+    res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(name)}.pdf"`);
+    res.setHeader("Content-Length",       pdf.length);
+    res.setHeader("Cache-Control",        "no-store");
+    return res.status(200).end(Buffer.from(pdf));
+  } catch (err) {
+    console.error("[pdf/ats]", err.message, err.stack);
+    return res.status(500).json({ message: err.message || "PDF generation failed" });
+  }
+});
+
 // ── admin/templates ───────────────────────────────────────────────────────────
 app.patch("/api/admin/templates/:id", async (req, res) => {
   const admin = getAdminFromReq(req);
