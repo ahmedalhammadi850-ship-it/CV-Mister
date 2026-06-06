@@ -62,6 +62,7 @@ async function main() {
         imgSrc: ["'self'", "data:", "blob:", "https:"],
         connectSrc: ["'self'", "https:"],
         frameSrc: ["https://*.replit.dev", "https://*.repl.co", "https://*.replit.app"],
+        frameAncestors: ["'self'", "https://*.replit.dev", "https://*.repl.co", "https://*.replit.app", "https://*.replit.com"],
         objectSrc: ["'none'"],
         upgradeInsecureRequests: [],
       },
