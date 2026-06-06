@@ -909,18 +909,39 @@ app.patch("/api/admin/business-contacts/:id", async (req, res) => {
 });
 
 // ── pdf/ats ───────────────────────────────────────────────────────────────────
-// Server-side ATS PDF using jsPDF native text operators.
-// No Puppeteer / Chromium — works on every serverless runtime.
+// Pixel-perfect PDF via Puppeteer + React SSR (same as api/pdf/ats.js on Replit).
+// Uses @sparticuz/chromium-min for the Chromium binary on Vercel serverless.
 app.post("/api/pdf/ats", async (req, res) => {
-  console.log("[PDF-DEBUG][...path/pdf/ats] handler reached — method:", req.method);
+  console.log("[PDF] handler reached — method:", req.method);
   try {
-    const { generateATSPdfBuffer } = await import("./_lib/atsServerPdf.js");
-    const { cvData, options = {} } = req.body || {};
-    if (!cvData) return res.status(400).json({ message: "cvData is required" });
-    console.log("[PDF-DEBUG][...path/pdf/ats] templateId :", options.templateId);
-    console.log("[PDF-DEBUG][...path/pdf/ats] isRTL      :", options.isRTL);
-    const pdf = await generateATSPdfBuffer(cvData, options);
-    console.log("[PDF-DEBUG][...path/pdf/ats] PDF generated — size (bytes):", pdf.length);
+    const { buildAtsHtmlFromReact, buildHtmlFromRendered } = await import("./_lib/atsReactRenderer.js");
+    const { generatePdfFromHtml } = await import("./_lib/puppeteerPdf.js");
+    const { cvData, renderedHtml, options = {} } = req.body || {};
+    const { templateId, isRTL, pageBreaks = [], totalHeight = 1122 } = options;
+
+    console.log("[PDF] templateId  :", templateId);
+    console.log("[PDF] isRTL       :", isRTL);
+    console.log("[PDF] pageBreaks  :", pageBreaks.length);
+    console.log("[PDF] totalHeight :", totalHeight);
+
+    let html;
+    if (cvData) {
+      console.log("[PDF] source: SSR primary — template:", templateId);
+      html = await buildAtsHtmlFromReact(cvData, options);
+    } else if (renderedHtml) {
+      console.log("[PDF] source: browser-rendered HTML fallback");
+      html = buildHtmlFromRendered(renderedHtml, { isRTL, pageBreaks, totalHeight });
+    } else {
+      return res.status(400).json({ message: "cvData or renderedHtml is required" });
+    }
+
+    const pdf = await generatePdfFromHtml(html, {
+      totalHeight,
+      pageBreakCount: pageBreaks.length,
+    });
+
+    console.log("[PDF] generated — size (bytes):", pdf.length);
+
     const name = cvData?.personalInfo?.fullName
       ? `${cvData.personalInfo.fullName} - CV`
       : "CV";
@@ -928,10 +949,10 @@ app.post("/api/pdf/ats", async (req, res) => {
     res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(name)}.pdf"`);
     res.setHeader("Content-Length",       pdf.length);
     res.setHeader("Cache-Control",        "no-store");
-    res.setHeader("X-PDF-Source",        "server-jspdf");
+    res.setHeader("X-PDF-Source",         cvData ? "ssr-puppeteer" : "browser-rendered");
     return res.status(200).end(Buffer.from(pdf));
   } catch (err) {
-    console.error("[PDF-DEBUG][...path/pdf/ats] ERROR:", err.message, err.stack);
+    console.error("[PDF] ERROR:", err.message, err.stack?.slice(0, 800));
     return res.status(500).json({ message: err.message || "PDF generation failed" });
   }
 });

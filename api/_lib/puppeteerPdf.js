@@ -46,6 +46,11 @@ const LAUNCH_ARGS = [
   "--font-render-hinting=none",
 ];
 
+// Vercel-specific Chromium URL for @sparticuz/chromium-min
+// Must match the chromium-min version installed in package.vercel.json.
+const SPARTICUZ_CHROMIUM_URL =
+  "https://github.com/Sparticuz/chromium/releases/download/v132.0.0/chromium-v132.0.0-pack.tar";
+
 async function getBrowser() {
   if (_browser) {
     try {
@@ -55,12 +60,30 @@ async function getBrowser() {
       _browser = null;
     }
   }
-  const executablePath = findChromium();
-  console.log(`[Puppeteer] Launching Chromium at: ${executablePath}`);
+
+  let executablePath;
+  let launchArgs = LAUNCH_ARGS;
+  let headless = true;
+
+  if (process.env.VERCEL) {
+    // On Vercel serverless: use @sparticuz/chromium-min.
+    // It downloads a compressed Chromium binary to /tmp on first cold-start
+    // and caches it for subsequent warm invocations of the same Lambda.
+    const chromium = (await import("@sparticuz/chromium-min")).default;
+    chromium.setGraphicsMode = false;
+    executablePath = await chromium.executablePath(SPARTICUZ_CHROMIUM_URL);
+    launchArgs = [...chromium.args, ...LAUNCH_ARGS];
+    headless = chromium.headless;
+    console.log(`[Puppeteer] Vercel — sparticuz Chromium at: ${executablePath}`);
+  } else {
+    executablePath = findChromium();
+    console.log(`[Puppeteer] Launching Chromium at: ${executablePath}`);
+  }
+
   _browser = await puppeteer.launch({
     executablePath,
-    headless: true,
-    args: LAUNCH_ARGS,
+    headless,
+    args: launchArgs,
   });
   _browser.on("disconnected", () => { _browser = null; });
   return _browser;
@@ -97,15 +120,18 @@ export async function generatePdfFromHtml(html, opts = {}) {
     // fonts, spacing, backgrounds, and element sizing are pixel-identical.
     await page.emulateMediaType('screen');
 
-    // baseURL makes Puppeteer resolve relative URLs (e.g. /api/font-proxy?url=...)
-    // against the local Express server rather than about:blank, so font loading
-    // goes through the same localhost proxy the browser preview uses.
-    const PORT = process.env.PORT || 3001;
-    await page.setContent(html, {
+    // On Vercel: HTML uses absolute Google Fonts URLs — no baseURL needed.
+    // On Replit/local: HTML uses relative /api/font-proxy URLs — baseURL
+    // resolves them against the local Express server (http://127.0.0.1:PORT).
+    const setContentOpts = {
       waitUntil: "networkidle0",
       timeout: 30000,
-      baseURL: `http://127.0.0.1:${PORT}`,
-    });
+    };
+    if (!process.env.VERCEL) {
+      const PORT = process.env.PORT || 3001;
+      setContentOpts.baseURL = `http://127.0.0.1:${PORT}`;
+    }
+    await page.setContent(html, setContentOpts);
 
     // Wait for every @font-face to fully load and flush into the rendering pipeline
     await page.evaluate(async () => {

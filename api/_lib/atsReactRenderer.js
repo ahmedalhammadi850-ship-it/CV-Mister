@@ -130,12 +130,30 @@ function normalizeId(id) {
 
 const _templateCache = new Map();
 
+// On Vercel, Node.js cannot import raw .jsx files.
+// scripts/buildSsr.mjs pre-compiles all templates into dist-ssr/templates.js
+// (run as part of the Vercel build).  We import from that bundle on Vercel
+// and fall back to dynamic JSX imports on Replit / local (tsx handles JSX).
+const _ssrBundle = process.env.VERCEL
+  ? import('../../dist-ssr/templates.js').catch(() => null)
+  : null;
+
 async function loadTemplate(tid) {
   if (_templateCache.has(tid)) return _templateCache.get(tid);
   const file = TEMPLATE_FILES[tid] || TEMPLATE_FILES.atsclean;
-  const fullPath = path.join(TEMPLATES_DIR, file);
-  const mod = await import(fullPath);
-  const component = mod.default;
+  let component;
+
+  if (process.env.VERCEL) {
+    const bundle = await _ssrBundle;
+    if (!bundle) throw new Error('dist-ssr/templates.js not found — run scripts/buildSsr.mjs');
+    const exportName = file.replace(/\.(jsx|tsx)$/, '');
+    component = bundle[exportName];
+  } else {
+    const fullPath = path.join(TEMPLATES_DIR, file);
+    const mod = await import(fullPath);
+    component = mod.default;
+  }
+
   if (!component) throw new Error(`Template ${file} has no default export`);
   _templateCache.set(tid, component);
   return component;
@@ -167,9 +185,13 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   // this relative URL resolves to http://127.0.0.1:<PORT>/api/font-proxy?url=...
   // The proxy rewrites font-file URLs to /api/font-file?url=... (also relative),
   // which Puppeteer resolves the same way — all font traffic stays on localhost.
-  const fontLinks = [
-    `<link href="/api/font-proxy?url=${encodeURIComponent(ALL_GOOGLE_FONTS_URL)}" rel="stylesheet" />`,
-  ].join('\n  ');
+  // On Vercel, Chromium has direct internet access — fetch Google Fonts directly
+  // (no localhost server is running so the /api/font-proxy relative URL would fail).
+  // On Replit/local, use the font-proxy which routes through the local Express
+  // server (baseURL: http://127.0.0.1:PORT makes the relative URL resolve).
+  const fontLinks = process.env.VERCEL
+    ? `<link href="${ALL_GOOGLE_FONTS_URL}" rel="stylesheet" />`
+    : `<link href="/api/font-proxy?url=${encodeURIComponent(ALL_GOOGLE_FONTS_URL)}" rel="stylesheet" />`;
 
   // ── Base CSS — exact mirror of Tailwind CSS v4 preflight ──────────────────
   //

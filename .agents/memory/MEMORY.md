@@ -3,3 +3,4 @@
 - [PDF vs Preview — complete root cause analysis](pdf-preview-mismatch.md) — Three root causes identified and fixed; see topic file for full details and critical "do NOT" rules.
 - [ATS PDF — React SSR via renderToStaticMarkup](ats-pdf-puppeteer.md) — All PDFs use Puppeteer + react-dom/server renderToStaticMarkup on the actual JSX templates (api/_lib/atsReactRenderer.js). globalThis.React must be set before importing templates (tsx uses classic JSX transform). tsconfig.server.json needs jsx:react-jsx and src/templates in include.
 - [Vite 8 Node.js requirement](vite8-node-requirement.md) — Vite 8 requires Node >=20.19.0 or >=22.12.0; set engines in package.json and .node-version to 22 for Vercel compatibility.
+- [Vercel PDF — Puppeteer + SSR bundle fix](vercel-pdf-fix.md) — Vercel used jsPDF (text-only); fix uses @sparticuz/chromium-min + esbuild SSR bundle for pixel-perfect PDFs on Vercel.
