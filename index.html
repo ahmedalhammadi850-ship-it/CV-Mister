@@ -17,10 +17,14 @@
     <meta property="og:description" content="Build your next ATS-compliant, stunning resume with live preview and custom designs." />
     <meta property="og:type" content="website" />
     
-    <!-- Fonts loaded via same-origin proxy to avoid CORS issues with html-to-image -->
+    <!-- Resume template fonts — loaded via same-origin proxy so Vite dev server
+         doesn't block cross-origin CSS during development.
+         Includes both UI fonts (Plus Jakarta Sans, DM Sans) and all template fonts
+         (Inter, Merriweather, Outfit, Tajawal, Cairo, Amiri, Noto Naskh Arabic,
+         Scheherazade New) so the browser preview matches the server-side Puppeteer PDF. -->
     <script>
       (function () {
-        var FONTS_URL = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Merriweather:wght@300;400;700&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:wght@400;700&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap';
+        var FONTS_URL = 'https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Outfit:wght@400;500;600;700;800&family=Tajawal:wght@300;400;500;700&family=Cairo:wght@300;400;600;700&family=Amiri:ital,wght@0,400;0,700;1,400&family=Noto+Naskh+Arabic:wght@400;500;600;700&family=Scheherazade+New:wght@400;700&display=swap';
         fetch('/api/font-proxy?url=' + encodeURIComponent(FONTS_URL))
           .then(function (r) { return r.ok ? r.text() : Promise.reject(); })
           .then(function (css) {

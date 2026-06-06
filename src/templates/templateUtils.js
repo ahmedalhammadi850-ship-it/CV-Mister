@@ -51,9 +51,13 @@ export function resolveTheme(theme, isRTL) {
     fontFamily = 'Calibri';
   }
 
+  // For LTR: fall through to Inter (loaded from Google Fonts) before the
+  // generic sans-serif, so non-Windows browsers and the server-side PDF
+  // renderer both use the same web font when Calibri is not installed.
+  // For RTL: Tajawal is always a Google Font, so the stack is consistent.
   const baseFont = isRTL
     ? `'${fontFamily}', 'Tajawal', Arial, sans-serif`
-    : `'${fontFamily}', 'Calibri', Arial, sans-serif`;
+    : `'${fontFamily}', 'Inter', Arial, sans-serif`;
 
   return {
     sz: SIZES[fontSize],

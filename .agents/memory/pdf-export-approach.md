@@ -1,20 +1,32 @@
 ---
-name: PDF Export approach
-description: How PDF download works in CVBuilder — html-to-image visual capture + invisible text layer for ATS selectability.
+name: PDF Export — Universal Puppeteer SSR
+description: All templates use server-side Puppeteer + react-dom/server renderToStaticMarkup for PDF generation.
 ---
 
-## Architecture (current)
-All PDF exports use **html-to-image + jsPDF** — pixel-perfect visual with fully selectable text.
+# PDF Export: Universal Puppeteer SSR
 
-### Stack
-- **Visual layer**: `html-to-image` (`toCanvas`) at 2× pixel ratio — handles modern CSS (oklch, lch, lab) that html2canvas v1 crashes on
-- **Text layer**: jsPDF v4 `doc.text(str, x, y, { renderingMode: 'invisible' })` — PDF text mode 3 (invisible on screen but selectable/copyable/ATS-readable)
+## The Rule
+ALL templates (ATS + non-ATS) generate PDFs via `POST /api/pdf/ats` on the server using Puppeteer. No client-side html-to-image or jsPDF image layers. The same React component used in the browser preview is server-rendered with `renderToStaticMarkup` → identical layout guaranteed.
 
-### Key rules
-- **ALWAYS** use `{ renderingMode: 'invisible' }` — NOT `doc.internal.write('3 Tr')` (jsPDF v4 deprecated hack)
-- For image capture: clone captureEl to `position:fixed; top:0; left:0` (viewport origin) with a white overlay at z-index 999997 on top. Do NOT place at `-10000px` — html-to-image produces a blank canvas when element is off-screen.
-- For text-rect extraction: clone captureEl to `position:fixed; top:0; left:0; visibility:hidden` so browser fully lays out the clone before calling `getClientRects()` on text nodes.
-- Always remove clones in the `finally` block.
-- Tailwind v4 uses Constructable Stylesheets invisible to html2canvas — that's why html-to-image is used (inlines computed styles per element).
+**Why:** html-to-image + jsPDF (old approach) produced dual-layer PDFs (image + invisible text). Some PDF viewers rendered the invisible text layer as visible black text at incorrect positions → headings appeared "on the left". Also: Tailwind v4 Constructable Stylesheets are invisible to html2canvas/html-to-image's SVG foreignObject → blank captures. Puppeteer renders real text — no dual layers.
 
-**Why:** html2canvas v1 cannot read Tailwind v4 Constructable Stylesheets → blank white canvas. html-to-image uses SVG foreignObject + getComputedStyle inlining which works correctly.
+## Multi-page support
+Client (`LivePreview.jsx` via `breakDataRef`) computes pixel y-positions of page breaks using a smart-break algorithm. These are sent to the server as `options.pageBreaks` + `options.totalHeight`. When provided, `atsReactRenderer.js` builds N `.page-slice` containers, each `overflow:hidden` + `translateY(-pageStart_px)` + `break-after:page` — so PDF pages exactly match the preview slices.
+
+## Font substitution (server-side)
+System fonts (Calibri, Georgia, Times New Roman, Verdana, Trebuchet MS, Arial) are NOT available on Linux/Chromium. `atsReactRenderer.js` has `LINUX_FONT_SUBSTITUTES` map that patches `theme.fontFamily` before SSR:
+- Calibri, Verdana, Trebuchet MS, Arial → **Inter**
+- Georgia, Times New Roman → **Merriweather**
+
+Applied via `patchThemeForServer(theme, isRTL)`. Does NOT change Firestore data or browser UI selection.
+
+## Font consistency (browser ↔ PDF)
+`index.html` loads Inter, Merriweather, Outfit via the same `/api/font-proxy` so the browser preview also has these fonts. `templateUtils.js` font stack for LTR:
+`'${fontFamily}', 'Inter', Arial, sans-serif` — so non-Windows browsers fall through to Inter (matching the PDF) instead of Arial.
+
+## Key files
+- `api/_lib/atsReactRenderer.js` — SSR + multi-page HTML builder + font substitution
+- `api/pdf/ats.js` — HTTP handler, accepts pageBreaks/totalHeight
+- `api/_lib/puppeteerPdf.js` — singleton browser, viewport height from pageBreakCount
+- `src/templates/templateUtils.js` — font stack (Inter as LTR fallback)
+- `index.html` — loads all template fonts via font-proxy

@@ -92,6 +92,38 @@ const ALL_GOOGLE_FONTS_URL =
   '&family=Scheherazade+New:wght@400;700' +
   '&display=swap';
 
+// ── Server-side font substitution ─────────────────────────────────────────────
+// System fonts listed here are NOT available in Puppeteer's Linux/Chromium
+// environment. Without substitution they fall back to Arial, which has
+// measurably different character widths and causes layout shifts vs. the
+// browser preview (where Windows/macOS users have the system font installed).
+//
+// Each system font is mapped to the CLOSEST Google Font equivalent that is
+// already declared in ALL_GOOGLE_FONTS_URL, so no extra network fetch is
+// needed. The substitution is applied only to the theme passed to the server-
+// side renderToStaticMarkup call — it never changes what is stored in Firestore
+// or shown as the selected font in the browser UI.
+const LINUX_FONT_SUBSTITUTES = {
+  'Calibri':         'Inter',          // Microsoft humanist sans-serif → Inter
+  'Verdana':         'Inter',          // Geometric humanist → Inter
+  'Trebuchet MS':    'Inter',          // Humanist sans-serif → Inter
+  'Georgia':         'Merriweather',   // Transitional serif → Merriweather
+  'Times New Roman': 'Merriweather',   // Old-style serif → Merriweather
+  'Arial':           'Inter',          // Grotesque sans-serif → Inter (closest web font)
+};
+
+/**
+ * Patch a theme object so any system-only font is replaced with its
+ * nearest Google Fonts equivalent before server-side rendering.
+ * This keeps the PDF layout as close as possible to the browser preview.
+ */
+function patchThemeForServer(theme, isRTL) {
+  const ff = theme?.fontFamily || (isRTL ? 'Tajawal' : 'Calibri');
+  const substitute = LINUX_FONT_SUBSTITUTES[ff];
+  if (!substitute) return theme ?? {};
+  return { ...(theme ?? {}), fontFamily: substitute };
+}
+
 function normalizeId(id) {
   return (id || '').toLowerCase().replace(/[\s\-_]/g, '');
 }
@@ -142,11 +174,15 @@ export async function buildAtsHtmlFromReact(cvData, options = {}) {
   const tid = normalizeId(templateId);
   const TemplateComponent = await loadTemplate(tid);
 
+  // Substitute any system-only fonts with Google Fonts equivalents so the
+  // PDF layout matches the preview as closely as possible on Linux/Chromium.
+  const serverTheme = patchThemeForServer(theme, isRTL);
+
   // Server-render the same component the browser preview uses.
   const bodyHtml = renderToStaticMarkup(
     React.createElement(TemplateComponent, {
       data: cvData,
-      theme,
+      theme: serverTheme,
       isRTL,
       visibleSections,
       visiblePersonalFields,
