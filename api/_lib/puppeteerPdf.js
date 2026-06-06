@@ -97,7 +97,15 @@ export async function generatePdfFromHtml(html, opts = {}) {
     // fonts, spacing, backgrounds, and element sizing are pixel-identical.
     await page.emulateMediaType('screen');
 
-    await page.setContent(html, { waitUntil: "networkidle0", timeout: 30000 });
+    // baseURL makes Puppeteer resolve relative URLs (e.g. /api/font-proxy?url=...)
+    // against the local Express server rather than about:blank, so font loading
+    // goes through the same localhost proxy the browser preview uses.
+    const PORT = process.env.PORT || 3001;
+    await page.setContent(html, {
+      waitUntil: "networkidle0",
+      timeout: 30000,
+      baseURL: `http://127.0.0.1:${PORT}`,
+    });
 
     // Wait for every @font-face to fully load and flush into the rendering pipeline
     await page.evaluate(async () => {

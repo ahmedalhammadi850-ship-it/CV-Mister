@@ -142,10 +142,18 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   const dir  = isRTL ? 'rtl' : 'ltr';
   const lang = isRTL ? 'ar'  : 'en';
 
+  // Load fonts via the local font-proxy rather than directly from fonts.googleapis.com.
+  // The browser preview already uses /api/font-proxy (see index.html), so using the
+  // same proxy in Puppeteer guarantees identical font files and eliminates the
+  // external-network dependency that can cause Google Fonts to fail or time-out
+  // inside the Replit sandbox — which would fall back to Arial and break every
+  // layout measurement compared to the preview.
+  // puppeteerPdf.js sets baseURL:'http://127.0.0.1:<PORT>' on page.setContent() so
+  // this relative URL resolves to http://127.0.0.1:<PORT>/api/font-proxy?url=...
+  // The proxy rewrites font-file URLs to /api/font-file?url=... (also relative),
+  // which Puppeteer resolves the same way — all font traffic stays on localhost.
   const fontLinks = [
-    '<link rel="preconnect" href="https://fonts.googleapis.com" />',
-    '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />',
-    `<link href="${ALL_GOOGLE_FONTS_URL}" rel="stylesheet" />`,
+    `<link href="/api/font-proxy?url=${encodeURIComponent(ALL_GOOGLE_FONTS_URL)}" rel="stylesheet" />`,
   ].join('\n  ');
 
   // Base CSS — note: print-color-adjust must be inside a real selector.
@@ -183,7 +191,12 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     img, svg { display: block; }
     section, article, aside, header, footer, nav, main {
       display: block; margin: 0; padding: 0;
-    }`;
+    }
+    /* address: browser default is font-style:italic — templates use <address>
+       for the contact line but never set fontStyle in the inline style object.
+       Tailwind preflight resets this to normal in the browser preview; we must
+       do the same here so Puppeteer doesn't render contact info in italics. */
+    address { font-style: normal; margin: 0; padding: 0; }`;
 
   // ── Single-page ────────────────────────────────────────────────────────────
   if (!pageBreaks || pageBreaks.length === 0) {
