@@ -219,11 +219,20 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
       tab-size: 4;
     }
 
-    /* Print-color + background preservation */
+    /* ── Print-colour preservation (CRITICAL for coloured sidebars/backgrounds) ──
+     * Chromium's PDF pipeline can strip background-color / background-image even
+     * when printBackground:true is set, unless print-color-adjust:exact is declared
+     * on the *element itself*.  Setting it only on html/body is not enough —
+     * every element with a background needs it.  The * selector covers all of them.
+     * The !important ensures it wins over any UA-stylesheet adjustments.
+     */
+    *, *::before, *::after {
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+      color-adjust: exact !important;
+    }
     html, body {
       background: #ffffff;
-      -webkit-print-color-adjust: exact;
-      print-color-adjust: exact;
     }
 
     /* Tailwind preflight: heading reset (lines 73-81) */
