@@ -75,16 +75,27 @@ const TEMPLATE_FILES = {
 };
 
 // All Google Fonts used across templates — loaded in a single CSS request.
-// Must stay in sync with the font list in index.html (font-proxy script) so
-// browser preview and Puppeteer PDF use identical font files.
+//
+// CRITICAL: This URL must be IDENTICAL to FONTS_URL in index.html.
+// Both the browser preview and Puppeteer now load fonts through /api/font-proxy.
+// If the URLs differ, Google Fonts returns different CSS → different font files
+// → different glyph metrics → layout shifts between preview and PDF.
+//
+// To update fonts: change both this URL and index.html at the same time.
+// Includes all template fonts (Inter, Merriweather, Outfit, Tajawal, Cairo,
+// Amiri, Noto Naskh Arabic, Scheherazade New) plus UI fonts (Plus Jakarta Sans,
+// DM Sans) so the exact same Google Fonts CSS is returned for both environments.
 const ALL_GOOGLE_FONTS_URL =
-  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800' +
-  '&family=Merriweather:ital,wght@0,400;0,700;1,400' +
+  'https://fonts.googleapis.com/css2?' +
+  'family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400' +
+  '&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400' +
+  '&family=Inter:wght@400;500;600;700;800' +
+  '&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400' +
   '&family=Outfit:wght@400;500;600;700;800' +
-  '&family=Tajawal:wght@400;500;700;800' +
-  '&family=Cairo:wght@400;600;700;800' +
+  '&family=Tajawal:wght@300;400;500;700' +
+  '&family=Cairo:wght@300;400;600;700' +
   '&family=Amiri:ital,wght@0,400;0,700;1,400' +
-  '&family=Noto+Naskh+Arabic:wght@400;600;700' +
+  '&family=Noto+Naskh+Arabic:wght@400;500;600;700' +
   '&family=Scheherazade+New:wght@400;700' +
   '&display=swap';
 
@@ -156,47 +167,93 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     `<link href="/api/font-proxy?url=${encodeURIComponent(ALL_GOOGLE_FONTS_URL)}" rel="stylesheet" />`,
   ].join('\n  ');
 
-  // Base CSS — note: print-color-adjust must be inside a real selector.
-  // We intentionally do NOT include @media print {} overrides — those would
-  // alter rendering vs. the browser preview. Instead we set emulateMediaType
-  // to 'screen' in puppeteerPdf.js to keep Chromium in screen-render mode.
+  // ── Base CSS — exact mirror of Tailwind CSS v4 preflight ──────────────────
   //
-  // IMPORTANT — HTML element reset (mirrors Tailwind preflight):
-  // In the browser preview, Tailwind's preflight stylesheet neutralises
-  // browser-default margins on h1-h6, p, ul, ol, li (e.g. h3 gets
-  // "margin: 1em 0" by default, p gets "margin: 1em 0").  Puppeteer
-  // renders in a minimal document with NO Tailwind, so those browser
-  // defaults would apply and add invisible extra spacing that doesn't
-  // exist in the preview — causing every section, role title, and
-  // paragraph to shift down relative to what the user sees.
-  // The inline styles on template elements (which always win over element
-  // selectors) are unaffected by this reset.
+  // WHY: The browser preview renders inside the full app where Tailwind is
+  // active (src/index.css → @import "tailwindcss").  Puppeteer renders a bare
+  // HTML document with NO Tailwind.  Without this reset, Chromium's UA
+  // stylesheet defaults apply in Puppeteer but NOT in the browser (Tailwind
+  // overrides them), causing phantom margins on h1-h6, p, ul, ol, etc. that
+  // push every section downward relative to what the user sees in the preview.
+  //
+  // HOW: Copy tailwindcss/preflight.css rules verbatim.  We intentionally do
+  // NOT include @media print {} overrides — emulateMediaType('screen') in
+  // puppeteerPdf.js keeps Chromium in screen-render mode so print-only rules
+  // never apply.  Template inline styles always win over element selectors.
+  //
+  // WHAT TAILWIND v4 PREFLIGHT ACTUALLY DOES (verified from the source file):
+  //   *, ::before, ::after              → margin:0; padding:0; border:0 solid
+  //   html                              → line-height:1.5
+  //   h1-h6                             → font-size/weight: inherit
+  //   a                                 → color/text-decoration: inherit
+  //   b, strong                         → font-weight: bolder
+  //   ol, ul, menu                      → list-style: none
+  //   table                             → text-indent:0; border-collapse:collapse
+  //   img/svg/video/canvas/…            → display:block; vertical-align:middle
+  //
+  // WHAT TAILWIND v4 DOES NOT RESET:
+  //   address { font-style: italic }    ← UA stylesheet; Tailwind's * selector
+  //                                        only zeroes margin/padding/border,
+  //                                        NOT font-style.  Both the browser
+  //                                        (Tailwind active) and Puppeteer
+  //                                        (bare document) therefore render
+  //                                        <address> in italic — they match.
+  //                                        Do NOT add address{font-style:normal}
+  //                                        here or the PDF will differ from the
+  //                                        preview.
   const baseStyles = `
     @page { size: A4; margin: 0; }
-    *, *::before, *::after { box-sizing: border-box; }
+
+    /* Tailwind preflight: universal reset (preflight.css lines 7-16) */
+    *, ::after, ::before, ::backdrop {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: 0 solid;
+    }
+
+    /* Tailwind preflight: html baseline (lines 28-46) */
+    html {
+      line-height: 1.5;
+      -webkit-text-size-adjust: 100%;
+      tab-size: 4;
+    }
+
+    /* Print-color + background preservation */
     html, body {
-      margin: 0; padding: 0; background: #ffffff;
+      background: #ffffff;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
     }
+
+    /* Tailwind preflight: heading reset (lines 73-81) */
     h1, h2, h3, h4, h5, h6 {
-      margin: 0; padding: 0;
-      font-size: inherit; font-weight: inherit;
+      font-size: inherit;
+      font-weight: inherit;
     }
-    p  { margin: 0; padding: 0; }
-    ul, ol { margin: 0; padding: 0; list-style: none; }
-    li { margin: 0; padding: 0; }
-    blockquote, figure, pre { margin: 0; padding: 0; }
-    table { border-collapse: collapse; border-spacing: 0; }
-    img, svg { display: block; }
-    section, article, aside, header, footer, nav, main {
-      display: block; margin: 0; padding: 0;
+
+    /* Tailwind preflight: link reset (lines 87-91) */
+    a {
+      color: inherit;
+      -webkit-text-decoration: inherit;
+      text-decoration: inherit;
     }
-    /* address: browser default is font-style:italic — templates use <address>
-       for the contact line but never set fontStyle in the inline style object.
-       Tailwind preflight resets this to normal in the browser preview; we must
-       do the same here so Puppeteer doesn't render contact info in italics. */
-    address { font-style: normal; margin: 0; padding: 0; }`;
+
+    /* Tailwind preflight: bold weight (lines 97-100) */
+    b, strong { font-weight: bolder; }
+
+    /* Tailwind preflight: list reset (lines 197-201) */
+    ol, ul, menu { list-style: none; }
+
+    /* Tailwind preflight: table (lines 163-167) */
+    table { text-indent: 0; border-color: inherit; border-collapse: collapse; }
+
+    /* Tailwind preflight: block media (lines 209-219) */
+    img, svg, video, canvas, audio, iframe, embed, object {
+      display: block;
+      vertical-align: middle;
+    }
+    img, video { max-width: 100%; height: auto; }`;
 
   // ── Single-page ────────────────────────────────────────────────────────────
   if (!pageBreaks || pageBreaks.length === 0) {
