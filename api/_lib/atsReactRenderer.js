@@ -1,15 +1,18 @@
 /**
  * atsReactRenderer.js
  *
- * Renders ATS resume templates using the SAME React components as the
- * browser preview — guaranteeing pixel-perfect PDF/preview parity.
+ * Renders ALL resume templates (ATS + non-ATS) using the SAME React components
+ * as the browser preview — guaranteeing pixel-perfect PDF/preview parity.
  *
  * Uses react-dom/server renderToStaticMarkup to produce static HTML from
  * the JSX templates in src/templates/, then wraps it in a print-ready
  * HTML document for Puppeteer.
  *
- * This is the single source of truth for ATS PDF layout. Do NOT maintain
- * a separate HTML/CSS mirror (atsHtmlTemplate.js is no longer used for PDF).
+ * Multi-page support: when pageBreaks are provided (from the client's smart
+ * break computation), the HTML document contains one clipped container per
+ * page slice. Each container uses overflow:hidden + translateY to show only
+ * the correct slice of the template, and break-after:page forces a Puppeteer
+ * page boundary between them — so the PDF pages exactly match the preview.
  */
 
 import * as React from 'react';
@@ -29,6 +32,7 @@ const TEMPLATES_DIR = path.resolve(__dirname, '../../src/templates');
 
 // Maps normalized templateId → filename in src/templates/
 const TEMPLATE_FILES = {
+  // ── ATS templates ──────────────────────────────────────────────────────────
   atsclean:   'ATSCleanTemplate.jsx',
   atspro:     'ATSProTemplate.jsx',
   atssimple:  'ATSSimpleTemplate.jsx',
@@ -38,22 +42,55 @@ const TEMPLATE_FILES = {
   atsharvard: 'ATSHarvardTemplate.jsx',
   atscenter:  'ATSCenterTemplate.jsx',
   atselegant: 'ATSElegantTemplate.jsx',
+
+  // ── Standard / English templates ───────────────────────────────────────────
+  modern:         'ModernTemplate.jsx',
+  classic:        'ClassicTemplate.jsx',
+  creative:       'CreativeTemplate.jsx',
+  minimal:        'MinimalTemplate.jsx',
+  executive:      'ExecutiveTemplate.jsx',
+  prestige:       'PrestigeTemplate.jsx',
+  classicserif:   'ClassicSerifTemplate.jsx',
+  atlanticblue:   'AtlanticBlueTemplate.jsx',
+  mercuryflow:    'MercuryFlowTemplate.jsx',
+  editorialrule:  'EditorialRuleTemplate.jsx',
+  sidebarlight:   'SidebarLightTemplate.jsx',
+  tealpro:        'TealProTemplate.jsx',
+  roseelegant:    'RoseElegantTemplate.jsx',
+  darkheader:     'DarkHeaderTemplate.jsx',
+  velvet:         'VelvetTemplate.jsx',
+  aurora:         'AuroraTemplate.jsx',
+  englishhorizon: 'EnglishHorizonTemplate.jsx',
+  englishapex:    'EnglishApexTemplate.jsx',
+
+  // ── Arabic templates ────────────────────────────────────────────────────────
+  arabicgem:          'ArabicGemTemplate.jsx',
+  arabicnavy:         'ArabicNavyTemplate.jsx',
+  arabicpro:          'ArabicProTemplate.jsx',
+  arabictealsidebar:  'ArabicTealSidebarTemplate.jsx',
+  arabicslatesidebar: 'ArabicSlateSidebarTemplate.jsx',
+  arabicmodern:       'ArabicModernTemplate.jsx',
+  arabiccard:         'ArabicCardTemplate.jsx',
+  arabicelite:        'ArabicEliteTemplate.jsx',
+  arabicwave:         'ArabicWaveTemplate.jsx',
+  arabicluxe:         'ArabicLuxeTemplate.jsx',
+  arabiczafir:        'ArabicZafirTemplate.jsx',
 };
 
-// Google Fonts CSS URLs for the web fonts the templates can use.
-// System fonts (Calibri, Arial, Georgia, Times New Roman, Verdana,
-// Trebuchet MS) are not listed here — Puppeteer's Chromium resolves them
-// from system fonts (same behaviour as a browser on the same OS).
-const GOOGLE_FONT_URLS = {
-  'Inter':             'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap',
-  'Merriweather':      'https://fonts.googleapis.com/css2?family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap',
-  'Outfit':            'https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&display=swap',
-  'Tajawal':           'https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap',
-  'Cairo':             'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap',
-  'Amiri':             'https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400&display=swap',
-  'Noto Naskh Arabic': 'https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&display=swap',
-  'Scheherazade New':  'https://fonts.googleapis.com/css2?family=Scheherazade+New:wght@400;700&display=swap',
-};
+// All Google Fonts used across templates — loaded in a single CSS request
+// so every font is available regardless of which template is selected.
+// System fonts (Calibri, Arial, Georgia, etc.) are resolved from Chromium's
+// bundled fonts; on Linux this means Liberation/Noto fallbacks.
+const ALL_GOOGLE_FONTS_URL =
+  'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800' +
+  '&family=Merriweather:ital,wght@0,400;0,700;1,400' +
+  '&family=Outfit:wght@400;500;600;700;800' +
+  '&family=Tajawal:wght@400;500;700;800' +
+  '&family=Cairo:wght@400;600;700;800' +
+  '&family=Amiri:ital,wght@0,400;0,700;1,400' +
+  '&family=Noto+Naskh+Arabic:wght@400;600;700' +
+  '&family=Scheherazade+New:wght@400;700' +
+  '&display=swap';
 
 function normalizeId(id) {
   return (id || '').toLowerCase().replace(/[\s\-_]/g, '');
@@ -74,11 +111,19 @@ async function loadTemplate(tid) {
 }
 
 /**
- * Build a complete print-ready HTML document by server-rendering the
- * exact same React template component used in the browser preview.
+ * Build a complete print-ready HTML document by server-rendering the exact
+ * same React template component used in the browser preview.
+ *
+ * When pageBreaks are provided (pixel y-positions from the client's smart
+ * break computation), the document contains one clipped container per page
+ * slice. Each container uses overflow:hidden + translateY to display only its
+ * slice of the template, and break-after:page forces a PDF page boundary —
+ * so the exported pages exactly match what the user sees in the preview.
  *
  * @param {object} cvData
  * @param {object} options  — same shape as POST /api/pdf/ats body.options
+ *   @param {number[]} [options.pageBreaks=[]]     pixel y-positions of page breaks
+ *   @param {number}   [options.totalHeight=1122]  total content height in px
  * @returns {Promise<string>} Full HTML document ready for Puppeteer
  */
 export async function buildAtsHtmlFromReact(cvData, options = {}) {
@@ -90,14 +135,14 @@ export async function buildAtsHtmlFromReact(cvData, options = {}) {
     visiblePersonalFields = {},
     sectionOrder          = ['summary', 'experience', 'education', 'skills', 'projects', 'languages'],
     sectionNames          = {},
+    pageBreaks            = [],
+    totalHeight           = 1122,
   } = options;
 
   const tid = normalizeId(templateId);
   const TemplateComponent = await loadTemplate(tid);
 
   // Server-render the same component the browser preview uses.
-  // React.createElement is used (not JSX) so this file doesn't need
-  // the JSX transform itself — the template files do their own JSX.
   const bodyHtml = renderToStaticMarkup(
     React.createElement(TemplateComponent, {
       data: cvData,
@@ -110,37 +155,95 @@ export async function buildAtsHtmlFromReact(cvData, options = {}) {
     })
   );
 
-  // Load the same font family the template uses.
-  // resolveTheme() in templateUtils.js defaults to 'Calibri' (LTR) or
-  // 'Tajawal' (RTL). Only web fonts need a <link>; system fonts are
-  // picked up automatically by Chromium.
-  const fontFamily = theme?.fontFamily || (isRTL ? 'Tajawal' : 'Calibri');
-  const fontUrl    = GOOGLE_FONT_URLS[fontFamily];
-  const fontLinks  = fontUrl
-    ? `<link rel="preconnect" href="https://fonts.googleapis.com" />
-       <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-       <link href="${fontUrl}" rel="stylesheet" />`
-    : '';
-
   const dir = isRTL ? 'rtl' : 'ltr';
+  const lang = isRTL ? 'ar' : 'en';
 
-  // The React templates render at width:794px / minHeight:1122px
-  // which is exactly A4 at 96 dpi. Puppeteer's viewport is set to
-  // match this width in generatePdfFromHtml, so @page A4 maps 1:1.
+  const fontLinks = `
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="${ALL_GOOGLE_FONTS_URL}" rel="stylesheet" />`;
+
+  const baseStyles = `
+    @page { size: A4; margin: 0; }
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: #ffffff; }
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;`;
+
+  // ── Single-page (no breaks) ────────────────────────────────────────────────
+  // Use the original simple HTML structure — Puppeteer paginates automatically
+  // at A4 boundaries using the template's own CSS break-inside/break-after rules.
+  if (pageBreaks.length === 0) {
+    return `<!DOCTYPE html>
+<html lang="${lang}" dir="${dir}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=794" />
+  ${fontLinks}
+  <style>${baseStyles}</style>
+</head>
+<body>
+  ${bodyHtml}
+</body>
+</html>`;
+  }
+
+  // ── Multi-page (breaks provided by client) ─────────────────────────────────
+  // Build one 794×1122px container per page slice. Each container:
+  //   • Is exactly A4 height (1122px at 96dpi) with overflow:hidden
+  //   • Shifts the template upward by -pageStart px using translateY so only
+  //     the correct slice is visible
+  //   • Has break-after:page so Puppeteer starts a new PDF page after it
+  //
+  // This approach duplicates the template HTML N times (once per page), but
+  // since it's static markup the overhead is small and the layout is exact.
+  const pageStarts = [0, ...pageBreaks];
+  const pageEnds   = [...pageBreaks, totalHeight];
+
+  const pageContainers = pageStarts.map((start, i) => {
+    const isLast = i === pageStarts.length - 1;
+    return `<div class="page-slice${isLast ? ' last-slice' : ''}">
+  <div class="template-wrap" style="transform:translateY(-${Math.round(start)}px)">
+    ${bodyHtml}
+  </div>
+</div>`;
+  }).join('\n');
+
   return `<!DOCTYPE html>
-<html lang="${isRTL ? 'ar' : 'en'}" dir="${dir}">
+<html lang="${lang}" dir="${dir}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=794" />
   ${fontLinks}
   <style>
-    @page { size: A4; margin: 0; }
-    *, *::before, *::after { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: #ffffff; }
+    ${baseStyles}
+
+    /* One container per PDF page */
+    .page-slice {
+      width: 794px;
+      height: 1122px;          /* A4 at 96 dpi */
+      overflow: hidden;
+      position: relative;
+      break-after: page;
+      page-break-after: always;
+    }
+    .page-slice.last-slice {
+      break-after: auto;
+      page-break-after: auto;
+    }
+
+    /* The template itself; transform shifts it to show only this page's slice */
+    .template-wrap {
+      width: 794px;
+      position: absolute;
+      top: 0;
+      left: 0;
+      transform-origin: top left;
+    }
   </style>
 </head>
 <body>
-  ${bodyHtml}
+${pageContainers}
 </body>
 </html>`;
 }

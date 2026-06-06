@@ -7,7 +7,6 @@ import { useAuth } from '../../context/AuthContext';
 import EditorPanel from './EditorPanel';
 import CustomizePanel from './CustomizePanel';
 import LivePreview from './LivePreview';
-import { embedArabicFont, isATSTemplate } from '../../utils/atsPdfExport';
 
 
 const OverviewIcon = () => (
@@ -213,280 +212,61 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
 
-    // ── [PDF-DEBUG] client-side checkpoint ──────────────────────────────────
-    const _atsCheck = isATSTemplate(selectedTemplate);
-    console.log('[PDF-DEBUG] selectedTemplate  :', selectedTemplate);
-    console.log('[PDF-DEBUG] isATSTemplate()   :', _atsCheck);
-    console.log('[PDF-DEBUG] path taken        :', _atsCheck ? 'SERVER /api/pdf/ats' : 'CLIENT html-to-image');
-    // ────────────────────────────────────────────────────────────────────────
-
-    // ATS templates → server-side jsPDF PDF (real text, no image layer)
-    if (_atsCheck) {
-      try {
-        const name = cvData.personalInfo?.fullName || 'Resume';
-        console.log('[PDF-DEBUG] calling POST /api/pdf/ats …');
-        const response = await fetch('/api/pdf/ats', {
-          method: 'POST',
-          credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            cvData,
-            options: {
-              templateId: selectedTemplate,
-              isRTL,
-              theme,
-              visibleSections,
-              visiblePersonalFields,
-              sectionOrder,
-              sectionNames,
-            },
-          }),
-        });
-        console.log('[PDF-DEBUG] /api/pdf/ats response status :', response.status);
-        console.log('[PDF-DEBUG] Content-Type header           :', response.headers.get('content-type'));
-        console.log('[PDF-DEBUG] X-PDF-Source header           :', response.headers.get('x-pdf-source'));
-        if (!response.ok) {
-          const err = await response.json().catch(() => ({}));
-          throw new Error(err.message || 'PDF generation failed');
-        }
-        const blob   = await response.blob();
-        console.log('[PDF-DEBUG] blob size (bytes)             :', blob.size);
-        const url    = URL.createObjectURL(blob);
-        const link   = document.createElement('a');
-        link.href     = url;
-        link.download = `${name} - CV.pdf`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 15000);
-        if (currentCVId) {
-          fetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
-        }
-      } catch (err) {
-        console.error('[PDF-DEBUG] ATS PDF error:', err);
-        alert(isRTL
-          ? 'فشل تصدير PDF: ' + err.message
-          : 'PDF export failed: ' + err.message);
-      } finally {
-        setIsPrinting(false);
-      }
-      return;
-    }
-
-    // Non-ATS templates → client-side html-to-image + jsPDF with text overlay
-    // Temporary nodes added to document.body — cleaned up in finally
-    let screenClone = null;   // on-screen clone for visual capture
-    let textClone   = null;   // off-screen clone for text-rect extraction
-
+    // All templates — ATS and non-ATS — use server-side Puppeteer rendering.
+    // The same React component rendered in the preview is server-rendered via
+    // react-dom/server renderToStaticMarkup, ensuring pixel-perfect parity.
+    //
+    // pageBreaks (pixel y-positions from LivePreview's smart-break algorithm)
+    // are forwarded to the server so the PDF pages match the preview exactly.
     try {
-      const { jsPDF }    = await import('jspdf');
-      const { toCanvas } = await import('html-to-image');
-
-      const captureEl   = breakDataRef.current?.captureEl;
-      if (!captureEl) throw new Error('Preview element not ready');
-
-      const breaks      = breakDataRef.current?.breaks ?? [];
+      const name        = cvData.personalInfo?.fullName || 'Resume';
+      const pageBreaks  = breakDataRef.current?.breaks      ?? [];
       const totalHeight = breakDataRef.current?.totalHeight ?? PAGE_H_PX;
 
-      const CONTENT_W   = 794;   // A4 width at 96 dpi
-      const CONTENT_H   = 1122;  // A4 height at 96 dpi
-      const PAGE_W_MM   = 210;
-      const PAGE_H_MM   = 297;
-      const PIXEL_RATIO = 2;     // 2× = crisp retina output
-
-      // ── 1. Visual capture via html-to-image ──────────────────────────────
-      // html-to-image uses SVG foreignObject + inlines all computed styles,
-      // so it correctly handles Tailwind v4 Constructable Stylesheets and
-      // modern CSS colors (oklch, oklab, color()) without any monkey-patching.
-
-      // Place a full-viewport white overlay so the user sees a loading screen,
-      // then render the clone at (0,0) so html-to-image can capture it properly.
-      // html-to-image requires the element to be within the visible viewport.
-      const captureOverlay = document.createElement('div');
-      Object.assign(captureOverlay.style, {
-        position: 'fixed', inset: '0', zIndex: '999997',
-        background: '#ffffff', pointerEvents: 'none',
+      const response = await fetch('/api/pdf/ats', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cvData,
+          options: {
+            templateId: selectedTemplate,
+            isRTL,
+            theme,
+            visibleSections,
+            visiblePersonalFields,
+            sectionOrder,
+            sectionNames,
+            pageBreaks,
+            totalHeight,
+          },
+        }),
       });
-      document.body.appendChild(captureOverlay);
 
-      screenClone = captureEl.cloneNode(true);
-      Object.assign(screenClone.style, {
-        position:      'fixed',
-        top:           '0px',
-        left:          '0px',
-        width:         `${CONTENT_W}px`,
-        height:        `${totalHeight}px`,
-        zIndex:        '999998',
-        pointerEvents: 'none',
-        overflow:      'visible',
-        background:    '#ffffff',
-      });
-      document.body.appendChild(screenClone);
-
-      // Three rAF ticks — lets the browser fully paint the clone
-      await new Promise(r => requestAnimationFrame(r));
-      await new Promise(r => requestAnimationFrame(r));
-      await new Promise(r => requestAnimationFrame(r));
-
-      let fullCanvas;
-      try {
-        fullCanvas = await toCanvas(screenClone, {
-          pixelRatio:      PIXEL_RATIO,
-          backgroundColor: '#ffffff',
-          width:           CONTENT_W,
-          height:          totalHeight,
-          skipFonts:       true,
-          useCORS:         true,
-        });
-      } finally {
-        if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} screenClone = null; }
-        try { document.body.removeChild(captureOverlay); } catch (_) {}
+      if (!response.ok) {
+        const err = await response.json().catch(() => ({}));
+        throw new Error(err.message || 'PDF generation failed');
       }
 
-      // ── 2. Off-screen clone for accurate text-rect extraction ─────────────
-      // Uses visibility:hidden (not display:none) so getClientRects() works.
-      textClone = captureEl.cloneNode(true);
-      Object.assign(textClone.style, {
-        position:      'fixed',
-        top:           '0px',
-        left:          '0px',
-        width:         `${CONTENT_W}px`,
-        height:        `${totalHeight}px`,
-        overflow:      'visible',
-        pointerEvents: 'none',
-        zIndex:        '-1',
-        visibility:    'hidden',
-      });
-      document.body.appendChild(textClone);
-      // Two rAF ticks let the browser fully lay out the clone
-      await new Promise(r => requestAnimationFrame(r));
-      await new Promise(r => requestAnimationFrame(r));
-
-      const cloneRect = textClone.getBoundingClientRect();
-
-      // ── 3. Build PDF ──────────────────────────────────────────────────────
-      const pageStarts = [0, ...breaks];
-      const pageEnds   = [...breaks, totalHeight];
-
-      const doc = new jsPDF({ unit: 'mm', format: 'a4', orientation: 'portrait' });
-
-      // Embed Arabic font so the invisible text layer preserves Arabic Unicode.
-      // Without this, jsPDF's default Helvetica (Latin-1) mangles Arabic
-      // codepoints (U+0600–U+06FF) into garbage like "þ« þâþô…".
-      let arabicFontReady = false;
-      if (isRTL) {
-        arabicFontReady = await embedArabicFont(doc);
-        if (arabicFontReady) doc.setR2L(true);
-      }
-      const textFont = arabicFontReady ? 'Amiri' : 'helvetica';
-
-      for (let pageIdx = 0; pageIdx < pageStarts.length; pageIdx++) {
-        if (pageIdx > 0) doc.addPage();
-
-        const sliceStart = pageStarts[pageIdx];
-        const sliceEnd   = pageEnds[pageIdx];
-        const sliceH     = sliceEnd - sliceStart;
-
-        // ── 3a. Image layer ──────────────────────────────────────────────
-        const srcX  = 0;
-        const srcY  = Math.round(sliceStart * PIXEL_RATIO);
-        const srcW  = Math.round(CONTENT_W  * PIXEL_RATIO);
-        const srcH  = Math.round(sliceH     * PIXEL_RATIO);
-
-        const pageCanvas       = document.createElement('canvas');
-        pageCanvas.width       = srcW;
-        pageCanvas.height      = Math.round(CONTENT_H * PIXEL_RATIO);
-        const ctx              = pageCanvas.getContext('2d');
-        ctx.fillStyle          = '#ffffff';
-        ctx.fillRect(0, 0, pageCanvas.width, pageCanvas.height);
-        ctx.drawImage(fullCanvas, srcX, srcY, srcW, srcH, 0, 0, srcW, srcH);
-
-        doc.addImage(
-          pageCanvas.toDataURL('image/jpeg', 0.96),
-          'JPEG', 0, 0, PAGE_W_MM, PAGE_H_MM
-        );
-
-        // ── 3b. Invisible text layer (ATS-compatible, fully selectable) ──
-        // Scale factors: content-px → PDF mm
-        const scaleX = PAGE_W_MM / CONTENT_W;
-        const scaleY = PAGE_H_MM / sliceH;
-
-        // Walk every text node in the clone
-        const walker = document.createTreeWalker(textClone, NodeFilter.SHOW_TEXT);
-        let node;
-        while ((node = walker.nextNode())) {
-          const raw = node.nodeValue;
-          if (!raw || !raw.trim()) continue;
-
-          try {
-            const range     = document.createRange();
-            range.selectNode(node);
-            const clientRects = Array.from(range.getClientRects());
-
-            for (const r of clientRects) {
-              if (r.width < 1 || r.height < 1) continue;
-
-              // Position relative to clone top-left
-              const relTop  = r.top  - cloneRect.top;
-              const relLeft = r.left - cloneRect.left;
-
-              // Skip if this rect belongs to a different page slice
-              if (relTop + r.height < sliceStart || relTop > sliceEnd) continue;
-
-              // Convert to PDF coordinates
-              const xMm  = Math.max(0, relLeft * scaleX);
-              const yMm  = Math.min(PAGE_H_MM,
-                             ((relTop - sliceStart) + r.height * 0.80) * scaleY);
-
-              // Font size: px → pt, then scale to fit this page slice
-              const computedStyle = window.getComputedStyle(node.parentElement);
-              const fsPx  = parseFloat(computedStyle.fontSize) || 12;
-              const fsPt  = fsPx * (72 / 96) * (PAGE_H_MM / sliceH) * (96 / 25.4);
-
-              doc.setFontSize(Math.max(1, fsPt));
-              // Use the embedded Arabic font so Unicode glyphs survive encoding.
-              // Helvetica is Latin-1 only — Arabic codepoints get corrupted.
-              doc.setFont(textFont, 'normal');
-
-              // jsPDF v4: renderingMode:'invisible' = PDF text mode 3
-              // Invisible to the eye but fully selectable / ATS-readable
-              doc.text(raw.trim(), xMm, yMm, { renderingMode: 'invisible' });
-            }
-          } catch (_) { /* skip nodes that can't be measured */ }
-        }
-      }
-
-      // ── 4. Save ───────────────────────────────────────────────────────────
-      const name    = cvData.personalInfo?.fullName || 'Resume';
-      const pdfBlob = doc.output('blob');
-      const blobUrl = URL.createObjectURL(pdfBlob);
-      const link    = document.createElement('a');
-      link.href     = blobUrl;
+      const blob = await response.blob();
+      const url  = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href     = url;
       link.download = `${name} - CV.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      setTimeout(() => URL.revokeObjectURL(blobUrl), 15000);
+      setTimeout(() => URL.revokeObjectURL(url), 15000);
 
       if (currentCVId) {
-        apiFetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' })
-          .catch(() => {});
+        fetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
       }
-
     } catch (err) {
       console.error('[PDF export]', err);
-      if (err.message === 'BLANK_CANVAS') {
-        alert(isRTL
-          ? 'المعاينة فارغة — تأكد أن السيرة الذاتية تحتوي على بيانات ثم حاول مجدداً.'
-          : 'Preview appears blank — make sure your CV has content, then try again.');
-      } else {
-        alert(isRTL
-          ? 'فشل تصدير PDF: ' + err.message
-          : 'PDF export failed: ' + err.message);
-      }
+      alert(isRTL
+        ? 'فشل تصدير PDF: ' + err.message
+        : 'PDF export failed: ' + err.message);
     } finally {
-      if (screenClone) { try { document.body.removeChild(screenClone); } catch (_) {} }
-      if (textClone)   { try { document.body.removeChild(textClone);   } catch (_) {} }
       setIsPrinting(false);
     }
   };

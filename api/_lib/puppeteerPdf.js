@@ -27,12 +27,6 @@ const LAUNCH_ARGS = [
   "--disable-dev-shm-usage",
   "--disable-gpu",
   "--no-zygote",
-  // NOTE: --single-process is intentionally omitted.
-  // It eliminates the GPU/compositor subprocess which Chromium relies on to
-  // embed fonts as real CIDFont (Type2) glyphs in the PDF.  With it present,
-  // Chromium falls back to converting every glyph to a bezier path (Type3),
-  // which looks correct on screen but cannot be selected, copied, or parsed
-  // by ATS software.
   "--disable-extensions",
   "--disable-background-networking",
   "--disable-default-apps",
@@ -43,7 +37,8 @@ const LAUNCH_ARGS = [
   "--mute-audio",
   "--no-first-run",
   "--safebrowsing-disable-auto-update",
-  // Prevent glyph-level hinting from triggering path-based fallback rendering
+  // Preserve font hinting so glyphs are embedded as real CIDFont (Type2)
+  // rather than bezier paths (Type3) in the PDF — keeps text selectable/ATS-readable.
   "--font-render-hinting=none",
 ];
 
@@ -72,38 +67,36 @@ process.on("exit", () => { if (_browser) _browser.close().catch(() => {}); });
 /**
  * Generate a PDF buffer from an HTML string.
  *
- * @param {string} html          - Complete HTML document
+ * @param {string} html              - Complete HTML document
  * @param {object} [opts]
- * @param {number} [opts.viewportWidth=794] - Viewport width in px.
- *   The React ATS templates use width:794px (A4 at 96 dpi), so we match
- *   that exactly so layout is computed at the same breakpoint as the preview.
+ * @param {number} [opts.totalHeight=1122]     - Total template content height in px.
+ *   Used to set a viewport tall enough to lay out the full document before
+ *   Puppeteer captures the PDF (avoids partial-layout issues with multi-page docs).
+ * @param {number} [opts.pageBreakCount=0]     - Number of explicit page breaks.
+ *   When > 0, the HTML uses .page-slice containers for per-slice layout.
  * @returns {Promise<Buffer>}
  */
 export async function generatePdfFromHtml(html, opts = {}) {
-  const { viewportWidth = 794 } = opts;
+  const { totalHeight = 1122, pageBreakCount = 0 } = opts;
+
+  // For multi-page documents, set the viewport tall enough to hold all slices.
+  // Each slice is exactly 1122px (A4 at 96 dpi); single-page uses 1122px.
+  const viewportHeight = pageBreakCount > 0
+    ? Math.ceil((pageBreakCount + 1) * 1122)
+    : Math.max(1122, Math.ceil(totalHeight));
+
   const browser = await getBrowser();
   const page = await browser.newPage();
   try {
-    // Set viewport to match the React templates' width:794px so the layout
-    // engine computes identical dimensions to the browser preview.
-    await page.setViewport({ width: viewportWidth, height: 1122, deviceScaleFactor: 1 });
+    await page.setViewport({ width: 794, height: viewportHeight, deviceScaleFactor: 1 });
 
     await page.setContent(html, { waitUntil: "networkidle0", timeout: 30000 });
 
     // Ensure every @font-face is fully loaded and flushed into Chromium's
     // internal font pipeline before PDF generation begins.
-    //
-    // document.fonts.ready resolves when the layout engine is satisfied, but
-    // Chromium's PDF compositor has its own pipeline.  The two-stage wait below
-    // (explicit per-font load + rAF + 150 ms settle) ensures glyphs are
-    // committed as CIDFont (Type2, selectable) rather than as bezier paths
-    // (Type3, visually identical but unselectable / ATS-opaque).
     await page.evaluate(async () => {
-      // 1. Resolve the global fonts-ready promise
       await document.fonts.ready;
 
-      // 2. Explicitly load every declared @font-face so the browser cannot
-      //    defer them as "optional" during PDF rendering
       const loadPromises = [];
       document.fonts.forEach((face) => {
         if (face.status !== "loaded") {
@@ -112,9 +105,8 @@ export async function generatePdfFromHtml(html, opts = {}) {
       });
       if (loadPromises.length) await Promise.all(loadPromises);
 
-      // 3. Yield to the rendering pipeline so compositing is flushed before
-      //    Chromium takes the PDF snapshot
-      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 150)));
+      // Yield to the rendering pipeline so compositing is flushed
+      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 200)));
     });
 
     const pdf = await page.pdf({
