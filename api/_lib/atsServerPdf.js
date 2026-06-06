@@ -1,71 +1,38 @@
 /**
- * atsServerPdf.js
+ * atsServerPdf.js — PDFKit-based ATS PDF generator
  *
- * Server-side ATS PDF generator using jsPDF native text operators.
- * Every character is written with doc.text() — zero html2canvas / addImage /
- * Puppeteer.  Text is always 100 % selectable and ATS-parseable.
+ * Replaced jsPDF because jsPDF embeds incorrect glyph advance widths for
+ * custom TTF fonts, causing PDF viewers to render selection rectangles that
+ * are offset from the visible glyphs ("fragmented blue blocks" symptom).
  *
- * Works identically on Replit (Express) and Vercel (serverless Lambda)
- * because it has no dependency on Chromium or any system-level binary.
+ * PDFKit uses its bundled fontkit to read actual TTF/OTF metrics, so every
+ * glyph's width in the PDF's /Widths array matches what is rendered on screen.
+ * Text selection, copy/paste, and ATS parsing all work correctly.
  *
- * Fonts are loaded from api/_lib/fonts/ which is committed to the repo and
- * therefore included in Vercel's serverless bundle automatically.
+ * Fonts in api/_lib/fonts/ are committed to the repo and bundled automatically
+ * in every deployment environment (Replit, Vercel Lambda, etc.).
  */
 
-import { readFileSync, existsSync } from "fs";
-import { fileURLToPath } from "url";
+import PDFDocument from "pdfkit";
+import { existsSync } from "fs";
 import path from "path";
+import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const FONTS_DIR  = path.join(__dirname, "fonts");
 
-// ── Font cache (loaded once per process) ──────────────────────────────────────
-let _latinRegularB64 = null;
-let _latinBoldB64    = null;
-let _arabicB64       = null;
+// 1 mm expressed in PDF user-space points (72 dpi)
+const MM = 2.8346;
 
-function tryRead(...candidates) {
-  for (const p of candidates) {
-    try {
-      if (existsSync(p)) return readFileSync(p).toString("base64");
-    } catch (_) {}
-  }
-  return null;
-}
-
-function getLatinFonts() {
-  if (!_latinRegularB64) {
-    _latinRegularB64 = tryRead(
-      path.join(FONTS_DIR, "DejaVuSans.ttf"),
-      path.join(__dirname, "../../server/fonts/DejaVuSans.ttf"),
-      "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
-    );
-    _latinBoldB64 = tryRead(
-      path.join(FONTS_DIR, "DejaVuSans-Bold.ttf"),
-      path.join(__dirname, "../../server/fonts/DejaVuSans-Bold.ttf"),
-      "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-    );
-    if (!_latinRegularB64) {
-      console.warn("[atsServerPdf] DejaVu fonts not found — Helvetica fallback will be used");
-    }
-  }
-  return { regular: _latinRegularB64, bold: _latinBoldB64 };
-}
-
-function getArabicFont() {
-  if (_arabicB64 === null) {
-    _arabicB64 = tryRead(
-      path.join(FONTS_DIR, "NotoNaskhArabic-Regular.ttf"),
-      path.join(__dirname, "../../server/fonts/NotoNaskhArabic-Regular.ttf"),
-    ) ?? false; // false = tried and failed
-    if (!_arabicB64) {
-      console.warn("[atsServerPdf] NotoNaskhArabic font not found — Helvetica fallback");
-    }
-  }
-  return _arabicB64 || null;
-}
+// Page geometry — all values in points (A4 = 595 × 842 pt)
+const ML     = 15 * MM;          // left margin
+const MT     = 15 * MM;          // top margin
+const MB     = 12 * MM;          // bottom margin
+const CW     = 180 * MM;         // content width (210 - 30 mm)
+const BOTTOM = (297 - 12) * MM;  // lower threshold before page break
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
 const SECTION_LABELS = {
   summary:       { en: "PROFESSIONAL SUMMARY",  ar: "الملخص المهني"         },
   experience:    { en: "WORK EXPERIENCE",        ar: "الخبرة العملية"        },
@@ -102,17 +69,20 @@ function dateRange(start, end, current, isRTL) {
 
 function safe(v) { return v ? String(v) : ""; }
 
-// ── Main export ───────────────────────────────────────────────────────────────
 /**
- * Generate an ATS-compatible PDF from CV data.
- * @param {object} cvData   - CV data object
- * @param {object} options  - { isRTL, visibleSections, visiblePersonalFields,
- *                              sectionOrder, sectionNames }
- * @returns {Promise<Buffer>} Raw PDF bytes
+ * Line height in PDF points for a given font size (in pt).
+ * Formula mirrors the original mm layout: lineH(mm) = size*0.35 + 1.8
+ * Converting to points: × 2.8346
+ */
+function lineH(size) { return (size * 0.35 + 1.8) * MM; }
+
+// ── Main export ───────────────────────────────────────────────────────────────
+
+/**
+ * Generate an ATS-compatible PDF from CV data using PDFKit.
+ * Returns a Buffer containing raw PDF bytes.
  */
 export async function generateATSPdfBuffer(cvData, options = {}) {
-  const { jsPDF } = await import("jspdf");
-
   const {
     isRTL                = false,
     visibleSections      = {},
@@ -123,139 +93,144 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
   const show = (key) => visibleSections[key] !== false;
 
-  // Page geometry (mm)
-  const PAGE_W = 210;
-  const PAGE_H = 297;
-  const ML     = 15;
-  const MR     = 15;
-  const MT     = 15;
-  const MB     = 12;
-  const CW     = PAGE_W - ML - MR;
-  const BOTTOM = PAGE_H - MB;
+  // ── Resolve font paths ───────────────────────────────────────────────────────
+  const latinRegPath  = path.join(FONTS_DIR, "DejaVuSans.ttf");
+  const latinBoldPath = path.join(FONTS_DIR, "DejaVuSans-Bold.ttf");
+  const arabicPath    = path.join(FONTS_DIR, "NotoNaskhArabic-Regular.ttf");
 
-  const doc = new jsPDF({ unit: "mm", format: "a4", orientation: "portrait" });
+  const hasLatin  = existsSync(latinRegPath);
+  const hasBold   = existsSync(latinBoldPath);
+  const hasArabic = existsSync(arabicPath);
 
-  // ── Embed fonts ─────────────────────────────────────────────────────────────
-  let FONT_FAMILY = "helvetica";
+  if (!hasLatin)  console.warn("[atsServerPdf] DejaVuSans.ttf not found — falling back to Helvetica");
+  if (!hasArabic) console.warn("[atsServerPdf] NotoNaskhArabic-Regular.ttf not found — Arabic may render incorrectly");
 
-  if (isRTL) {
-    const arabicB64 = getArabicFont();
-    if (arabicB64) {
-      doc.addFileToVFS("NotoNaskhArabic-Regular.ttf", arabicB64);
-      doc.addFont("NotoNaskhArabic-Regular.ttf", "NotoNaskhArabic", "normal");
-      doc.addFileToVFS("NotoNaskhArabic-Bold.ttf",    arabicB64);
-      doc.addFont("NotoNaskhArabic-Bold.ttf",    "NotoNaskhArabic", "bold");
-      FONT_FAMILY = "NotoNaskhArabic";
-      doc.setR2L(true);
-    }
-  } else {
-    const { regular, bold } = getLatinFonts();
-    if (regular) {
-      doc.addFileToVFS("DejaVuSans.ttf",      regular);
-      doc.addFont("DejaVuSans.ttf",      "DejaVuSans", "normal");
-      FONT_FAMILY = "DejaVuSans";
-    }
-    if (bold) {
-      doc.addFileToVFS("DejaVuSans-Bold.ttf", bold);
-      doc.addFont("DejaVuSans-Bold.ttf", "DejaVuSans", "bold");
-    }
+  // ── Create PDFKit document ───────────────────────────────────────────────────
+  const doc = new PDFDocument({
+    size:          "A4",
+    margin:        0,
+    autoFirstPage: true,
+    lang:          isRTL ? "ar" : "en",
+    info:          { Title: "Resume", Subject: "ATS-optimised resume" },
+  });
+
+  // ── Register fonts ───────────────────────────────────────────────────────────
+  let FONT_REG  = "Helvetica";
+  let FONT_BOLD = "Helvetica-Bold";
+
+  if (isRTL && hasArabic) {
+    doc.registerFont("PDF-Regular", arabicPath);
+    doc.registerFont("PDF-Bold",    arabicPath); // NotoNaskh has no separate bold; same TTF used
+    FONT_REG  = "PDF-Regular";
+    FONT_BOLD = "PDF-Bold";
+  } else if (!isRTL && hasLatin) {
+    doc.registerFont("PDF-Regular", latinRegPath);
+    doc.registerFont("PDF-Bold",    hasBold ? latinBoldPath : latinRegPath);
+    FONT_REG  = "PDF-Regular";
+    FONT_BOLD = "PDF-Bold";
   }
 
-  const BOLD_STYLE   = "bold";
-  const NORMAL_STYLE = "normal";
-
-  let y = MT;
-
-  function needsPageBreak(needed) { return y + needed > BOTTOM; }
-  function newPageIfNeeded(needed = 6) {
-    if (needsPageBreak(needed)) { doc.addPage(); y = MT; }
-  }
-
-  const TX    = isRTL ? (ML + CW) : ML;
+  // ── Layout state ─────────────────────────────────────────────────────────────
+  let y     = MT;
   const ALIGN = isRTL ? "right" : "left";
 
-  function writeLine(text, { size = 10, style = NORMAL_STYLE, color = [20, 20, 20] } = {}) {
-    if (!text) return;
-    const lineH = size * 0.35 + 1.8;
-    newPageIfNeeded(lineH);
-    doc.setFontSize(size);
-    doc.setFont(FONT_FAMILY, style);
-    doc.setTextColor(...color);
-    doc.text(String(text), TX, y, { align: ALIGN });
-    y += lineH;
-  }
-
-  function writeWrapped(text, { size = 10, style = NORMAL_STYLE, color = [30, 30, 30] } = {}) {
-    if (!text) return;
-    const lineH = size * 0.35 + 1.8;
-    doc.setFontSize(size);
-    doc.setFont(FONT_FAMILY, style);
-    doc.setTextColor(...color);
-    const lines = doc.splitTextToSize(String(text), CW);
-    for (const line of lines) {
-      newPageIfNeeded(lineH);
-      doc.text(line, TX, y, { align: ALIGN });
-      y += lineH;
+  function ensurePage(needed) {
+    if (y + needed > BOTTOM) {
+      doc.addPage({ size: "A4", margin: 0 });
+      y = MT;
     }
   }
 
+  /**
+   * Render a single non-wrapping line of text.
+   * We position it at (ML, y) with full content width so alignment works.
+   */
+  function writeLine(text, { size = 10, bold = false, color = [20, 20, 20] } = {}) {
+    if (!text) return;
+    const lh = lineH(size);
+    ensurePage(lh);
+    doc
+      .font(bold ? FONT_BOLD : FONT_REG)
+      .fontSize(size)
+      .fillColor(color)
+      .text(String(text), ML, y, { lineBreak: false, width: CW, align: ALIGN });
+    y += lh;
+  }
+
+  /**
+   * Render wrapped (possibly multi-line) text.
+   * After the call we sync y from PDFKit's cursor so multi-line content
+   * correctly advances our position tracker.
+   */
+  function writeWrapped(text, { size = 10, bold = false, color = [30, 30, 30] } = {}) {
+    if (!text) return;
+    const lh = lineH(size);
+    ensurePage(lh);
+    doc
+      .font(bold ? FONT_BOLD : FONT_REG)
+      .fontSize(size)
+      .fillColor(color)
+      .text(String(text), ML, y, { width: CW, align: ALIGN, lineBreak: true });
+    // Sync our manual tracker with PDFKit's cursor after wrapping
+    y = doc.y;
+  }
+
+  /**
+   * Render two items on the same line (job title + date, degree + date, etc.).
+   * LTR: bold left-aligned title | light right-aligned date
+   * RTL: bold right-aligned title | light left-aligned date
+   */
   function writeTwoCol(left, right, { size = 10 } = {}) {
     if (!left && !right) return;
-    const lineH = size * 0.35 + 1.8;
-    newPageIfNeeded(lineH);
-    doc.setFontSize(size);
+    const lh = lineH(size);
+    ensurePage(lh);
+
     if (isRTL) {
+      // Primary content at right, secondary (date) at left
       if (left) {
-        doc.setFont(FONT_FAMILY, BOLD_STYLE);
-        doc.setTextColor(10, 10, 10);
-        doc.text(String(left), ML + CW, y, { align: "right" });
+        doc.font(FONT_BOLD).fontSize(size).fillColor([10, 10, 10])
+          .text(String(left), ML, y, { width: CW, align: "right", lineBreak: false });
       }
       if (right) {
-        doc.setFont(FONT_FAMILY, NORMAL_STYLE);
-        doc.setTextColor(80, 80, 80);
-        doc.text(String(right), ML, y, { align: "left" });
+        doc.font(FONT_REG).fontSize(size).fillColor([80, 80, 80])
+          .text(String(right), ML, y, { width: CW * 0.32, align: "left", lineBreak: false });
       }
     } else {
+      // Primary content at left, secondary (date) at right
       if (left) {
-        const safeLeft = doc.splitTextToSize(String(left), CW * 0.72)[0] ?? "";
-        doc.setFont(FONT_FAMILY, BOLD_STYLE);
-        doc.setTextColor(10, 10, 10);
-        doc.text(safeLeft, ML, y);
+        doc.font(FONT_BOLD).fontSize(size).fillColor([10, 10, 10])
+          .text(String(left), ML, y, { width: CW * 0.68, lineBreak: false });
       }
       if (right) {
-        doc.setFont(FONT_FAMILY, NORMAL_STYLE);
-        doc.setTextColor(80, 80, 80);
-        doc.text(String(right), ML + CW, y, { align: "right" });
+        doc.font(FONT_REG).fontSize(size).fillColor([80, 80, 80])
+          .text(String(right), ML, y, { width: CW, align: "right", lineBreak: false });
       }
     }
-    y += lineH;
+    y += lh;
   }
 
   function writeSectionHeading(label) {
-    y += 3;
-    newPageIfNeeded(10);
-    doc.setFontSize(10.5);
-    doc.setFont(FONT_FAMILY, BOLD_STYLE);
-    doc.setTextColor(0, 0, 0);
-    doc.text(String(label), TX, y, { align: ALIGN });
-    y += 4.5;
-    doc.setDrawColor(100, 100, 100);
-    doc.setLineWidth(0.35);
-    doc.line(ML, y, ML + CW, y);
-    y += 3.5;
+    y += 3 * MM;
+    ensurePage(10 * MM);
+    doc.font(FONT_BOLD).fontSize(10.5).fillColor([0, 0, 0])
+      .text(String(label), ML, y, { lineBreak: false, width: CW, align: ALIGN });
+    y += lineH(10.5);
+    doc.strokeColor([100, 100, 100]).lineWidth(0.5)
+      .moveTo(ML, y).lineTo(ML + CW, y).stroke();
+    y += 3.5 * MM;
   }
 
-  function gap(mm = 3) { y += mm; }
+  function gap(mm = 3) { y += mm * MM; }
 
-  // ── Header ──────────────────────────────────────────────────────────────────
+  // ── Header ───────────────────────────────────────────────────────────────────
   const pi = cvData?.personalInfo ?? {};
 
-  if (pi.fullName) writeLine(pi.fullName, { size: 20, style: BOLD_STYLE,   color: [10, 10, 10] });
-  if (pi.jobTitle) writeLine(pi.jobTitle, { size: 11, style: NORMAL_STYLE, color: [60, 60, 60] });
+  if (pi.fullName) writeLine(pi.fullName, { size: 20, bold: true,  color: [10, 10, 10] });
+  if (pi.jobTitle) writeLine(pi.jobTitle, { size: 11, bold: false, color: [60, 60, 60] });
 
   gap(1);
 
-  const L = (k) => CONTACT_LABELS[k]?.[isRTL ? "ar" : "en"] ?? k;
+  const L  = (k) => CONTACT_LABELS[k]?.[isRTL ? "ar" : "en"] ?? k;
   const vp = visiblePersonalFields;
   const contactParts = [];
   if (vp.email     !== false && pi.email)     contactParts.push(`${L("email")}: ${pi.email}`);
@@ -263,22 +238,21 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
   if (vp.location  !== false && pi.location)  contactParts.push(`${L("location")}: ${pi.location}`);
   if (vp.linkedin  !== false && pi.linkedin)  contactParts.push(`${L("linkedin")}: ${pi.linkedin}`);
   if (vp.portfolio !== false && pi.portfolio) contactParts.push(`${L("portfolio")}: ${pi.portfolio}`);
-
   if (contactParts.length) {
     writeWrapped(contactParts.join("   |   "), { size: 9, color: [60, 60, 60] });
   }
 
   gap(2);
-  doc.setDrawColor(60, 60, 60);
-  doc.setLineWidth(0.5);
-  doc.line(ML, y, ML + CW, y);
+  doc.strokeColor([60, 60, 60]).lineWidth(0.7)
+    .moveTo(ML, y).lineTo(ML + CW, y).stroke();
   gap(1);
 
-  // ── Sections ────────────────────────────────────────────────────────────────
+  // ── Sections ─────────────────────────────────────────────────────────────────
   const renderSection = (key) => {
     if (!show(key)) return;
 
     switch (key) {
+
       case "summary": {
         if (!pi.summary) return;
         writeSectionHeading(sectionLabel("summary", isRTL, sectionNames));
@@ -314,7 +288,9 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
       case "skills": {
         if (!cvData.skills?.length) return;
         writeSectionHeading(sectionLabel("skills", isRTL, sectionNames));
-        writeWrapped(cvData.skills.map(sk => safe(sk.name || sk)).filter(Boolean).join("  ·  "));
+        writeWrapped(
+          cvData.skills.map(sk => safe(sk.name || sk)).filter(Boolean).join("  ·  ")
+        );
         break;
       }
 
@@ -335,7 +311,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
         writeSectionHeading(sectionLabel("projects", isRTL, sectionNames));
         cvData.projects.forEach((p, idx) => {
           if (idx > 0) gap(3);
-          writeLine(safe(p.title), { size: 10, style: BOLD_STYLE });
+          writeLine(safe(p.title), { size: 10, bold: true });
           if (p.link) writeLine(safe(p.link), { size: 9, color: [80, 80, 80] });
           if (p.description) writeWrapped(safe(p.description));
         });
@@ -417,7 +393,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
         writeSectionHeading(sectionLabel("references", isRTL, sectionNames));
         cvData.references.forEach((r, idx) => {
           if (idx > 0) gap(3);
-          writeLine(safe(r.name), { size: 10, style: BOLD_STYLE });
+          writeLine(safe(r.name), { size: 10, bold: true });
           const sub = [safe(r.title), safe(r.company)].filter(Boolean).join(" — ");
           if (sub) writeLine(sub, { size: 9, color: [80, 80, 80] });
           const contact = [safe(r.email), safe(r.phone)].filter(Boolean).join("  |  ");
@@ -433,7 +409,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
           writeSectionHeading(safe(sec.title).toUpperCase());
           sec.items.forEach((item, idx) => {
             if (idx > 0) gap(3);
-            if (item.title)       writeLine(safe(item.title),       { size: 10, style: BOLD_STYLE });
+            if (item.title)       writeLine(safe(item.title),       { size: 10, bold: true });
             if (item.subtitle)    writeLine(safe(item.subtitle),    { size: 9,  color: [80, 80, 80] });
             if (item.description) writeWrapped(safe(item.description));
           });
@@ -444,8 +420,12 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
   for (const key of sectionOrder) renderSection(key);
 
-  // ── Output ──────────────────────────────────────────────────────────────────
-  // doc.output('arraybuffer') works in both browser and Node.js environments.
-  const arrayBuffer = doc.output("arraybuffer");
-  return Buffer.from(arrayBuffer);
+  // ── Collect PDF bytes ─────────────────────────────────────────────────────────
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    doc.on("data",  chunk => chunks.push(chunk));
+    doc.on("end",   ()    => resolve(Buffer.concat(chunks)));
+    doc.on("error", err   => reject(err));
+    doc.end();
+  });
 }
