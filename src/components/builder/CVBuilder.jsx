@@ -213,10 +213,18 @@ const CVBuilder = () => {
   const handleDownloadPDF = async () => {
     setIsPrinting(true);
 
-    // ATS templates → server-side Puppeteer PDF (real text, no image layer)
-    if (isATSTemplate(selectedTemplate)) {
+    // ── [PDF-DEBUG] client-side checkpoint ──────────────────────────────────
+    const _atsCheck = isATSTemplate(selectedTemplate);
+    console.log('[PDF-DEBUG] selectedTemplate  :', selectedTemplate);
+    console.log('[PDF-DEBUG] isATSTemplate()   :', _atsCheck);
+    console.log('[PDF-DEBUG] path taken        :', _atsCheck ? 'SERVER /api/pdf/ats' : 'CLIENT html-to-image');
+    // ────────────────────────────────────────────────────────────────────────
+
+    // ATS templates → server-side jsPDF PDF (real text, no image layer)
+    if (_atsCheck) {
       try {
         const name = cvData.personalInfo?.fullName || 'Resume';
+        console.log('[PDF-DEBUG] calling POST /api/pdf/ats …');
         const response = await fetch('/api/pdf/ats', {
           method: 'POST',
           credentials: 'include',
@@ -234,11 +242,15 @@ const CVBuilder = () => {
             },
           }),
         });
+        console.log('[PDF-DEBUG] /api/pdf/ats response status :', response.status);
+        console.log('[PDF-DEBUG] Content-Type header           :', response.headers.get('content-type'));
+        console.log('[PDF-DEBUG] X-PDF-Source header           :', response.headers.get('x-pdf-source'));
         if (!response.ok) {
           const err = await response.json().catch(() => ({}));
           throw new Error(err.message || 'PDF generation failed');
         }
         const blob   = await response.blob();
+        console.log('[PDF-DEBUG] blob size (bytes)             :', blob.size);
         const url    = URL.createObjectURL(blob);
         const link   = document.createElement('a');
         link.href     = url;
@@ -251,7 +263,7 @@ const CVBuilder = () => {
           fetch(`/api/cvs/${currentCVId}/download`, { method: 'POST', credentials: 'include' }).catch(() => {});
         }
       } catch (err) {
-        console.error('[ATS PDF]', err);
+        console.error('[PDF-DEBUG] ATS PDF error:', err);
         alert(isRTL
           ? 'فشل تصدير PDF: ' + err.message
           : 'PDF export failed: ' + err.message);

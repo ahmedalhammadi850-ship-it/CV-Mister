@@ -21,11 +21,19 @@ export default async function handler(req, res) {
 
   const user = getUserFromReq(req);
 
+  console.log("[PDF-DEBUG][api/pdf/ats] handler reached — method:", req.method);
+
   try {
     const { cvData, options = {} } = req.body || {};
     if (!cvData) return res.status(400).json({ message: "cvData is required" });
 
+    console.log("[PDF-DEBUG][api/pdf/ats] templateId :", options.templateId);
+    console.log("[PDF-DEBUG][api/pdf/ats] isRTL      :", options.isRTL);
+    console.log("[PDF-DEBUG][api/pdf/ats] userId     :", user?.userId ?? "(unauthenticated)");
+
     const pdf = await generateATSPdfBuffer(cvData, options);
+
+    console.log("[PDF-DEBUG][api/pdf/ats] PDF generated — size (bytes):", pdf.length);
 
     const name = cvData?.personalInfo?.fullName
       ? `${cvData.personalInfo.fullName} - CV`
@@ -35,9 +43,10 @@ export default async function handler(req, res) {
     res.setHeader("Content-Disposition", `attachment; filename="${encodeURIComponent(name)}.pdf"`);
     res.setHeader("Content-Length",       pdf.length);
     res.setHeader("Cache-Control",        "no-store");
+    res.setHeader("X-PDF-Source",        "server-jspdf");
     res.status(200).end(Buffer.from(pdf));
   } catch (err) {
-    console.error("[pdf/ats]", err.message, err.stack);
+    console.error("[PDF-DEBUG][api/pdf/ats] ERROR:", err.message, err.stack);
     res.status(500).json({ message: err.message || "PDF generation failed" });
   }
 }
