@@ -152,6 +152,17 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   // We intentionally do NOT include @media print {} overrides — those would
   // alter rendering vs. the browser preview. Instead we set emulateMediaType
   // to 'screen' in puppeteerPdf.js to keep Chromium in screen-render mode.
+  //
+  // IMPORTANT — HTML element reset (mirrors Tailwind preflight):
+  // In the browser preview, Tailwind's preflight stylesheet neutralises
+  // browser-default margins on h1-h6, p, ul, ol, li (e.g. h3 gets
+  // "margin: 1em 0" by default, p gets "margin: 1em 0").  Puppeteer
+  // renders in a minimal document with NO Tailwind, so those browser
+  // defaults would apply and add invisible extra spacing that doesn't
+  // exist in the preview — causing every section, role title, and
+  // paragraph to shift down relative to what the user sees.
+  // The inline styles on template elements (which always win over element
+  // selectors) are unaffected by this reset.
   const baseStyles = `
     @page { size: A4; margin: 0; }
     *, *::before, *::after { box-sizing: border-box; }
@@ -159,6 +170,19 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
       margin: 0; padding: 0; background: #ffffff;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin: 0; padding: 0;
+      font-size: inherit; font-weight: inherit;
+    }
+    p  { margin: 0; padding: 0; }
+    ul, ol { margin: 0; padding: 0; list-style: none; }
+    li { margin: 0; padding: 0; }
+    blockquote, figure, pre { margin: 0; padding: 0; }
+    table { border-collapse: collapse; border-spacing: 0; }
+    img, svg { display: block; }
+    section, article, aside, header, footer, nav, main {
+      display: block; margin: 0; padding: 0;
     }`;
 
   // ── Single-page ────────────────────────────────────────────────────────────
