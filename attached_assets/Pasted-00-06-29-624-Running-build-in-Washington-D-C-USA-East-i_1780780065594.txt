@@ -1,0 +1,98 @@
+00:06:29.624 Running build in Washington, D.C., USA (East) – iad1
+00:06:29.624 Build machine configuration: 2 cores, 8 GB
+00:06:29.637 Cloning github.com/ahmedalhammadi850-ship-it/CV-Mister (Branch: main, Commit: 538bb92)
+00:06:29.638 Skipping build cache, deployment was triggered without cache.
+00:06:41.294 Cloning completed: 11.656s
+00:06:41.417 Found .vercelignore
+00:06:41.477 Removed 457 ignored files defined in .vercelignore
+00:06:41.477   /.agents/agent_assets_metadata.toml
+00:06:41.478   /.agents/memory/ats-pdf-jspdf.md
+00:06:41.478   /.agents/memory/ats-pdf-pdfkit.md
+00:06:41.478   /.agents/memory/ats-pdf-puppeteer.md
+00:06:41.478   /.agents/memory/firebase-migration.md
+00:06:41.478   /.agents/memory/font-proxy-bug.md
+00:06:41.478   /.agents/memory/MEMORY.md
+00:06:41.478   /.agents/memory/pdf-export-approach.md
+00:06:41.478   /.agents/memory/pdf-preview-mismatch.md
+00:06:41.478   /.agents/memory/pdf-print-approach.md
+00:06:41.786 Running "vercel build"
+00:06:41.806 Vercel CLI 54.9.0
+00:06:42.492 Running "install" command: `cp package.vercel.json package.json && rm -f package-lock.json && npm install --legacy-peer-deps`...
+00:07:15.701 npm warn deprecated node-domexception@1.0.0: Use your platform's native DOMException instead
+00:07:16.525 npm warn deprecated uuid@8.3.2: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+00:07:16.719 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+00:07:16.722 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+00:07:16.723 npm warn deprecated uuid@9.0.1: uuid@10 and below is no longer supported.  For ESM codebases, update to uuid@latest.  For CommonJS codebases, use uuid@11 (but be aware this version will likely be deprecated in 2028).
+00:07:22.426 
+00:07:22.427 added 415 packages, and audited 416 packages in 40s
+00:07:22.427 
+00:07:22.428 66 packages are looking for funding
+00:07:22.428   run `npm fund` for details
+00:07:22.441 
+00:07:22.441 9 moderate severity vulnerabilities
+00:07:22.441 
+00:07:22.442 To address issues that do not require attention, run:
+00:07:22.442   npm audit fix
+00:07:22.442 
+00:07:22.442 To address all issues (including breaking changes), run:
+00:07:22.443   npm audit fix --force
+00:07:22.443 
+00:07:22.443 Run `npm audit` for details.
+00:07:22.731 
+00:07:22.737 > cv-mister@0.0.0 build
+00:07:22.737 > node scripts/buildSsr.mjs && npx vite build
+00:07:22.738 
+00:07:22.901 
+00:07:22.903   dist-ssr/templates.js  732.3kb
+00:07:22.903 
+00:07:22.904 ⚡ Done in 72ms
+00:07:22.904 ✓ SSR templates bundle → dist-ssr/templates.js
+00:07:23.532 vite v8.0.16 building client environment for production...
+00:07:24.572 transforming...✓ 120 modules transformed.
+00:07:24.655 rendering chunks...
+00:07:24.856 computing gzip size...
+00:07:24.869 dist/index.html                             3.22 kB │ gzip:   1.42 kB
+00:07:24.869 dist/assets/index-BPBM6MRl.css             97.30 kB │ gzip:  16.04 kB
+00:07:24.869 dist/assets/rolldown-runtime-Bh1tDfsg.js    0.56 kB │ gzip:   0.36 kB
+00:07:24.869 dist/assets/react-vendor-DgeVilJv.js      231.75 kB │ gzip:  74.18 kB
+00:07:24.870 dist/assets/firebase-vendor-DnRer91N.js   278.69 kB │ gzip:  85.37 kB
+00:07:24.870 dist/assets/index-BtOjy6Hk.js             872.74 kB │ gzip: 132.99 kB
+00:07:24.870 
+00:07:24.870 ✓ built in 1.34s
+00:07:24.953 Installing dependencies...
+00:07:25.419 npm error code ERESOLVE
+00:07:25.419 npm error ERESOLVE could not resolve
+00:07:25.420 npm error
+00:07:25.420 npm error While resolving: vite@8.0.16
+00:07:25.421 npm error Found: esbuild@0.24.2
+00:07:25.421 npm error node_modules/esbuild
+00:07:25.421 npm error   dev esbuild@"^0.24.0" from the root project
+00:07:25.421 npm error
+00:07:25.422 npm error Could not resolve dependency:
+00:07:25.422 npm error peerOptional esbuild@"^0.27.0 || ^0.28.0" from vite@8.0.16
+00:07:25.422 npm error node_modules/vite
+00:07:25.423 npm error   dev vite@"^8.0.16" from the root project
+00:07:25.423 npm error   peer vite@"^5.2.0 || ^6 || ^7 || ^8" from @tailwindcss/vite@4.3.0
+00:07:25.423 npm error   node_modules/@tailwindcss/vite
+00:07:25.423 npm error     @tailwindcss/vite@"^4.3.0" from the root project
+00:07:25.423 npm error   1 more (@vitejs/plugin-react)
+00:07:25.424 npm error
+00:07:25.424 npm error Conflicting peer dependency: esbuild@0.28.0
+00:07:25.424 npm error node_modules/esbuild
+00:07:25.424 npm error   peerOptional esbuild@"^0.27.0 || ^0.28.0" from vite@8.0.16
+00:07:25.424 npm error   node_modules/vite
+00:07:25.425 npm error     dev vite@"^8.0.16" from the root project
+00:07:25.425 npm error     peer vite@"^5.2.0 || ^6 || ^7 || ^8" from @tailwindcss/vite@4.3.0
+00:07:25.425 npm error     node_modules/@tailwindcss/vite
+00:07:25.425 npm error       @tailwindcss/vite@"^4.3.0" from the root project
+00:07:25.426 npm error     1 more (@vitejs/plugin-react)
+00:07:25.426 npm error
+00:07:25.426 npm error Fix the upstream dependency conflict, or retry
+00:07:25.426 npm error this command with --force or --legacy-peer-deps
+00:07:25.427 npm error to accept an incorrect (and potentially broken) dependency resolution.
+00:07:25.427 npm error
+00:07:25.427 npm error
+00:07:25.427 npm error For a full report see:
+00:07:25.427 npm error /vercel/.npm/_logs/2026-06-06T21_07_25_025Z-eresolve-report.txt
+00:07:25.428 npm error A complete log of this run can be found in: /vercel/.npm/_logs/2026-06-06T21_07_25_025Z-debug-0.log
+00:07:25.441 Error: Command "npm install" exited with 1
