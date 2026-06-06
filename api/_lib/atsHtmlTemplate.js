@@ -418,18 +418,21 @@ export async function buildAtsHtml(cvData, options = {}) {
       font-family: 'Noto Naskh Arabic';
       font-style: normal;
       font-weight: 400;
+      font-display: block;
       src: url('data:font/ttf;base64,${b64}') format('truetype');
     }
     @font-face {
       font-family: 'Noto Naskh Arabic';
       font-style: normal;
       font-weight: 600;
+      font-display: block;
       src: url('data:font/ttf;base64,${b64}') format('truetype');
     }
     @font-face {
       font-family: 'Noto Naskh Arabic';
       font-style: normal;
       font-weight: 700;
+      font-display: block;
       src: url('data:font/ttf;base64,${b64}') format('truetype');
     }`;
     }
@@ -443,24 +446,28 @@ export async function buildAtsHtml(cvData, options = {}) {
       font-family: 'CVFont';
       font-style: normal;
       font-weight: 400;
+      font-display: block;
       src: url('data:font/ttf;base64,${_latinFontRegularB64}') format('truetype');
     }
     @font-face {
       font-family: 'CVFont';
       font-style: normal;
       font-weight: 600;
+      font-display: block;
       src: url('data:font/ttf;base64,${_latinFontBoldB64 || _latinFontRegularB64}') format('truetype');
     }
     @font-face {
       font-family: 'CVFont';
       font-style: normal;
       font-weight: 700;
+      font-display: block;
       src: url('data:font/ttf;base64,${_latinFontBoldB64 || _latinFontRegularB64}') format('truetype');
     }
     @font-face {
       font-family: 'CVFont';
       font-style: normal;
       font-weight: 800;
+      font-display: block;
       src: url('data:font/ttf;base64,${_latinFontBoldB64 || _latinFontRegularB64}') format('truetype');
     }`;
     }

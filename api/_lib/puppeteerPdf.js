@@ -27,7 +27,12 @@ const LAUNCH_ARGS = [
   "--disable-dev-shm-usage",
   "--disable-gpu",
   "--no-zygote",
-  "--single-process",
+  // NOTE: --single-process is intentionally omitted.
+  // It eliminates the GPU/compositor subprocess which Chromium relies on to
+  // embed fonts as real CIDFont (Type2) glyphs in the PDF.  With it present,
+  // Chromium falls back to converting every glyph to a bezier path (Type3),
+  // which looks correct on screen but cannot be selected, copied, or parsed
+  // by ATS software.
   "--disable-extensions",
   "--disable-background-networking",
   "--disable-default-apps",
@@ -38,6 +43,8 @@ const LAUNCH_ARGS = [
   "--mute-audio",
   "--no-first-run",
   "--safebrowsing-disable-auto-update",
+  // Prevent glyph-level hinting from triggering path-based fallback rendering
+  "--font-render-hinting=none",
 ];
 
 async function getBrowser() {
@@ -72,10 +79,34 @@ export async function generatePdfFromHtml(html) {
   const page = await browser.newPage();
   try {
     await page.setContent(html, { waitUntil: "networkidle0", timeout: 30000 });
-    // Wait for all fonts to be fully loaded so Chromium embeds them as real
-    // text (Type2/CIDFont) in the PDF rather than converting glyphs to bezier
-    // paths (Type3), which would make text unselectable.
-    await page.evaluate(() => document.fonts.ready);
+
+    // Ensure every @font-face is fully loaded and flushed into Chromium's
+    // internal font pipeline before PDF generation begins.
+    //
+    // document.fonts.ready resolves when the layout engine is satisfied, but
+    // Chromium's PDF compositor has its own pipeline.  The two-stage wait below
+    // (explicit per-font load + rAF + 150 ms settle) ensures glyphs are
+    // committed as CIDFont (Type2, selectable) rather than as bezier paths
+    // (Type3, visually identical but unselectable / ATS-opaque).
+    await page.evaluate(async () => {
+      // 1. Resolve the global fonts-ready promise
+      await document.fonts.ready;
+
+      // 2. Explicitly load every declared @font-face so the browser cannot
+      //    defer them as "optional" during PDF rendering
+      const loadPromises = [];
+      document.fonts.forEach((face) => {
+        if (face.status !== "loaded") {
+          loadPromises.push(face.load().catch(() => {}));
+        }
+      });
+      if (loadPromises.length) await Promise.all(loadPromises);
+
+      // 3. Yield to the rendering pipeline so compositing is flushed before
+      //    Chromium takes the PDF snapshot
+      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 150)));
+    });
+
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
