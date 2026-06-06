@@ -1,0 +1,191 @@
+GET https://cv-mister-ai.vercel.app/api/font-proxy?url=https%3A%2F%2Ffonts.googleapis.com%2Fcss2%3Ffamily%3DPlus%2BJakarta%2BSans%3Aital%2Cwght%400%2C300%3B0%2C400%3B0%2C500%3B0%2C600%3B0%2C700%3B0%2C800%3B1%2C400%26family%3DDM%2BSans%3Aital%2Cwght%400%2C300%3B0%2C400%3B0%2C500%3B0%2C600%3B0%2C700%3B1%2C400%26family%3DMerriweather%3Awght%40300%3B400%3B700%26family%3DTajawal%3Awght%40300%3B400%3B500%3B700%26family%3DCairo%3Awght%40300%3B400%3B600%3B700%26family%3DAmiri%3Awght%40400%3B700%26family%3DNoto%2BNaskh%2BArabic%3Awght%40400%3B500%3B600%3B700%26family%3DScheherazade%2BNew%3Awght%40400%3B700%26display%3Dswap 500 (Internal Server Error)
+(anonymous) @ (index):24
+(anonymous) @ (index):37Understand this error
+(index):35 [CV-Mister] Font proxy failed; system fonts will be used.
+(anonymous) @ (index):35
+Promise.catch
+(anonymous) @ (index):32
+(anonymous) @ (index):37Understand this warning
+index-ChGIPseM.js:2  POST https://cv-mister-ai.vercel.app/api/auth/logout 404 (Not Found)
+k @ index-ChGIPseM.js:2
+(anonymous) @ index-ChGIPseM.js:2
+(anonymous) @ firebase-vendor-DnRer91N.js:1
+Promise.then
+registerStateListener @ firebase-vendor-DnRer91N.js:1
+onAuthStateChanged @ firebase-vendor-DnRer91N.js:1
+Yi @ firebase-vendor-DnRer91N.js:1
+(anonymous) @ index-ChGIPseM.js:2
+Uc @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+Uu @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+e.unstable_scheduleCallback @ react-vendor-dAykgUqI.js:1
+sd @ react-vendor-dAykgUqI.js:8
+od @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8Understand this error
+index-ChGIPseM.js:2  GET https://cv-mister-ai.vercel.app/api/templates/config 404 (Not Found)
+k @ index-ChGIPseM.js:2
+a @ index-ChGIPseM.js:12
+(anonymous) @ index-ChGIPseM.js:12
+Uc @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+Uu @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+e.unstable_scheduleCallback @ react-vendor-dAykgUqI.js:1
+sd @ react-vendor-dAykgUqI.js:8
+od @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8Understand this error
+index-ChGIPseM.js:2  GET https://cv-mister-ai.vercel.app/api/ping 500 (Internal Server Error)
+k @ index-ChGIPseM.js:2
+(anonymous) @ index-ChGIPseM.js:2
+(anonymous) @ index-ChGIPseM.js:2
+Uc @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+Uu @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+e.unstable_scheduleCallback @ react-vendor-dAykgUqI.js:1
+sd @ react-vendor-dAykgUqI.js:8
+od @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8Understand this error
+index-ChGIPseM.js:2  GET https://cv-mister-ai.vercel.app/api/navbar 500 (Internal Server Error)
+k @ index-ChGIPseM.js:2
+re @ index-ChGIPseM.js:2
+(anonymous) @ index-ChGIPseM.js:2
+Uc @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+El @ react-vendor-dAykgUqI.js:8
+Dl @ react-vendor-dAykgUqI.js:8
+Uu @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+re @ react-vendor-dAykgUqI.js:1
+postMessage
+w @ react-vendor-dAykgUqI.js:1
+e.unstable_scheduleCallback @ react-vendor-dAykgUqI.js:1
+sd @ react-vendor-dAykgUqI.js:8
+od @ react-vendor-dAykgUqI.js:8
+(anonymous) @ react-vendor-dAykgUqI.js:8Understand this error
