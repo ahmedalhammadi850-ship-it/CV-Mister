@@ -178,7 +178,12 @@ async function main() {
     try {
       const url = req.query.url as string;
       if (!url || !url.startsWith("https://fonts.googleapis.com/")) return res.status(400).end();
-      const response = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 Chrome/120" } });
+      // Use a full modern Chrome UA so Google Fonts CDN returns WOFF2 (not TTF).
+      // A truncated UA like "Mozilla/5.0 Chrome/120" is unrecognised and causes
+      // Google Fonts to fall back to TTF, which then mismatches the font/woff2
+      // Content-Type we serve — making Chromium/Puppeteer reject all fonts.
+      const CHROME_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36";
+      const response = await fetch(url, { headers: { "User-Agent": CHROME_UA } });
       const css = await response.text();
       const rewritten = css.replace(/url\((https:\/\/fonts\.gstatic\.com[^)]+)\)/g, "url(/api/font-file?url=$1)");
       res.setHeader("Content-Type", "text/css; charset=utf-8");
@@ -194,7 +199,16 @@ async function main() {
       if (!url || !url.startsWith("https://fonts.gstatic.com/")) return res.status(400).end();
       const response = await fetch(url);
       const buffer = await response.arrayBuffer();
-      res.setHeader("Content-Type", "font/woff2");
+      // Detect font format from URL extension and set the correct Content-Type.
+      // Mismatched Content-Type (e.g. font/woff2 for a .ttf file) causes
+      // Chromium/Puppeteer to silently reject the font, producing a PDF with
+      // no custom fonts (text appears as boxes or falls back to system fonts).
+      let contentType = "font/woff2";
+      if (url.endsWith(".ttf"))   contentType = "font/ttf";
+      else if (url.endsWith(".otf"))   contentType = "font/otf";
+      else if (url.endsWith(".woff"))  contentType = "font/woff";
+      else if (url.endsWith(".eot"))   contentType = "application/vnd.ms-fontobject";
+      res.setHeader("Content-Type", contentType);
       res.setHeader("X-Content-Type-Options", "nosniff");
       res.setHeader("Cache-Control", "public, max-age=604800");
       res.end(Buffer.from(buffer));
