@@ -39,7 +39,7 @@ const ARABIC_FONTS = new Set([
 
 export function resolveTheme(theme, isRTL) {
   const fontSize       = theme?.fontSize       || 'medium';
-  let   fontFamily     = theme?.fontFamily     || (isRTL ? 'Tajawal' : 'Calibri');
+  let   fontFamily     = theme?.fontFamily     || (isRTL ? 'Tajawal' : 'Inter');
   const pagePadding    = theme?.pagePadding    || 'medium';
   const lineHeightKey  = theme?.lineHeight     || 'normal';
   const sectionSpacing = theme?.sectionSpacing || 'medium';
@@ -48,7 +48,7 @@ export function resolveTheme(theme, isRTL) {
     fontFamily = 'Tajawal';
   }
   if (!isRTL && ARABIC_FONTS.has(fontFamily)) {
-    fontFamily = 'Calibri';
+    fontFamily = 'Inter';
   }
 
   // For LTR: fall through to Inter (loaded from Google Fonts) before the

@@ -223,12 +223,21 @@ const CVBuilder = () => {
       const pageBreaks  = breakDataRef.current?.breaks      ?? [];
       const totalHeight = breakDataRef.current?.totalHeight ?? PAGE_H_PX;
 
+      // PRIMARY: capture the exact HTML the browser rendered for the live preview.
+      // captureEl is the hidden off-screen div (position:absolute, top:-9999px, width:794px)
+      // that LivePreview uses for measurements. Its innerHTML is the template's actual DOM.
+      // Sending this to the server means Puppeteer renders the SAME HTML the user sees —
+      // same fonts, same computed styles, same layout — giving a pixel-perfect PDF.
+      const captureEl   = breakDataRef.current?.captureEl;
+      const renderedHtml = captureEl?.innerHTML || null;
+
       const response = await fetch('/api/pdf/ats', {
         method: 'POST',
         credentials: 'include',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          cvData,
+          renderedHtml,   // primary: browser's exact rendered HTML
+          cvData,         // fallback: raw data for server-side SSR
           options: {
             templateId: selectedTemplate,
             isRTL,

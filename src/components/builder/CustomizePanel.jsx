@@ -17,6 +17,9 @@ const COLORS = [
 ];
 
 const FONTS_EN = [
+  { label: 'Inter',          value: 'Inter'          },
+  { label: 'Outfit',         value: 'Outfit'         },
+  { label: 'Merriweather',   value: 'Merriweather'   },
   { label: 'Calibri',        value: 'Calibri'        },
   { label: 'Arial',          value: 'Arial'          },
   { label: 'Georgia',        value: 'Georgia'        },

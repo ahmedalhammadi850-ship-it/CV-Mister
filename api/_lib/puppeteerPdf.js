@@ -3,6 +3,12 @@
  *
  * Singleton Puppeteer browser manager + PDF-from-HTML utility.
  * Chromium is provided by the system (Nix package).
+ *
+ * IMPORTANT: We call page.emulateMediaType('screen') before rendering.
+ * Without this, Chromium switches to print-mode when page.pdf() is called,
+ * which applies different default CSS (stripping backgrounds, changing spacing,
+ * ignoring screen-only rules) and makes the PDF look different from the preview.
+ * Forcing 'screen' mode makes Chromium render exactly as the browser preview does.
  */
 
 import puppeteer from "puppeteer-core";
@@ -37,8 +43,6 @@ const LAUNCH_ARGS = [
   "--mute-audio",
   "--no-first-run",
   "--safebrowsing-disable-auto-update",
-  // Preserve font hinting so glyphs are embedded as real CIDFont (Type2)
-  // rather than bezier paths (Type3) in the PDF — keeps text selectable/ATS-readable.
   "--font-render-hinting=none",
 ];
 
@@ -69,18 +73,13 @@ process.on("exit", () => { if (_browser) _browser.close().catch(() => {}); });
  *
  * @param {string} html              - Complete HTML document
  * @param {object} [opts]
- * @param {number} [opts.totalHeight=1122]     - Total template content height in px.
- *   Used to set a viewport tall enough to lay out the full document before
- *   Puppeteer captures the PDF (avoids partial-layout issues with multi-page docs).
- * @param {number} [opts.pageBreakCount=0]     - Number of explicit page breaks.
- *   When > 0, the HTML uses .page-slice containers for per-slice layout.
+ * @param {number} [opts.totalHeight=1122]
+ * @param {number} [opts.pageBreakCount=0]
  * @returns {Promise<Buffer>}
  */
 export async function generatePdfFromHtml(html, opts = {}) {
   const { totalHeight = 1122, pageBreakCount = 0 } = opts;
 
-  // For multi-page documents, set the viewport tall enough to hold all slices.
-  // Each slice is exactly 1122px (A4 at 96 dpi); single-page uses 1122px.
   const viewportHeight = pageBreakCount > 0
     ? Math.ceil((pageBreakCount + 1) * 1122)
     : Math.max(1122, Math.ceil(totalHeight));
@@ -90,13 +89,19 @@ export async function generatePdfFromHtml(html, opts = {}) {
   try {
     await page.setViewport({ width: 794, height: viewportHeight, deviceScaleFactor: 1 });
 
+    // ── CRITICAL: Force screen media type ─────────────────────────────────────
+    // By default, page.pdf() puts Chromium in "print" media mode, which applies
+    // different default browser styles than what the user sees in the preview
+    // (which is always "screen" mode). Forcing "screen" here makes Chromium
+    // render with exactly the same CSS rules as the live preview — ensuring
+    // fonts, spacing, backgrounds, and element sizing are pixel-identical.
+    await page.emulateMediaType('screen');
+
     await page.setContent(html, { waitUntil: "networkidle0", timeout: 30000 });
 
-    // Ensure every @font-face is fully loaded and flushed into Chromium's
-    // internal font pipeline before PDF generation begins.
+    // Wait for every @font-face to fully load and flush into the rendering pipeline
     await page.evaluate(async () => {
       await document.fonts.ready;
-
       const loadPromises = [];
       document.fonts.forEach((face) => {
         if (face.status !== "loaded") {
@@ -104,9 +109,10 @@ export async function generatePdfFromHtml(html, opts = {}) {
         }
       });
       if (loadPromises.length) await Promise.all(loadPromises);
-
-      // Yield to the rendering pipeline so compositing is flushed
-      await new Promise((resolve) => requestAnimationFrame(() => setTimeout(resolve, 200)));
+      // Two rAF ticks to ensure compositing is flushed before capture
+      await new Promise(resolve =>
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 150)))
+      );
     });
 
     const pdf = await page.pdf({
