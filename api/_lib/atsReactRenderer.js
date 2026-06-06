@@ -348,14 +348,36 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
 
   const pageStarts = [0, ...pageBreaks];
 
+  // Extra pixel buffer added to the last page's content height to absorb the
+  // small difference between the browser-measured totalHeight (scrollHeight of
+  // the off-screen DOM) and the actual SSR-rendered height.
+  //
+  // WHY THIS HAPPENS: The browser measures the live DOM with the user's actual
+  // screen fonts loaded; SSR (react-dom/server) renders the same JSX but on
+  // the server, where font metrics can differ very slightly (sub-pixel
+  // line-height rounding, fractional em values resolved differently).  The
+  // result: SSR may produce a template that is 50–150 px taller than what the
+  // browser reported.  Without this buffer, that extra content is clipped by
+  // overflow:hidden on the last page's inner container, silently cutting off
+  // the last few items (e.g. the Languages section).
+  //
+  // 200 px is conservative — real variance is typically < 100 px — and keeps
+  // totalSliceHeight well under A4 (1122 px) for any normal resume layout,
+  // which prevents an unwanted blank third page.
+  const LAST_PAGE_SSR_BUFFER = 200;
+
   const pageContainers = pageStarts.map((start, i) => {
     const isFirst = i === 0;
     const isLast  = i === pageStarts.length - 1;
-    const end = isLast ? totalHeight : pageBreaks[i];
+
+    // For the last page extend the clip boundary by the SSR buffer so that
+    // content slightly beyond the browser-measured totalHeight is not hidden.
+    const end = isLast ? totalHeight + LAST_PAGE_SSR_BUFFER : pageBreaks[i];
     const sliceHeight = Math.max(1, Math.round(end - start));
 
     if (isFirst) {
-      // Page 1: template renders with its own padding — no extra margin needed.
+      // Page 1 (and single-page documents): template renders from the top.
+      // Cap at A4 height for non-last pages; last-page cap is handled below.
       return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${sliceHeight}px">
   <div class="template-wrap" style="transform:translateY(0px)">
     ${bodyHtml}
@@ -363,13 +385,19 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
 </div>`;
     }
 
-    // Pages 2+: mirror LivePreview's clip+overlay approach.
-    // Outer page-slice = MARGIN (white) + sliceHeight (content).
-    // Inner clip container is offset by MARGIN and has its own overflow:hidden,
-    // so absolutely NO template content appears in the top MARGIN px zone.
-    const totalSliceHeight = sliceHeight + MARGIN;
+    // Pages 2+: MARGIN px of white at top, then clipped content.
+    // For the last page, cap totalSliceHeight at A4 height (1122 px) so
+    // the SSR buffer never pushes the slice past one full page and causes
+    // Puppeteer to emit an unwanted blank extra page.
+    const rawTotalSliceHeight = sliceHeight + MARGIN;
+    const totalSliceHeight = isLast
+      ? Math.min(rawTotalSliceHeight, 1122)
+      : rawTotalSliceHeight;
+    // Recompute the inner clip height after the cap is applied.
+    const innerHeight = totalSliceHeight - MARGIN;
+
     return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${totalSliceHeight}px">
-  <div style="position:absolute;top:${MARGIN}px;left:0;width:794px;height:${sliceHeight}px;overflow:hidden">
+  <div style="position:absolute;top:${MARGIN}px;left:0;width:794px;height:${innerHeight}px;overflow:hidden">
     <div style="position:absolute;top:0;left:0;width:794px;transform:translateY(-${Math.round(start)}px)">
       ${bodyHtml}
     </div>
