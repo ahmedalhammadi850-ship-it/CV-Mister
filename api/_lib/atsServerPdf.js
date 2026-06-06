@@ -104,6 +104,16 @@ const SECTION_LABELS = {
   references:    { en: "References",            ar: "المراجع والتزكيات"     },
 };
 
+// Per-template overrides — must match the labels in each ATS JSX template exactly
+const TEMPLATE_LABEL_OVERRIDES = {
+  atsbold:    { skills: { en: "Key Skills",          ar: "المهارات الرئيسية"  } },
+  atspro:     { skills: { en: "Key Skills",          ar: "المهارات الرئيسية"  } },
+  atsmodern:  { skills: { en: "Core Competencies",   ar: "الكفاءات الأساسية" } },
+  atssimple:  { skills: { en: "Skills",              ar: "المهارات"           } },
+  atsharvard: { skills: { en: "Skills",              ar: "المهارات"           } },
+  atscompact: { skills: { en: "Skills",              ar: "المهارات"           } },
+};
+
 const CONTACT_LABELS = {
   email:     { en: "Email",    ar: "البريد الإلكتروني" },
   phone:     { en: "Phone",    ar: "الهاتف"            },
@@ -112,8 +122,10 @@ const CONTACT_LABELS = {
   portfolio: { en: "Portfolio",ar: "Portfolio"         },
 };
 
-function sectionLabel(key, isRTL, sectionNames) {
+function sectionLabel(key, isRTL, sectionNames, templateId) {
   if (sectionNames?.[key]) return sectionNames[key];
+  const override = TEMPLATE_LABEL_OVERRIDES[templateId]?.[key];
+  if (override) return override[isRTL ? "ar" : "en"];
   return SECTION_LABELS[key]?.[isRTL ? "ar" : "en"] ?? key;
 }
 function dateRange(start, end, current, isRTL) {
@@ -417,14 +429,14 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "summary": {
         if (!pi.summary) return;
-        writeSectionHeading(sectionLabel("summary", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("summary", isRTL, sectionNames, TS.id));
         writeWrapped(pi.summary, { size: 10 });
         break;
       }
 
       case "experience": {
         if (!cvData.experience?.length) return;
-        writeSectionHeading(sectionLabel("experience", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("experience", isRTL, sectionNames, TS.id));
         cvData.experience.forEach((e, i) => {
           if (i > 0) gap(3);
           writeTwoCol(safe(e.jobTitle), dateRange(e.startDate, e.endDate, e.current, isRTL));
@@ -437,7 +449,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "education": {
         if (!cvData.education?.length) return;
-        writeSectionHeading(sectionLabel("education", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("education", isRTL, sectionNames, TS.id));
         cvData.education.forEach((e, i) => {
           if (i > 0) gap(3);
           writeTwoCol(safe(e.degree), dateRange(e.startDate, e.endDate, false, isRTL));
@@ -449,24 +461,111 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "skills": {
         if (!cvData.skills?.length) return;
-        writeSectionHeading(sectionLabel("skills", isRTL, sectionNames));
-        const sep = TS.id === "atscompact" ? " | " : "  ·  ";
-        writeWrapped(cvData.skills.map(sk => safe(sk.name || sk)).filter(Boolean).join(sep));
+        writeSectionHeading(sectionLabel("skills", isRTL, sectionNames, TS.id));
+        const skillNames = cvData.skills.map(sk => safe(sk.name || sk)).filter(Boolean);
+
+        if (TS.id === "atsbold") {
+          // ATSBold: 2-column grid, ▪ bullet + skill name
+          const COL_W = CW / 2;
+          let col = 0;
+          let rowY = y;
+          const lh = lineH(10);
+          skillNames.forEach(name => {
+            ensurePage(lh);
+            const xBase = isRTL ? ML + CW - col * COL_W : ML + col * COL_W;
+            const bulletX = isRTL ? xBase - 1 : xBase;
+            const textX   = isRTL ? bulletX - 3 : bulletX + 3;
+            const textAl  = isRTL ? "right" : "left";
+            doc.setFontSize(9.5).setFont(FONT_FAMILY, B).setTextColor(...TS.accentRgb);
+            doc.text("\u25AA", bulletX, col === 0 ? y : rowY, { align: textAl });
+            doc.setFont(FONT_FAMILY, N).setTextColor(20, 20, 20);
+            doc.text(name, textX, col === 0 ? y : rowY, { align: textAl });
+            if (col === 0) { rowY = y; col = 1; }
+            else           { rowY += lh; col = 0; y = rowY; }
+          });
+          if (col === 1) y = rowY + lh;
+        } else if (TS.id === "atsmodern") {
+          // ATSModern: 3-column grid, colored dot + skill name
+          const COL_W = CW / 3;
+          let col = 0;
+          let rowY = y;
+          const lh = lineH(10);
+          const [dr, dg, db] = TS.accentRgb;
+          skillNames.forEach(name => {
+            ensurePage(lh);
+            const xBase = ML + col * COL_W;
+            doc.setFillColor(dr, dg, db).circle(xBase + 1, (col === 0 ? y : rowY) - 1, 1, "F");
+            doc.setFontSize(10).setFont(FONT_FAMILY, N).setTextColor(20, 20, 20);
+            doc.text(name, xBase + 3.5, col === 0 ? y : rowY, { align: "left" });
+            if (col < 2) { if (col === 0) rowY = y; col++; }
+            else         { rowY += lh; col = 0; y = rowY; }
+          });
+          if (col > 0) y = rowY + lh;
+        } else if (TS.id === "atspro") {
+          // ATSPro: wrapping pills (rendered as spaced text, ATS-safe)
+          writeWrapped(skillNames.join("   ·   "));
+        } else {
+          // ATSClean, ATSSimple, ATSHarvard, ATSCenter, ATSElegant, ATSCompact
+          const sep = TS.id === "atscompact" ? "  |  " : "  ·  ";
+          writeWrapped(skillNames.join(sep));
+        }
         break;
       }
 
       case "languages": {
         if (!cvData.languages?.length) return;
-        writeSectionHeading(sectionLabel("languages", isRTL, sectionNames));
-        writeWrapped(
-          cvData.languages.map(l => `${safe(l.name)} (${safe(l.level)})`).filter(s=>s!==" ()").join("  ·  ")
-        );
+        writeSectionHeading(sectionLabel("languages", isRTL, sectionNames, TS.id));
+        const langs = cvData.languages.filter(l => l.name);
+
+        if (TS.id === "atsbold") {
+          // ATSBold: 2-column grid, ▪ bullet + Name — Level
+          const COL_W = CW / 2;
+          let col = 0;
+          let rowY = y;
+          const lh = lineH(10);
+          langs.forEach(l => {
+            ensurePage(lh);
+            const xBase  = isRTL ? ML + CW - col * COL_W : ML + col * COL_W;
+            const textAl = isRTL ? "right" : "left";
+            doc.setFontSize(9.5).setFont(FONT_FAMILY, B).setTextColor(...TS.accentRgb);
+            doc.text("\u25AA", xBase, col === 0 ? y : rowY, { align: textAl });
+            doc.setFont(FONT_FAMILY, N).setTextColor(20, 20, 20);
+            doc.text(`${safe(l.name)} \u2014 ${safe(l.level)}`, isRTL ? xBase - 3 : xBase + 3, col === 0 ? y : rowY, { align: textAl });
+            if (col === 0) { rowY = y; col = 1; }
+            else           { rowY += lh; col = 0; y = rowY; }
+          });
+          if (col === 1) y = rowY + lh;
+        } else if (TS.id === "atsmodern") {
+          // ATSModern: 3-column grid, colored dot + Name — Level
+          const COL_W = CW / 3;
+          let col = 0;
+          let rowY = y;
+          const lh = lineH(10);
+          const [dr, dg, db] = TS.accentRgb;
+          langs.forEach(l => {
+            ensurePage(lh);
+            const xBase = ML + col * COL_W;
+            doc.setFillColor(dr, dg, db).circle(xBase + 1, (col === 0 ? y : rowY) - 1, 1, "F");
+            doc.setFontSize(10).setFont(FONT_FAMILY, N).setTextColor(20, 20, 20);
+            doc.text(`${safe(l.name)} \u2014 ${safe(l.level)}`, xBase + 3.5, col === 0 ? y : rowY, { align: "left" });
+            if (col < 2) { if (col === 0) rowY = y; col++; }
+            else         { rowY += lh; col = 0; y = rowY; }
+          });
+          if (col > 0) y = rowY + lh;
+        } else if (TS.id === "atspro") {
+          // ATSPro: pills — Name — Level
+          writeWrapped(langs.map(l => `${safe(l.name)} \u2014 ${safe(l.level)}`).join("   ·   "));
+        } else {
+          writeWrapped(
+            langs.map(l => `${safe(l.name)} (${safe(l.level)})`).join("  \u00B7  ")
+          );
+        }
         break;
       }
 
       case "projects": {
         if (!cvData.projects?.length) return;
-        writeSectionHeading(sectionLabel("projects", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("projects", isRTL, sectionNames, TS.id));
         cvData.projects.forEach((p, i) => {
           if (i > 0) gap(3);
           writeLine(safe(p.title), { size: 10, style: B });
@@ -478,7 +577,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "certificates": {
         if (!cvData.certificates?.length) return;
-        writeSectionHeading(sectionLabel("certificates", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("certificates", isRTL, sectionNames, TS.id));
         cvData.certificates.forEach((c, i) => {
           if (i > 0) gap(3);
           writeTwoCol(safe(c.name), safe(c.date));
@@ -490,14 +589,14 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "interests": {
         if (!cvData.interests?.length) return;
-        writeSectionHeading(sectionLabel("interests", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("interests", isRTL, sectionNames, TS.id));
         writeWrapped(cvData.interests.map(item => safe(typeof item==="string"?item:item.name)).filter(Boolean).join("  ·  "));
         break;
       }
 
       case "courses": {
         if (!cvData.courses?.length) return;
-        writeSectionHeading(sectionLabel("courses", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("courses", isRTL, sectionNames, TS.id));
         cvData.courses.forEach((c, i) => {
           if (i > 0) gap(3);
           writeTwoCol(safe(c.name), safe(c.date));
@@ -508,7 +607,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "awards": {
         if (!cvData.awards?.length) return;
-        writeSectionHeading(sectionLabel("awards", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("awards", isRTL, sectionNames, TS.id));
         cvData.awards.forEach((a, i) => {
           if (i > 0) gap(3);
           writeTwoCol(safe(a.title), safe(a.date));
@@ -520,7 +619,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "organisations": {
         if (!cvData.organisations?.length) return;
-        writeSectionHeading(sectionLabel("organisations", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("organisations", isRTL, sectionNames, TS.id));
         cvData.organisations.forEach((o, i) => {
           if (i > 0) gap(3);
           writeTwoCol(safe(o.name), safe(o.date));
@@ -531,7 +630,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "publications": {
         if (!cvData.publications?.length) return;
-        writeSectionHeading(sectionLabel("publications", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("publications", isRTL, sectionNames, TS.id));
         cvData.publications.forEach((p, i) => {
           if (i > 0) gap(3);
           writeTwoCol(safe(p.title), safe(p.date));
@@ -543,7 +642,7 @@ export async function generateATSPdfBuffer(cvData, options = {}) {
 
       case "references": {
         if (!cvData.references?.length) return;
-        writeSectionHeading(sectionLabel("references", isRTL, sectionNames));
+        writeSectionHeading(sectionLabel("references", isRTL, sectionNames, TS.id));
         cvData.references.forEach((r, i) => {
           if (i > 0) gap(3);
           writeLine(safe(r.name), { size: 10, style: B });
