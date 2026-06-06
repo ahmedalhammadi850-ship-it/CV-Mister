@@ -9,6 +9,15 @@
  * which applies different default CSS (stripping backgrounds, changing spacing,
  * ignoring screen-only rules) and makes the PDF look different from the preview.
  * Forcing 'screen' mode makes Chromium render exactly as the browser preview does.
+ *
+ * 2-PASS PDF GENERATION (for browser-captured HTML):
+ *   Pass 1 — measureBreaks(html): renders the unsliced template, computes smart
+ *             page-break positions from Puppeteer's own layout engine.
+ *   Pass 2 — generatePdfFromHtml(slicedHtml): renders the sliced HTML and exports PDF.
+ *
+ * This eliminates browser↔Puppeteer font-metric discrepancies: the page breaks
+ * are derived from the SAME rendering that produces the PDF, so content always
+ * falls on the correct page.
  */
 
 import puppeteer from "puppeteer-core";
@@ -66,9 +75,6 @@ async function getBrowser() {
   let headless = true;
 
   if (process.env.VERCEL) {
-    // On Vercel serverless: use @sparticuz/chromium-min.
-    // It downloads a compressed Chromium binary to /tmp on first cold-start
-    // and caches it for subsequent warm invocations of the same Lambda.
     const chromium = (await import("@sparticuz/chromium-min")).default;
     chromium.setGraphicsMode = false;
     executablePath = await chromium.executablePath(SPARTICUZ_CHROMIUM_URL);
@@ -92,9 +98,120 @@ async function getBrowser() {
 process.on("exit", () => { if (_browser) _browser.close().catch(() => {}); });
 
 /**
- * Generate a PDF buffer from an HTML string.
+ * Shared helper — open a page, set content, wait for fonts.
+ * Returns the Puppeteer Page object (caller must close it).
+ */
+async function _openPage(html, viewportHeight = 1122) {
+  const browser = await getBrowser();
+  const page = await browser.newPage();
+
+  await page.setViewport({ width: 794, height: viewportHeight, deviceScaleFactor: 1 });
+  await page.emulateMediaType("screen");
+
+  const opts = { waitUntil: "networkidle0", timeout: 30000 };
+  if (!process.env.VERCEL) {
+    const PORT = process.env.PORT || 3001;
+    opts.baseURL = `http://127.0.0.1:${PORT}`;
+  }
+  await page.setContent(html, opts);
+
+  // Wait for every @font-face to fully load and flush into the rendering pipeline
+  await page.evaluate(async () => {
+    await document.fonts.ready;
+    const pending = [];
+    document.fonts.forEach(f => {
+      if (f.status !== "loaded") pending.push(f.load().catch(() => {}));
+    });
+    if (pending.length) await Promise.all(pending);
+    // Two rAF ticks so the compositor has fully applied font metrics
+    await new Promise(r =>
+      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 150)))
+    );
+  });
+
+  return page;
+}
+
+// ── Constants shared with LivePreview.jsx ────────────────────────────────────
+const PAGE_H  = 1122;  // A4 height at 96 dpi  (must match LivePreview.jsx)
+const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
+const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
+
+/**
+ * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
  *
- * @param {string} html              - Complete HTML document
+ * Renders the UNSLICED template HTML, then runs the same smart-break algorithm
+ * as LivePreview.jsx inside Puppeteer's JavaScript engine so the measurements
+ * reflect Puppeteer's exact font metrics rather than the user's browser.
+ *
+ * @param   {string} html  — Complete HTML document (single-page, no slices)
+ * @returns {Promise<{breaks: number[], totalHeight: number}>}
+ */
+export async function measureBreaks(html) {
+  // Very tall viewport so nothing is clipped during measurement
+  const page = await _openPage(html, 10000);
+  try {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT) => {
+      // The template root div is the first child of <body>
+      const container = document.body.firstElementChild;
+      if (!container) return { breaks: [], totalHeight: PAGE_H };
+
+      const totalHeight = container.scrollHeight;
+      if (totalHeight <= PAGE_H) return { breaks: [], totalHeight };
+
+      // Mirror of computeSmartBreaks in LivePreview.jsx
+      const containerTop = container.getBoundingClientRect().top;
+
+      const candidates = Array.from(container.querySelectorAll("*")).filter(el => {
+        const s = getComputedStyle(el);
+        return (
+          s.breakInside      === "avoid" ||
+          s.pageBreakInside  === "avoid" ||
+          s.breakAfter       === "avoid" ||
+          s.pageBreakAfter   === "avoid"
+        );
+      });
+
+      const breaks = [];
+      let pageStart = 0;
+
+      while (pageStart + PAGE_H < totalHeight) {
+        const rawBreak = pageStart + PAGE_H - MARGIN;
+        let bestBreak = rawBreak;
+
+        for (const el of candidates) {
+          const rect  = el.getBoundingClientRect();
+          const elTop = rect.top    - containerTop;
+          const elBot = rect.bottom - containerTop;
+          if (
+            elTop < rawBreak &&
+            elBot > rawBreak &&
+            elTop > pageStart + MIN_PAGE_CONTENT
+          ) {
+            bestBreak = Math.min(bestBreak, elTop);
+          }
+        }
+
+        breaks.push(bestBreak);
+        pageStart = bestBreak;
+      }
+
+      return { breaks, totalHeight };
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT);
+
+    console.log(
+      `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}`
+    );
+    return result;
+  } finally {
+    await page.close().catch(() => {});
+  }
+}
+
+/**
+ * Pass 2 — generate a PDF buffer from a pre-built HTML document.
+ *
+ * @param {string} html              — Complete HTML document (may include page slices)
  * @param {object} [opts]
  * @param {number} [opts.totalHeight=1122]
  * @param {number} [opts.pageBreakCount=0]
@@ -107,48 +224,8 @@ export async function generatePdfFromHtml(html, opts = {}) {
     ? Math.ceil((pageBreakCount + 1) * 1122)
     : Math.max(1122, Math.ceil(totalHeight));
 
-  const browser = await getBrowser();
-  const page = await browser.newPage();
+  const page = await _openPage(html, viewportHeight);
   try {
-    await page.setViewport({ width: 794, height: viewportHeight, deviceScaleFactor: 1 });
-
-    // ── CRITICAL: Force screen media type ─────────────────────────────────────
-    // By default, page.pdf() puts Chromium in "print" media mode, which applies
-    // different default browser styles than what the user sees in the preview
-    // (which is always "screen" mode). Forcing "screen" here makes Chromium
-    // render with exactly the same CSS rules as the live preview — ensuring
-    // fonts, spacing, backgrounds, and element sizing are pixel-identical.
-    await page.emulateMediaType('screen');
-
-    // On Vercel: HTML uses absolute Google Fonts URLs — no baseURL needed.
-    // On Replit/local: HTML uses relative /api/font-proxy URLs — baseURL
-    // resolves them against the local Express server (http://127.0.0.1:PORT).
-    const setContentOpts = {
-      waitUntil: "networkidle0",
-      timeout: 30000,
-    };
-    if (!process.env.VERCEL) {
-      const PORT = process.env.PORT || 3001;
-      setContentOpts.baseURL = `http://127.0.0.1:${PORT}`;
-    }
-    await page.setContent(html, setContentOpts);
-
-    // Wait for every @font-face to fully load and flush into the rendering pipeline
-    await page.evaluate(async () => {
-      await document.fonts.ready;
-      const loadPromises = [];
-      document.fonts.forEach((face) => {
-        if (face.status !== "loaded") {
-          loadPromises.push(face.load().catch(() => {}));
-        }
-      });
-      if (loadPromises.length) await Promise.all(loadPromises);
-      // Two rAF ticks to ensure compositing is flushed before capture
-      await new Promise(resolve =>
-        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 150)))
-      );
-    });
-
     const pdf = await page.pdf({
       format: "A4",
       printBackground: true,
