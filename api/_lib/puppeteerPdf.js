@@ -107,8 +107,6 @@ async function getBrowser() {
 
   if (process.env.VERCEL) {
     const chromium = (await import("@sparticuz/chromium-min")).default;
-    // v149+: use `graphics` setter (was `setGraphicsMode` in older versions)
-    chromium.graphics = false;
     executablePath = await chromium.executablePath(SPARTICUZ_CHROMIUM_URL);
     // v149 args already include --no-sandbox, --no-zygote, --headless='shell', etc.
     // Merge but avoid duplicating flags already in chromium.args.
