@@ -51,9 +51,12 @@ const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag 
 // and the first item (e.g. ClassicSerif, Modern, etc.).
 const HEADING_ORPHAN_PX = 120;
 
-// Max pixels we'll pull a break back to avoid splitting a break-inside:avoid element.
-// Keeps white space at the bottom of a page reasonable (≈ 4 × top/bottom margin).
-const MAX_PULL = MARGIN * 4;
+// Max pixels we'll pull a break back to avoid splitting a break-inside:avoid element
+// OR to handle a heading orphan. Measured from the raw break point, not bestBreak,
+// so the two adjustments cannot compound into a large blank area.
+// Setting this to 20 ensures the visible blank space at the page bottom stays ≤ 20px
+// beyond the natural page margin.
+const MAX_PULL = 20;
 
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
@@ -67,8 +70,9 @@ function computeSmartBreaks(container, totalHeight) {
 
     // Avoid splitting elements that have break-inside:avoid (e.g. cv item cards).
     // Pull the break back to the element's top when it falls inside one,
-    // but only if pulling back stays within MAX_PULL of the raw break point
-    // (to avoid leaving large blank areas at the bottom of a page).
+    // but only if pulling back stays within MAX_PULL of the RAW break point.
+    // Using rawBreak (not bestBreak) as the reference prevents the heading orphan
+    // check below from compounding this pull and creating excessive blank space.
     const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
       const s = getComputedStyle(el);
       return s.breakInside === 'avoid' || s.pageBreakInside === 'avoid';
@@ -82,7 +86,7 @@ function computeSmartBreaks(container, totalHeight) {
       // Element spans the current candidate break point?
       if (elTop < bestBreak && elBot > bestBreak) {
         // Only pull back if it won't create an excessively blank bottom area
-        if (elTop > pageStart + MIN_PAGE_CONTENT && (bestBreak - elTop) <= MAX_PULL) {
+        if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL) {
           bestBreak = elTop;
         }
       }
@@ -92,6 +96,8 @@ function computeSmartBreaks(container, totalHeight) {
     // heading wrappers) must NOT be the last visible element on a page.
     // Templates use both <h2> tags AND plain <div>/<section> elements with
     // breakAfter:avoid inline style, so we match on computed style, not tag name.
+    // Cap: only move the heading if doing so stays within MAX_PULL of rawBreak,
+    // preventing the two adjustments from compounding into a large blank gap.
     Array.from(container.querySelectorAll('*')).forEach(el => {
       const cs = getComputedStyle(el);
       if (cs.breakAfter !== 'avoid' && cs.pageBreakAfter !== 'avoid') return;
@@ -99,11 +105,12 @@ function computeSmartBreaks(container, totalHeight) {
       const hTop = rect.top    - containerTop;
       const hBot = rect.bottom - containerTop;
       if (
-        hBot > pageStart + MARGIN &&        // heading is on this page
-        hBot <= bestBreak &&                // heading ends before (or at) break
-        (bestBreak - hBot) <= HEADING_ORPHAN_PX  // within orphan window
+        hBot > pageStart + MARGIN &&             // heading is on this page
+        hBot <= bestBreak &&                     // heading ends before (or at) break
+        (bestBreak - hBot) <= HEADING_ORPHAN_PX && // within orphan window
+        (rawBreak - hTop) <= MAX_PULL            // total pull stays within limit
       ) {
-        bestBreak = Math.min(bestBreak, hTop);  // pull break to before heading
+        bestBreak = Math.min(bestBreak, hTop);   // pull break to before heading
       }
     });
 

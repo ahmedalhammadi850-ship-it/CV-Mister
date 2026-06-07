@@ -172,9 +172,10 @@ const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
 const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
 // Heading orphan threshold — must match HEADING_ORPHAN_PX in LivePreview.jsx.
 const HEADING_ORPHAN_PX = 120;
-// Max px to pull a break back to avoid splitting a break-inside:avoid element.
-// Must match MAX_PULL in LivePreview.jsx.
-const MAX_PULL = MARGIN * 4;
+// Max px to pull a break back to avoid splitting a break-inside:avoid element
+// OR to handle a heading orphan. Measured from rawBreak so the two adjustments
+// cannot compound. Must match MAX_PULL in LivePreview.jsx.
+const MAX_PULL = 20;
 // White space to leave at the bottom of every PDF page.
 // Applied by placing breaks this many px before the raw page edge.
 // Preview is unaffected (uses its own break positions).
@@ -228,8 +229,10 @@ export async function measureBreaks(html) {
 
           // Element spans the current candidate break point?
           if (elTop < bestBreak && elBot > bestBreak) {
-            // Only pull back if it won't create an excessively blank bottom area
-            if (elTop > pageStart + MIN_PAGE_CONTENT && (bestBreak - elTop) <= MAX_PULL) {
+            // Only pull back if it stays within MAX_PULL of the RAW break point.
+            // Using rawBreak (not bestBreak) prevents the heading orphan check
+            // below from compounding this pull into a large blank area.
+            if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL) {
               bestBreak = elTop;
             }
           }
@@ -239,11 +242,8 @@ export async function measureBreaks(html) {
         // heading wrappers) must NOT be the last visible element on a page.
         // Templates use both <h2> tags AND plain <div>/<section> elements with
         // breakAfter:avoid inline style, so we match on computed style, not tag name.
-        //
-        // Threshold: 120px (larger than the old 40px) to catch cases where the
-        // heading is followed by decorative spacing, a horizontal rule, or padding
-        // before the first content item — all of which can push the break far past
-        // the heading bottom.
+        // Cap: only move the heading if (rawBreak - hTop) <= MAX_PULL so the two
+        // adjustments cannot compound into a large blank gap at the page bottom.
         Array.from(container.querySelectorAll('*')).forEach(el => {
           const cs = getComputedStyle(el);
           if (cs.breakAfter !== 'avoid' && cs.pageBreakAfter !== 'avoid') return;
@@ -253,7 +253,8 @@ export async function measureBreaks(html) {
           if (
             hBot > pageStart + MARGIN &&
             hBot <= bestBreak &&
-            (bestBreak - hBot) <= 120
+            (bestBreak - hBot) <= 120 &&
+            (rawBreak - hTop) <= MAX_PULL
           ) {
             bestBreak = Math.min(bestBreak, hTop);
           }
