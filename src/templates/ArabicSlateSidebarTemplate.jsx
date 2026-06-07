@@ -164,7 +164,7 @@ const ArabicSlateSidebarTemplate = ({
     if (!show(key)) return null;
     switch(key) {
       case 'skills': return data.skills?.length > 0 ? (
-        <SBSection key="skills" label={tr('skills',true)}>
+        <SBSection key="skills" label={tr('skills',isRTL)}>
           {data.skills.map((sk,i)=>(
             <div key={i} style={sb.skillItem}>
               <div style={sb.skillName}>{sk.name||sk}</div>
@@ -175,7 +175,7 @@ const ArabicSlateSidebarTemplate = ({
       ) : null;
 
       case 'languages': return data.languages?.length > 0 ? (
-        <SBSection key="languages" label={tr('languages',true)}>
+        <SBSection key="languages" label={tr('languages',isRTL)}>
           {data.languages.map((l,i)=>(
             <div key={i} style={sb.langRow}>
               <Dots level={l.proficiency||3} filled="#fff" empty="rgba(255,255,255,0.2)" />
@@ -190,7 +190,7 @@ const ArabicSlateSidebarTemplate = ({
         const items = data[key];
         if(!items?.length) return null;
         return (
-          <SBSection key={key} label={tr(key,true)}>
+          <SBSection key={key} label={tr(key,isRTL)}>
             {items.map((c,i)=>(
               <div key={i} style={{ marginBottom:'7pt', paddingRight:'0' }}>
                 <div style={{ ...sb.bullet, fontWeight:'600', color:'#fff' }}>{c.name||c.title||c}</div>
@@ -203,7 +203,7 @@ const ArabicSlateSidebarTemplate = ({
       }
 
       case 'awards': return data.awards?.length > 0 ? (
-        <SBSection key="awards" label={tr('awards',true)}>
+        <SBSection key="awards" label={tr('awards',isRTL)}>
           {data.awards.map((a,i)=>(
             <div key={i} style={{ marginBottom:'6pt' }}>
               <div style={{ ...sb.bullet, fontWeight:'600', color:'#fff' }}>{a.title||a.name||a}</div>
@@ -214,7 +214,7 @@ const ArabicSlateSidebarTemplate = ({
       ) : null;
 
       case 'interests': return data.interests?.length > 0 ? (
-        <SBSection key="interests" label={tr('interests',true)}>
+        <SBSection key="interests" label={tr('interests',isRTL)}>
           <div style={{ display:'flex', flexWrap:'wrap', flexDirection:'row-reverse', gap:'3pt' }}>
             {data.interests.map((item,i)=>(
               <span key={i} style={{ background:'rgba(255,255,255,0.15)', borderRadius:'3pt', padding:'2pt 6pt', fontSize:sz.meta, color:'#fff' }}>{item.name||item}</span>
@@ -224,7 +224,7 @@ const ArabicSlateSidebarTemplate = ({
       ) : null;
 
       case 'organisations': return data.organisations?.length > 0 ? (
-        <SBSection key="organisations" label={tr('organisations',true)}>
+        <SBSection key="organisations" label={tr('organisations',isRTL)}>
           {data.organisations.map((o,i)=>(<div key={i} style={sb.bullet}>• {o.name||o}</div>))}
         </SBSection>
       ) : null;
@@ -238,19 +238,19 @@ const ArabicSlateSidebarTemplate = ({
     switch(key) {
       case 'summary': return info.summary ? (
         <section key="summary" style={{ ...BREAK_ITEM, marginBottom:'12pt' }}>
-          <MNHeading label={tr('summary',true)} />
+          <MNHeading label={tr('summary',isRTL)} />
           <div style={mn.bodyText}>{info.summary}</div>
         </section>
       ) : null;
 
       case 'experience': return data.experience?.length > 0 ? (
         <section key="experience">
-          <MNHeading label={tr('experience',true)} />
+          <MNHeading label={tr('experience',isRTL)} />
           {data.experience.map((e,i)=>(
             <div key={i} style={mn.item}>
               <div style={mn.row}>
                 <div style={mn.role}>{e.jobTitle}</div>
-                <div style={mn.date}>{e.startDate} – {e.current?tr('present',true):e.endDate}</div>
+                <div style={mn.date}>{e.startDate} – {e.current?tr('present',isRTL):e.endDate}</div>
               </div>
               <div style={mn.company}>{e.company}{e.location?` · ${e.location}`:''}</div>
               {e.description && <div style={mn.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
@@ -261,7 +261,7 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'education': return data.education?.length > 0 ? (
         <section key="education">
-          <MNHeading label={tr('education',true)} />
+          <MNHeading label={tr('education',isRTL)} />
           {data.education.map((e,i)=>(
             <div key={i} style={mn.item}>
               <div style={mn.row}>
@@ -277,7 +277,7 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'projects': return data.projects?.length > 0 ? (
         <section key="projects">
-          <MNHeading label={tr('projects',true)} />
+          <MNHeading label={tr('projects',isRTL)} />
           {data.projects.map((p,i)=>(
             <div key={i} style={mn.item}>
               <div style={mn.role}>{p.title||p.name}</div>
@@ -290,7 +290,7 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'publications': return data.publications?.length > 0 ? (
         <section key="publications">
-          <MNHeading label={tr('publications',true)} />
+          <MNHeading label={tr('publications',isRTL)} />
           {data.publications.map((p,i)=>(
             <div key={i} style={mn.item}>
               <div style={mn.row}>
@@ -306,7 +306,7 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'references': return data.references?.length > 0 ? (
         <section key="references">
-          <MNHeading label={tr('references',true)} />
+          <MNHeading label={tr('references',isRTL)} />
           {data.references.map((r,i)=>(
             <div key={i} style={mn.item}>
               <div style={mn.role}>{r.name}</div>
@@ -356,7 +356,7 @@ const ArabicSlateSidebarTemplate = ({
 
         <div style={{ padding:'12pt 13pt 0' }}>
           <div style={{ ...sb.sectionBox, marginTop:'0' }}>
-            <div style={sb.sectionLabel}>{tr('contact',true)}</div>
+            <div style={sb.sectionLabel}>{tr('contact',isRTL)}</div>
           </div>
           {contactItems.map((row,i)=>(
             <div key={i} style={sb.contactRow}>
