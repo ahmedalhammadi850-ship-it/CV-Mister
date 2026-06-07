@@ -1,52 +1,44 @@
 /**
  * POST /api/pdf/ats
  *
- * Pixel-perfect PDF generation using browser-computed page breaks.
+ * Pixel-perfect PDF generation using a 2-pass Puppeteer approach.
  *
  * ════════════════════════════════════════════════════════════════════════════
- * SINGLE-PASS PIPELINE (browser-captured HTML path):
+ * 2-PASS PIPELINE (browser-captured HTML path):
  *
- *  The client sends:
- *    • renderedHtml  — the exact innerHTML the browser used for the live preview
- *    • pageBreaks    — the break positions computed by computeSmartBreaks()
- *                      in LivePreview.jsx (same values the user sees)
- *    • totalHeight   — scrollHeight of the off-screen measurement container
+ *  Pass 1 — measureBreaks(singlePageHtml)
+ *    Puppeteer renders the unsliced template and runs the smart-break algorithm
+ *    in its own JavaScript engine.  Page-break positions are derived from
+ *    Puppeteer's font metrics, NOT the browser's.
  *
- *  We build sliced HTML using those browser break positions and hand it to
- *  Puppeteer for rendering.  Because the break positions come from the same
- *  algorithm that drives the preview, the PDF pages are identical to what
- *  the user sees.
+ *    The algorithm now correctly handles:
+ *      • break-inside:avoid  — pulls breaks before element boundaries (MAX_PULL cap)
+ *      • break-after:avoid   — detects heading wrappers (div/h2/etc.) with 120px window
  *
- * WHY WE NO LONGER RE-MEASURE IN PUPPETEER (old "2-pass" approach):
- *   Puppeteer (headless Chromium on Linux, --font-render-hinting=none) uses
- *   slightly different character advance widths than the user's desktop browser.
- *   Re-measuring in Puppeteer produced break points that differed from the
- *   preview — sections moved between pages, content appeared in unexpected
- *   positions.  Trusting the browser's own measurements gives the user
- *   exactly what they saw in the preview.
+ *  Pass 2 — buildHtmlFromRendered(renderedHtml, puppeteerBreaks)
+ *            → generatePdfFromHtml(slicedHtml)
+ *    The sliced HTML is built using the breaks measured in pass 1, then
+ *    rendered to PDF.  Because the breaks come from the same rendering engine
+ *    that produces the final output, content always lands on the correct page
+ *    and section headings are never orphaned.
+ *
+ * WHY 2-PASS (NOT browser breaks):
+ *   The user's browser (Chrome on Windows/Mac) renders fonts with OS-level
+ *   hinting and sub-pixel antialiasing.  Puppeteer (headless Chromium on
+ *   Linux, --font-render-hinting=none) renders fonts with slightly different
+ *   character advance widths.  Over many lines the difference accumulates.
+ *   If we use the browser's breaks, Puppeteer may render text taller, causing
+ *   content to overflow and be clipped.  Measuring IN Puppeteer ensures the
+ *   breaks always match Puppeteer's own rendering → no overflow, no clipping.
  *
  * SSR FALLBACK (no renderedHtml):
- *   Used for direct API calls or old clients that don't supply pre-rendered
- *   HTML.  Page-break positions come from the browser (forwarded in options).
+ *   Used for direct API calls or old clients.  Breaks come from the browser.
  * ════════════════════════════════════════════════════════════════════════════
- *
- * Body shape:
- *  {
- *    cvData:        object,   // CV data — used for filename + SSR fallback
- *    renderedHtml?: string,   // browser innerHTML — primary PDF source
- *    options: {
- *      templateId,
- *      isRTL, theme,
- *      visibleSections, visiblePersonalFields, sectionOrder, sectionNames,
- *      pageBreaks,   // number[] — browser break positions (used directly)
- *      totalHeight,  // number  — browser scrollHeight
- *    }
- *  }
  */
 
 import { getUserFromReq }                              from '../_lib/token.js';
 import { buildHtmlFromRendered, buildAtsHtmlFromReact } from '../_lib/atsReactRenderer.js';
-import { generatePdfFromHtml }                          from '../_lib/puppeteerPdf.js';
+import { measureBreaks, generatePdfFromHtml }           from '../_lib/puppeteerPdf.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ message: 'Method not allowed' });
@@ -60,28 +52,37 @@ export default async function handler(req, res) {
 
     console.log('[PDF] templateId  :', templateId);
     console.log('[PDF] isRTL       :', isRTL);
-    console.log('[PDF] pageBreaks  :', pageBreaks);
-    console.log('[PDF] totalHeight :', totalHeight);
     console.log('[PDF] userId      :', user?.userId ?? '(unauthenticated)');
 
     let html;
     let finalPageBreakCount = pageBreaks.length;
 
     if (renderedHtml) {
-      // ── SINGLE-PASS PATH: use browser-computed break positions ─────────────
+      // ── 2-PASS PATH: browser-captured HTML ────────────────────────────────
       //
-      // The browser already computed the correct break positions via the same
-      // computeSmartBreaks() algorithm that drives the live preview.  We use
-      // those positions directly — no Puppeteer re-measurement needed.
-      console.log('[PDF] source: browser-captured HTML — size:', renderedHtml.length, 'chars');
-      console.log('[PDF] using browser breaks:', pageBreaks.length, 'break(s)');
+      // Pass 1: render the FULL template (no slices) in Puppeteer so that
+      //         break positions are measured by Puppeteer's own font engine.
+      console.log('[PDF] source: browser-captured HTML (2-pass) — size:', renderedHtml.length, 'chars');
 
+      const singlePageHtml = buildHtmlFromRendered(renderedHtml, {
+        isRTL,
+        pageBreaks:  [],     // no slicing — measure the full single-page template
+        totalHeight: 99999,
+      });
+
+      console.log('[PDF] Pass 1: measuring page breaks in Puppeteer…');
+      const { breaks: puppeteerBreaks, totalHeight: puppeteerHeight } =
+        await measureBreaks(singlePageHtml);
+
+      console.log('[PDF] Pass 1 done — puppeteerBreaks:', puppeteerBreaks, '| puppeteerHeight:', puppeteerHeight);
+
+      // Pass 2: slice HTML using Puppeteer's own measured breaks.
       html = buildHtmlFromRendered(renderedHtml, {
         isRTL,
-        pageBreaks,
-        totalHeight,
+        pageBreaks:  puppeteerBreaks,
+        totalHeight: puppeteerHeight,
       });
-      finalPageBreakCount = pageBreaks.length;
+      finalPageBreakCount = puppeteerBreaks.length;
 
     } else if (cvData) {
       // ── SSR FALLBACK: server-render from raw CV data ───────────────────────
@@ -93,7 +94,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'renderedHtml or cvData is required' });
     }
 
-    console.log('[PDF] generating PDF…');
+    console.log('[PDF] Pass 2: generating PDF…');
     const pdf = await generatePdfFromHtml(html, {
       totalHeight,
       pageBreakCount: finalPageBreakCount,
@@ -109,7 +110,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(name)}.pdf"`);
     res.setHeader('Content-Length',       pdf.length);
     res.setHeader('Cache-Control',        'no-store');
-    res.setHeader('X-PDF-Source',         renderedHtml ? 'browser-single-pass' : 'ssr-fallback');
+    res.setHeader('X-PDF-Source',         renderedHtml ? 'browser-2pass' : 'ssr-fallback');
     res.status(200).end(Buffer.from(pdf));
   } catch (err) {
     console.error('[PDF] ERROR:', err.message, err.stack?.slice(0, 500));

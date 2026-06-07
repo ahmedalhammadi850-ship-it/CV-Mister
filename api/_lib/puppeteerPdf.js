@@ -171,10 +171,14 @@ const PAGE_H  = 1122;  // A4 height at 96 dpi  (must match LivePreview.jsx)
 const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
 const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
 // Heading orphan threshold — must match HEADING_ORPHAN_PX in LivePreview.jsx.
-const HEADING_ORPHAN_PX = 40;
+const HEADING_ORPHAN_PX = 120;
 // Max px to pull a break back to avoid splitting a break-inside:avoid element.
 // Must match MAX_PULL in LivePreview.jsx.
 const MAX_PULL = MARGIN * 4;
+// White space to leave at the bottom of every PDF page.
+// Applied by placing breaks this many px before the raw page edge.
+// Preview is unaffected (uses its own break positions).
+const PDF_BOTTOM_MARGIN = 20;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -190,7 +194,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, PDF_BOTTOM_MARGIN) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], totalHeight: PAGE_H };
@@ -198,14 +202,15 @@ export async function measureBreaks(html) {
       const totalHeight = container.scrollHeight;
       if (totalHeight <= PAGE_H) return { breaks: [], totalHeight };
 
-      // Mirror of computeSmartBreaks in LivePreview.jsx
+      // Mirror of computeSmartBreaks in LivePreview.jsx, with PDF_BOTTOM_MARGIN
+      // subtracted so every page naturally has white space before the page edge.
       const containerTop = container.getBoundingClientRect().top;
 
       const breaks = [];
       let pageStart = 0;
 
       while (pageStart + PAGE_H < totalHeight) {
-        const rawBreak = pageStart + PAGE_H - MARGIN;
+        const rawBreak = pageStart + PAGE_H - MARGIN - PDF_BOTTOM_MARGIN;
         let bestBreak = rawBreak;
 
         // Avoid splitting elements with break-inside:avoid (e.g. cv item cards).
@@ -259,7 +264,7 @@ export async function measureBreaks(html) {
       }
 
       return { breaks, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, PDF_BOTTOM_MARGIN);
 
     console.log(
       `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}`

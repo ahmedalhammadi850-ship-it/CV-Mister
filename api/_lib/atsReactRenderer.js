@@ -365,9 +365,6 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   // totalSliceHeight well under A4 (1122 px) for any normal resume layout,
   // which prevents an unwanted blank third page.
   const LAST_PAGE_SSR_BUFFER = 200;
-  // White space reserved at the bottom of the last PDF page (px).
-  // Keeps content from touching the very edge of the page.
-  const PDF_BOTTOM_MARGIN = 20;
 
   const pageContainers = pageStarts.map((start, i) => {
     const isFirst = i === 0;
@@ -379,21 +376,11 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     const sliceHeight = Math.max(1, Math.round(end - start));
 
     if (isFirst) {
-      if (isLast) {
-        // Single-page document: cap at A4, clip content 20 px short so there
-        // is always PDF_BOTTOM_MARGIN px of white at the bottom of the page.
-        const cappedHeight  = Math.min(sliceHeight, 1122);
-        const contentHeight = Math.max(1, cappedHeight - PDF_BOTTOM_MARGIN);
-        return `<div class="page-slice last-slice" style="height:${cappedHeight}px">
-  <div style="overflow:hidden;height:${contentHeight}px">
-    <div class="template-wrap" style="transform:translateY(0px)">
-      ${bodyHtml}
-    </div>
-  </div>
-</div>`;
-      }
-      // Page 1 of a multi-page document: no bottom margin, no extra clip.
-      return `<div class="page-slice" style="height:${sliceHeight}px">
+      // Page 1 (single-page OR first of multi-page): template at translateY(0).
+      // For single-page documents cap at A4 height so Puppeteer never emits a
+      // second blank page.
+      const singleHeight = isLast ? Math.min(sliceHeight, 1122) : sliceHeight;
+      return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${singleHeight}px">
   <div class="template-wrap" style="transform:translateY(0px)">
     ${bodyHtml}
   </div>
@@ -409,9 +396,10 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
       ? Math.min(rawTotalSliceHeight, 1122)
       : rawTotalSliceHeight;
     // Recompute the inner clip height after the cap is applied.
-    // For the last page subtract PDF_BOTTOM_MARGIN so content stops 20 px
-    // before the page edge, leaving a clean white bottom margin.
-    const innerHeight = totalSliceHeight - MARGIN - (isLast ? PDF_BOTTOM_MARGIN : 0);
+    // NOTE: we do NOT subtract a PDF_BOTTOM_MARGIN here — that would clip
+    // content.  The 20 px white bottom space is achieved naturally because
+    // measureBreaks() places each break 20 px before the raw page edge.
+    const innerHeight = totalSliceHeight - MARGIN;
 
     // TOP-CLIP GUARD: subtract 2 px from the translateY so the inner-clip
     // starts 2 px BEFORE the measured break point.
