@@ -137,9 +137,41 @@ async function getBrowser() {
 
 process.on("exit", () => { if (_browser) _browser.close().catch(() => {}); });
 
+// Must stay in sync with ALL_GOOGLE_FONTS_URL in api/_lib/atsReactRenderer.js.
+// Contains every font used by all templates so one proxy fetch covers all of them.
+const ALL_GOOGLE_FONTS_URL =
+  'https://fonts.googleapis.com/css2?' +
+  'family=Plus+Jakarta+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400' +
+  '&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400' +
+  '&family=Inter:wght@400;500;600;700;800' +
+  '&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400' +
+  '&family=Outfit:wght@400;500;600;700;800' +
+  '&family=Tajawal:wght@300;400;500;700' +
+  '&family=Cairo:wght@300;400;600;700' +
+  '&family=Amiri:ital,wght@0,400;0,700;1,400' +
+  '&family=Noto+Naskh+Arabic:wght@400;500;600;700' +
+  '&family=Scheherazade+New:wght@400;700' +
+  '&display=swap';
+
 /**
- * Shared helper — open a page, set content, wait for fonts.
+ * Shared helper — open a page, set content, inject fonts, wait for fonts.
  * Returns the Puppeteer Page object (caller must close it).
+ *
+ * FONT INJECTION STRATEGY
+ * -----------------------
+ * Puppeteer headless Chrome on Linux does NOT reliably process <link rel="stylesheet">
+ * elements during page.setContent() — even with waitUntil:"networkidle0" the
+ * @font-face rules may never be registered (document.fonts shows 0 entries).
+ * Without web fonts the page renders with the Linux system font (DejaVu/Liberation),
+ * which is ~20% wider than Inter → content measures ~200 px taller in Puppeteer
+ * than in the browser → wrong page count.
+ *
+ * Fix: fetch the Google Fonts CSS server-side using Node.js fetch() (always
+ * reliable), rewrite relative /api/font-file?url= paths to absolute
+ * http://127.0.0.1:PORT/api/font-file?url= URLs (so Chromium can load the
+ * font files without depending on the page's base URL setting), then inject
+ * the result via page.addStyleTag({ content }) which is guaranteed to be
+ * registered before the font-wait evaluate runs.
  */
 async function _openPage(html, viewportHeight = 1122) {
   const browser = await getBrowser();
@@ -149,11 +181,38 @@ async function _openPage(html, viewportHeight = 1122) {
   await page.emulateMediaType("screen");
 
   const opts = { waitUntil: "networkidle0", timeout: 30000 };
+  const PORT = process.env.PORT || 3001;
   if (!process.env.VERCEL) {
-    const PORT = process.env.PORT || 3001;
     opts.baseURL = `http://127.0.0.1:${PORT}`;
   }
   await page.setContent(html, opts);
+
+  // ── Force-inject font CSS via server-side fetch + addStyleTag ──────────────
+  // (skipped on Vercel where Chromium has direct internet access and the <link>
+  //  tag uses the real Google Fonts URL, which works fine)
+  if (!process.env.VERCEL) {
+    try {
+      const proxyCssUrl =
+        `http://127.0.0.1:${PORT}/api/font-proxy?url=` +
+        encodeURIComponent(ALL_GOOGLE_FONTS_URL);
+      const cssResp = await fetch(proxyCssUrl, { signal: AbortSignal.timeout(10000) });
+      if (cssResp.ok) {
+        const css = await cssResp.text();
+        // Rewrite relative /api/font-file?url= → absolute http://127.0.0.1:PORT/api/font-file?url=
+        // so Chromium can load the actual woff2 files without base-URL resolution.
+        const absoluteCss = css.replace(
+          /url\(\/api\/font-file\?url=/g,
+          `url(http://127.0.0.1:${PORT}/api/font-file?url=`
+        );
+        await page.addStyleTag({ content: absoluteCss });
+        console.log("[Puppeteer] Font CSS injected via addStyleTag");
+      } else {
+        console.warn(`[Puppeteer] font-proxy returned HTTP ${cssResp.status} — fonts may fall back to system`);
+      }
+    } catch (err) {
+      console.warn("[Puppeteer] Font CSS injection failed:", err.message, "— falling back to system fonts");
+    }
+  }
 
   // Wait for every @font-face to fully load and flush into the rendering pipeline
   await page.evaluate(async () => {
