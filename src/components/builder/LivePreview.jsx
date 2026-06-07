@@ -49,19 +49,12 @@ const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag 
 // to before the heading so it travels with its content to the next page.
 const HEADING_ORPHAN_PX = 40;
 
+// Max pixels we'll pull a break back to avoid splitting a break-inside:avoid element.
+// Keeps white space at the bottom of a page reasonable (≈ 4 × top/bottom margin).
+const MAX_PULL = MARGIN * 4;
+
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
-  const candidates = Array.from(container.querySelectorAll('*')).filter(el => {
-    // Use getComputedStyle to catch BOTH inline styles AND CSS class-based rules
-    // (e.g. .cv-section, .cv-item set break-inside:avoid via stylesheet, not inline)
-    const s = getComputedStyle(el);
-    return (
-      s.breakInside === 'avoid' ||
-      s.pageBreakInside === 'avoid' ||
-      s.breakAfter === 'avoid' ||
-      s.pageBreakAfter === 'avoid'
-    );
-  });
 
   const breaks = [];
   let pageStart = 0;
@@ -70,9 +63,28 @@ function computeSmartBreaks(container, totalHeight) {
     const rawBreak = pageStart + PAGE_H - MARGIN;
     let bestBreak = rawBreak;
 
-    // Do NOT push elements to the next page based on break-inside:avoid alone —
-    // that creates large white gaps. Instead let everything split naturally at
-    // rawBreak, then fix up orphaned section headings below.
+    // Avoid splitting elements that have break-inside:avoid (e.g. cv item cards).
+    // Pull the break back to the element's top when it falls inside one,
+    // but only if pulling back stays within MAX_PULL of the raw break point
+    // (to avoid leaving large blank areas at the bottom of a page).
+    const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
+      const s = getComputedStyle(el);
+      return s.breakInside === 'avoid' || s.pageBreakInside === 'avoid';
+    });
+
+    for (const el of avoidEls) {
+      const rect = el.getBoundingClientRect();
+      const elTop = rect.top    - containerTop;
+      const elBot = rect.bottom - containerTop;
+
+      // Element spans the current candidate break point?
+      if (elTop < bestBreak && elBot > bestBreak) {
+        // Only pull back if it won't create an excessively blank bottom area
+        if (elTop > pageStart + MIN_PAGE_CONTENT && (bestBreak - elTop) <= MAX_PULL) {
+          bestBreak = elTop;
+        }
+      }
+    }
 
     // Orphan fix: if a section heading (h1/h2/h3) would be left alone just
     // before the break (its bottom is within HEADING_ORPHAN_PX of bestBreak),
