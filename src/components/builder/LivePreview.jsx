@@ -44,10 +44,12 @@ const PAGE_H = 1122;   // A4 height at 96 dpi
 const PAGE_W = 794;    // A4 width  at 96 dpi
 const MARGIN = 48;     // top/bottom page margin (≈ 36pt)
 const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag handle clamping)
-// Heading orphan threshold: if a section heading (h1/h2/h3) ends within this many
-// pixels of the break point, it would be left alone on the page. Move the break
-// to before the heading so it travels with its content to the next page.
-const HEADING_ORPHAN_PX = 40;
+// Heading orphan threshold: if a section heading ends within this many pixels of
+// the break point, it would be left alone on the page. Move the break to before
+// the heading so it travels with its content to the next page.
+// 120px covers cases where decorative spacing / a rule sits between the heading
+// and the first item (e.g. ClassicSerif, Modern, etc.).
+const HEADING_ORPHAN_PX = 120;
 
 // Max pixels we'll pull a break back to avoid splitting a break-inside:avoid element.
 // Keeps white space at the bottom of a page reasonable (≈ 4 × top/bottom margin).
@@ -86,17 +88,20 @@ function computeSmartBreaks(container, totalHeight) {
       }
     }
 
-    // Orphan fix: if a section heading (h1/h2/h3) would be left alone just
-    // before the break (its bottom is within HEADING_ORPHAN_PX of bestBreak),
-    // pull the break back to before the heading so it travels with its content.
-    container.querySelectorAll('h1, h2, h3').forEach(heading => {
-      const rect = heading.getBoundingClientRect();
+    // Orphan fix: any element with break-after:avoid (BREAK_HEADING — section
+    // heading wrappers) must NOT be the last visible element on a page.
+    // Templates use both <h2> tags AND plain <div>/<section> elements with
+    // breakAfter:avoid inline style, so we match on computed style, not tag name.
+    Array.from(container.querySelectorAll('*')).forEach(el => {
+      const cs = getComputedStyle(el);
+      if (cs.breakAfter !== 'avoid' && cs.pageBreakAfter !== 'avoid') return;
+      const rect = el.getBoundingClientRect();
       const hTop = rect.top    - containerTop;
       const hBot = rect.bottom - containerTop;
       if (
-        hBot > pageStart + MARGIN &&   // heading is on this page
-        hBot <= bestBreak &&            // heading ends before (or at) break
-        (bestBreak - hBot) <= HEADING_ORPHAN_PX  // heading is very close to break
+        hBot > pageStart + MARGIN &&        // heading is on this page
+        hBot <= bestBreak &&                // heading ends before (or at) break
+        (bestBreak - hBot) <= HEADING_ORPHAN_PX  // within orphan window
       ) {
         bestBreak = Math.min(bestBreak, hTop);  // pull break to before heading
       }

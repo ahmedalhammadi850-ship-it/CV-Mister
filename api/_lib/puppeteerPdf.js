@@ -230,16 +230,25 @@ export async function measureBreaks(html) {
           }
         }
 
-        // Orphan fix: if an h1/h2/h3 ends within HEADING_ORPHAN_PX of the break,
-        // pull the break back to before the heading so it travels with its content.
-        container.querySelectorAll('h1, h2, h3').forEach(heading => {
-          const rect = heading.getBoundingClientRect();
+        // Orphan fix: any element with break-after:avoid (BREAK_HEADING — section
+        // heading wrappers) must NOT be the last visible element on a page.
+        // Templates use both <h2> tags AND plain <div>/<section> elements with
+        // breakAfter:avoid inline style, so we match on computed style, not tag name.
+        //
+        // Threshold: 120px (larger than the old 40px) to catch cases where the
+        // heading is followed by decorative spacing, a horizontal rule, or padding
+        // before the first content item — all of which can push the break far past
+        // the heading bottom.
+        Array.from(container.querySelectorAll('*')).forEach(el => {
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter !== 'avoid' && cs.pageBreakAfter !== 'avoid') return;
+          const rect = el.getBoundingClientRect();
           const hTop = rect.top    - containerTop;
           const hBot = rect.bottom - containerTop;
           if (
             hBot > pageStart + MARGIN &&
             hBot <= bestBreak &&
-            (bestBreak - hBot) <= HEADING_ORPHAN_PX
+            (bestBreak - hBot) <= 120
           ) {
             bestBreak = Math.min(bestBreak, hTop);
           }
