@@ -381,14 +381,12 @@ const LivePreview = ({ breakDataRef }) => {
               />
             )}
 
-            {/* A4 page frame */}
+            {/* A4 page frame — always full A4 height to match the PDF exactly */}
             <div
               className="shadow-2xl overflow-hidden bg-white relative"
               style={{
                 width: scaledW,
-                height: isLast
-                  ? Math.min(PAGE_H, contentSliceH + (isFirst ? 0 : MARGIN) + MARGIN) * scale
-                  : PAGE_H * scale,
+                height: PAGE_H * scale,
                 flexShrink: 0,
               }}
             >
