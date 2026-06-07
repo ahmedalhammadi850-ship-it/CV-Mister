@@ -87,8 +87,9 @@ const LAUNCH_ARGS = [
 
 // Vercel-specific Chromium URL for @sparticuz/chromium-min
 // Must match the chromium-min version installed in package.vercel.json.
+// v149+ uses architecture-specific pack names (pack.x64.tar / pack.arm64.tar).
 const SPARTICUZ_CHROMIUM_URL =
-  "https://github.com/Sparticuz/chromium/releases/download/v132.0.0/chromium-v132.0.0-pack.tar";
+  "https://github.com/Sparticuz/chromium/releases/download/v149.0.0/chromium-v149.0.0-pack.x64.tar";
 
 async function getBrowser() {
   if (_browser) {
@@ -106,11 +107,16 @@ async function getBrowser() {
 
   if (process.env.VERCEL) {
     const chromium = (await import("@sparticuz/chromium-min")).default;
-    chromium.setGraphicsMode = false;
+    // v149+: use `graphics` setter (was `setGraphicsMode` in older versions)
+    chromium.graphics = false;
     executablePath = await chromium.executablePath(SPARTICUZ_CHROMIUM_URL);
-    launchArgs = [...chromium.args, ...LAUNCH_ARGS];
-    headless = chromium.headless;
-    console.log(`[Puppeteer] Vercel — sparticuz Chromium at: ${executablePath}`);
+    // v149 args already include --no-sandbox, --no-zygote, --headless='shell', etc.
+    // Merge but avoid duplicating flags already in chromium.args.
+    launchArgs = [...chromium.args, "--font-render-hinting=none", "--disable-dev-shm-usage"];
+    // v149 uses --headless='shell' via args; pass headless:false so puppeteer
+    // doesn't add its own conflicting --headless flag.
+    headless = false;
+    console.log(`[Puppeteer] Vercel — sparticuz Chromium v149 at: ${executablePath}`);
   } else {
     executablePath = findChromium();
     console.log(`[Puppeteer] Launching Chromium at: ${executablePath}`);
