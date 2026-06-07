@@ -44,10 +44,10 @@ const PAGE_H = 1122;   // A4 height at 96 dpi
 const PAGE_W = 794;    // A4 width  at 96 dpi
 const MARGIN = 48;     // top/bottom page margin (≈ 36pt)
 const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag handle clamping)
-// Only push a section to the next page if it starts in the last 25% of the page.
-// This prevents sections that begin mid-page from being unnecessarily pushed, which
-// leaves a large white gap at the bottom of the current page.
-const SMART_BREAK_THRESHOLD = PAGE_H * 0.75; // ~841px
+// Maximum wasted space (px) at the bottom of a page before we allow a section to split
+// rather than pushing it entirely to the next page.
+// e.g. 150px gap = acceptable; 300px gap = too much waste, let it split instead.
+const MAX_PUSH_WASTE = 150;
 
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
@@ -74,7 +74,12 @@ function computeSmartBreaks(container, totalHeight) {
       const rect  = el.getBoundingClientRect();
       const elTop = rect.top    - containerTop;
       const elBot = rect.bottom - containerTop;
-      if (elTop < rawBreak && elBot > rawBreak && elTop > pageStart + SMART_BREAK_THRESHOLD) {
+      // Only push the section to the next page if the resulting gap at the
+      // bottom of the current page would be small (≤ MAX_PUSH_WASTE px).
+      // If pushing would waste more space than that, allow the section to
+      // split at the natural break point instead of creating a large white gap.
+      const wastedSpace = rawBreak - elTop;
+      if (elTop < rawBreak && elBot > rawBreak && wastedSpace <= MAX_PUSH_WASTE) {
         bestBreak = Math.min(bestBreak, elTop);
       }
     }
