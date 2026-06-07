@@ -43,7 +43,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 const PAGE_H = 1122;   // A4 height at 96 dpi
 const PAGE_W = 794;    // A4 width  at 96 dpi
 const MARGIN = 48;     // top/bottom page margin (≈ 36pt)
-const MIN_PAGE_CONTENT = 200; // minimum content pixels per page
+const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag handle clamping)
+// Only push a section to the next page if it starts in the last 25% of the page.
+// This prevents sections that begin mid-page from being unnecessarily pushed, which
+// leaves a large white gap at the bottom of the current page.
+const SMART_BREAK_THRESHOLD = PAGE_H * 0.75; // ~841px
 
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
@@ -70,7 +74,7 @@ function computeSmartBreaks(container, totalHeight) {
       const rect  = el.getBoundingClientRect();
       const elTop = rect.top    - containerTop;
       const elBot = rect.bottom - containerTop;
-      if (elTop < rawBreak && elBot > rawBreak && elTop > pageStart + MARGIN) {
+      if (elTop < rawBreak && elBot > rawBreak && elTop > pageStart + SMART_BREAK_THRESHOLD) {
         bestBreak = Math.min(bestBreak, elTop);
       }
     }

@@ -170,6 +170,9 @@ async function _openPage(html, viewportHeight = 1122) {
 const PAGE_H  = 1122;  // A4 height at 96 dpi  (must match LivePreview.jsx)
 const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
 const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
+// Only push a section to the next page if it starts in the last 25% of the page.
+// Must match SMART_BREAK_THRESHOLD in LivePreview.jsx.
+const SMART_BREAK_THRESHOLD = PAGE_H * 0.75; // ~841px
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -185,7 +188,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, SMART_BREAK_THRESHOLD) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], totalHeight: PAGE_H };
@@ -220,7 +223,7 @@ export async function measureBreaks(html) {
           if (
             elTop < rawBreak &&
             elBot > rawBreak &&
-            elTop > pageStart + MIN_PAGE_CONTENT
+            elTop > pageStart + SMART_BREAK_THRESHOLD
           ) {
             bestBreak = Math.min(bestBreak, elTop);
           }
@@ -231,7 +234,7 @@ export async function measureBreaks(html) {
       }
 
       return { breaks, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, SMART_BREAK_THRESHOLD);
 
     console.log(
       `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}`
