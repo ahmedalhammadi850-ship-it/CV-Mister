@@ -172,6 +172,9 @@ const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
 const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
 // Heading orphan threshold — must match HEADING_ORPHAN_PX in LivePreview.jsx.
 const HEADING_ORPHAN_PX = 40;
+// Max px to pull a break back to avoid splitting a break-inside:avoid element.
+// Must match MAX_PULL in LivePreview.jsx.
+const MAX_PULL = MARGIN * 4;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -187,7 +190,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], totalHeight: PAGE_H };
@@ -198,16 +201,6 @@ export async function measureBreaks(html) {
       // Mirror of computeSmartBreaks in LivePreview.jsx
       const containerTop = container.getBoundingClientRect().top;
 
-      const candidates = Array.from(container.querySelectorAll("*")).filter(el => {
-        const s = getComputedStyle(el);
-        return (
-          s.breakInside      === "avoid" ||
-          s.pageBreakInside  === "avoid" ||
-          s.breakAfter       === "avoid" ||
-          s.pageBreakAfter   === "avoid"
-        );
-      });
-
       const breaks = [];
       let pageStart = 0;
 
@@ -215,9 +208,30 @@ export async function measureBreaks(html) {
         const rawBreak = pageStart + PAGE_H - MARGIN;
         let bestBreak = rawBreak;
 
-        // Do NOT push elements based on break-inside:avoid — causes large gaps.
-        // Only fix orphaned headings: if an h1/h2/h3 ends within HEADING_ORPHAN_PX
-        // of the break, pull the break back to before the heading.
+        // Avoid splitting elements with break-inside:avoid (e.g. cv item cards).
+        // Pull the break back to the element's top when it falls inside one,
+        // but only if pulling back stays within MAX_PULL of the raw break point.
+        const avoidEls = Array.from(container.querySelectorAll("*")).filter(el => {
+          const s = getComputedStyle(el);
+          return s.breakInside === "avoid" || s.pageBreakInside === "avoid";
+        });
+
+        for (const el of avoidEls) {
+          const rect = el.getBoundingClientRect();
+          const elTop = rect.top    - containerTop;
+          const elBot = rect.bottom - containerTop;
+
+          // Element spans the current candidate break point?
+          if (elTop < bestBreak && elBot > bestBreak) {
+            // Only pull back if it won't create an excessively blank bottom area
+            if (elTop > pageStart + MIN_PAGE_CONTENT && (bestBreak - elTop) <= MAX_PULL) {
+              bestBreak = elTop;
+            }
+          }
+        }
+
+        // Orphan fix: if an h1/h2/h3 ends within HEADING_ORPHAN_PX of the break,
+        // pull the break back to before the heading so it travels with its content.
         container.querySelectorAll('h1, h2, h3').forEach(heading => {
           const rect = heading.getBoundingClientRect();
           const hTop = rect.top    - containerTop;
@@ -236,7 +250,7 @@ export async function measureBreaks(html) {
       }
 
       return { breaks, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL);
 
     console.log(
       `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}`
