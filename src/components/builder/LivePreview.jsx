@@ -44,10 +44,10 @@ const PAGE_H = 1122;   // A4 height at 96 dpi
 const PAGE_W = 794;    // A4 width  at 96 dpi
 const MARGIN = 48;     // top/bottom page margin (≈ 36pt)
 const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag handle clamping)
-// Maximum wasted space (px) at the bottom of a page before we allow a section to split
-// rather than pushing it entirely to the next page.
-// e.g. 150px gap = acceptable; 300px gap = too much waste, let it split instead.
-const MAX_PUSH_WASTE = 150;
+// Heading orphan threshold: if a section heading (h1/h2/h3) ends within this many
+// pixels of the break point, it would be left alone on the page. Move the break
+// to before the heading so it travels with its content to the next page.
+const HEADING_ORPHAN_PX = 40;
 
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
@@ -70,19 +70,25 @@ function computeSmartBreaks(container, totalHeight) {
     const rawBreak = pageStart + PAGE_H - MARGIN;
     let bestBreak = rawBreak;
 
-    for (const el of candidates) {
-      const rect  = el.getBoundingClientRect();
-      const elTop = rect.top    - containerTop;
-      const elBot = rect.bottom - containerTop;
-      // Only push the section to the next page if the resulting gap at the
-      // bottom of the current page would be small (≤ MAX_PUSH_WASTE px).
-      // If pushing would waste more space than that, allow the section to
-      // split at the natural break point instead of creating a large white gap.
-      const wastedSpace = rawBreak - elTop;
-      if (elTop < rawBreak && elBot > rawBreak && wastedSpace <= MAX_PUSH_WASTE) {
-        bestBreak = Math.min(bestBreak, elTop);
+    // Do NOT push elements to the next page based on break-inside:avoid alone —
+    // that creates large white gaps. Instead let everything split naturally at
+    // rawBreak, then fix up orphaned section headings below.
+
+    // Orphan fix: if a section heading (h1/h2/h3) would be left alone just
+    // before the break (its bottom is within HEADING_ORPHAN_PX of bestBreak),
+    // pull the break back to before the heading so it travels with its content.
+    container.querySelectorAll('h1, h2, h3').forEach(heading => {
+      const rect = heading.getBoundingClientRect();
+      const hTop = rect.top    - containerTop;
+      const hBot = rect.bottom - containerTop;
+      if (
+        hBot > pageStart + MARGIN &&   // heading is on this page
+        hBot <= bestBreak &&            // heading ends before (or at) break
+        (bestBreak - hBot) <= HEADING_ORPHAN_PX  // heading is very close to break
+      ) {
+        bestBreak = Math.min(bestBreak, hTop);  // pull break to before heading
       }
-    }
+    });
 
     breaks.push(bestBreak);
     pageStart = bestBreak;

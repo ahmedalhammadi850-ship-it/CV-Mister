@@ -170,9 +170,8 @@ async function _openPage(html, viewportHeight = 1122) {
 const PAGE_H  = 1122;  // A4 height at 96 dpi  (must match LivePreview.jsx)
 const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
 const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
-// Maximum wasted space (px) at the bottom of a page before we allow a section to split.
-// Must match MAX_PUSH_WASTE in LivePreview.jsx.
-const MAX_PUSH_WASTE = 150;
+// Heading orphan threshold — must match HEADING_ORPHAN_PX in LivePreview.jsx.
+const HEADING_ORPHAN_PX = 40;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -188,7 +187,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, MAX_PUSH_WASTE) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], totalHeight: PAGE_H };
@@ -216,26 +215,28 @@ export async function measureBreaks(html) {
         const rawBreak = pageStart + PAGE_H - MARGIN;
         let bestBreak = rawBreak;
 
-        for (const el of candidates) {
-          const rect  = el.getBoundingClientRect();
-          const elTop = rect.top    - containerTop;
-          const elBot = rect.bottom - containerTop;
-          const wastedSpace = rawBreak - elTop;
+        // Do NOT push elements based on break-inside:avoid — causes large gaps.
+        // Only fix orphaned headings: if an h1/h2/h3 ends within HEADING_ORPHAN_PX
+        // of the break, pull the break back to before the heading.
+        container.querySelectorAll('h1, h2, h3').forEach(heading => {
+          const rect = heading.getBoundingClientRect();
+          const hTop = rect.top    - containerTop;
+          const hBot = rect.bottom - containerTop;
           if (
-            elTop < rawBreak &&
-            elBot > rawBreak &&
-            wastedSpace <= MAX_PUSH_WASTE
+            hBot > pageStart + MARGIN &&
+            hBot <= bestBreak &&
+            (bestBreak - hBot) <= HEADING_ORPHAN_PX
           ) {
-            bestBreak = Math.min(bestBreak, elTop);
+            bestBreak = Math.min(bestBreak, hTop);
           }
-        }
+        });
 
         breaks.push(bestBreak);
         pageStart = bestBreak;
       }
 
       return { breaks, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, MAX_PUSH_WASTE);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX);
 
     console.log(
       `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}`
