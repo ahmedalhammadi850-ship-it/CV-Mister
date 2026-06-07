@@ -27,12 +27,42 @@ let _browser = null;
 
 function findChromium() {
   if (process.env.CHROMIUM_PATH) return process.env.CHROMIUM_PATH;
+
+  // Prefer Nix-store chromium (contains its own shared libraries); skip /tmp paths
+  // which are puppeteer-downloaded binaries that lack system NSS/libnss3.
+  const candidates = [
+    // Nix profile paths
+    "/nix/var/nix/profiles/default/bin/chromium",
+    "/run/current-system/sw/bin/chromium",
+    // Standard Linux paths
+    "/usr/bin/chromium",
+    "/usr/bin/chromium-browser",
+    "/usr/bin/google-chrome",
+  ];
+
+  // Try `which` but reject anything in /tmp
+  for (const cmd of ["chromium", "chromium-browser"]) {
+    try {
+      const p = execSync(`which ${cmd} 2>/dev/null`).toString().trim();
+      if (p && !p.startsWith("/tmp")) return p;
+    } catch (_) {}
+  }
+
+  // Try nix-store path via readlink resolution
   try {
-    return execSync("which chromium 2>/dev/null").toString().trim();
+    const nixPath = execSync(
+      "readlink -f $(which chromium 2>/dev/null) 2>/dev/null"
+    ).toString().trim();
+    if (nixPath && !nixPath.startsWith("/tmp")) return nixPath;
   } catch (_) {}
-  try {
-    return execSync("which chromium-browser 2>/dev/null").toString().trim();
-  } catch (_) {}
+
+  for (const c of candidates) {
+    try {
+      execSync(`test -x "${c}"`, { stdio: "ignore" });
+      return c;
+    } catch (_) {}
+  }
+
   return "/usr/bin/chromium";
 }
 
