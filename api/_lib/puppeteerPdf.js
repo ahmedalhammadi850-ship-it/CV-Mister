@@ -82,7 +82,13 @@ const LAUNCH_ARGS = [
   "--mute-audio",
   "--no-first-run",
   "--safebrowsing-disable-auto-update",
-  "--font-render-hinting=none",
+  // "slight" hinting is closer to what desktop Chrome uses on Windows/macOS,
+  // reducing the character-advance discrepancy that caused Puppeteer to measure
+  // content ~10-20% taller than the browser preview (leading to PDF=2 pages
+  // when Preview=1 page).  "none" produced mathematically-pure but OS-mismatched
+  // metrics; "slight" aligns pixel advances without sacrificing cross-platform
+  // consistency on Linux Chromium.
+  "--font-render-hinting=slight",
 ];
 
 // Vercel-specific Chromium URL for @sparticuz/chromium-min
@@ -110,7 +116,7 @@ async function getBrowser() {
     executablePath = await chromium.executablePath(SPARTICUZ_CHROMIUM_URL);
     // v149 args already include --no-sandbox, --no-zygote, --headless='shell', etc.
     // Merge but avoid duplicating flags already in chromium.args.
-    launchArgs = [...chromium.args, "--font-render-hinting=none", "--disable-dev-shm-usage"];
+    launchArgs = [...chromium.args, "--font-render-hinting=slight", "--disable-dev-shm-usage"];
     // v149 uses --headless='shell' via args; pass headless:false so puppeteer
     // doesn't add its own conflicting --headless flag.
     headless = false;
@@ -176,10 +182,16 @@ const HEADING_ORPHAN_PX = 120;
 // OR to handle a heading orphan. Measured from rawBreak so the two adjustments
 // cannot compound. Must match MAX_PULL in LivePreview.jsx.
 const MAX_PULL = 20;
-// White space to leave at the bottom of every PDF page.
-// Applied by placing breaks this many px before the raw page edge.
-// Preview is unaffected (uses its own break positions).
-const PDF_BOTTOM_MARGIN = 20;
+// PDF_BOTTOM_MARGIN — extra px deducted from the raw break point to leave
+// white space at the bottom of each PDF page.
+//
+// Set to 0: the natural MARGIN (48 px ≈ 36 pt) already provides a comfortable
+// bottom-of-page white zone, and adding 20 px more was causing the PDF to break
+// 20 px earlier than the preview (rawBreak_PDF=1054 vs rawBreak_Preview=1074),
+// producing PDF=2 pages when Preview=1 page for borderline-length resumes.
+// With 0, both paths use rawBreak = PAGE_H - MARGIN = 1074, so page capacity is
+// identical and the Preview→PDF page count is consistent.
+const PDF_BOTTOM_MARGIN = 0;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -267,8 +279,23 @@ export async function measureBreaks(html) {
       return { breaks, totalHeight };
     }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, PDF_BOTTOM_MARGIN);
 
+    // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
+    const fontStatus = await page.evaluate(() => {
+      const loaded = [], failed = [];
+      document.fonts.forEach(f => {
+        (f.status === 'loaded' ? loaded : failed).push(`${f.family}:${f.weight}`);
+      });
+      // Also sample the computed font-family of the first text node to verify
+      // the resolved font matches what the template declares.
+      const root = document.body.firstElementChild;
+      const resolvedFont = root ? getComputedStyle(root).fontFamily : 'n/a';
+      return { loaded: loaded.length, failed: failed.length, failedList: failed.slice(0, 5), resolvedFont };
+    });
     console.log(
-      `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}`
+      `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}` +
+      ` | fonts loaded: ${fontStatus.loaded}, failed: ${fontStatus.failed}` +
+      (fontStatus.failed > 0 ? ` [${fontStatus.failedList.join(', ')}]` : '') +
+      ` | resolvedFont: ${fontStatus.resolvedFont}`
     );
     return result;
   } finally {
