@@ -423,42 +423,25 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     // measureBreaks() places each break 20 px before the raw page edge.
     const innerHeight = totalSliceHeight - MARGIN;
 
-    // TOP-CLIP GUARD: subtract 8 px from the translateY so the inner-clip
-    // starts 8 px BEFORE the measured break point.
-    //
-    // WHY THIS IS NEEDED:
-    //   The break algorithm sets start = elTop (getBoundingClientRect top of the
-    //   first element on the new page).  Some elements render a top-border,
-    //   rule, or decorative line whose paint box starts a few px ABOVE elTop
-    //   (e.g. a section heading with border-top, or a pseudo-element).
-    //   translateY(-Math.round(start)) positions that content at y ≤ -1 inside
-    //   the overflow:hidden inner-clip → clipped → "first line missing" in PDF.
-    //
-    //   By translating 8 px less (start - 8), any element whose paint box
-    //   starts up to 8 px before the measured break lands at inner-clip y ≥ 0
-    //   and is always visible.  The top 8 px of the inner-clip show the
-    //   inter-element gap just before the break (whitespace/margin), which is
-    //   invisible to the reader and doesn't disturb the MARGIN white area above.
-    //
-    //   8 px (vs the previous 2 px) gives extra safety for the cases where
-    //   MAX_PULL_AVOID cannot pull a large element and the split happens near
-    //   a text line boundary that slightly precedes the measured break point.
-    const translateY = Math.max(0, Math.floor(start) - 8);
+    // Use Math.round(start) so content at exactly `start` maps to inner-clip
+    // y=0 (or within one sub-pixel).  getBoundingClientRect() returns the
+    // border box, so borders ARE included in `elTop`; the MARGIN white zone
+    // above provides visual breathing room.  We do NOT use a backward shift
+    // (the old "start - 8" approach) because:
+    //   1. A fractional `start` (from Phase-4 line-boundary snap) made guardPx
+    //      jump to 9 px instead of 8 px, hiding the very first line/heading of
+    //      page 2 under the white guard overlay.
+    //   2. The backward shift reduced innerHeight by 8 px, silently clipping
+    //      the last 8 px of every non-last page's content.
+    // Without the shift, the MARGIN (48 px) white zone already separates
+    // pages visually, matching the live-preview layout exactly.
+    const translateY = Math.round(start);
 
-    // The top-clip guard shifts translateY back by 8px so border/decoration
-    // paint boxes that start slightly before the break point are not clipped.
-    // This also means up to 8px of page-1 content can "bleed" into the top
-    // of the page-2 inner clip, producing a ghost line.
-    // Fix: a white overlay of exactly 8px at the very top of the inner clip
-    // covers that bleed zone.  The first real content of page 2 starts at
-    // inner-clip y=8 (template position `start`) so nothing visible is hidden.
-    const guardPx = Math.round(start) - translateY; // = 8 in normal cases
     return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${totalSliceHeight}px">
   <div style="position:absolute;top:${MARGIN}px;left:0;width:794px;height:${innerHeight}px;overflow:hidden">
     <div style="position:absolute;top:0;left:0;width:794px;transform:translateY(-${translateY}px)">
       ${bodyHtml}
     </div>
-    ${guardPx > 0 ? `<div style="position:absolute;top:0;left:0;width:794px;height:${guardPx}px;background:#ffffff;z-index:10"></div>` : ''}
   </div>
 </div>`;
   }).join('\n');
