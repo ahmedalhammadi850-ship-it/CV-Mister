@@ -114,9 +114,9 @@ const TealProTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <h2 style={s.heading}>{tr('experience', isRTL)}</h2>
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('experience', isRTL)}</h2>}
                 <div style={s.row}>
                   <div>
                     <h3 style={s.role}>{e.jobTitle}</h3>
@@ -133,9 +133,9 @@ const TealProTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <h2 style={s.heading}>{tr('education', isRTL)}</h2>
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('education', isRTL)}</h2>}
                 <div style={s.row}>
                   <div>
                     <h3 style={s.role}>{e.degree}</h3>
@@ -175,9 +175,9 @@ const TealProTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <h2 style={s.heading}>{tr('projects', isRTL)}</h2>
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('projects', isRTL)}</h2>}
                 <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ ...s.meta, color: accent }}>{p.link}</div>}
                 {p.description && <BulletDesc text={p.description} style={ta(s.body, p.descriptionAlign)} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -189,9 +189,9 @@ const TealProTemplate = ({
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <section key="certificates">
-            <h2 style={s.heading}>{tr('certificates', isRTL)}</h2>
             {data.certificates.map((c, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('certificates', isRTL)}</h2>}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -206,9 +206,9 @@ const TealProTemplate = ({
       case 'awards':
         return data.awards?.length > 0 ? (
           <section key="awards">
-            <h2 style={s.heading}>{tr('awards', isRTL)}</h2>
             {data.awards.map((a, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('awards', isRTL)}</h2>}
                 <div style={s.row}>
                   <h3 style={s.role}>{a.title || a.name}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}

@@ -246,7 +246,7 @@ const MAX_PULL_AVOID = 200;
 // Max px to pull a break back for a heading-orphan fix.
 // Headings are small; the greedy-fill phase recovers the resulting gap.
 // Must match MAX_PULL in LivePreview.jsx.
-const MAX_PULL = 100;
+const MAX_PULL = 200;
 // BOTTOM_BLANK — blank px reserved at the bottom of each page for the raw break.
 // Must match BOTTOM_BLANK in src/components/builder/LivePreview.jsx.
 const BOTTOM_BLANK = 15;

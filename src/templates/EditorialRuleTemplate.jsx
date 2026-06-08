@@ -130,9 +130,9 @@ const EditorialRuleTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <SectionHead labelKey="experience" />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHead labelKey="experience" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -147,9 +147,9 @@ const EditorialRuleTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <SectionHead labelKey="education" />
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHead labelKey="education" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -164,9 +164,9 @@ const EditorialRuleTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <SectionHead labelKey="projects" />
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHead labelKey="projects" />}
                 <h3 style={s.role}>{p.name}</h3>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.url}</div>}
                 {p.description && <BulletDesc text={p.description} style={s.bodyText} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}

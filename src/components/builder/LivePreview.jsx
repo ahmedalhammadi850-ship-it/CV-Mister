@@ -61,10 +61,10 @@ const HEADING_ORPHAN_PX = 120;
 const MAX_PULL_AVOID = 200;
 
 // Max pixels to pull a break back for a heading-orphan fix.
-// Headings are small, so a 100px budget is safe; the greedy-fill phase then
-// refills the resulting gap to ≤ MAX_BOTTOM_GAP.
+// Must be ≥ MAX_PULL_AVOID so that Phase 2 can always pull past the heading
+// even when Phase 1 already consumed most of the budget pulling to an item top.
 // Must match MAX_PULL in api/_lib/puppeteerPdf.js.
-const MAX_PULL = 100;
+const MAX_PULL = 200;
 
 // Maximum allowed blank space (px) at the bottom of any page.
 // After pull-backs, the greedy-fill phase packs complete avoid-elements into the

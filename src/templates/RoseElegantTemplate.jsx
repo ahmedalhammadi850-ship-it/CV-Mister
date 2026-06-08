@@ -131,9 +131,9 @@ const RoseElegantTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <SectionHeading label={tr('experience', isRTL)} />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHeading label={tr('experience', isRTL)} />}
                 <div style={s.row}>
                   <div>
                     <h3 style={s.role}>{e.jobTitle}</h3>
@@ -150,9 +150,9 @@ const RoseElegantTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <SectionHeading label={tr('education', isRTL)} />
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHeading label={tr('education', isRTL)} />}
                 <div style={s.row}>
                   <div>
                     <h3 style={s.role}>{e.degree}</h3>
@@ -192,9 +192,9 @@ const RoseElegantTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <SectionHeading label={tr('projects', isRTL)} />
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHeading label={tr('projects', isRTL)} />}
                 <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ ...s.body, color: accent, fontSize: sz.meta }}>{p.link}</div>}
                 {p.description && <BulletDesc text={p.description} style={ta(s.body, p.descriptionAlign)} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -206,9 +206,9 @@ const RoseElegantTemplate = ({
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <section key="certificates">
-            <SectionHeading label={tr('certificates', isRTL)} />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHeading label={tr('certificates', isRTL)} />}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -223,9 +223,9 @@ const RoseElegantTemplate = ({
       case 'awards':
         return data.awards?.length > 0 ? (
           <section key="awards">
-            <SectionHeading label={tr('awards', isRTL)} />
             {data.awards.map((a, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHeading label={tr('awards', isRTL)} />}
                 <div style={s.row}>
                   <h3 style={s.role}>{a.title || a.name}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
