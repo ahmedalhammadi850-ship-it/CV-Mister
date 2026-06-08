@@ -120,7 +120,7 @@ const DarkHeaderTemplate = ({
     skillRow: {
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       marginBottom: '6pt', fontSize: sz.meta, color: '#3d3452',
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row', ...BREAK_ITEM,
     },
     tag: {
       display: 'inline-block',

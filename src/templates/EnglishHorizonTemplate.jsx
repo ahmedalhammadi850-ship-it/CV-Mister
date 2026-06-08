@@ -146,7 +146,7 @@ const EnglishHorizonTemplate = ({
         <section key="languages" style={BREAK_ITEM}>
           <SbHeading label={tr('languages',isRTL)} accent={accent} isRTL={isRTL} />
           {data.languages.map((l,i)=>(
-            <div key={i} style={{ marginBottom:'8pt' }}>
+            <div key={i} style={{ marginBottom:'8pt', breakInside:'avoid', pageBreakInside:'avoid' }}>
               <div style={{ fontSize:'8.5pt', color:'#2d3748', fontWeight:'600', marginBottom:'2pt', textAlign:align }}>{l.name}</div>
               <DotRating level={l.proficiency||3} accent={accent} />
             </div>

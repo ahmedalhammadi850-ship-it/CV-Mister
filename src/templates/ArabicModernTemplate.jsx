@@ -129,10 +129,10 @@ const ArabicModernTemplate = ({
     company: { fontSize: sz.meta, color: '#555', marginBottom: '3pt', textAlign: 'right' },
     bodyText: { fontSize: sz.body, color: '#444', lineHeight, whiteSpace: 'pre-line', textAlign: 'right' },
     item: { marginBottom: '12pt', ...BREAK_ITEM },
-    skillItem: { marginBottom: '8pt' },
+    skillItem: { marginBottom: '8pt', ...BREAK_ITEM },
     skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row-reverse', marginBottom: '3pt' },
     skillName: { fontSize: sz.body, color: '#222', textAlign: 'right' },
-    langRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row-reverse', marginBottom: '6pt', fontSize: sz.body },
+    langRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row-reverse', marginBottom: '6pt', fontSize: sz.body, ...BREAK_ITEM },
     bullet: { fontSize: sz.body, color: '#444', marginBottom: '4pt', textAlign: 'right' },
     tag: { display: 'inline-block', background: accentLight, border: `1px solid ${accent}44`, borderRadius: '3pt', padding: '2pt 7pt', fontSize: sz.meta, color: accent, marginLeft: '4pt', marginBottom: '4pt' },
   };

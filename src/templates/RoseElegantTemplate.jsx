@@ -107,7 +107,7 @@ const RoseElegantTemplate = ({
     body: { fontSize: sz.body, color: '#444', lineHeight, whiteSpace: 'pre-line' },
     item: { marginBottom: '12pt', ...BREAK_ITEM },
     tag: { display: 'inline-block', background: accentLight, border: `1px solid ${accent}44`, borderRadius: '4pt', padding: '2pt 8pt', fontSize: sz.meta, color: accent, marginRight: '5pt', marginBottom: '4pt' },
-    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7pt', fontSize: sz.body, flexDirection: isRTL ? 'row-reverse' : 'row' },
+    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7pt', fontSize: sz.body, flexDirection: isRTL ? 'row-reverse' : 'row', ...BREAK_ITEM },
   };
 
   const SectionHeading = ({ label }) => (

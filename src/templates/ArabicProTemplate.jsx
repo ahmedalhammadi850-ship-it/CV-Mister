@@ -97,7 +97,7 @@ const ArabicProTemplate = ({
     },
     sectionLabel:{ fontSize:'9.5pt', fontWeight:'700', color:'#fff', textAlign:'center', letterSpacing:'0.04em' },
     skillName:{ fontSize:sz.meta, color:'#fff', textAlign:'right', marginBottom:'2pt' },
-    skillItem:{ marginBottom:'9pt' },
+    skillItem:{ marginBottom:'9pt', ...BREAK_ITEM },
     bullet:{ fontSize:sz.meta, color:'rgba(255,255,255,0.88)', marginBottom:'5pt', textAlign:'right', paddingRight:'6pt', position:'relative' },
     bulletDot:{ content:'""', position:'absolute', right:0, top:'5pt', width:'4pt', height:'4pt', borderRadius:'50%', backgroundColor:'rgba(255,255,255,0.5)' },
     tag:{ display:'inline-block', background:'rgba(255,255,255,0.15)', borderRadius:'3pt', padding:'2pt 7pt', fontSize:sz.meta, color:'#fff', marginLeft:'4pt', marginBottom:'4pt' },

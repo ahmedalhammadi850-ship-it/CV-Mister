@@ -198,7 +198,7 @@ const ArabicGemTemplate = ({
       fontSize: '7pt', color: accentDark, fontWeight: '800',
     },
     skillRow: {
-      marginBottom: '8pt', direction: 'rtl',
+      marginBottom: '8pt', direction: 'rtl', ...BREAK_ITEM,
     },
     skillName: {
       fontSize: sz.meta, color: 'rgba(255,255,255,0.9)',
@@ -207,7 +207,7 @@ const ArabicGemTemplate = ({
     langRow: {
       display: 'flex', alignItems: 'center', gap: '8pt',
       flexDirection: 'row-reverse',
-      marginBottom: '7pt',
+      marginBottom: '7pt', ...BREAK_ITEM,
     },
     langName: {
       fontSize: sz.meta, color: 'rgba(255,255,255,0.9)',

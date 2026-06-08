@@ -104,7 +104,7 @@ const SidebarLightTemplate = ({
     skillRow: {
       display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       marginBottom: '6pt', fontSize: sz.meta, color: sidebarText,
-      flexDirection: isRTL ? 'row-reverse' : 'row',
+      flexDirection: isRTL ? 'row-reverse' : 'row', ...BREAK_ITEM,
     },
     tag: {
       display: 'inline-block',

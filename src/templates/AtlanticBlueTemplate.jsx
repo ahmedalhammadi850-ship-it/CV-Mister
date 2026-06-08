@@ -115,7 +115,7 @@ const AtlanticBlueTemplate = ({
       flexDirection: isRTL ? 'row-reverse' : 'row',
     },
     icon: { width: '14pt', textAlign: 'center', flexShrink: 0, fontSize: '9pt', marginTop: '1pt' },
-    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7pt', fontSize: sz.meta, color: '#fff', flexDirection: isRTL ? 'row-reverse' : 'row' },
+    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7pt', fontSize: sz.meta, color: '#fff', flexDirection: isRTL ? 'row-reverse' : 'row', ...BREAK_ITEM },
     tag: { display: 'inline-block', background: 'rgba(255,255,255,0.15)', borderRadius: '3pt', padding: '2pt 7pt', fontSize: sz.meta, color: '#fff', marginRight: '4pt', marginBottom: '4pt' },
   };
 

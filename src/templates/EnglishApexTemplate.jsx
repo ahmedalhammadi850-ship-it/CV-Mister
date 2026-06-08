@@ -156,7 +156,7 @@ const EnglishApexTemplate = ({
             const map = { native:5, fluent:4, advanced:4, 'upper-intermediate':3, intermediate:3, elementary:2, beginner:1 };
             const lvl = l.proficiency || map[(l.level || '').toLowerCase()] || 3;
             return (
-              <div key={i} style={{ marginBottom:'8pt' }}>
+              <div key={i} style={{ marginBottom:'8pt', breakInside:'avoid', pageBreakInside:'avoid' }}>
                 <div style={{ fontSize:'8pt', color:'rgba(255,255,255,0.88)', fontWeight:'600', textAlign:align }}>{l.name}</div>
                 <DotRow level={lvl} accent={accent} />
               </div>

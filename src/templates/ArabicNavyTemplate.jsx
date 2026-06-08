@@ -97,7 +97,7 @@ const ArabicNavyTemplate = ({
     },
     icon: { width: '12pt', textAlign: 'center', flexShrink: 0, fontSize: '9pt', color: 'rgba(255,255,255,0.6)', marginTop: '1pt' },
     skillName: { fontSize: sz.meta, color: '#fff', marginBottom: '3pt', textAlign: 'right' },
-    skillItem: { marginBottom: '8pt' },
+    skillItem: { marginBottom: '8pt', ...BREAK_ITEM },
     tag: { display: 'inline-block', background: 'rgba(255,255,255,0.12)', borderRadius: '3pt', padding: '2pt 6pt', fontSize: sz.meta, color: '#fff', marginLeft: '4pt', marginBottom: '4pt' },
     bullet: { fontSize: sz.meta, color: 'rgba(255,255,255,0.8)', marginBottom: '4pt', textAlign: 'right' },
   };

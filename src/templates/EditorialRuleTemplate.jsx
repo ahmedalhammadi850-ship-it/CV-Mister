@@ -105,7 +105,7 @@ const EditorialRuleTemplate = ({
     item: { marginBottom: '10pt', ...BREAK_ITEM },
     twoCol: { display: 'flex', gap: '24pt', flexDirection: isRTL ? 'row-reverse' : 'row' },
     col: { flex: 1 },
-    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6pt', flexDirection: isRTL ? 'row-reverse' : 'row' },
+    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6pt', flexDirection: isRTL ? 'row-reverse' : 'row', ...BREAK_ITEM },
     skillName: { fontSize: sz.body, color: '#333' },
   };
 

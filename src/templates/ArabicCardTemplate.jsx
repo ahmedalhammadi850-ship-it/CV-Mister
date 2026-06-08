@@ -111,9 +111,9 @@ const ArabicCardTemplate = ({
       alignItems: 'flex-start', flexDirection: 'row-reverse',
     },
     icon: { width: '14pt', textAlign: 'center', flexShrink: 0, color: accent, fontSize: '9pt', marginTop: '1pt' },
-    skillRow: { marginBottom: '8pt' },
+    skillRow: { marginBottom: '8pt', ...BREAK_ITEM },
     skillName: { fontSize: sz.meta, color: '#2d3748', textAlign: 'right', marginBottom: '2pt' },
-    langRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row-reverse', marginBottom: '6pt' },
+    langRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexDirection: 'row-reverse', marginBottom: '6pt', ...BREAK_ITEM },
     bullet: { fontSize: sz.meta, color: '#4a5568', marginBottom: '4pt', textAlign: 'right' },
     tag: { display: 'inline-block', background: accentLight, border: `1px solid ${accent}44`, borderRadius: '3pt', padding: '2pt 6pt', fontSize: sz.meta, color: accent, marginLeft: '4pt', marginBottom: '4pt' },
   };

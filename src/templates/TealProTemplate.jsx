@@ -97,7 +97,7 @@ const TealProTemplate = ({
     company:{ fontSize: sz.meta, color: accent, fontStyle: 'italic', marginBottom: '3pt' },
     item:   { marginBottom: '12pt', ...BREAK_ITEM },
     tag:    { display: 'inline-block', border: `1px solid ${accent}`, borderRadius: '12pt', padding: '2pt 9pt', fontSize: sz.meta, color: accent, marginRight: '5pt', marginBottom: '4pt' },
-    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6pt', fontSize: sz.body, flexDirection: isRTL ? 'row-reverse' : 'row' },
+    skillRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6pt', fontSize: sz.body, flexDirection: isRTL ? 'row-reverse' : 'row', ...BREAK_ITEM },
   };
 
   const renderSection = (key) => {

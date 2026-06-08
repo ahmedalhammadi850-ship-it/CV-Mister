@@ -104,11 +104,11 @@ const ArabicTealSidebarTemplate = ({
       alignItems:'flex-start', flexDirection:'row-reverse',
     },
     icon:{ flexShrink:0, fontSize:'9pt', color:'rgba(255,255,255,0.6)', marginTop:'1pt', width:'11pt', textAlign:'center' },
-    skillItem:{ marginBottom:'9pt' },
+    skillItem:{ marginBottom:'9pt', ...BREAK_ITEM },
     skillName:{ fontSize:sz.meta, color:'#fff', textAlign:'right', marginBottom:'2pt' },
     langRow:{
       display:'flex', justifyContent:'space-between', alignItems:'center',
-      flexDirection:'row-reverse', marginBottom:'7pt',
+      flexDirection:'row-reverse', marginBottom:'7pt', ...BREAK_ITEM,
     },
     langName:{ fontSize:sz.meta, color:'#fff' },
     bullet:{ fontSize:sz.meta, color:'rgba(255,255,255,0.85)', marginBottom:'4pt', textAlign:'right' },
