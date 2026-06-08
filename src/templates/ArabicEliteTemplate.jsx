@@ -346,9 +346,9 @@ const ArabicEliteTemplate = ({
 
       case 'experience': return data.experience?.length > 0 ? (
         <section key="experience">
-          <MainHeading label={L.experience} accent={accent} iconKey="experience" />
           {data.experience.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={L.experience} accent={accent} iconKey="experience" />}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6pt', direction: 'rtl' }}>
                 <div style={{ fontSize: sz.body, fontWeight: '700', color: '#1a202c', flex: 1, textAlign: 'right' }}>
                   {e.jobTitle}
@@ -368,9 +368,9 @@ const ArabicEliteTemplate = ({
 
       case 'education': return data.education?.length > 0 ? (
         <section key="education">
-          <MainHeading label={L.education} accent={accent} iconKey="education" />
           {data.education.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={L.education} accent={accent} iconKey="education" />}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6pt', direction: 'rtl' }}>
                 <div style={{ fontSize: sz.body, fontWeight: '700', color: '#1a202c', flex: 1, textAlign: 'right' }}>
                   {e.degree}
@@ -390,9 +390,9 @@ const ArabicEliteTemplate = ({
 
       case 'projects': return data.projects?.length > 0 ? (
         <section key="projects">
-          <MainHeading label={L.projects} accent={accent} iconKey="projects" />
           {data.projects.map((p, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={L.projects} accent={accent} iconKey="projects" />}
               <div style={{ fontSize: sz.body, fontWeight: '700', color: '#1a202c', textAlign: 'right', direction: 'rtl' }}>
                 {p.title || p.name}
               </div>

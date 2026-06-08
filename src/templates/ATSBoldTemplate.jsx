@@ -175,9 +175,9 @@ const ATSBoldTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <div style={s.headingBlock}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <div style={s.headingBlock}>{tr('experience', isRTL)}</div>}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -192,9 +192,9 @@ const ATSBoldTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <div style={s.headingBlock}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <div style={s.headingBlock}>{tr('education', isRTL)}</div>}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -239,9 +239,9 @@ const ATSBoldTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <div style={s.headingBlock}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <div style={s.headingBlock}>{tr('projects', isRTL)}</div>}
                 <h3 style={s.role}>{p.title}</h3>
                 {p.link && <div style={s.company}>{p.link}</div>}
                 <BulletDesc text={p.description} style={ta(s.body, p.descriptionAlign)} bold={p?.descriptionBold} italic={p?.descriptionItalic} />
@@ -253,9 +253,9 @@ const ATSBoldTemplate = ({
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <section key="certificates">
-            <div style={s.headingBlock}>{tr('certificates', isRTL)}</div>
             {data.certificates.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <div style={s.headingBlock}>{tr('certificates', isRTL)}</div>}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -280,9 +280,9 @@ const ATSBoldTemplate = ({
       case 'courses':
         return data.courses?.length > 0 ? (
           <section key="courses">
-            <div style={s.headingBlock}>{tr('courses', isRTL)}</div>
             {data.courses.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <div style={s.headingBlock}>{tr('courses', isRTL)}</div>}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -296,9 +296,9 @@ const ATSBoldTemplate = ({
       case 'awards':
         return data.awards?.length > 0 ? (
           <section key="awards">
-            <div style={s.headingBlock}>{tr('awards', isRTL)}</div>
             {data.awards.map((a, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <div style={s.headingBlock}>{tr('awards', isRTL)}</div>}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{a.title}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
@@ -329,9 +329,9 @@ const ATSBoldTemplate = ({
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <div style={s.headingBlock}>{tr('publications', isRTL)}</div>
             {data.publications.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <div style={s.headingBlock}>{tr('publications', isRTL)}</div>}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{p.title}</h3>
                   {p.date && <div style={s.date}>{p.date}</div>}
@@ -346,9 +346,9 @@ const ATSBoldTemplate = ({
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <div style={s.headingBlock}>{tr('references', isRTL)}</div>
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <div style={s.headingBlock}>{tr('references', isRTL)}</div>}
                 <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
@@ -363,9 +363,9 @@ const ATSBoldTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <div style={s.headingBlock}>{sec.title}</div>
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
+                  {i === 0 && <div style={s.headingBlock}>{sec.title}</div>}
                   {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <BulletDesc text={item.description} style={ta(s.body, item.descriptionAlign)} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}

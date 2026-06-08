@@ -220,9 +220,9 @@ const ArabicNavyTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <div style={mn.heading}>{tr('experience', true)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('experience', true)}</div>}
                 <div style={mn.row}>
                   <div style={mn.role}>{e.jobTitle}</div>
                   <div style={mn.date}>{e.startDate} – {e.current ? tr('present', true) : e.endDate}</div>
@@ -237,9 +237,9 @@ const ArabicNavyTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <div style={mn.heading}>{tr('education', true)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('education', true)}</div>}
                 <div style={mn.row}>
                   <div style={mn.role}>{e.degree}</div>
                   <div style={mn.date}>{e.startDate} – {e.endDate}</div>
@@ -254,9 +254,9 @@ const ArabicNavyTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <div style={mn.heading}>{tr('projects', true)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('projects', true)}</div>}
                 <div style={mn.role}>{p.title || p.name}</div>
                 {p.link && <div style={{ fontSize: sz.meta, color: accent, textAlign: 'right' }}>{p.link}</div>}
                 {p.description && <BulletDesc text={p.description} style={mn.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -268,9 +268,9 @@ const ArabicNavyTemplate = ({
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <div style={mn.heading}>{tr('publications', true)}</div>
             {data.publications.map((p, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('publications', true)}</div>}
                 <div style={mn.row}>
                   <div style={mn.role}>{p.title}</div>
                   {p.date && <div style={mn.date}>{p.date}</div>}
@@ -285,9 +285,9 @@ const ArabicNavyTemplate = ({
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <div style={mn.heading}>{tr('references', true)}</div>
             {data.references.map((r, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('references', true)}</div>}
                 <div style={mn.role}>{r.name}</div>
                 {(r.title || r.company) && <div style={mn.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={mn.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}

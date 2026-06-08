@@ -262,84 +262,79 @@ const ArabicCardTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <MainSection label={tr('experience', true)}>
-              {data.experience.map((e, i) => (
-                <div key={i} style={mn.item}>
+            {data.experience.map((e, i) => (
+              <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.sectionCard}><div style={mn.sectionLabel}>{tr('experience', true)}</div></div>}
                   <div style={mn.row}>
                     <div style={mn.role}>{e.jobTitle}</div>
                     <div style={mn.date}>{e.startDate} – {e.current ? tr('present', true) : e.endDate}</div>
                   </div>
                   <div style={mn.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
                   {e.description && <BulletDesc text={e.description} style={mn.body} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
-                </div>
-              ))}
-            </MainSection>
+              </div>
+            ))}
           </section>
         ) : null;
 
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <MainSection label={tr('education', true)}>
-              {data.education.map((e, i) => (
-                <div key={i} style={mn.item}>
-                  <div style={mn.row}>
-                    <div style={mn.role}>{e.degree}</div>
-                    <div style={mn.date}>{e.startDate} – {e.endDate}</div>
-                  </div>
-                  <div style={mn.company}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
-                  {e.description && <BulletDesc text={e.description} style={mn.body} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
+            {data.education.map((e, i) => (
+              <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.sectionCard}><div style={mn.sectionLabel}>{tr('education', true)}</div></div>}
+                <div style={mn.row}>
+                  <div style={mn.role}>{e.degree}</div>
+                  <div style={mn.date}>{e.startDate} – {e.endDate}</div>
                 </div>
-              ))}
-            </MainSection>
+                <div style={mn.company}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
+                {e.description && <BulletDesc text={e.description} style={mn.body} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
+              </div>
+            ))}
           </section>
         ) : null;
 
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <MainSection label={tr('projects', true)}>
-              {data.projects.map((p, i) => (
-                <div key={i} style={mn.item}>
-                  <div style={mn.role}>{p.title || p.name}</div>
-                  {p.link && <div style={{ fontSize: sz.meta, color: accent, textAlign: 'right' }}>{p.link}</div>}
-                  {p.description && <BulletDesc text={p.description} style={mn.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
-                </div>
-              ))}
-            </MainSection>
+            {data.projects.map((p, i) => (
+              <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.sectionCard}><div style={mn.sectionLabel}>{tr('projects', true)}</div></div>}
+                <div style={mn.role}>{p.title || p.name}</div>
+                {p.link && <div style={{ fontSize: sz.meta, color: accent, textAlign: 'right' }}>{p.link}</div>}
+                {p.description && <BulletDesc text={p.description} style={mn.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
+              </div>
+            ))}
           </section>
         ) : null;
 
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <MainSection label={tr('publications', true)}>
-              {data.publications.map((p, i) => (
-                <div key={i} style={mn.item}>
-                  <div style={mn.row}>
-                    <div style={mn.role}>{p.title}</div>
-                    {p.date && <div style={mn.date}>{p.date}</div>}
-                  </div>
-                  {p.publisher && <div style={mn.company}>{p.publisher}</div>}
-                  {p.description && <BulletDesc text={p.description} style={mn.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
+            {data.publications.map((p, i) => (
+              <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.sectionCard}><div style={mn.sectionLabel}>{tr('publications', true)}</div></div>}
+                <div style={mn.row}>
+                  <div style={mn.role}>{p.title}</div>
+                  {p.date && <div style={mn.date}>{p.date}</div>}
                 </div>
-              ))}
-            </MainSection>
+                {p.publisher && <div style={mn.company}>{p.publisher}</div>}
+                {p.description && <BulletDesc text={p.description} style={mn.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
+              </div>
+            ))}
           </section>
         ) : null;
 
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <MainSection label={tr('references', true)}>
-              {data.references.map((r, i) => (
-                <div key={i} style={mn.item}>
-                  <div style={mn.role}>{r.name}</div>
-                  {(r.title || r.company) && <div style={mn.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
-                  {(r.email || r.phone) && <div style={mn.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
-                </div>
-              ))}
-            </MainSection>
+            {data.references.map((r, i) => (
+              <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.sectionCard}><div style={mn.sectionLabel}>{tr('references', true)}</div></div>}
+                <div style={mn.role}>{r.name}</div>
+                {(r.title || r.company) && <div style={mn.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
+                {(r.email || r.phone) && <div style={mn.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
+              </div>
+            ))}
           </section>
         ) : null;
 
@@ -349,15 +344,14 @@ const ArabicCardTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <MainSection label={sec.title}>
-                {sec.items.map((item, idx) => (
-                  <div key={idx} style={mn.item}>
-                    {item.title && <div style={mn.role}>{item.title}</div>}
-                    {item.subtitle && <div style={mn.company}>{item.subtitle}</div>}
-                    {item.description && <BulletDesc text={item.description} style={mn.body} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}
-                  </div>
-                ))}
-              </MainSection>
+              {sec.items.map((item, idx) => (
+                <div key={idx} style={mn.item}>
+                  {idx === 0 && <div style={mn.sectionCard}><div style={mn.sectionLabel}>{sec.title}</div></div>}
+                  {item.title && <div style={mn.role}>{item.title}</div>}
+                  {item.subtitle && <div style={mn.company}>{item.subtitle}</div>}
+                  {item.description && <BulletDesc text={item.description} style={mn.body} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}
+                </div>
+              ))}
             </div>
           );
         }

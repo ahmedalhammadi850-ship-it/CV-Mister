@@ -151,9 +151,9 @@ const ArabicModernTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <h2 style={s.heading}>{tr('experience', true)}</h2>
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('experience', true)}</h2>}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', true) : e.endDate}</div>
@@ -168,9 +168,9 @@ const ArabicModernTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <h2 style={s.heading}>{tr('education', true)}</h2>
             {data.education.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('education', true)}</h2>}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -213,9 +213,9 @@ const ArabicModernTemplate = ({
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <section key="certificates">
-            <h2 style={s.heading}>{tr('certificates', true)}</h2>
             {data.certificates.map((c, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('certificates', true)}</h2>}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -230,9 +230,9 @@ const ArabicModernTemplate = ({
       case 'courses':
         return data.courses?.length > 0 ? (
           <section key="courses">
-            <h2 style={s.heading}>{tr('courses', true)}</h2>
             {data.courses.map((c, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('courses', true)}</h2>}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -246,9 +246,9 @@ const ArabicModernTemplate = ({
       case 'awards':
         return data.awards?.length > 0 ? (
           <section key="awards">
-            <h2 style={s.heading}>{tr('awards', true)}</h2>
             {data.awards.map((a, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('awards', true)}</h2>}
                 <div style={s.row}>
                   <h3 style={s.role}>{a.title || a.name}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
@@ -272,9 +272,9 @@ const ArabicModernTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <h2 style={s.heading}>{tr('projects', true)}</h2>
             {data.projects.map((p, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <h2 style={s.heading}>{tr('projects', true)}</h2>}
                 <h3 style={s.role}>{p.title || p.name}</h3>
                 {p.link && <div style={{ fontSize: sz.meta, color: accent, textAlign: 'right' }}>{p.link}</div>}
                 {p.description && <BulletDesc text={p.description} style={s.bodyText} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}

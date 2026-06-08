@@ -253,9 +253,9 @@ const ArabicWaveTemplate = ({
 
       case 'experience': return data.experience?.length > 0 ? (
         <section key="experience">
-          <MainHeading label={tr('experience', true)} iconKey="experience" accent={accent} />
           {data.experience.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('experience', true)} iconKey="experience" accent={accent} />}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6pt', direction: 'rtl' }}>
                 <div style={{ fontSize: sz.body, fontWeight: '700', color: '#222', flex: 1, textAlign: 'right' }}>{e.jobTitle}</div>
                 <div style={{ fontSize: '8pt', color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -273,9 +273,9 @@ const ArabicWaveTemplate = ({
 
       case 'education': return data.education?.length > 0 ? (
         <section key="education">
-          <MainHeading label={tr('education', true)} iconKey="education" accent={accent} />
           {data.education.map((e, i) => (
             <div key={i} style={{ marginBottom: '11pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('education', true)} iconKey="education" accent={accent} />}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6pt', direction: 'rtl' }}>
                 <div style={{ fontSize: sz.body, fontWeight: '700', color: '#222', flex: 1, textAlign: 'right' }}>{e.degree}</div>
                 <div style={{ fontSize: '8pt', color: '#999', whiteSpace: 'nowrap', flexShrink: 0 }}>
@@ -293,9 +293,9 @@ const ArabicWaveTemplate = ({
 
       case 'projects': return data.projects?.length > 0 ? (
         <section key="projects">
-          <MainHeading label={tr('projects', true)} iconKey="projects" accent={accent} />
           {data.projects.map((p, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('projects', true)} iconKey="projects" accent={accent} />}
               <div style={{ fontSize: sz.body, fontWeight: '700', color: '#222', textAlign: 'right', direction: 'rtl' }}>{p.title || p.name}</div>
               {p.link && <div style={{ fontSize: '8pt', color: accent, textAlign: 'right' }}>{p.link}</div>}
               {p.description && <BulletDesc text={p.description} style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -306,9 +306,9 @@ const ArabicWaveTemplate = ({
 
       case 'publications': return data.publications?.length > 0 ? (
         <section key="publications">
-          <MainHeading label={tr('publications', true)} iconKey={null} accent={accent} />
           {data.publications.map((p, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('publications', true)} iconKey={null} accent={accent} />}
               <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6pt', direction: 'rtl' }}>
                 <div style={{ fontSize: sz.body, fontWeight: '700', color: '#222', flex: 1, textAlign: 'right' }}>{p.title}</div>
                 {p.date && <div style={{ fontSize: '8pt', color: '#999', whiteSpace: 'nowrap' }}>{p.date}</div>}
@@ -322,9 +322,9 @@ const ArabicWaveTemplate = ({
 
       case 'references': return data.references?.length > 0 ? (
         <section key="references">
-          <MainHeading label={tr('references', true)} iconKey={null} accent={accent} />
           {data.references.map((r, i) => (
             <div key={i} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('references', true)} iconKey={null} accent={accent} />}
               <div style={{ fontSize: sz.body, fontWeight: '700', color: '#222', textAlign: 'right', direction: 'rtl' }}>{r.name}</div>
               {(r.title || r.company) && <div style={{ fontSize: '8.5pt', color: accent, textAlign: 'right', direction: 'rtl' }}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
               {(r.email || r.phone) && <div style={{ fontSize: sz.body, color: '#555', textAlign: 'right', direction: 'rtl' }}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
@@ -339,9 +339,9 @@ const ArabicWaveTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <MainHeading label={sec.title} iconKey={null} accent={accent} />
               {sec.items.map((item, idx) => (
                 <div key={idx} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
+                  {idx === 0 && <MainHeading label={sec.title} iconKey={null} accent={accent} />}
                   {item.title    && <div style={{ fontSize: sz.body, fontWeight: '700', color: '#222', textAlign: 'right', direction: 'rtl' }}>{item.title}</div>}
                   {item.subtitle && <div style={{ fontSize: '8pt', color: accent, textAlign: 'right', direction: 'rtl' }}>{item.subtitle}</div>}
                   {item.description && <BulletDesc text={item.description} style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', direction: 'rtl' }} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}

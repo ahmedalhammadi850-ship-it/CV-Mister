@@ -71,10 +71,9 @@ const MinimalTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <h2 style={s.heading}>{tr('experience', isRTL)}</h2>
-            <div style={s.divider} />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <><h2 style={s.heading}>{tr('experience', isRTL)}</h2><div style={s.divider} /></>}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -88,10 +87,9 @@ const MinimalTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <h2 style={s.heading}>{tr('education', isRTL)}</h2>
-            <div style={s.divider} />
             {data.education.map((e, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <><h2 style={s.heading}>{tr('education', isRTL)}</h2><div style={s.divider} /></>}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -121,10 +119,9 @@ const MinimalTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <h2 style={s.heading}>{tr('projects', isRTL)}</h2>
-            <div style={s.divider} />
             {data.projects.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <><h2 style={s.heading}>{tr('projects', isRTL)}</h2><div style={s.divider} /></>}
                 <h3 style={s.role}>{p.title}</h3>
                 {p.link && <div style={s.meta}>{p.link}</div>}
                 <BulletDesc text={p.description} style={ta(s.body, p.descriptionAlign)} bold={p?.descriptionBold} italic={p?.descriptionItalic} />
@@ -135,10 +132,9 @@ const MinimalTemplate = ({
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <section key="certificates">
-            <h2 style={s.heading}>{tr('certificates', isRTL)}</h2>
-            <div style={s.divider} />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <><h2 style={s.heading}>{tr('certificates', isRTL)}</h2><div style={s.divider} /></>}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -162,10 +158,9 @@ const MinimalTemplate = ({
       case 'courses':
         return data.courses?.length > 0 ? (
           <section key="courses">
-            <h2 style={s.heading}>{tr('courses', isRTL)}</h2>
-            <div style={s.divider} />
             {data.courses.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <><h2 style={s.heading}>{tr('courses', isRTL)}</h2><div style={s.divider} /></>}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -178,10 +173,9 @@ const MinimalTemplate = ({
       case 'awards':
         return data.awards?.length > 0 ? (
           <section key="awards">
-            <h2 style={s.heading}>{tr('awards', isRTL)}</h2>
-            <div style={s.divider} />
             {data.awards.map((a, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <><h2 style={s.heading}>{tr('awards', isRTL)}</h2><div style={s.divider} /></>}
                 <div style={s.row}>
                   <h3 style={s.role}>{a.title}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
@@ -211,10 +205,9 @@ const MinimalTemplate = ({
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <h2 style={s.heading}>{tr('publications', isRTL)}</h2>
-            <div style={s.divider} />
             {data.publications.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <><h2 style={s.heading}>{tr('publications', isRTL)}</h2><div style={s.divider} /></>}
                 <div style={s.row}>
                   <h3 style={s.role}>{p.title}</h3>
                   {p.date && <div style={s.date}>{p.date}</div>}
@@ -228,10 +221,9 @@ const MinimalTemplate = ({
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <h2 style={s.heading}>{tr('references', isRTL)}</h2>
-            <div style={s.divider} />
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <><h2 style={s.heading}>{tr('references', isRTL)}</h2><div style={s.divider} /></>}
                 <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.meta}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
@@ -245,10 +237,9 @@ const MinimalTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <h2 style={s.heading}>{sec.title}</h2>
-              <div style={s.divider} />
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
+                  {i === 0 && <><h2 style={s.heading}>{sec.title}</h2><div style={s.divider} /></>}
                   {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.meta}>{item.subtitle}</div>}
                   {item.description && <BulletDesc text={item.description} style={ta(s.body, item.descriptionAlign)} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}

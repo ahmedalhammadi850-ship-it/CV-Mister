@@ -452,9 +452,9 @@ const ArabicGemTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <MnHeading label={tr('experience', true)} />
             {data.experience.map((e, i) => (
               <div key={i} style={mn.expItem}>
+                {i === 0 && <MnHeading label={tr('experience', true)} />}
                 <div style={mn.jobRow}>
                   <div style={mn.jobTitle}>{e.jobTitle}</div>
                   <div style={mn.dateBadge}>
@@ -476,9 +476,9 @@ const ArabicGemTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <MnHeading label={tr('education', true)} />
             {data.education.map((e, i) => (
               <div key={i} style={mn.eduItem}>
+                {i === 0 && <MnHeading label={tr('education', true)} />}
                 <div style={mn.jobRow}>
                   <div style={mn.degree}>{e.degree}</div>
                   {(e.startDate || e.endDate) && (
@@ -495,9 +495,9 @@ const ArabicGemTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <MnHeading label={tr('projects', true)} />
             {data.projects.map((p, i) => (
               <div key={i} style={mn.eduItem}>
+                {i === 0 && <MnHeading label={tr('projects', true)} />}
                 <div style={mn.degree}>{p.title}</div>
                 {p.link && <div style={{ ...mn.institution, fontSize: sz.meta }}>{p.link}</div>}
                 {p.description && <BulletDesc text={p.description} style={mn.desc} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -509,9 +509,9 @@ const ArabicGemTemplate = ({
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <MnHeading label={tr('publications', true)} />
             {data.publications.map((p, i) => (
               <div key={i} style={mn.eduItem}>
+                {i === 0 && <MnHeading label={tr('publications', true)} />}
                 <div style={mn.jobRow}>
                   <div style={mn.degree}>{p.title}</div>
                   {p.date && <div style={mn.dateBadge}>{p.date}</div>}
@@ -526,9 +526,9 @@ const ArabicGemTemplate = ({
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <MnHeading label={tr('references', true)} />
             {data.references.map((r, i) => (
               <div key={i} style={mn.eduItem}>
+                {i === 0 && <MnHeading label={tr('references', true)} />}
                 <div style={mn.degree}>{r.name}</div>
                 {(r.title || r.company) && <div style={mn.institution}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={mn.desc}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}

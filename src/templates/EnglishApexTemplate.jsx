@@ -243,36 +243,38 @@ const EnglishApexTemplate = ({
 
       case 'experience': return data.experience?.length > 0 ? (
         <section key="experience">
-          <MainHeading label={tr('experience', isRTL)} accent={accent} isRTL={isRTL} />
           {data.experience.map((e, i) => (
-            <div key={i} style={{ marginBottom:'14pt', ...BREAK_ITEM, display:'flex', gap:'10pt', direction:dir }}>
-              {!isRTL && (
-                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:'2pt', flexShrink:0 }}>
-                  <div style={{ width:'10pt', height:'10pt', borderRadius:'50%', backgroundColor:accent, boxShadow:`0 0 0 3pt ${accent}20`, flexShrink:0 }} />
-                  {i < (data.experience.length - 1) && <div style={{ flex:1, width:'2px', backgroundColor:`${accent}25`, minHeight:'20pt' }} />}
-                </div>
-              )}
-              <div style={{ flex:1 }}>
-                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:'8pt', direction:dir }}>
-                  <div style={{ fontSize:sz.body, fontWeight:'800', color:TEXT, textAlign:align }}>{e.jobTitle}</div>
-                  <div style={{
-                    fontSize:'7pt', color:WHITE, whiteSpace:'nowrap', flexShrink:0,
-                    backgroundColor:accent, padding:'2pt 8pt', borderRadius:'20pt',
-                  }}>
-                    {e.startDate}{(e.endDate || e.current) ? ` – ${e.current ? tr('present', isRTL) : e.endDate}` : ''}
+            <div key={i} style={{ marginBottom:'14pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('experience', isRTL)} accent={accent} isRTL={isRTL} />}
+              <div style={{ display:'flex', gap:'10pt', direction:dir }}>
+                {!isRTL && (
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:'2pt', flexShrink:0 }}>
+                    <div style={{ width:'10pt', height:'10pt', borderRadius:'50%', backgroundColor:accent, boxShadow:`0 0 0 3pt ${accent}20`, flexShrink:0 }} />
+                    {i < (data.experience.length - 1) && <div style={{ flex:1, width:'2px', backgroundColor:`${accent}25`, minHeight:'20pt' }} />}
                   </div>
+                )}
+                <div style={{ flex:1 }}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:'8pt', direction:dir }}>
+                    <div style={{ fontSize:sz.body, fontWeight:'800', color:TEXT, textAlign:align }}>{e.jobTitle}</div>
+                    <div style={{
+                      fontSize:'7pt', color:WHITE, whiteSpace:'nowrap', flexShrink:0,
+                      backgroundColor:accent, padding:'2pt 8pt', borderRadius:'20pt',
+                    }}>
+                      {e.startDate}{(e.endDate || e.current) ? ` – ${e.current ? tr('present', isRTL) : e.endDate}` : ''}
+                    </div>
+                  </div>
+                  <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', marginBottom:'3pt', textAlign:align, direction:dir }}>
+                    {e.company}{e.location ? ` · ${e.location}` : ''}
+                  </div>
+                  {e.description && <BulletDesc text={e.description} style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
                 </div>
-                <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', marginBottom:'3pt', textAlign:align, direction:dir }}>
-                  {e.company}{e.location ? ` · ${e.location}` : ''}
-                </div>
-                {e.description && <BulletDesc text={e.description} style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
+                {isRTL && (
+                  <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:'2pt', flexShrink:0 }}>
+                    <div style={{ width:'10pt', height:'10pt', borderRadius:'50%', backgroundColor:accent, boxShadow:`0 0 0 3pt ${accent}20`, flexShrink:0 }} />
+                    {i < (data.experience.length - 1) && <div style={{ flex:1, width:'2px', backgroundColor:`${accent}25`, minHeight:'20pt' }} />}
+                  </div>
+                )}
               </div>
-              {isRTL && (
-                <div style={{ display:'flex', flexDirection:'column', alignItems:'center', paddingTop:'2pt', flexShrink:0 }}>
-                  <div style={{ width:'10pt', height:'10pt', borderRadius:'50%', backgroundColor:accent, boxShadow:`0 0 0 3pt ${accent}20`, flexShrink:0 }} />
-                  {i < (data.experience.length - 1) && <div style={{ flex:1, width:'2px', backgroundColor:`${accent}25`, minHeight:'20pt' }} />}
-                </div>
-              )}
             </div>
           ))}
         </section>
@@ -280,7 +282,6 @@ const EnglishApexTemplate = ({
 
       case 'education': return data.education?.length > 0 ? (
         <section key="education">
-          <MainHeading label={tr('education', isRTL)} accent={accent} isRTL={isRTL} />
           {data.education.map((e, i) => (
             <div key={i} style={{
               marginBottom:'11pt', ...BREAK_ITEM,
@@ -288,6 +289,7 @@ const EnglishApexTemplate = ({
               backgroundColor: i % 2 === 0 ? OFFWHITE : WHITE,
               borderRadius:'4pt',
             }}>
+              {i === 0 && <MainHeading label={tr('education', isRTL)} accent={accent} isRTL={isRTL} />}
               <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:'6pt', direction:dir }}>
                 <div style={{ fontSize:sz.body, fontWeight:'800', color:TEXT, textAlign:align }}>{e.degree}</div>
                 <div style={{ fontSize:'7.5pt', color:MUTED, whiteSpace:'nowrap', flexShrink:0 }}>
@@ -305,12 +307,12 @@ const EnglishApexTemplate = ({
 
       case 'projects': return data.projects?.length > 0 ? (
         <section key="projects">
-          <MainHeading label={tr('projects', isRTL)} accent={accent} isRTL={isRTL} />
           {data.projects.map((p, i) => (
             <div key={i} style={{
               marginBottom:'10pt', ...BREAK_ITEM, direction:dir, textAlign:align,
               ...(isRTL ? { paddingRight:'10pt', borderRight:`2px solid ${accent}30` } : { paddingLeft:'10pt', borderLeft:`2px solid ${accent}30` }),
             }}>
+              {i === 0 && <MainHeading label={tr('projects', isRTL)} accent={accent} isRTL={isRTL} />}
               <div style={{ fontSize:sz.body, fontWeight:'800', color:TEXT }}>{p.title || p.name}</div>
               {p.link && <div style={{ fontSize:'7.5pt', color:accent }}>{p.link}</div>}
               {p.description && <BulletDesc text={p.description} style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line' }} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -321,9 +323,9 @@ const EnglishApexTemplate = ({
 
       case 'publications': return data.publications?.length > 0 ? (
         <section key="publications">
-          <MainHeading label={tr('publications', isRTL)} accent={accent} isRTL={isRTL} />
           {data.publications.map((p, i) => (
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, direction:dir }}>
+              {i === 0 && <MainHeading label={tr('publications', isRTL)} accent={accent} isRTL={isRTL} />}
               <div style={{ display:'flex', justifyContent: isRTL ? 'flex-end' : 'flex-start', alignItems:'flex-start', gap:'6pt' }}>
                 <div style={{ fontSize:sz.body, fontWeight:'700', color:TEXT, flex:1, textAlign:align }}>{p.title}</div>
                 {p.date && <div style={{ fontSize:'7.5pt', color:MUTED, whiteSpace:'nowrap' }}>{p.date}</div>}
@@ -337,9 +339,9 @@ const EnglishApexTemplate = ({
 
       case 'references': return data.references?.length > 0 ? (
         <section key="references">
-          <MainHeading label={tr('references', isRTL)} accent={accent} isRTL={isRTL} />
           {data.references.map((r, i) => (
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, direction:dir, textAlign:align }}>
+              {i === 0 && <MainHeading label={tr('references', isRTL)} accent={accent} isRTL={isRTL} />}
               <div style={{ fontSize:sz.body, fontWeight:'700', color:TEXT }}>{r.name}</div>
               {(r.title || r.company) && <div style={{ fontSize:'8.5pt', color:accent }}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
               {(r.email || r.phone) && <div style={{ fontSize:sz.body, color:'#555' }}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
@@ -354,9 +356,9 @@ const EnglishApexTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <MainHeading label={sec.title} accent={accent} isRTL={isRTL} />
               {sec.items.map((item, idx) => (
                 <div key={idx} style={{ marginBottom:'10pt', ...BREAK_ITEM, direction:dir, textAlign:align }}>
+                  {idx === 0 && <MainHeading label={sec.title} accent={accent} isRTL={isRTL} />}
                   {item.title && <div style={{ fontSize:sz.body, fontWeight:'700', color:TEXT }}>{item.title}</div>}
                   {item.subtitle && <div style={{ fontSize:'8pt', color:accent }}>{item.subtitle}</div>}
                   {item.description && <BulletDesc text={item.description} style={{ fontSize:sz.body, color:'#555', lineHeight }} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}

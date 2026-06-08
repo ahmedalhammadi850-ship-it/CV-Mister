@@ -203,9 +203,9 @@ const ATSProTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <SectionHeading label={tr('experience', isRTL)} />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHeading label={tr('experience', isRTL)} />}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -220,9 +220,9 @@ const ATSProTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <SectionHeading label={tr('education', isRTL)} />
             {data.education.map((e, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading label={tr('education', isRTL)} />}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -261,9 +261,9 @@ const ATSProTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <SectionHeading label={tr('projects', isRTL)} />
             {data.projects.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading label={tr('projects', isRTL)} />}
                 <h3 style={s.role}>{p.title}</h3>
                 {p.link && <div style={s.company}>{p.link}</div>}
                 <BulletDesc text={p.description} style={ta(s.body, p.descriptionAlign)} bold={p?.descriptionBold} italic={p?.descriptionItalic} />
@@ -275,9 +275,9 @@ const ATSProTemplate = ({
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <section key="certificates">
-            <SectionHeading label={tr('certificates', isRTL)} />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading label={tr('certificates', isRTL)} />}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -302,9 +302,9 @@ const ATSProTemplate = ({
       case 'courses':
         return data.courses?.length > 0 ? (
           <section key="courses">
-            <SectionHeading label={tr('courses', isRTL)} />
             {data.courses.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading label={tr('courses', isRTL)} />}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -318,9 +318,9 @@ const ATSProTemplate = ({
       case 'awards':
         return data.awards?.length > 0 ? (
           <section key="awards">
-            <SectionHeading label={tr('awards', isRTL)} />
             {data.awards.map((a, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading label={tr('awards', isRTL)} />}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{a.title}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
@@ -351,9 +351,9 @@ const ATSProTemplate = ({
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <SectionHeading label={tr('publications', isRTL)} />
             {data.publications.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading label={tr('publications', isRTL)} />}
                 <div style={s.roleRow}>
                   <h3 style={s.role}>{p.title}</h3>
                   {p.date && <div style={s.date}>{p.date}</div>}
@@ -368,9 +368,9 @@ const ATSProTemplate = ({
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <SectionHeading label={tr('references', isRTL)} />
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading label={tr('references', isRTL)} />}
                 <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={s.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
@@ -385,9 +385,9 @@ const ATSProTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <SectionHeading label={sec.title} />
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
+                  {i === 0 && <SectionHeading label={sec.title} />}
                   {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.company}>{item.subtitle}</div>}
                   {item.description && <BulletDesc text={item.description} style={ta(s.body, item.descriptionAlign)} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}

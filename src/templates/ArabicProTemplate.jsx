@@ -225,9 +225,9 @@ const ArabicProTemplate = ({
 
       case 'experience': return data.experience?.length > 0 ? (
         <section key="experience">
-          <MNSection label={tr('experience', true)} />
           {data.experience.map((e, i) => (
             <div key={i} style={mn.item}>
+              {i === 0 && <MNSection label={tr('experience', true)} />}
               <div style={mn.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
               <div style={mn.row}>
                 <div style={mn.role}>{e.jobTitle}</div>
@@ -241,9 +241,9 @@ const ArabicProTemplate = ({
 
       case 'education': return data.education?.length > 0 ? (
         <section key="education">
-          <MNSection label={tr('education', true)} />
           {data.education.map((e, i) => (
             <div key={i} style={mn.item}>
+              {i === 0 && <MNSection label={tr('education', true)} />}
               <div style={{ ...mn.role, color: accentDark, marginBottom:'1pt' }}>{e.degree}</div>
               <div style={mn.row}>
                 <div style={{ fontSize:sz.meta, color:'#666', textAlign:'right' }}>{e.institution}{e.location ? ` · ${e.location}` : ''}</div>
@@ -268,9 +268,9 @@ const ArabicProTemplate = ({
 
       case 'projects': return data.projects?.length > 0 ? (
         <section key="projects">
-          <MNSection label={tr('projects', true)} />
           {data.projects.map((p, i) => (
             <div key={i} style={mn.item}>
+              {i === 0 && <MNSection label={tr('projects', true)} />}
               <div style={mn.role}>{p.title || p.name}</div>
               {p.link && <div style={{ fontSize:sz.meta, color: accentDark, textAlign:'right' }}>{p.link}</div>}
               {p.description && <BulletDesc text={p.description} style={mn.bodyText} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -281,9 +281,9 @@ const ArabicProTemplate = ({
 
       case 'publications': return data.publications?.length > 0 ? (
         <section key="publications">
-          <MNSection label={tr('publications', true)} />
           {data.publications.map((p, i) => (
             <div key={i} style={mn.item}>
+              {i === 0 && <MNSection label={tr('publications', true)} />}
               <div style={mn.row}>
                 <div style={mn.role}>{p.title}</div>
                 {p.date && <div style={mn.date}>{p.date}</div>}
@@ -297,9 +297,9 @@ const ArabicProTemplate = ({
 
       case 'references': return data.references?.length > 0 ? (
         <section key="references">
-          <MNSection label={tr('references', true)} />
           {data.references.map((r, i) => (
             <div key={i} style={mn.item}>
+              {i === 0 && <MNSection label={tr('references', true)} />}
               <div style={mn.role}>{r.name}</div>
               {(r.title || r.company) && <div style={{ fontSize:sz.meta, color: accentDark, textAlign:'right' }}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
               {(r.email || r.phone) && <div style={mn.bodyText}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}

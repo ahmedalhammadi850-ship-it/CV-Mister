@@ -199,9 +199,9 @@ const ClassicSerifTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <div style={main.sectionLabel}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={main.item}>
+                {i === 0 && <div style={main.sectionLabel}>{tr('experience', isRTL)}</div>}
                 <div style={main.row}>
                   <div style={main.role}>{e.jobTitle}</div>
                   <div style={main.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -216,9 +216,9 @@ const ClassicSerifTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <div style={main.sectionLabel}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={main.item}>
+                {i === 0 && <div style={main.sectionLabel}>{tr('education', isRTL)}</div>}
                 <div style={main.row}>
                   <div style={main.role}>{e.degree}</div>
                   <div style={main.date}>{e.startDate} – {e.endDate}</div>
@@ -233,9 +233,9 @@ const ClassicSerifTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <div style={main.sectionLabel}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={main.item}>
+                {i === 0 && <div style={main.sectionLabel}>{tr('projects', isRTL)}</div>}
                 <div style={{ ...main.role, marginBottom: '2pt' }}>{p.name}</div>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '3pt' }}>{p.url}</div>}
                 {p.description && <BulletDesc text={p.description} style={main.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}

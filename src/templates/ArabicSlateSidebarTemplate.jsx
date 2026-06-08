@@ -246,9 +246,9 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'experience': return data.experience?.length > 0 ? (
         <section key="experience">
-          <MNHeading label={tr('experience',isRTL)} />
           {data.experience.map((e,i)=>(
             <div key={i} style={mn.item}>
+              {i === 0 && <MNHeading label={tr('experience',isRTL)} />}
               <div style={mn.row}>
                 <div style={mn.role}>{e.jobTitle}</div>
                 <div style={mn.date}>{e.startDate} – {e.current?tr('present',isRTL):e.endDate}</div>
@@ -262,9 +262,9 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'education': return data.education?.length > 0 ? (
         <section key="education">
-          <MNHeading label={tr('education',isRTL)} />
           {data.education.map((e,i)=>(
             <div key={i} style={mn.item}>
+              {i === 0 && <MNHeading label={tr('education',isRTL)} />}
               <div style={mn.row}>
                 <div style={mn.role}>{e.degree}</div>
                 <div style={mn.date}>{e.startDate} – {e.endDate}</div>
@@ -278,9 +278,9 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'projects': return data.projects?.length > 0 ? (
         <section key="projects">
-          <MNHeading label={tr('projects',isRTL)} />
           {data.projects.map((p,i)=>(
             <div key={i} style={mn.item}>
+              {i === 0 && <MNHeading label={tr('projects',isRTL)} />}
               <div style={mn.role}>{p.title||p.name}</div>
               {p.link && <div style={{ fontSize:sz.meta, color:accent, textAlign:'right' }}>{p.link}</div>}
               {p.description && <BulletDesc text={p.description} style={mn.bodyText} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -291,9 +291,9 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'publications': return data.publications?.length > 0 ? (
         <section key="publications">
-          <MNHeading label={tr('publications',isRTL)} />
           {data.publications.map((p,i)=>(
             <div key={i} style={mn.item}>
+              {i === 0 && <MNHeading label={tr('publications',isRTL)} />}
               <div style={mn.row}>
                 <div style={mn.role}>{p.title}</div>
                 {p.date && <div style={mn.date}>{p.date}</div>}
@@ -307,9 +307,9 @@ const ArabicSlateSidebarTemplate = ({
 
       case 'references': return data.references?.length > 0 ? (
         <section key="references">
-          <MNHeading label={tr('references',isRTL)} />
           {data.references.map((r,i)=>(
             <div key={i} style={mn.item}>
+              {i === 0 && <MNHeading label={tr('references',isRTL)} />}
               <div style={mn.role}>{r.name}</div>
               {(r.title||r.company) && <div style={mn.company}>{[r.title,r.company].filter(Boolean).join(' — ')}</div>}
               {(r.email||r.phone) && <div style={mn.bodyText}>{[r.email,r.phone].filter(Boolean).join(' | ')}</div>}

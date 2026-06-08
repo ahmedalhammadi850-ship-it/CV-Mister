@@ -80,9 +80,9 @@ const ExecutiveTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <SectionHeading labelKey="experience" />
             {data.experience.map((e, i) => (
               <div key={i} style={s.item}>
+                {i === 0 && <SectionHeading labelKey="experience" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.jobTitle}</h3>
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
@@ -96,9 +96,9 @@ const ExecutiveTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <SectionHeading labelKey="education" />
             {data.education.map((e, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading labelKey="education" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{e.degree}</h3>
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
@@ -126,9 +126,9 @@ const ExecutiveTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <SectionHeading labelKey="projects" />
             {data.projects.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading labelKey="projects" />}
                 <h3 style={s.role}>{p.title}</h3>
                 {p.link && <div style={{ ...s.meta, color: gold }}>{p.link}</div>}
                 <BulletDesc text={p.description} style={ta(s.body, p.descriptionAlign)} bold={p?.descriptionBold} italic={p?.descriptionItalic} />
@@ -139,9 +139,9 @@ const ExecutiveTemplate = ({
       case 'certificates':
         return data.certificates?.length > 0 ? (
           <section key="certificates">
-            <SectionHeading labelKey="certificates" />
             {data.certificates.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading labelKey="certificates" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -164,9 +164,9 @@ const ExecutiveTemplate = ({
       case 'courses':
         return data.courses?.length > 0 ? (
           <section key="courses">
-            <SectionHeading labelKey="courses" />
             {data.courses.map((c, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading labelKey="courses" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{c.name}</h3>
                   {c.date && <div style={s.date}>{c.date}</div>}
@@ -179,9 +179,9 @@ const ExecutiveTemplate = ({
       case 'awards':
         return data.awards?.length > 0 ? (
           <section key="awards">
-            <SectionHeading labelKey="awards" />
             {data.awards.map((a, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading labelKey="awards" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{a.title}</h3>
                   {a.date && <div style={s.date}>{a.date}</div>}
@@ -210,9 +210,9 @@ const ExecutiveTemplate = ({
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <SectionHeading labelKey="publications" />
             {data.publications.map((p, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading labelKey="publications" />}
                 <div style={s.row}>
                   <h3 style={s.role}>{p.title}</h3>
                   {p.date && <div style={s.date}>{p.date}</div>}
@@ -226,9 +226,9 @@ const ExecutiveTemplate = ({
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <SectionHeading labelKey="references" />
             {data.references.map((r, i) => (
               <div key={i} style={s.itemSm}>
+                {i === 0 && <SectionHeading labelKey="references" />}
                 <h3 style={s.role}>{r.name}</h3>
                 {(r.title || r.company) && <div style={{ ...s.meta, fontWeight: '600' }}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={s.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}
@@ -242,9 +242,9 @@ const ExecutiveTemplate = ({
           if (!sec || !sec.items?.length) return null;
           return (
             <div key={key}>
-              <h2 style={s.heading}>{sec.title}</h2>
               {sec.items.map((item, i) => (
                 <div key={i} style={s.itemSm}>
+                  {i === 0 && <h2 style={s.heading}>{sec.title}</h2>}
                   {item.title && <h3 style={s.role}>{item.title}</h3>}
                   {item.subtitle && <div style={s.meta}>{item.subtitle}</div>}
                   {item.description && <BulletDesc text={item.description} style={ta(s.body, item.descriptionAlign)} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}

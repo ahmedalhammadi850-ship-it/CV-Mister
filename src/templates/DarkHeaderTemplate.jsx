@@ -254,9 +254,9 @@ const DarkHeaderTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <div style={mn.heading}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('experience', isRTL)}</div>}
                 <div style={mn.row}>
                   <div>
                     <div style={mn.role}>{e.jobTitle}</div>
@@ -273,9 +273,9 @@ const DarkHeaderTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <div style={mn.heading}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('education', isRTL)}</div>}
                 <div style={mn.row}>
                   <div>
                     <div style={mn.role}>{e.degree}</div>
@@ -292,9 +292,9 @@ const DarkHeaderTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <div style={mn.heading}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('projects', isRTL)}</div>}
                 <div style={mn.role}>{p.title || p.name}</div>
                 {p.link && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.link}</div>}
                 {p.description && <BulletDesc text={p.description} style={mn.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -306,9 +306,9 @@ const DarkHeaderTemplate = ({
       case 'publications':
         return data.publications?.length > 0 ? (
           <section key="publications">
-            <div style={mn.heading}>{tr('publications', isRTL)}</div>
             {data.publications.map((p, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('publications', isRTL)}</div>}
                 <div style={mn.row}>
                   <div style={mn.role}>{p.title}</div>
                   {p.date && <div style={mn.date}>{p.date}</div>}
@@ -323,9 +323,9 @@ const DarkHeaderTemplate = ({
       case 'references':
         return data.references?.length > 0 ? (
           <section key="references">
-            <div style={mn.heading}>{tr('references', isRTL)}</div>
             {data.references.map((r, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('references', isRTL)}</div>}
                 <div style={mn.role}>{r.name}</div>
                 {(r.title || r.company) && <div style={mn.company}>{[r.title, r.company].filter(Boolean).join(' — ')}</div>}
                 {(r.email || r.phone) && <div style={mn.body}>{[r.email, r.phone].filter(Boolean).join(' | ')}</div>}

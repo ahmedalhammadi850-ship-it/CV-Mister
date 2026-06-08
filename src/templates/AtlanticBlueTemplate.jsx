@@ -221,23 +221,25 @@ const AtlanticBlueTemplate = ({
       case 'experience':
         return data.experience?.length > 0 ? (
           <section key="experience">
-            <div style={mn.heading}>{tr('experience', isRTL)}</div>
             {data.experience.map((e, i) => (
-              <div key={i} style={{ ...mn.item, display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', gap: '10pt' }}>
-                {/* Timeline dot */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingTop: '3pt' }}>
-                  <div style={{ width: '9pt', height: '9pt', borderRadius: '50%', backgroundColor: accent, flexShrink: 0 }} />
-                  {i < data.experience.length - 1 && (
-                    <div style={{ width: '1.5px', flex: 1, backgroundColor: accent + '33', marginTop: '3pt', minHeight: '20pt' }} />
-                  )}
-                </div>
-                <div style={{ flex: 1 }}>
-                  <div style={mn.row}>
-                    <div style={mn.role}>{e.jobTitle}</div>
-                    <div style={mn.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
+              <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('experience', isRTL)}</div>}
+                <div style={{ display: 'flex', flexDirection: isRTL ? 'row-reverse' : 'row', gap: '10pt' }}>
+                  {/* Timeline dot */}
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingTop: '3pt' }}>
+                    <div style={{ width: '9pt', height: '9pt', borderRadius: '50%', backgroundColor: accent, flexShrink: 0 }} />
+                    {i < data.experience.length - 1 && (
+                      <div style={{ width: '1.5px', flex: 1, backgroundColor: accent + '33', marginTop: '3pt', minHeight: '20pt' }} />
+                    )}
                   </div>
-                  <div style={mn.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
-                  {e.description && <BulletDesc text={e.description} style={mn.body} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
+                  <div style={{ flex: 1 }}>
+                    <div style={mn.row}>
+                      <div style={mn.role}>{e.jobTitle}</div>
+                      <div style={mn.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
+                    </div>
+                    <div style={mn.company}>{e.company}{e.location ? ` · ${e.location}` : ''}</div>
+                    {e.description && <BulletDesc text={e.description} style={mn.body} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
+                  </div>
                 </div>
               </div>
             ))}
@@ -247,9 +249,9 @@ const AtlanticBlueTemplate = ({
       case 'education':
         return data.education?.length > 0 ? (
           <section key="education">
-            <div style={mn.heading}>{tr('education', isRTL)}</div>
             {data.education.map((e, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('education', isRTL)}</div>}
                 <div style={mn.row}>
                   <div style={mn.role}>{e.degree}</div>
                   <div style={mn.date}>{e.startDate} – {e.endDate}</div>
@@ -264,9 +266,9 @@ const AtlanticBlueTemplate = ({
       case 'projects':
         return data.projects?.length > 0 ? (
           <section key="projects">
-            <div style={mn.heading}>{tr('projects', isRTL)}</div>
             {data.projects.map((p, i) => (
               <div key={i} style={mn.item}>
+                {i === 0 && <div style={mn.heading}>{tr('projects', isRTL)}</div>}
                 <div style={mn.role}>{p.name}</div>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.url}</div>}
                 {p.description && <BulletDesc text={p.description} style={mn.body} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}

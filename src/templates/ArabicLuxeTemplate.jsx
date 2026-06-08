@@ -254,7 +254,6 @@ const ArabicLuxeTemplate = ({
 
       case 'experience': return data.experience?.length>0 ? (
         <section key="experience">
-          <MainHeading label={tr('experience',isRTL)} iconKey="experience" accent={accent} isRTL={isRTL} />
           {data.experience.map((e,i)=>(
             <div key={i} style={{
               marginBottom:'12pt', ...BREAK_ITEM,
@@ -262,6 +261,7 @@ const ArabicLuxeTemplate = ({
                 ? { paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }
                 : { paddingLeft:'10pt',  marginLeft:'3pt',  borderLeft:`3px solid ${accent}20`  }),
             }}>
+              {i === 0 && <MainHeading label={tr('experience',isRTL)} iconKey="experience" accent={accent} isRTL={isRTL} />}
               <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:dir }}>
                 <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, flex:1, textAlign:align }}>{e.jobTitle}</div>
                 <div style={{ fontSize:'8pt', color:'#888', whiteSpace:'nowrap', flexShrink:0, background:`${accent}15`, padding:'1.5pt 6pt', borderRadius:'20pt' }}>
@@ -281,7 +281,6 @@ const ArabicLuxeTemplate = ({
 
       case 'education': return data.education?.length>0 ? (
         <section key="education">
-          <MainHeading label={tr('education',isRTL)} iconKey="education" accent={accent} isRTL={isRTL} />
           {data.education.map((e,i)=>(
             <div key={i} style={{
               marginBottom:'11pt', ...BREAK_ITEM,
@@ -289,6 +288,7 @@ const ArabicLuxeTemplate = ({
                 ? { paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }
                 : { paddingLeft:'10pt',  marginLeft:'3pt',  borderLeft:`3px solid ${accent}20`  }),
             }}>
+              {i === 0 && <MainHeading label={tr('education',isRTL)} iconKey="education" accent={accent} isRTL={isRTL} />}
               <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:dir }}>
                 <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, flex:1, textAlign:align }}>{e.degree}</div>
                 <div style={{ fontSize:'8pt', color:'#888', whiteSpace:'nowrap', flexShrink:0, background:`${accent}15`, padding:'1.5pt 6pt', borderRadius:'20pt' }}>
@@ -308,7 +308,6 @@ const ArabicLuxeTemplate = ({
 
       case 'projects': return data.projects?.length>0 ? (
         <section key="projects">
-          <MainHeading label={tr('projects',isRTL)} iconKey="projects" accent={accent} isRTL={isRTL} />
           {data.projects.map((p,i)=>(
             <div key={i} style={{
               marginBottom:'10pt', ...BREAK_ITEM,
@@ -316,6 +315,7 @@ const ArabicLuxeTemplate = ({
                 ? { paddingRight:'10pt', marginRight:'3pt', borderRight:`3px solid ${accent}20` }
                 : { paddingLeft:'10pt',  marginLeft:'3pt',  borderLeft:`3px solid ${accent}20`  }),
             }}>
+              {i === 0 && <MainHeading label={tr('projects',isRTL)} iconKey="projects" accent={accent} isRTL={isRTL} />}
               <div style={{ fontSize:sz.body, fontWeight:'800', color:NAVY, textAlign:align, direction:dir }}>{p.title||p.name}</div>
               {p.link&&<div style={{ fontSize:'8pt', color:accent, textAlign:align }}>{p.link}</div>}
               {p.description&&<BulletDesc text={p.description} style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align, whiteSpace:'pre-line', direction:dir }} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
@@ -326,9 +326,9 @@ const ArabicLuxeTemplate = ({
 
       case 'publications': return data.publications?.length>0 ? (
         <section key="publications">
-          <MainHeading label={tr('publications',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />
           {data.publications.map((p,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('publications',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />}
               <div style={{ display:'flex', alignItems:'flex-start', gap:'6pt', direction:dir }}>
                 <div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, flex:1, textAlign:align }}>{p.title}</div>
                 {p.date&&<div style={{ fontSize:'8pt', color:'#888', whiteSpace:'nowrap' }}>{p.date}</div>}
@@ -342,9 +342,9 @@ const ArabicLuxeTemplate = ({
 
       case 'references': return data.references?.length>0 ? (
         <section key="references">
-          <MainHeading label={tr('references',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />
           {data.references.map((r,i)=>(
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM }}>
+              {i === 0 && <MainHeading label={tr('references',isRTL)} iconKey={null} accent={accent} isRTL={isRTL} />}
               <div style={{ fontSize:sz.body, fontWeight:'700', color:NAVY, textAlign:align, direction:dir }}>{r.name}</div>
               {(r.title||r.company)&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:align, direction:dir }}>{[r.title,r.company].filter(Boolean).join(' — ')}</div>}
               {(r.email||r.phone)&&<div style={{ fontSize:sz.body, color:'#555', textAlign:align, direction:dir }}>{[r.email,r.phone].filter(Boolean).join(' | ')}</div>}
