@@ -168,15 +168,25 @@ function computeSmartBreaks(container, totalHeight) {
     }
 
     // ── Phase 4: Range API line-boundary snap ────────────────────────────────
-    // Safety net: if bestBreak is STILL inside a large text element (paragraph,
-    // list item, table cell) after Phases 1-3, use Range.getClientRects() to
-    // find the last complete text line before bestBreak.
-    // This eliminates the "half-character" horizontal split that appears when
-    // the element is too tall to pull back (> MAX_PULL_AVOID) and rawBreak
-    // lands mid-line inside a paragraph.
+    // Safety net: if bestBreak is STILL inside a text element after Phases 1-3,
+    // use Range.getClientRects() to find the last complete text line before
+    // bestBreak. This eliminates the "half-character" horizontal split.
+    //
+    // Covers ALL elements that contain at least one direct text node — not just
+    // semantic elements (p, li, …) but also div/span which resume templates use
+    // heavily for descriptions, bullets, job titles, etc.
     {
+      // Collect all elements that straddle bestBreak and contain direct text.
+      // Pick the smallest (most specific) straddling element so Range gives us
+      // the tightest line-rect set for that text block.
       let ph4El = null, ph4ElH = Infinity;
-      for (const el of container.querySelectorAll('p, li, td, th, address')) {
+      const ph4Selector = 'p, li, td, th, address, div, span';
+      for (const el of container.querySelectorAll(ph4Selector)) {
+        // Only elements that have at least one direct text node with content
+        const hasText = Array.from(el.childNodes).some(
+          n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0
+        );
+        if (!hasText) continue;
         const r   = el.getBoundingClientRect();
         const eT  = r.top    - containerTop;
         const eB  = r.bottom - containerTop;
@@ -256,8 +266,14 @@ function fixSplitBreak(container, breakAt, pageStart) {
   }
 
   // Phase 4 — Range API line-boundary snap
+  // Covers div/span too, not just semantic elements, because resume templates
+  // commonly use div/span for descriptions, bullets, and job details.
   let bestEl = null, bestH = Infinity;
-  for (const el of container.querySelectorAll('p, li, td, th, address')) {
+  for (const el of container.querySelectorAll('p, li, td, th, address, div, span')) {
+    const hasText = Array.from(el.childNodes).some(
+      n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0
+    );
+    if (!hasText) continue;
     const r  = el.getBoundingClientRect();
     const eT = r.top    - containerTop;
     const eB = r.bottom - containerTop;

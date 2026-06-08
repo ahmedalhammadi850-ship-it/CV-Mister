@@ -372,6 +372,41 @@ export async function measureBreaks(html) {
           }
         }
 
+        // ── Phase 4: Range API line-boundary snap ─────────────────────────────
+        // Safety net: if bestBreak still lands mid-line inside a text element,
+        // use Range.getClientRects() to snap to the last complete line before it.
+        // Covers div/span too — resume templates use these for descriptions and
+        // bullets, not just semantic p/li elements.
+        {
+          let ph4El = null, ph4ElH = Infinity;
+          const ph4Els = container.querySelectorAll('p, li, td, th, address, div, span');
+          for (const el of ph4Els) {
+            const hasText = Array.from(el.childNodes).some(
+              n => n.nodeType === 3 && n.textContent.trim().length > 0
+            );
+            if (!hasText) continue;
+            const r   = el.getBoundingClientRect();
+            const eT  = r.top    - containerTop;
+            const eB  = r.bottom - containerTop;
+            if (eT >= bestBreak || eB <= bestBreak) continue;
+            if (eT >= bestBreak - 3) continue;
+            if (r.height < ph4ElH) { ph4El = el; ph4ElH = r.height; }
+          }
+          if (ph4El) {
+            try {
+              const range = document.createRange();
+              range.selectNodeContents(ph4El);
+              const rects = Array.from(range.getClientRects());
+              let lastSafe = null;
+              for (const rect of rects) {
+                const rBot = rect.bottom - containerTop;
+                if (rBot <= bestBreak - 1) lastSafe = rBot;
+              }
+              if (lastSafe !== null) bestBreak = lastSafe;
+            } catch (_) {}
+          }
+        }
+
         const gap = Math.round(rawBreak - bestBreak);
         pageReport.push({
           page:       pageIndex,
