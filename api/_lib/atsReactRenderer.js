@@ -428,11 +428,20 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     //   a text line boundary that slightly precedes the measured break point.
     const translateY = Math.max(0, Math.floor(start) - 8);
 
+    // The top-clip guard shifts translateY back by 8px so border/decoration
+    // paint boxes that start slightly before the break point are not clipped.
+    // This also means up to 8px of page-1 content can "bleed" into the top
+    // of the page-2 inner clip, producing a ghost line.
+    // Fix: a white overlay of exactly 8px at the very top of the inner clip
+    // covers that bleed zone.  The first real content of page 2 starts at
+    // inner-clip y=8 (template position `start`) so nothing visible is hidden.
+    const guardPx = Math.round(start) - translateY; // = 8 in normal cases
     return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${totalSliceHeight}px">
   <div style="position:absolute;top:${MARGIN}px;left:0;width:794px;height:${innerHeight}px;overflow:hidden">
     <div style="position:absolute;top:0;left:0;width:794px;transform:translateY(-${translateY}px)">
       ${bodyHtml}
     </div>
+    ${guardPx > 0 ? `<div style="position:absolute;top:0;left:0;width:794px;height:${guardPx}px;background:#ffffff;z-index:10"></div>` : ''}
   </div>
 </div>`;
   }).join('\n');
