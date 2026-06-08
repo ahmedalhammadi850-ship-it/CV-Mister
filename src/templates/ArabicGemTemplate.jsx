@@ -1,4 +1,5 @@
 import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
+import BulletDesc from './BulletDesc';
 
 const labels = {
   summary:       { ar: 'الملخص المهني',        en: 'Professional Summary'  },
@@ -465,7 +466,7 @@ const ArabicGemTemplate = ({
                   {e.location && <div style={mn.location}>· {e.location}</div>}
                 </div>
                 {e.description && (
-                  <div style={mn.desc}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>
+                  <BulletDesc text={e.description} style={mn.desc} bold={e?.descriptionBold} italic={e?.descriptionItalic} />
                 )}
               </div>
             ))}
@@ -485,7 +486,7 @@ const ArabicGemTemplate = ({
                   )}
                 </div>
                 <div style={mn.institution}>{e.institution}</div>
-                {e.description && <div style={{ ...mn.desc, marginTop: '3pt' }}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
+                {e.description && <BulletDesc text={e.description} style={{ ...mn.desc, marginTop: '3pt' }} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
               </div>
             ))}
           </section>
@@ -499,7 +500,7 @@ const ArabicGemTemplate = ({
               <div key={i} style={mn.eduItem}>
                 <div style={mn.degree}>{p.title}</div>
                 {p.link && <div style={{ ...mn.institution, fontSize: sz.meta }}>{p.link}</div>}
-                {p.description && <div style={mn.desc}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
+                {p.description && <BulletDesc text={p.description} style={mn.desc} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
               </div>
             ))}
           </section>
@@ -516,7 +517,7 @@ const ArabicGemTemplate = ({
                   {p.date && <div style={mn.dateBadge}>{p.date}</div>}
                 </div>
                 {p.publisher && <div style={mn.institution}>{p.publisher}</div>}
-                {p.description && <div style={mn.desc}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
+                {p.description && <BulletDesc text={p.description} style={mn.desc} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
               </div>
             ))}
           </section>

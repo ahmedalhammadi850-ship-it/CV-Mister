@@ -1,4 +1,5 @@
 import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
+import BulletDesc from './BulletDesc';
 
 const labels = {
   summary:       { en: 'Summary',             ar: 'الملخص المهني'        },
@@ -137,7 +138,7 @@ const EditorialRuleTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.current ? tr('present', isRTL) : e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.company}{e.location ? `, ${e.location}` : ''}</div>
-                {e.description && <div style={s.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
+                {e.description && <BulletDesc text={e.description} style={s.bodyText} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
               </div>
             ))}
           </section>
@@ -154,7 +155,7 @@ const EditorialRuleTemplate = ({
                   <div style={s.date}>{e.startDate} – {e.endDate}</div>
                 </div>
                 <div style={s.company}>{e.institution}{e.location ? `, ${e.location}` : ''}</div>
-                {e.description && <div style={s.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
+                {e.description && <BulletDesc text={e.description} style={s.bodyText} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
               </div>
             ))}
           </section>
@@ -168,7 +169,7 @@ const EditorialRuleTemplate = ({
               <div key={i} style={s.item}>
                 <h3 style={s.role}>{p.name}</h3>
                 {p.url && <div style={{ fontSize: sz.meta, color: accent, marginBottom: '2pt' }}>{p.url}</div>}
-                {p.description && <div style={s.bodyText}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
+                {p.description && <BulletDesc text={p.description} style={s.bodyText} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
               </div>
             ))}
           </section>

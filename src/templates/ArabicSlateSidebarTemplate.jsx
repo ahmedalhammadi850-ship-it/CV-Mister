@@ -1,4 +1,5 @@
 import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
+import BulletDesc from './BulletDesc';
 
 const labels = {
   summary:       { en: 'Professional Summary', ar: 'الملخص المهني'       },
@@ -253,7 +254,7 @@ const ArabicSlateSidebarTemplate = ({
                 <div style={mn.date}>{e.startDate} – {e.current?tr('present',isRTL):e.endDate}</div>
               </div>
               <div style={mn.company}>{e.company}{e.location?` · ${e.location}`:''}</div>
-              {e.description && <div style={mn.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
+              {e.description && <BulletDesc text={e.description} style={mn.bodyText} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -269,7 +270,7 @@ const ArabicSlateSidebarTemplate = ({
                 <div style={mn.date}>{e.startDate} – {e.endDate}</div>
               </div>
               <div style={mn.company}>{e.institution}{e.location?` · ${e.location}`:''}</div>
-              {e.description && <div style={mn.bodyText}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
+              {e.description && <BulletDesc text={e.description} style={mn.bodyText} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -282,7 +283,7 @@ const ArabicSlateSidebarTemplate = ({
             <div key={i} style={mn.item}>
               <div style={mn.role}>{p.title||p.name}</div>
               {p.link && <div style={{ fontSize:sz.meta, color:accent, textAlign:'right' }}>{p.link}</div>}
-              {p.description && <div style={mn.bodyText}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
+              {p.description && <BulletDesc text={p.description} style={mn.bodyText} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -298,7 +299,7 @@ const ArabicSlateSidebarTemplate = ({
                 {p.date && <div style={mn.date}>{p.date}</div>}
               </div>
               {p.publisher && <div style={mn.company}>{p.publisher}</div>}
-              {p.description && <div style={mn.bodyText}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
+              {p.description && <BulletDesc text={p.description} style={mn.bodyText} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -328,7 +329,7 @@ const ArabicSlateSidebarTemplate = ({
                 <div key={idx} style={mn.item}>
                   {item.title && <div style={mn.role}>{item.title}</div>}
                   {item.subtitle && <div style={mn.company}>{item.subtitle}</div>}
-                  {item.description && <div style={mn.bodyText}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
+                  {item.description && <BulletDesc text={item.description} style={mn.bodyText} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}
                 </div>
               ))}
             </div>

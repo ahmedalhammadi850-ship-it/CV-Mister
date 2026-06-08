@@ -1,4 +1,5 @@
 import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
+import BulletDesc from './BulletDesc';
 
 const GitHubIcon = () => <svg width="9" height="9" viewBox="0 0 16 16" fill="rgba(255,255,255,0.85)"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8 8 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>;
 
@@ -247,9 +248,7 @@ const EnglishHorizonTemplate = ({
                   {e.company}{e.location?` · ${e.location}`:''}
                 </div>
                 {e.description&&(
-                  <div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }}>
-                    <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
-                  </div>
+                  <BulletDesc text={e.description} style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }} bold={e?.descriptionBold} italic={e?.descriptionItalic} />
                 )}
               </div>
             </div>
@@ -275,7 +274,7 @@ const EnglishHorizonTemplate = ({
                 <div style={{ fontSize:'8.5pt', color:accent, fontWeight:'700', marginBottom:'3pt', textAlign:align }}>
                   {e.institution}{e.location?` · ${e.location}`:''}
                 </div>
-                {e.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }}><span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span></div>}
+                {e.description&&<BulletDesc text={e.description} style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line', textAlign:align, direction:dir }} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
               </div>
             </div>
           ))}
@@ -289,7 +288,7 @@ const EnglishHorizonTemplate = ({
             <div key={i} style={{ marginBottom:'10pt', ...BREAK_ITEM, textAlign:align, direction:dir }}>
               <div style={{ fontSize:sz.body, fontWeight:'800', color:'#1a202c' }}>{p.title||p.name}</div>
               {p.link&&<div style={{ fontSize:'8pt', color:accent }}>{p.link}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line' }}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
+              {p.description&&<BulletDesc text={p.description} style={{ fontSize:sz.body, color:'#555', lineHeight, whiteSpace:'pre-line' }} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -305,7 +304,7 @@ const EnglishHorizonTemplate = ({
                 {p.date&&<div style={{ fontSize:'8pt', color:'#718096', whiteSpace:'nowrap', marginLeft:'8pt' }}>{p.date}</div>}
               </div>
               {p.publisher&&<div style={{ fontSize:'8.5pt', color:accent, textAlign:align }}>{p.publisher}</div>}
-              {p.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align }}><span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span></div>}
+              {p.description&&<BulletDesc text={p.description} style={{ fontSize:sz.body, color:'#555', lineHeight, textAlign:align }} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -335,7 +334,7 @@ const EnglishHorizonTemplate = ({
                 <div key={idx} style={{ marginBottom:'10pt', ...BREAK_ITEM, textAlign:align, direction:dir }}>
                   {item.title&&<div style={{ fontSize:sz.body, fontWeight:'700', color:'#1a202c' }}>{item.title}</div>}
                   {item.subtitle&&<div style={{ fontSize:'8pt', color:accent }}>{item.subtitle}</div>}
-                  {item.description&&<div style={{ fontSize:sz.body, color:'#555', lineHeight }}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
+                  {item.description&&<BulletDesc text={item.description} style={{ fontSize:sz.body, color:'#555', lineHeight }} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}
                 </div>
               ))}
             </div>

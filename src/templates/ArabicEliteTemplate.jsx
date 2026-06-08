@@ -1,4 +1,5 @@
 import { resolveTheme, BREAK_ITEM, BREAK_HEADING, ta} from './templateUtils';
+import BulletDesc from './BulletDesc';
 
 /* ─── labels ─────────────────────────────────────────────────── */
 const L = {
@@ -359,11 +360,7 @@ const ArabicEliteTemplate = ({
               <div style={{ fontSize: '8.5pt', color: accent, fontWeight: '600', textAlign: 'right', direction: 'rtl', marginBottom: '2pt' }}>
                 {e.company}{e.location ? ` · ${e.location}` : ''}
               </div>
-              {e.description && (
-                <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
-                  <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
-                </div>
-              )}
+              {e.description && <BulletDesc text={e.description} style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -385,11 +382,7 @@ const ArabicEliteTemplate = ({
               <div style={{ fontSize: '8.5pt', color: accent, fontWeight: '600', textAlign: 'right', direction: 'rtl', marginBottom: '2pt' }}>
                 {e.institution}{e.location ? ` · ${e.location}` : ''}
               </div>
-              {e.description && (
-                <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
-                  <span style={{fontWeight:e?.descriptionBold?700:undefined,fontStyle:e?.descriptionItalic?"italic":undefined}}>{e.description}</span>
-                </div>
-              )}
+              {e.description && <BulletDesc text={e.description} style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }} bold={e?.descriptionBold} italic={e?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -404,11 +397,7 @@ const ArabicEliteTemplate = ({
                 {p.title || p.name}
               </div>
               {p.link && <div style={{ fontSize: '8pt', color: accent, textAlign: 'right' }}>{p.link}</div>}
-              {p.description && (
-                <div style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }}>
-                  <span style={{fontWeight:p?.descriptionBold?700:undefined,fontStyle:p?.descriptionItalic?"italic":undefined}}>{p.description}</span>
-                </div>
-              )}
+              {p.description && <BulletDesc text={p.description} style={{ fontSize: sz.body, color: '#555', lineHeight, textAlign: 'right', whiteSpace: 'pre-line', direction: 'rtl' }} bold={p?.descriptionBold} italic={p?.descriptionItalic} />}
             </div>
           ))}
         </section>
@@ -425,7 +414,7 @@ const ArabicEliteTemplate = ({
                 <div key={idx} style={{ marginBottom: '10pt', ...BREAK_ITEM }}>
                   {item.title    && <div style={{ fontSize: sz.body, fontWeight:'700', color:'#1a202c', textAlign:'right', direction:'rtl' }}>{item.title}</div>}
                   {item.subtitle && <div style={{ fontSize:'8pt', color:accent, textAlign:'right', direction:'rtl' }}>{item.subtitle}</div>}
-                  {item.description && <div style={{ fontSize: sz.body, color:'#555', lineHeight, textAlign:'right', direction:'rtl' }}><span style={{fontWeight:item?.descriptionBold?700:undefined,fontStyle:item?.descriptionItalic?"italic":undefined}}>{item.description}</span></div>}
+                  {item.description && <BulletDesc text={item.description} style={{ fontSize: sz.body, color:'#555', lineHeight, textAlign:'right', direction:'rtl' }} bold={item?.descriptionBold} italic={item?.descriptionItalic} />}
                 </div>
               ))}
             </div>
