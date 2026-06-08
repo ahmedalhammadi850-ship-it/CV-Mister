@@ -240,7 +240,10 @@ const HEADING_ORPHAN_PX = 120;
 // Max px to pull a break back to avoid splitting a break-inside:avoid element
 // OR to handle a heading orphan. Measured from rawBreak so the two adjustments
 // cannot compound. Must match MAX_PULL in LivePreview.jsx.
-const MAX_PULL = 20;
+// 100px covers typical project/experience cards (50-80px tall) and section
+// headings near the page boundary. Both checks use rawBreak as reference so
+// they cannot compound: worst-case blank at page bottom = 100px ≈ 2.6cm.
+const MAX_PULL = 100;
 // PDF_BOTTOM_MARGIN — extra px deducted from the raw break point to leave
 // white space at the bottom of each PDF page.
 //

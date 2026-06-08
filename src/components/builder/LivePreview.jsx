@@ -54,9 +54,10 @@ const HEADING_ORPHAN_PX = 120;
 // Max pixels we'll pull a break back to avoid splitting a break-inside:avoid element
 // OR to handle a heading orphan. Measured from the raw break point, not bestBreak,
 // so the two adjustments cannot compound into a large blank area.
-// Setting this to 20 ensures the visible blank space at the page bottom stays ≤ 20px
-// beyond the natural page margin.
-const MAX_PULL = 20;
+// 100px covers typical project/experience cards (50-80px tall) and section headings
+// that land near the page boundary. Both checks reference rawBreak independently so
+// they cannot compound: worst-case blank space at page bottom = 100px ≈ 2.6cm.
+const MAX_PULL = 100;
 
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
