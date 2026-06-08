@@ -62,60 +62,66 @@ export default async function handler(req, res) {
     let debugReport = null;
 
     if (renderedHtml) {
-      // ── PRIMARY PATH: browser-captured HTML + preview breaks ──────────────
+      // ── PRIMARY PATH: browser-captured HTML + Puppeteer-measured breaks ──
+      //
+      // ROOT FIX: Puppeteer ALWAYS measures its own page breaks from the same
+      // HTML it will use to render the PDF.  Browser-provided previewBreaks are
+      // logged for comparison but are NEVER used for slicing.
+      //
+      // WHY BROWSER BREAKS CANNOT BE USED:
+      //   Browser (Chrome on Windows/macOS) and Puppeteer (Chromium on Linux)
+      //   apply different sub-pixel font hinting, so the same web font produces
+      //   slightly different character advance widths and line heights (±1-5 px
+      //   per line, compounding over 30+ lines → ±30-150 px per page).
+      //   If we slice at y=1059 (browser measurement) but Puppeteer actually
+      //   places that text at y=1062, overflow:hidden clips the last line.
+      //   If the difference goes the other way (shorter in Puppeteer), the start
+      //   of page 2 falls above the MARGIN zone and is hidden.
+      //
+      // WHY PUPPETEER'S OWN BREAKS WORK:
+      //   Pass 1 (measureBreaks) and Pass 2 (generatePdfFromHtml) run in the
+      //   SAME Chromium process with the SAME fonts loaded.  The break positions
+      //   from Pass 1 are pixel-perfect for Pass 2's rendering → no clipping,
+      //   no hidden text, no missing lines.
+      //
+      // PREVIEW vs PDF:
+      //   The preview (browser) may show breaks ±1-5 px from the PDF.  This is
+      //   cosmetic and unavoidable without running Puppeteer in the browser.
+      //   What matters: the PDF has no missing or hidden content.
 
       console.log('[PDF] source: browser-captured HTML — size:', renderedHtml.length, 'chars');
-      console.log('[PDF] Preview Page Breaks:', JSON.stringify(previewBreaks));
+      console.log('[PDF] Preview breaks (reference only):', JSON.stringify(previewBreaks));
 
-      if (previewBreaks && previewBreaks.length > 0) {
-        // ── USE PREVIEW BREAKS DIRECTLY (source of truth) ────────────────
-        finalBreaks = previewBreaks;
-        finalHeight = previewTotalHeight;
+      // Build the UNSLICED full-template HTML for Puppeteer to measure
+      const singlePageHtml = buildHtmlFromRendered(renderedHtml, {
+        isRTL,
+        pageBreaks:  [],
+        totalHeight: 99999,
+      });
 
-        console.log('[PDF] Using preview breaks directly (no Puppeteer re-measurement).');
-        console.log('[PDF] PDF Page Breaks   :', JSON.stringify(finalBreaks));
-        console.log('[PDF] Match: TRUE — Preview breaks == PDF breaks');
+      // Pass 1 — Puppeteer measures its own breaks from its own rendering
+      const { breaks: puppeteerBreaks, totalHeight: puppeteerHeight, pageReport } =
+        await measureBreaks(singlePageHtml);
 
-        debugReport = {
-          source: 'preview',
-          previewBreaks,
-          pdfBreaks: finalBreaks,
-          match: true,
-        };
+      console.log('[PDF] Puppeteer breaks (used for PDF):', JSON.stringify(puppeteerBreaks));
+      console.log('[PDF] Preview breaks   (reference)   :', JSON.stringify(previewBreaks));
 
-      } else {
-        // ── FALLBACK: no preview breaks — measure in Puppeteer ───────────
-        console.log('[PDF] No preview breaks provided — falling back to Puppeteer measurement.');
-
-        const singlePageHtml = buildHtmlFromRendered(renderedHtml, {
-          isRTL,
-          pageBreaks:  [],
-          totalHeight: 99999,
-        });
-
-        const { breaks: puppeteerBreaks, totalHeight: puppeteerHeight, pageReport } =
-          await measureBreaks(singlePageHtml);
-
-        console.log('[PDF] Puppeteer Page Breaks:', JSON.stringify(puppeteerBreaks));
-        console.log('[PDF] Preview Page Breaks  :', JSON.stringify(previewBreaks));
-        console.log('[PDF] Match: N/A — no preview breaks to compare');
-
-        if (pageReport && pageReport.length > 0) {
-          console.log('[PDF] Page-break report:', JSON.stringify(pageReport, null, 2));
-        }
-
-        finalBreaks = puppeteerBreaks;
-        finalHeight = puppeteerHeight;
-
-        debugReport = {
-          source: 'puppeteer-fallback',
-          previewBreaks,
-          pdfBreaks: finalBreaks,
-          match: false,
-          pageReport,
-        };
+      if (pageReport && pageReport.length > 0) {
+        console.log('[PDF] Page-break quality report:', JSON.stringify(pageReport, null, 2));
       }
 
+      finalBreaks = puppeteerBreaks;
+      finalHeight = puppeteerHeight;
+
+      debugReport = {
+        source: 'puppeteer-primary',
+        previewBreaks,
+        pdfBreaks: finalBreaks,
+        match: false,
+        pageReport,
+      };
+
+      // Pass 2 — build the sliced document using Puppeteer's own breaks
       html = buildHtmlFromRendered(renderedHtml, {
         isRTL,
         pageBreaks:  finalBreaks,

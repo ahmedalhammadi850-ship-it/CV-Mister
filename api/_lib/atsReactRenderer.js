@@ -388,31 +388,6 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   // which prevents an unwanted blank third page.
   const LAST_PAGE_SSR_BUFFER = 200;
 
-  // ── ROOT FIX: white-overlay clipping (mirrors LivePreview exactly) ──────────
-  //
-  // PROBLEM: The old approach used overflow:hidden at height=sliceHeight on
-  // the inner clip div.  This clips content at the EXACT break pixel boundary.
-  // Because Chromium on Linux (Puppeteer) renders fonts with different sub-pixel
-  // hinting than Chrome on Windows/macOS (the user's browser), the same line of
-  // text can be 1-5 px taller in Puppeteer.  overflow:hidden then clips the
-  // bottom portion of that line, making it invisible — "missing line" bug.
-  //
-  // FIX: Mirror exactly what LivePreview.jsx does:
-  //   • LivePreview does NOT use overflow:hidden to cut content at the break.
-  //     It uses position:absolute white overlay divs (z-index:5) to hide content
-  //     beyond the break point while leaving the content itself unclipped.
-  //   • The PDF now does the same: white overlay divs (z-index:20) replace
-  //     overflow:hidden on the inner content container.
-  //
-  // RESULT: Content near the break boundary is COVERED by white, not CUT.
-  // A line rendered 3 px taller by Puppeteer is hidden under the white overlay
-  // rather than sliced in half — matching the preview pixel-for-pixel.
-  //
-  // Each non-last .page-slice is always exactly 1122 px (A4 height) with
-  // overflow:hidden on the .page-slice itself (not the inner div).
-  // The .page-slice overflow:hidden acts as the hard A4-page boundary;
-  // the white overlays act as the visual break boundaries.
-
   const pageContainers = pageStarts.map((start, i) => {
     const isFirst = i === 0;
     const isLast  = i === pageStarts.length - 1;
@@ -423,85 +398,37 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     const sliceHeight = Math.max(1, Math.round(end - start));
 
     if (isFirst) {
-      if (isLast) {
-        // Single-page document: cap at A4 so Puppeteer never emits a blank second page.
-        const singleHeight = Math.min(sliceHeight, 1122);
-        return `<div class="page-slice last-slice" style="height:${singleHeight}px">
+      // Page 1 (single-page OR first of multi-page): template at translateY(0).
+      // For single-page documents cap at A4 height so Puppeteer never emits a
+      // second blank page.
+      const singleHeight = isLast ? Math.min(sliceHeight, 1122) : sliceHeight;
+      return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${singleHeight}px">
   <div class="template-wrap" style="transform:translateY(0px)">
     ${bodyHtml}
   </div>
-</div>`;
-      }
-
-      // First page of a multi-page document.
-      //
-      // Old approach:  height:${sliceHeight}px + overflow:hidden
-      //   → clips content at exactly sliceHeight; Puppeteer font differences
-      //     cause last-line content to be 1-5 px taller → line disappears.
-      //
-      // New approach:  height:1122px + overflow:hidden (on .page-slice)
-      //                + white bottom overlay starting at sliceHeight
-      //   → content near the break is COVERED not CUT; matches LivePreview.
-      //
-      // The white overlay mirrors LivePreview.jsx lines 843-853:
-      //   const contentEndInFrame = (end - clipStart) * scale;
-      //   const overlayH = (PAGE_H * scale) - contentEndInFrame;
-      //   → white from (end - 0) * scale to PAGE_H * scale
-      //   In PDF (scale=1): white from sliceHeight to 1122.
-      const botOverlayH = 1122 - sliceHeight;
-      return `<div class="page-slice" style="height:1122px">
-  <div class="template-wrap" style="transform:translateY(0px)">
-    ${bodyHtml}
-  </div>
-  <div style="position:absolute;top:${sliceHeight}px;left:0;width:794px;height:${botOverlayH}px;background:#fff;z-index:20"></div>
 </div>`;
     }
 
-    // ── Pages 2+ ─────────────────────────────────────────────────────────────
-    // Use Math.round(start) so content at exactly `start` maps to y=0 inside
-    // the inner container.  No backward shift (see MEMORY for why).
+    // Pages 2+: MARGIN px of white at top, then clipped content.
+    // For the last page, cap totalSliceHeight at A4 height (1122 px) so
+    // the SSR buffer never pushes the slice past one full page and causes
+    // Puppeteer to emit an unwanted blank extra page.
+    const rawTotalSliceHeight = sliceHeight + MARGIN;
+    const totalSliceHeight = Math.min(rawTotalSliceHeight, 1122);
+    const innerHeight = totalSliceHeight - MARGIN;
+
+    // Use Math.round(start) so content at exactly `start` maps to inner-clip
+    // y=0 (or within one sub-pixel).  getBoundingClientRect() returns the
+    // border box, so borders ARE included in `elTop`; the MARGIN white zone
+    // above provides visual breathing room.
     const translateY = Math.round(start);
 
-    if (isLast) {
-      // Last page 2+: keep overflow:hidden on inner div — LAST_PAGE_SSR_BUFFER
-      // (+200 px) already extends sliceHeight well past any font-metric drift,
-      // so overflow:hidden never clips real content here.
-      const rawTotalSliceHeight = sliceHeight + MARGIN;
-      const totalSliceHeight = Math.min(rawTotalSliceHeight, 1122);
-      const innerHeight = totalSliceHeight - MARGIN;
-      return `<div class="page-slice last-slice" style="height:${totalSliceHeight}px">
+    return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${totalSliceHeight}px">
   <div style="position:absolute;top:${MARGIN}px;left:0;width:794px;height:${innerHeight}px;overflow:hidden">
     <div style="position:absolute;top:0;left:0;width:794px;transform:translateY(-${translateY}px)">
       ${bodyHtml}
     </div>
   </div>
-</div>`;
-    }
-
-    // Non-last pages 2+.
-    //
-    // Old approach:  inner div height:${innerHeight}px + overflow:hidden
-    //   → same "missing last line" clip bug as page 1.
-    //
-    // New approach:  inner div has NO overflow:hidden (open-ended height)
-    //                outer .page-slice is always 1122px with overflow:hidden
-    //                Two white overlays replace the hard clip:
-    //                  top overlay  (0 → MARGIN):               hides prev-page bleed
-    //                  bottom overlay (MARGIN+sliceHeight → 1122): hides next-page bleed
-    //
-    // This exactly mirrors LivePreview.jsx:
-    //   top:    <div style={{height: MARGIN * scale, background: '#fff'}} />  (line 836-840)
-    //   bottom: <div style={{height: overlayH, bottom: 0, background: '#fff'}} /> (line 843-853)
-    const botOverlayY = MARGIN + sliceHeight;
-    const botOverlayH = 1122 - botOverlayY;
-    return `<div class="page-slice" style="height:1122px">
-  <div style="position:absolute;top:${MARGIN}px;left:0;width:794px">
-    <div style="position:absolute;top:0;left:0;width:794px;transform:translateY(-${translateY}px)">
-      ${bodyHtml}
-    </div>
-  </div>
-  <div style="position:absolute;top:0;left:0;width:794px;height:${MARGIN}px;background:#fff;z-index:20"></div>
-  <div style="position:absolute;top:${botOverlayY}px;left:0;width:794px;height:${botOverlayH}px;background:#fff;z-index:20"></div>
 </div>`;
   }).join('\n');
 
