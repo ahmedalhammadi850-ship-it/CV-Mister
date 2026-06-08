@@ -254,6 +254,10 @@ const BOTTOM_BLANK = 15;
 // The greedy-fill phase packs complete avoid-elements into any gap > this.
 // Must match MAX_BOTTOM_GAP in src/components/builder/LivePreview.jsx.
 const MAX_BOTTOM_GAP = 15;
+// MIN_PHANTOM_PAGE — minimum real content on the last page before we consider
+// the break a phantom caused by CSS bottom-padding and remove it.
+// Must match MIN_PHANTOM_PAGE in src/components/builder/LivePreview.jsx.
+const MIN_PHANTOM_PAGE = 50;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -269,7 +273,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], pageReport: [], totalHeight: PAGE_H };
@@ -285,8 +289,18 @@ export async function measureBreaks(html) {
       let pageStart = 0;
       let pageIndex = 1;
 
-      while (pageStart + PAGE_H < totalHeight) {
-        const rawBreak = pageStart + PAGE_H - BOTTOM_BLANK;
+      while (true) {
+        // Pages 2+ have MARGIN px of white at top; their usable content height
+        // is PAGE_H − MARGIN (1074 px).  Using PAGE_H for all pages creates a
+        // 33 px dead zone (1107→1074) where content is clipped in both preview
+        // and PDF.  Mirror of the same fix in LivePreview.jsx computeSmartBreaks.
+        const isFirstPage   = pageStart === 0;
+        const pageTopMargin = isFirstPage ? 0 : MARGIN;
+        const pageVisibleH  = PAGE_H - pageTopMargin;   // 1122 for p1, 1074 for p2+
+
+        if (pageStart + pageVisibleH >= totalHeight) break;
+
+        const rawBreak = pageStart + pageVisibleH - BOTTOM_BLANK;
         let bestBreak = rawBreak;
 
         // ── Phase 1: Avoid splitting break-inside:avoid elements ─────────────
@@ -421,8 +435,16 @@ export async function measureBreaks(html) {
         pageIndex++;
       }
 
+      // Phantom-page guard — remove trailing breaks where the last page has
+      // fewer than MIN_PHANTOM_PAGE px of content (likely just CSS bottom padding).
+      // Must match the same guard in LivePreview.jsx computeSmartBreaks.
+      while (breaks.length > 0 && totalHeight - breaks[breaks.length - 1] < MIN_PHANTOM_PAGE) {
+        breaks.pop();
+        pageReport.pop();
+      }
+
       return { breaks, pageReport, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE);
 
     // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
     const fontStatus = await page.evaluate(() => {

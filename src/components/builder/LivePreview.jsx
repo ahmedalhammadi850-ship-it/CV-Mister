@@ -69,7 +69,9 @@ const MAX_LINE_H = 35;  // px — covers one line at up to ~14pt / line-height 1
 // Minimum pixels of real content on the last page.
 // If the final page would have less content than this, it is a "phantom page"
 // caused by template bottom padding and the break is discarded.
-const MIN_PHANTOM_PAGE = 120;
+// Set to 50 px — enough to include even short sections (2-3 lines) while
+// still filtering out pure CSS bottom-padding artefacts (typically ≤ 30 px).
+const MIN_PHANTOM_PAGE = 50;
 
 // Maximum allowed blank space (px) at the bottom of any page.
 // After pull-backs, the greedy-fill phase packs complete avoid-elements into the
@@ -83,8 +85,22 @@ function computeSmartBreaks(container, totalHeight) {
   const breaks = [];
   let pageStart = 0;
 
-  while (pageStart + PAGE_H < totalHeight) {
-    const rawBreak = pageStart + PAGE_H - BOTTOM_BLANK;
+  while (true) {
+    // Pages 2+ have MARGIN px of white at the top; their usable content height
+    // is PAGE_H − MARGIN (1074 px) instead of PAGE_H (1122 px).  Page 1 starts
+    // at y=0 with no top margin, so its full PAGE_H is available.
+    // Using PAGE_H for pages 2+ creates a 33 px "dead zone" (1107→1074) where
+    // content is placed by the algorithm but clipped by the page frame and
+    // invisible in both preview and PDF.
+    const isFirstPage   = pageStart === 0;
+    const pageTopMargin = isFirstPage ? 0 : MARGIN;
+    const pageVisibleH  = PAGE_H - pageTopMargin;   // 1122 for p1, 1074 for p2+
+
+    // Stop once remaining content fits on this page
+    if (pageStart + pageVisibleH >= totalHeight) break;
+
+    // rawBreak = furthest allowed break; BOTTOM_BLANK px stay empty at page bottom.
+    const rawBreak = pageStart + pageVisibleH - BOTTOM_BLANK;
     let bestBreak = rawBreak;
 
     // ── Phase 1: Avoid splitting break-inside:avoid elements ─────────────────
@@ -241,8 +257,11 @@ function findLineBottomBefore(el, y, containerTop) {
 // Tries Phase 1 (pull to avoid-element top) then Phase 4 (Range line snap)
 // to find a safe break position near `breakAt`.  Returns the adjusted Y.
 function fixSplitBreak(container, breakAt, pageStart) {
-  const containerTop = container.getBoundingClientRect().top;
-  const rawBreak     = pageStart + PAGE_H - BOTTOM_BLANK;
+  const containerTop  = container.getBoundingClientRect().top;
+  const isFirstPage   = pageStart === 0;
+  const pageTopMargin = isFirstPage ? 0 : MARGIN;
+  const pageVisibleH  = PAGE_H - pageTopMargin;
+  const rawBreak      = pageStart + pageVisibleH - BOTTOM_BLANK;
 
   // Phase 1 — pull to the straddling avoid-element's top
   const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
@@ -311,9 +330,12 @@ function analyzeBreakQuality(container, breaks) {
   });
 
   return breaks.map((breakAt, i) => {
-    const pageStart = i === 0 ? 0 : breaks[i - 1];
-    const rawBreak  = pageStart + PAGE_H - BOTTOM_BLANK;
-    const gap       = Math.max(0, Math.round(rawBreak - breakAt));
+    const pageStart     = i === 0 ? 0 : breaks[i - 1];
+    const isFirstPage   = i === 0;
+    const pageTopMargin = isFirstPage ? 0 : MARGIN;
+    const pageVisibleH  = PAGE_H - pageTopMargin;
+    const rawBreak      = pageStart + pageVisibleH - BOTTOM_BLANK;
+    const gap           = Math.max(0, Math.round(rawBreak - breakAt));
 
     // A 'split' occurs when a protected element straddles the break by > 3 px on each side.
     let isSplit = false;

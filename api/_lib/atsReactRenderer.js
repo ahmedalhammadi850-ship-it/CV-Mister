@@ -414,9 +414,14 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     // the SSR buffer never pushes the slice past one full page and causes
     // Puppeteer to emit an unwanted blank extra page.
     const rawTotalSliceHeight = sliceHeight + MARGIN;
-    const totalSliceHeight = isLast
-      ? Math.min(rawTotalSliceHeight, 1122)
-      : rawTotalSliceHeight;
+    // Cap at A4 height (1122 px) for ALL pages — not just the last.
+    // The primary path (preview breaks) now guarantees sliceHeight ≤ 1059 px
+    // for non-last pages (PAGE_H − MARGIN − BOTTOM_BLANK), so totalSliceHeight
+    // ≤ 1107 px and the cap is effectively a no-op for non-last pages.
+    // For the fallback Puppeteer-measured path the cap is a hard safety net
+    // that prevents a non-last slice from overflowing A4 and spilling into an
+    // unwanted extra blank PDF page.
+    const totalSliceHeight = Math.min(rawTotalSliceHeight, 1122);
     // Recompute the inner clip height after the cap is applied.
     // NOTE: we do NOT subtract a PDF_BOTTOM_MARGIN here — that would clip
     // content.  The 20 px white bottom space is achieved naturally because
