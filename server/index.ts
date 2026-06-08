@@ -140,6 +140,9 @@ async function main() {
   // ── Puppeteer PDF (ATS templates) ──
   route("post", "/api/pdf/ats", "pdf/ats");
 
+  // ── Pagination verification (dev only) ──
+  route("get", "/api/verify-pagination", "verify-pagination");
+
   // ── Admin Settings (n8n) ──
   route("get",   "/api/admin/settings", "admin/settings");
   route("patch", "/api/admin/settings", "admin/settings");
