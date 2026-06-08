@@ -369,6 +369,16 @@ h1, h2, h3, h4, h5, h6 {
   break-inside: avoid;
   page-break-inside: avoid;
 }
+/* Prevent paragraph and list-item text from being cut horizontally.
+ * break-inside:avoid is respected by the LivePreview algorithm (getComputedStyle)
+ * so adding it here makes <p> and <li> blocks appear in avoidEls automatically,
+ * causing the algorithm to pull short paragraphs to the next page instead of
+ * slicing them. Long paragraphs (> MAX_PULL_AVOID) fall back to Phase 4
+ * Range-API line-boundary snapping which snaps between lines, not characters. */
+p, li, address {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
 .cv-page-separator {
   position: absolute;
   left: 0;

@@ -317,6 +317,13 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     h1, h2, h3, h4, h5, h6 {
       break-inside: avoid;
       page-break-inside: avoid;
+    }
+    /* Prevent paragraph and list-item text from being cut horizontally.
+     * Mirrors the rule in src/index.css so the Puppeteer print engine
+     * applies the same protection as the browser preview algorithm. */
+    p, li, address {
+      break-inside: avoid;
+      page-break-inside: avoid;
     }`;
 
   // ── Single-page ────────────────────────────────────────────────────────────

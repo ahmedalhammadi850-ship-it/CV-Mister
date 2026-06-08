@@ -66,6 +66,10 @@ const MAX_PULL_AVOID = 200;
 // Must match MAX_PULL in api/_lib/puppeteerPdf.js.
 const MAX_PULL = 200;
 const MAX_LINE_H = 35;  // px — covers one line at up to ~14pt / line-height 1.8
+// Minimum pixels of real content on the last page.
+// If the final page would have less content than this, it is a "phantom page"
+// caused by template bottom padding and the break is discarded.
+const MIN_PHANTOM_PAGE = 120;
 
 // Maximum allowed blank space (px) at the bottom of any page.
 // After pull-backs, the greedy-fill phase packs complete avoid-elements into the
@@ -167,11 +171,109 @@ function computeSmartBreaks(container, totalHeight) {
       }
     }
 
+    // ── Phase 4: Range API line-boundary snap ────────────────────────────────
+    // Safety net: if bestBreak is STILL inside a large text element (paragraph,
+    // list item, table cell) after Phases 1-3, use Range.getClientRects() to
+    // find the last complete text line before bestBreak.
+    // This eliminates the "half-character" horizontal split that appears when
+    // the element is too tall to pull back (> MAX_PULL_AVOID) and rawBreak
+    // lands mid-line inside a paragraph.
+    {
+      let ph4El = null, ph4ElH = Infinity;
+      for (const el of container.querySelectorAll('p, li, td, th, address')) {
+        const r   = el.getBoundingClientRect();
+        const eT  = r.top    - containerTop;
+        const eB  = r.bottom - containerTop;
+        if (eT >= bestBreak || eB <= bestBreak) continue; // doesn't straddle
+        if (eT >= bestBreak - 3) continue;               // already at element top
+        if (r.height < ph4ElH) { ph4El = el; ph4ElH = r.height; }
+      }
+      if (ph4El) {
+        const lb = findLineBottomBefore(ph4El, bestBreak, containerTop);
+        if (lb !== null) bestBreak = lb;
+      }
+    }
+
     breaks.push(bestBreak);
     pageStart = bestBreak;
   }
 
+  // ── Phantom-page guard ────────────────────────────────────────────────────
+  // A template's bottom padding can push scrollHeight slightly above PAGE_H
+  // even for short CVs, producing a near-empty second page.  If the last page
+  // has fewer real content pixels than MIN_PHANTOM_PAGE, discard its break.
+  while (breaks.length > 0 && totalHeight - breaks[breaks.length - 1] < MIN_PHANTOM_PAGE) {
+    breaks.pop();
+  }
+
   return breaks;
+}
+
+// ── Range API helper — used by Phase 4 and fixSplitBreak ─────────────────────
+// Returns the bottom Y (relative to containerTop) of the last complete text
+// line within `el` that fits entirely before `y`.
+// Uses Range.getClientRects() which returns one rect per inline text-fragment,
+// naturally aligned to line boundaries. Returns null if nothing was found.
+function findLineBottomBefore(el, y, containerTop) {
+  try {
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const rects = Array.from(range.getClientRects());
+    if (rects.length === 0) return null;
+    let lastSafe = null;
+    for (const rect of rects) {
+      const rBot = rect.bottom - containerTop;
+      if (rBot <= y - 1) lastSafe = rBot;  // entire line fits before break
+    }
+    return lastSafe;
+  } catch {
+    return null;
+  }
+}
+
+// ── Fix a single split break ──────────────────────────────────────────────────
+// Tries Phase 1 (pull to avoid-element top) then Phase 4 (Range line snap)
+// to find a safe break position near `breakAt`.  Returns the adjusted Y.
+function fixSplitBreak(container, breakAt, pageStart) {
+  const containerTop = container.getBoundingClientRect().top;
+  const rawBreak     = pageStart + PAGE_H - BOTTOM_BLANK;
+
+  // Phase 1 — pull to the straddling avoid-element's top
+  const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
+    const cs = getComputedStyle(el);
+    if (cs.breakInside === 'avoid' || cs.pageBreakInside === 'avoid') return true;
+    const d = cs.display;
+    if (d === 'none' || d === 'contents' || d === 'table' || d === 'table-row') return false;
+    const h = el.getBoundingClientRect().height;
+    return h > 0 && h <= MAX_LINE_H;
+  });
+
+  for (const el of avoidEls) {
+    const r  = el.getBoundingClientRect();
+    const eT = r.top    - containerTop;
+    const eB = r.bottom - containerTop;
+    if (eT < breakAt - 3 && eB > breakAt + 3) {
+      if (eT > pageStart + MIN_PAGE_CONTENT && (rawBreak - eT) <= MAX_PULL_AVOID) {
+        return eT;
+      }
+    }
+  }
+
+  // Phase 4 — Range API line-boundary snap
+  let bestEl = null, bestH = Infinity;
+  for (const el of container.querySelectorAll('p, li, td, th, address')) {
+    const r  = el.getBoundingClientRect();
+    const eT = r.top    - containerTop;
+    const eB = r.bottom - containerTop;
+    if (eT >= breakAt || eB <= breakAt) continue;
+    if (r.height < bestH) { bestEl = el; bestH = r.height; }
+  }
+  if (bestEl) {
+    const lb = findLineBottomBefore(bestEl, breakAt, containerTop);
+    if (lb !== null) return lb;
+  }
+
+  return breakAt; // no improvement found
 }
 
 // ── Page-break quality analysis ───────────────────────────────────────────────
@@ -396,6 +498,29 @@ const LivePreview = ({ breakDataRef }) => {
     return () => clearTimeout(t);
   }, [activeBreaks]);
 
+  /* ── Fix All Splits — adjusts only the broken breaks, keeps manual ones ── */
+  const handleFixAllSplits = useCallback(() => {
+    const el = contentRef.current;
+    if (!el || activeBreaks.length === 0) return;
+
+    const newBreaks = [...activeBreaks];
+    let changed = false;
+
+    breakQuality.forEach((q, i) => {
+      if (q.status !== 'split') return;
+      const pageStart = i === 0 ? 0 : activeBreaks[i - 1];
+      const fixed = fixSplitBreak(el, q.breakAt, pageStart);
+      if (Math.abs(fixed - q.breakAt) > 2) {
+        newBreaks[i] = fixed;
+        changed = true;
+      }
+    });
+
+    // If fixSplitBreak couldn't improve anything, fall back to re-running
+    // the auto algorithm which now includes Phase 4 Range snapping.
+    setManualBreaks(changed ? newBreaks : null);
+  }, [activeBreaks, breakQuality]);
+
   /* ── template renderer ── */
   const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder, sectionNames };
   const renderTemplate = () => {
@@ -516,10 +641,26 @@ const LivePreview = ({ breakDataRef }) => {
             : 'bg-emerald-500';
 
           return (
-            <div className={`px-3 py-1.5 border rounded-full text-xs font-medium shadow-sm flex items-center gap-1.5 ${cls}`}>
-              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dotCls}`} />
-              <span>{label}</span>
-            </div>
+            <>
+              <div className={`px-3 py-1.5 border rounded-full text-xs font-medium shadow-sm flex items-center gap-1.5 ${cls}`}>
+                <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dotCls}`} />
+                <span>{label}</span>
+              </div>
+
+              {/* Fix All Splits button — only visible when red splits are detected */}
+              {overallStatus === 'split' && (
+                <button
+                  onClick={handleFixAllSplits}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white border border-red-700 rounded-full text-xs font-medium shadow-sm flex items-center gap-1.5 transition-colors"
+                  title={isRTL ? 'ضبط تلقائي لجميع نقاط الانقسام' : 'Automatically snap all split breaks to the nearest line boundary'}
+                >
+                  <svg className="w-3 h-3 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span>{isRTL ? 'إصلاح كافة الانقسامات' : 'Fix All Splits'}</span>
+                </button>
+              )}
+            </>
           );
         })()}
       </div>
