@@ -237,17 +237,20 @@ const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
 const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
 // Heading orphan threshold — must match HEADING_ORPHAN_PX in LivePreview.jsx.
 const HEADING_ORPHAN_PX = 120;
-// Max px to pull a break back to avoid splitting a break-inside:avoid element
-// OR to handle a heading orphan. Measured from rawBreak so the two adjustments
-// cannot compound. Must match MAX_PULL in LivePreview.jsx.
+// Max px to pull a break back when an AVOID-INSIDE element spans the break.
+// Equal to MAX_BOTTOM_GAP — guarantees the pull itself leaves ≤ 15px blank.
+// Elements requiring a larger pull are split at rawBreak instead (gap = 0).
+// Must match MAX_PULL_AVOID in LivePreview.jsx.
+const MAX_PULL_AVOID = 15;
+// Max px to pull a break back for a heading-orphan fix.
+// Headings are small; the greedy-fill phase recovers the resulting gap.
+// Must match MAX_PULL in LivePreview.jsx.
 const MAX_PULL = 100;
-// BOTTOM_BLANK — blank px reserved at the bottom of each page for the raw break
-// calculation. Must match BOTTOM_BLANK in src/components/builder/LivePreview.jsx.
-// Set to MAX_BOTTOM_GAP so the raw break already leaves ≤ MAX_BOTTOM_GAP blank.
+// BOTTOM_BLANK — blank px reserved at the bottom of each page for the raw break.
+// Must match BOTTOM_BLANK in src/components/builder/LivePreview.jsx.
 const BOTTOM_BLANK = 15;
-// MAX_BOTTOM_GAP — maximum allowed blank space (px) at the bottom of any PDF page.
-// After pull-backs (avoid-split + heading-orphan), the greedy-fill phase tries
-// to pack complete avoid-elements into the remaining space until the gap is ≤ this.
+// MAX_BOTTOM_GAP — maximum allowed blank px at the bottom of any PDF page.
+// The greedy-fill phase packs complete avoid-elements into any gap > this.
 // Must match MAX_BOTTOM_GAP in src/components/builder/LivePreview.jsx.
 const MAX_BOTTOM_GAP = 15;
 
@@ -265,7 +268,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], pageReport: [], totalHeight: PAGE_H };
@@ -286,8 +289,9 @@ export async function measureBreaks(html) {
         let bestBreak = rawBreak;
 
         // ── Phase 1: Avoid splitting break-inside:avoid elements ─────────────
-        // Pull the break back to the element's top when it falls inside one,
-        // but only if pulling back stays within MAX_PULL of the raw break point.
+        // Pull the break back ONLY if the pull ≤ MAX_PULL_AVOID (= MAX_BOTTOM_GAP).
+        // This guarantees the pull itself leaves ≤ 15px blank at the page bottom.
+        // Larger elements are split at rawBreak (gap = 0, no blank wasted).
         const avoidEls = Array.from(container.querySelectorAll("*")).filter(el => {
           const s = getComputedStyle(el);
           return s.breakInside === "avoid" || s.pageBreakInside === "avoid";
@@ -299,7 +303,7 @@ export async function measureBreaks(html) {
           const elBot = rect.bottom - containerTop;
 
           if (elTop < bestBreak && elBot > bestBreak) {
-            if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL) {
+            if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL_AVOID) {
               bestBreak = elTop;
             }
           }
@@ -368,7 +372,7 @@ export async function measureBreaks(html) {
       }
 
       return { breaks, pageReport, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP);
 
     // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
     const fontStatus = await page.evaluate(() => {

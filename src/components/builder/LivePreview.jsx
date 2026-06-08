@@ -53,9 +53,17 @@ const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag 
 // the heading so it travels with its content to the next page.
 const HEADING_ORPHAN_PX = 120;
 
-// Max pixels we'll pull a break back to avoid splitting a break-inside:avoid element
-// OR to handle a heading orphan. Measured from the raw break point, not bestBreak,
-// so the two adjustments cannot compound into a large blank area.
+// Max pixels to pull a break back when an AVOID-INSIDE element spans the break.
+// Keeping this equal to MAX_BOTTOM_GAP ensures the pull-back itself never leaves
+// more than MAX_BOTTOM_GAP blank px at the page bottom.
+// If the element requires a larger pull, we allow the split at rawBreak (gap = 0).
+// Must match MAX_PULL_AVOID in api/_lib/puppeteerPdf.js.
+const MAX_PULL_AVOID = 15;
+
+// Max pixels to pull a break back for a heading-orphan fix.
+// Headings are small, so a 100px budget is safe; the greedy-fill phase then
+// refills the resulting gap to ≤ MAX_BOTTOM_GAP.
+// Must match MAX_PULL in api/_lib/puppeteerPdf.js.
 const MAX_PULL = 100;
 
 // Maximum allowed blank space (px) at the bottom of any page.
@@ -75,8 +83,9 @@ function computeSmartBreaks(container, totalHeight) {
     let bestBreak = rawBreak;
 
     // ── Phase 1: Avoid splitting break-inside:avoid elements ─────────────────
-    // Pull the break back to the element's top when it falls inside one,
-    // but only if pulling back stays within MAX_PULL of the RAW break point.
+    // Pull the break back to the element's top ONLY if the pull ≤ MAX_PULL_AVOID.
+    // This guarantees the pull-back itself leaves ≤ MAX_BOTTOM_GAP blank px.
+    // Elements requiring a larger pull are split at rawBreak instead (gap = 0).
     const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
       const s = getComputedStyle(el);
       return s.breakInside === 'avoid' || s.pageBreakInside === 'avoid';
@@ -88,7 +97,7 @@ function computeSmartBreaks(container, totalHeight) {
       const elBot = rect.bottom - containerTop;
 
       if (elTop < bestBreak && elBot > bestBreak) {
-        if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL) {
+        if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL_AVOID) {
           bestBreak = elTop;
         }
       }
