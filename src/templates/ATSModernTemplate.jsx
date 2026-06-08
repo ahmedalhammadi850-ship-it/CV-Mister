@@ -143,6 +143,7 @@ const ATSModernTemplate = ({
       gap: '5pt',
       paddingRight: '8pt',
       marginBottom: '3pt',
+      ...BREAK_ITEM,
     },
     skillDot: {
       width: '5px',

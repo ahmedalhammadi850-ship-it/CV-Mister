@@ -139,6 +139,7 @@ const ATSBoldTemplate = ({
       alignItems: 'center',
       gap: '5pt',
       minWidth: '180pt',
+      ...BREAK_ITEM,
     },
     bullet: {
       color: accent,
