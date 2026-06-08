@@ -124,11 +124,15 @@ function computeSmartBreaks(container, totalHeight) {
     // ── Phase 3: Greedy forward fill (minimize bottom blank space) ────────────
     // After pull-backs, the gap = rawBreak - bestBreak may be > MAX_BOTTOM_GAP.
     // Greedily include complete avoid-elements that start at/after bestBreak
-    // and end at/before rawBreak to reduce the gap to ≤ MAX_BOTTOM_GAP.
+    // and fit entirely within the FULL page height (pageStart + PAGE_H).
     //
-    // Example: a section heading orphan check moved the break 80px backward.
-    // The first few bullet-point lines of that section fit in those 80px →
-    // we include them, leaving only a tiny gap instead of 80px of blank space.
+    // Using pageStart + PAGE_H instead of rawBreak as the upper bound is
+    // critical: if a row's bottom lands just a few px past rawBreak (but still
+    // within the page), the old condition excluded it — leaving a large gap AND
+    // causing the row to ghost at the top of the next page via the 8px guard.
+    // Allowing up to the full page height ensures such rows are included on the
+    // current page, keeping the bottom gap ≤ MAX_BOTTOM_GAP.
+    const pageEnd = pageStart + PAGE_H;
     if (rawBreak - bestBreak > MAX_BOTTOM_GAP) {
       const avoidPositions = avoidEls
         .map(el => {
@@ -137,7 +141,7 @@ function computeSmartBreaks(container, totalHeight) {
         })
         .filter(({ top, bot }) =>
           top >= bestBreak - 2 &&   // starts at or after current break
-          bot  <= rawBreak     &&   // fits entirely before raw break
+          bot  <= pageEnd      &&   // fits entirely within full page height
           bot  >  bestBreak         // actually adds content
         )
         .sort((a, b) => a.top - b.top);
