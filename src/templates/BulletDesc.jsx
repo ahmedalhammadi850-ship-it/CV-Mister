@@ -18,7 +18,7 @@ export default function BulletDesc({ text, style, bold, italic }) {
 
   if (lines.length <= 1) {
     return (
-      <div style={style}>
+      <div style={{ ...style, breakInside: 'avoid', pageBreakInside: 'avoid' }}>
         <span style={spanStyle}>{text}</span>
       </div>
     );

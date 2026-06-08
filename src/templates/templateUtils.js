@@ -92,7 +92,14 @@ export function buildContact(info, visible, isRTL) {
 
 /* ── Print break helpers (use as inline styles) ── */
 export const BREAK_ITEM    = { breakInside: 'avoid', pageBreakInside: 'avoid' };
-export const BREAK_HEADING = { breakAfter:  'avoid', pageBreakAfter:  'avoid' };
+// BREAK_HEADING: prevent the heading from being orphaned (break-after:avoid)
+// AND prevent the heading itself from being split horizontally (break-inside:avoid).
+// Both are needed: break-after keeps heading with its content; break-inside
+// prevents the heading's flex row (text + decorative lines) from being sliced.
+export const BREAK_HEADING = {
+  breakAfter:   'avoid', pageBreakAfter:  'avoid',
+  breakInside:  'avoid', pageBreakInside: 'avoid',
+};
 
 /* ── Text-align helper: merges a stored align value into a style object ── */
 export function ta(style, align) {

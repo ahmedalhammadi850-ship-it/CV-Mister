@@ -86,9 +86,23 @@ function computeSmartBreaks(container, totalHeight) {
     // Pull the break back to the element's top ONLY if the pull ≤ MAX_PULL_AVOID.
     // This guarantees the pull-back itself leaves ≤ MAX_BOTTOM_GAP blank px.
     // Elements requiring a larger pull are split at rawBreak instead (gap = 0).
+    //
+    // avoidEls includes TWO categories:
+    //  1. Elements explicitly marked break-inside:avoid (CSS or inline style).
+    //  2. "Single-line" elements ≤ MAX_LINE_H px tall — this auto-protects role,
+    //     company, meta, date divs (inline-styled, no CSS class) so the algorithm
+    //     can always snap to a line boundary even inside large items it cannot pull.
+    const MAX_LINE_H = 35; // px — covers one line at up to ~14pt / line-height 1.8
     const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
       const s = getComputedStyle(el);
-      return s.breakInside === 'avoid' || s.pageBreakInside === 'avoid';
+      if (s.breakInside === 'avoid' || s.pageBreakInside === 'avoid') return true;
+      // Auto-protect single-line block/inline-block elements so that even when a
+      // large container cannot be pulled back, the break lands between lines not
+      // through a character (prevents horizontal text-splitting "ghosting").
+      const d = s.display;
+      if (d === 'none' || d === 'contents' || d === 'table' || d === 'table-row') return false;
+      const h = el.getBoundingClientRect().height;
+      return h > 0 && h <= MAX_LINE_H;
     });
 
     for (const el of avoidEls) {

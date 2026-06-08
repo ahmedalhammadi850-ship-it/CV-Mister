@@ -347,8 +347,11 @@
   page-break-inside: avoid;
 }
 .cv-heading {
+  /* Keep heading with its content (no orphan) AND prevent heading from being split */
   break-after: avoid;
   page-break-after: avoid;
+  break-inside: avoid;
+  page-break-inside: avoid;
 }
 .cv-item {
   break-inside: avoid;
@@ -356,6 +359,13 @@
 }
 /* Prevent individual bullet-point lines from being orphaned on a new page */
 .cv-item li, .cv-section li {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+/* Prevent heading elements (h1-h6) from being split horizontally.
+ * Templates render job titles as <h3>, section labels as <h2>, etc.
+ * Without this rule a large item can be split mid-heading. */
+h1, h2, h3, h4, h5, h6 {
   break-inside: avoid;
   page-break-inside: avoid;
 }
