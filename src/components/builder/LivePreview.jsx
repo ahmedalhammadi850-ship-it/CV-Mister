@@ -65,6 +65,7 @@ const MAX_PULL_AVOID = 200;
 // even when Phase 1 already consumed most of the budget pulling to an item top.
 // Must match MAX_PULL in api/_lib/puppeteerPdf.js.
 const MAX_PULL = 200;
+const MAX_LINE_H = 35;  // px — covers one line at up to ~14pt / line-height 1.8
 
 // Maximum allowed blank space (px) at the bottom of any page.
 // After pull-backs, the greedy-fill phase packs complete avoid-elements into the
@@ -92,7 +93,6 @@ function computeSmartBreaks(container, totalHeight) {
     //  2. "Single-line" elements ≤ MAX_LINE_H px tall — this auto-protects role,
     //     company, meta, date divs (inline-styled, no CSS class) so the algorithm
     //     can always snap to a line boundary even inside large items it cannot pull.
-    const MAX_LINE_H = 35; // px — covers one line at up to ~14pt / line-height 1.8
     const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
       const s = getComputedStyle(el);
       if (s.breakInside === 'avoid' || s.pageBreakInside === 'avoid') return true;
@@ -174,8 +174,49 @@ function computeSmartBreaks(container, totalHeight) {
   return breaks;
 }
 
+// ── Page-break quality analysis ───────────────────────────────────────────────
+// Runs after breaks are computed. For each break:
+//   'clean' — gap ≤ QUALITY_GAP_WARN and no avoid-element is being split
+//   'gap'   — larger blank space at page bottom (section/heading pulled forward)
+//   'split' — a break-inside:avoid element straddles the break point
+//
+// Uses the same avoidEls definition as computeSmartBreaks (must stay in sync).
+const QUALITY_GAP_WARN = 60; // px — gap larger than this shows an amber warning
+
+function analyzeBreakQuality(container, breaks) {
+  if (!container || breaks.length === 0) return [];
+  const containerTop = container.getBoundingClientRect().top;
+
+  const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
+    const cs = getComputedStyle(el);
+    if (cs.breakInside === 'avoid' || cs.pageBreakInside === 'avoid') return true;
+    const d = cs.display;
+    if (d === 'none' || d === 'contents' || d === 'table' || d === 'table-row') return false;
+    const h = el.getBoundingClientRect().height;
+    return h > 0 && h <= MAX_LINE_H;
+  });
+
+  return breaks.map((breakAt, i) => {
+    const pageStart = i === 0 ? 0 : breaks[i - 1];
+    const rawBreak  = pageStart + PAGE_H - BOTTOM_BLANK;
+    const gap       = Math.max(0, Math.round(rawBreak - breakAt));
+
+    // A 'split' occurs when a protected element straddles the break by > 3 px on each side.
+    let isSplit = false;
+    for (const el of avoidEls) {
+      const r  = el.getBoundingClientRect();
+      const eT = r.top    - containerTop;
+      const eB = r.bottom - containerTop;
+      if (eT < breakAt - 3 && eB > breakAt + 3) { isSplit = true; break; }
+    }
+
+    const status = isSplit ? 'split' : gap > QUALITY_GAP_WARN ? 'gap' : 'clean';
+    return { breakAt, gap, isSplit, status };
+  });
+}
+
 /* ── Draggable page-break handle ── */
-const DragHandle = ({ breakIndex, breakY, pageStart, nextPageEnd, scale, isRTL, onDrag, onReset }) => {
+const DragHandle = ({ breakIndex, breakY, pageStart, nextPageEnd, scale, isRTL, onDrag, onReset, qualityStatus }) => {
   const dragging = useRef(false);
   const startY   = useRef(0);
   const startBreak = useRef(0);
@@ -233,6 +274,19 @@ const DragHandle = ({ breakIndex, breakY, pageStart, nextPageEnd, scale, isRTL, 
         </svg>
         <span>{isRTL ? `صفحة ${breakIndex + 2}` : `Page ${breakIndex + 2}`}</span>
 
+        {/* Quality dot — green/amber/red based on break analysis */}
+        {qualityStatus && (() => {
+          const dotCls = qualityStatus === 'clean'
+            ? 'bg-emerald-400'
+            : qualityStatus === 'gap'
+            ? 'bg-amber-300'
+            : 'bg-red-400 animate-pulse';
+          const dotTitle = isRTL
+            ? (qualityStatus === 'split' ? 'انقسام في المحتوى' : qualityStatus === 'gap' ? 'مسافة فارغة' : 'فاصل نظيف')
+            : (qualityStatus === 'split' ? 'Content split here' : qualityStatus === 'gap' ? 'Empty gap at bottom' : 'Clean break');
+          return <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dotCls}`} title={dotTitle} />;
+        })()}
+
         {/* reset button */}
         <button
           onMouseDown={(e) => e.stopPropagation()}
@@ -263,6 +317,7 @@ const LivePreview = ({ breakDataRef }) => {
   const [autoBreaks, setAutoBreaks]     = useState([]);   // computed smart breaks
   const [manualBreaks, setManualBreaks] = useState(null); // null = use auto
   const [totalHeight, setTotalHeight]   = useState(PAGE_H);
+  const [breakQuality, setBreakQuality] = useState([]);   // per-break quality info
 
   const activeBreaks = manualBreaks ?? autoBreaks;
 
@@ -331,6 +386,15 @@ const LivePreview = ({ breakDataRef }) => {
   }, [autoBreaks]);
 
   const handleResetAll = () => setManualBreaks(null);
+
+  /* ── quality analysis (runs whenever active breaks change, incl. manual drags) ── */
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el || activeBreaks.length === 0) { setBreakQuality([]); return; }
+    // Small delay so the off-screen layout is fully settled after a drag
+    const t = setTimeout(() => setBreakQuality(analyzeBreakQuality(el, activeBreaks)), 120);
+    return () => clearTimeout(t);
+  }, [activeBreaks]);
 
   /* ── template renderer ── */
   const props = { data: cvData, theme, isRTL, visibleSections, visiblePersonalFields, sectionOrder, sectionNames };
@@ -420,6 +484,44 @@ const LivePreview = ({ breakDataRef }) => {
             {isRTL ? 'إعادة الضبط التلقائي' : 'Reset to auto'}
           </button>
         )}
+
+        {/* ── Page-break quality summary badge ── */}
+        {activeBreaks.length > 0 && breakQuality.length === activeBreaks.length && (() => {
+          const splits = breakQuality.filter(q => q.status === 'split').length;
+          const gaps   = breakQuality.filter(q => q.status === 'gap').length;
+          const overallStatus = splits > 0 ? 'split' : gaps > 0 ? 'gap' : 'clean';
+
+          const label = isRTL
+            ? (overallStatus === 'split'
+                ? `${splits} انقسام في المحتوى`
+                : overallStatus === 'gap'
+                ? `${gaps} مسافة فارغة`
+                : 'فواصل الصفحات نظيفة')
+            : (overallStatus === 'split'
+                ? `${splits} content split${splits > 1 ? 's' : ''}`
+                : overallStatus === 'gap'
+                ? `${gaps} empty gap${gaps > 1 ? 's' : ''}`
+                : 'All page breaks clean');
+
+          const cls = overallStatus === 'split'
+            ? 'bg-red-50 border-red-200 text-red-700'
+            : overallStatus === 'gap'
+            ? 'bg-amber-50 border-amber-200 text-amber-700'
+            : 'bg-emerald-50 border-emerald-200 text-emerald-700';
+
+          const dotCls = overallStatus === 'split'
+            ? 'bg-red-500'
+            : overallStatus === 'gap'
+            ? 'bg-amber-400'
+            : 'bg-emerald-500';
+
+          return (
+            <div className={`px-3 py-1.5 border rounded-full text-xs font-medium shadow-sm flex items-center gap-1.5 ${cls}`}>
+              <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dotCls}`} />
+              <span>{label}</span>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Hidden off-screen CV — measurement only */}
@@ -455,6 +557,7 @@ const LivePreview = ({ breakDataRef }) => {
                 isRTL={isRTL}
                 onDrag={handleDrag}
                 onReset={handleReset}
+                qualityStatus={breakQuality[pageIndex - 1]?.status}
               />
             )}
 
@@ -499,6 +602,39 @@ const LivePreview = ({ breakDataRef }) => {
                     position: 'absolute', bottom: 0, left: 0, right: 0,
                     height: overlayH, background: '#fff', zIndex: 5,
                   }} />
+                );
+              })()}
+
+              {/* ── Quality strip — 4px colored line at the break point ─────────
+                  Green  = clean (gap ≤ 60px, no split)
+                  Amber  = gap   (section pulled to next page, blank space remains)
+                  Red    = split (a protected element straddles the break)
+                  Pulses red when there is a split so it's immediately noticeable.  */}
+              {!isLast && (() => {
+                const q = breakQuality[pageIndex];
+                if (!q) return null;
+                const cef = (end - clipStart) * scale;
+                const stripTop = Math.min(Math.max(cef - 2, 0), PAGE_H * scale - 4);
+                const color = q.status === 'clean' ? '#10b981'
+                            : q.status === 'gap'   ? '#f59e0b'
+                            : '#ef4444';
+                const title = isRTL
+                  ? (q.status === 'split' ? 'انقسام في المحتوى' : q.status === 'gap' ? `مسافة فارغة (${q.gap}px)` : 'فاصل نظيف')
+                  : (q.status === 'split' ? 'Content split here' : q.status === 'gap' ? `Empty gap (${q.gap}px)` : 'Clean page break');
+                return (
+                  <div
+                    title={title}
+                    style={{
+                      position: 'absolute',
+                      top: stripTop,
+                      left: 0, right: 0,
+                      height: 4,
+                      background: color,
+                      zIndex: 8,
+                      opacity: 0.88,
+                      pointerEvents: 'none',
+                    }}
+                  />
                 );
               })()}
             </div>
