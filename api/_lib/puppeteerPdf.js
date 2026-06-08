@@ -240,15 +240,16 @@ const HEADING_ORPHAN_PX = 120;
 // Max px to pull a break back to avoid splitting a break-inside:avoid element
 // OR to handle a heading orphan. Measured from rawBreak so the two adjustments
 // cannot compound. Must match MAX_PULL in LivePreview.jsx.
-// 100px covers typical project/experience cards (50-80px tall) and section
-// headings near the page boundary. Both checks use rawBreak as reference so
-// they cannot compound: worst-case blank at page bottom = 100px ≈ 2.6cm.
 const MAX_PULL = 100;
 // BOTTOM_BLANK — blank px reserved at the bottom of each page for the raw break
-// calculation. Smaller = more content fits per page = less empty gap at page bottom.
-// 20 px ≈ 0.5 cm gives a barely-perceptible bottom margin while maximising content.
-// Must match BOTTOM_BLANK in src/components/builder/LivePreview.jsx.
-const BOTTOM_BLANK = 20;
+// calculation. Must match BOTTOM_BLANK in src/components/builder/LivePreview.jsx.
+// Set to MAX_BOTTOM_GAP so the raw break already leaves ≤ MAX_BOTTOM_GAP blank.
+const BOTTOM_BLANK = 15;
+// MAX_BOTTOM_GAP — maximum allowed blank space (px) at the bottom of any PDF page.
+// After pull-backs (avoid-split + heading-orphan), the greedy-fill phase tries
+// to pack complete avoid-elements into the remaining space until the gap is ≤ this.
+// Must match MAX_BOTTOM_GAP in src/components/builder/LivePreview.jsx.
+const MAX_BOTTOM_GAP = 15;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -264,26 +265,27 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
-      if (!container) return { breaks: [], totalHeight: PAGE_H };
+      if (!container) return { breaks: [], pageReport: [], totalHeight: PAGE_H };
 
       const totalHeight = container.scrollHeight;
-      if (totalHeight <= PAGE_H) return { breaks: [], totalHeight };
+      if (totalHeight <= PAGE_H) return { breaks: [], pageReport: [], totalHeight };
 
       // Mirror of computeSmartBreaks in LivePreview.jsx.
-      // BOTTOM_BLANK limits blank space at page bottom and must match LivePreview.jsx.
       const containerTop = container.getBoundingClientRect().top;
 
       const breaks = [];
+      const pageReport = [];
       let pageStart = 0;
+      let pageIndex = 1;
 
       while (pageStart + PAGE_H < totalHeight) {
         const rawBreak = pageStart + PAGE_H - BOTTOM_BLANK;
         let bestBreak = rawBreak;
 
-        // Avoid splitting elements with break-inside:avoid (e.g. cv item cards).
+        // ── Phase 1: Avoid splitting break-inside:avoid elements ─────────────
         // Pull the break back to the element's top when it falls inside one,
         // but only if pulling back stays within MAX_PULL of the raw break point.
         const avoidEls = Array.from(container.querySelectorAll("*")).filter(el => {
@@ -296,23 +298,16 @@ export async function measureBreaks(html) {
           const elTop = rect.top    - containerTop;
           const elBot = rect.bottom - containerTop;
 
-          // Element spans the current candidate break point?
           if (elTop < bestBreak && elBot > bestBreak) {
-            // Only pull back if it stays within MAX_PULL of the RAW break point.
-            // Using rawBreak (not bestBreak) prevents the heading orphan check
-            // below from compounding this pull into a large blank area.
             if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL) {
               bestBreak = elTop;
             }
           }
         }
 
-        // Orphan fix: any element with break-after:avoid (BREAK_HEADING — section
-        // heading wrappers) must NOT be the last visible element on a page.
-        // Templates use both <h2> tags AND plain <div>/<section> elements with
-        // breakAfter:avoid inline style, so we match on computed style, not tag name.
-        // Cap: only move the heading if (rawBreak - hTop) <= MAX_PULL so the two
-        // adjustments cannot compound into a large blank gap at the page bottom.
+        // ── Phase 2: Heading orphan fix ───────────────────────────────────────
+        // A section heading with break-after:avoid must NOT be the last element
+        // on a page. Pull the break to before the heading.
         Array.from(container.querySelectorAll('*')).forEach(el => {
           const cs = getComputedStyle(el);
           if (cs.breakAfter !== 'avoid' && cs.pageBreakAfter !== 'avoid') return;
@@ -322,19 +317,58 @@ export async function measureBreaks(html) {
           if (
             hBot > pageStart + MARGIN &&
             hBot <= bestBreak &&
-            (bestBreak - hBot) <= 120 &&
+            (bestBreak - hBot) <= HEADING_ORPHAN_PX &&
             (rawBreak - hTop) <= MAX_PULL
           ) {
             bestBreak = Math.min(bestBreak, hTop);
           }
         });
 
+        // ── Phase 3: Greedy forward fill (minimize bottom blank space) ────────
+        // After pull-backs, the gap = rawBreak - bestBreak may be > MAX_BOTTOM_GAP.
+        // Greedily include complete avoid-elements that start at/after bestBreak
+        // and end at/before rawBreak to reduce the gap.
+        //
+        // This handles cases like:
+        //   • A section was pulled to the next page (heading orphan) but its
+        //     first few items actually fit in the remaining space.
+        //   • Bullet-point lines that can fill the bottom of the page.
+        if (rawBreak - bestBreak > MAX_BOTTOM_GAP) {
+          const avoidPositions = avoidEls
+            .map(el => {
+              const r = el.getBoundingClientRect();
+              return { top: r.top - containerTop, bot: r.bottom - containerTop };
+            })
+            .filter(({ top, bot }) =>
+              top >= bestBreak - 2 &&   // starts at or after current break
+              bot  <= rawBreak     &&   // fits entirely before raw break
+              bot  >  bestBreak         // actually adds content
+            )
+            .sort((a, b) => a.top - b.top);
+
+          for (const { top, bot } of avoidPositions) {
+            if (top >= bestBreak - 2) {
+              bestBreak = Math.max(bestBreak, bot);
+            }
+          }
+        }
+
+        const gap = Math.round(rawBreak - bestBreak);
+        pageReport.push({
+          page:       pageIndex,
+          breakAt:    Math.round(bestBreak),
+          rawBreak:   Math.round(rawBreak),
+          bottomGap:  gap,
+          gapOk:      gap <= MAX_BOTTOM_GAP,
+        });
+
         breaks.push(bestBreak);
         pageStart = bestBreak;
+        pageIndex++;
       }
 
-      return { breaks, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK);
+      return { breaks, pageReport, totalHeight };
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP);
 
     // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
     const fontStatus = await page.evaluate(() => {
@@ -342,19 +376,37 @@ export async function measureBreaks(html) {
       document.fonts.forEach(f => {
         (f.status === 'loaded' ? loaded : failed).push(`${f.family}:${f.weight}`);
       });
-      // Also sample the computed font-family of the first text node to verify
-      // the resolved font matches what the template declares.
       const root = document.body.firstElementChild;
       const resolvedFont = root ? getComputedStyle(root).fontFamily : 'n/a';
       return { loaded: loaded.length, failed: failed.length, failedList: failed.slice(0, 5), resolvedFont };
     });
+
+    // ── Page-break report ────────────────────────────────────────────────────
     console.log(
       `[Puppeteer] measureBreaks → totalHeight: ${result.totalHeight}px, breaks: ${result.breaks.length}` +
       ` | fonts loaded: ${fontStatus.loaded}, failed: ${fontStatus.failed}` +
       (fontStatus.failed > 0 ? ` [${fontStatus.failedList.join(', ')}]` : '') +
       ` | resolvedFont: ${fontStatus.resolvedFont}`
     );
-    return result;
+    if (result.pageReport && result.pageReport.length > 0) {
+      console.log('[Puppeteer] ── Page-break report ──────────────────────────────────');
+      for (const r of result.pageReport) {
+        const status = r.gapOk ? '✓' : '✗';
+        console.log(
+          `[Puppeteer]  Page ${r.page}: breakAt=${r.breakAt}px  rawBreak=${r.rawBreak}px` +
+          `  bottomGap=${r.bottomGap}px  [${status} ≤${MAX_BOTTOM_GAP}px rule ${r.gapOk ? 'OK' : 'VIOLATED'}]`
+        );
+      }
+      const violations = result.pageReport.filter(r => !r.gapOk);
+      if (violations.length === 0) {
+        console.log(`[Puppeteer]  All ${result.pageReport.length} page(s) respect the ≤${MAX_BOTTOM_GAP}px bottom-gap rule ✓`);
+      } else {
+        console.log(`[Puppeteer]  ${violations.length}/${result.pageReport.length} page(s) exceed the ${MAX_BOTTOM_GAP}px limit (content too tall to fill gap)`);
+      }
+      console.log('[Puppeteer] ────────────────────────────────────────────────────────');
+    }
+
+    return { breaks: result.breaks, totalHeight: result.totalHeight, pageReport: result.pageReport };
   } finally {
     await page.close().catch(() => {});
   }

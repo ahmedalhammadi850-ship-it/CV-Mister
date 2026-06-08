@@ -71,10 +71,13 @@ export default async function handler(req, res) {
       });
 
       console.log('[PDF] Pass 1: measuring page breaks in Puppeteer…');
-      const { breaks: puppeteerBreaks, totalHeight: puppeteerHeight } =
+      const { breaks: puppeteerBreaks, totalHeight: puppeteerHeight, pageReport } =
         await measureBreaks(singlePageHtml);
 
       console.log('[PDF] Pass 1 done — puppeteerBreaks:', puppeteerBreaks, '| puppeteerHeight:', puppeteerHeight);
+      if (pageReport && pageReport.length > 0) {
+        console.log('[PDF] Page-break report:', JSON.stringify(pageReport, null, 2));
+      }
 
       // Pass 2: slice HTML using Puppeteer's own measured breaks.
       html = buildHtmlFromRendered(renderedHtml, {
@@ -111,6 +114,11 @@ export default async function handler(req, res) {
     res.setHeader('Content-Length',       pdf.length);
     res.setHeader('Cache-Control',        'no-store');
     res.setHeader('X-PDF-Source',         renderedHtml ? 'browser-2pass' : 'ssr-fallback');
+    if (typeof pageReport !== 'undefined' && pageReport && pageReport.length > 0) {
+      // Expose the page-break report so clients / tests can inspect it.
+      // Format: JSON array — [{page,breakAt,rawBreak,bottomGap,gapOk}, …]
+      res.setHeader('X-PDF-Page-Report', JSON.stringify(pageReport));
+    }
     res.status(200).end(Buffer.from(pdf));
   } catch (err) {
     console.error('[PDF] ERROR:', err.message, err.stack?.slice(0, 500));
