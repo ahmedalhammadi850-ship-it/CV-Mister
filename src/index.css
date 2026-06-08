@@ -354,6 +354,11 @@
   break-inside: avoid;
   page-break-inside: avoid;
 }
+/* Prevent individual bullet-point lines from being orphaned on a new page */
+.cv-item li, .cv-section li {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
 .cv-page-separator {
   position: absolute;
   left: 0;

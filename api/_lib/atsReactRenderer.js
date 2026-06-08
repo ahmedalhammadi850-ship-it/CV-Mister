@@ -302,6 +302,11 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     .cv-heading {
       break-after: avoid;
       page-break-after: avoid;
+    }
+    /* Prevent individual bullet-point lines from being orphaned on a new page */
+    .cv-item li, .cv-section li {
+      break-inside: avoid;
+      page-break-inside: avoid;
     }`;
 
   // ── Single-page ────────────────────────────────────────────────────────────
