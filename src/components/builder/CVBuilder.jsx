@@ -243,6 +243,13 @@ const CVBuilder = () => {
       const captureEl   = breakDataRef.current?.captureEl;
       const renderedHtml = captureEl?.innerHTML || null;
 
+      // ── Debug: log preview breaks before sending ──────────────────────────
+      const pageCount = pageBreaks.length + 1;
+      console.log(`[PDF Debug] Preview Page Breaks (${pageCount} pages):`, pageBreaks.map((b, i) => `Page ${i+1}→${i+2} at y=${Math.round(b)}px`));
+      if (pageBreaks.length === 0) {
+        console.log('[PDF Debug] Single-page document — no breaks needed.');
+      }
+
       const response = await fetch('/api/pdf/ats', {
         method: 'POST',
         credentials: 'include',
@@ -267,6 +274,25 @@ const CVBuilder = () => {
       if (!response.ok) {
         const err = await response.json().catch(() => ({}));
         throw new Error(err.message || 'PDF generation failed');
+      }
+
+      // ── Debug: read PDF break report from response headers ────────────────
+      const pdfDebugRaw = response.headers.get('X-PDF-Debug');
+      if (pdfDebugRaw) {
+        try {
+          const dbg = JSON.parse(pdfDebugRaw);
+          console.log('[PDF Debug] PDF Page Breaks:', (dbg.pdfBreaks || []).map((b, i) => `Page ${i+1}→${i+2} at y=${Math.round(b)}px`));
+          const match = dbg.match;
+          console.log('[PDF Debug] Match:', match ? 'TRUE ✅' : 'FALSE ❌');
+          if (!match && dbg.firstDiff) {
+            const d = dbg.firstDiff;
+            if (d.pageCountMismatch) {
+              console.warn(`[PDF Debug] Page count mismatch: Preview=${d.previewPages} pages, PDF=${d.pdfPages} pages`);
+            } else {
+              console.warn(`[PDF Debug] First differing break at index ${d.index}: Preview=${d.preview}px, PDF=${d.pdf}px, Δ=${d.delta}px`);
+            }
+          }
+        } catch (_) {}
       }
 
       const blob = await response.blob();

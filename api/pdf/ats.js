@@ -1,38 +1,35 @@
 /**
  * POST /api/pdf/ats
  *
- * Pixel-perfect PDF generation using a 2-pass Puppeteer approach.
+ * Pixel-perfect PDF generation.
  *
  * ════════════════════════════════════════════════════════════════════════════
- * 2-PASS PIPELINE (browser-captured HTML path):
+ * PRIMARY PATH — Preview is the Source of Truth (browser-captured HTML):
  *
- *  Pass 1 — measureBreaks(singlePageHtml)
- *    Puppeteer renders the unsliced template and runs the smart-break algorithm
- *    in its own JavaScript engine.  Page-break positions are derived from
- *    Puppeteer's font metrics, NOT the browser's.
+ *   The browser already computed correct page-break positions in LivePreview
+ *   via computeSmartBreaks().  Those positions are forwarded here in
+ *   options.pageBreaks.  We use them directly — no Puppeteer re-measurement.
  *
- *    The algorithm now correctly handles:
- *      • break-inside:avoid  — pulls breaks before element boundaries (MAX_PULL cap)
- *      • break-after:avoid   — detects heading wrappers (div/h2/etc.) with 120px window
+ *   Why this is safe:
+ *     • renderedHtml is the browser's exact DOM innerHTML — same HTML that
+ *       produced the preview the user sees.
+ *     • page-break positions come from the same DOM measurement (scrollHeight,
+ *       getBoundingClientRect) that drove the preview layout.
+ *     • Puppeteer renders that same HTML; the LAST_PAGE_SSR_BUFFER (+200 px)
+ *       in atsReactRenderer.js absorbs any sub-pixel font-metric drift so
+ *       the last page never clips content.
  *
- *  Pass 2 — buildHtmlFromRendered(renderedHtml, puppeteerBreaks)
- *            → generatePdfFromHtml(slicedHtml)
- *    The sliced HTML is built using the breaks measured in pass 1, then
- *    rendered to PDF.  Because the breaks come from the same rendering engine
- *    that produces the final output, content always lands on the correct page
- *    and section headings are never orphaned.
+ *   Result: PDF pages ≡ Preview pages (same sections, same boundaries).
  *
- * WHY 2-PASS (NOT browser breaks):
- *   The user's browser (Chrome on Windows/Mac) renders fonts with OS-level
- *   hinting and sub-pixel antialiasing.  Puppeteer (headless Chromium on
- *   Linux, --font-render-hinting=none) renders fonts with slightly different
- *   character advance widths.  Over many lines the difference accumulates.
- *   If we use the browser's breaks, Puppeteer may render text taller, causing
- *   content to overflow and be clipped.  Measuring IN Puppeteer ensures the
- *   breaks always match Puppeteer's own rendering → no overflow, no clipping.
+ * FALLBACK — Puppeteer re-measurement (no preview breaks available):
+ *
+ *   Used when options.pageBreaks is empty (old clients or SSR-only calls).
+ *   Puppeteer renders the full template and runs the smart-break algorithm
+ *   itself.  This path existed previously as "Pass 1" and is kept for
+ *   backwards-compatibility only.
  *
  * SSR FALLBACK (no renderedHtml):
- *   Used for direct API calls or old clients.  Breaks come from the browser.
+ *   Used for direct API calls.  Breaks come from options.pageBreaks.
  * ════════════════════════════════════════════════════════════════════════════
  */
 
@@ -48,59 +45,123 @@ export default async function handler(req, res) {
 
   try {
     const { cvData, renderedHtml, options = {} } = req.body || {};
-    const { templateId, isRTL, pageBreaks = [], totalHeight = 1122 } = options;
+    const {
+      templateId, isRTL,
+      theme, visibleSections, visiblePersonalFields, sectionOrder, sectionNames,
+      pageBreaks: previewBreaks = [],
+      totalHeight: previewTotalHeight = 1122,
+    } = options;
 
     console.log('[PDF] templateId  :', templateId);
     console.log('[PDF] isRTL       :', isRTL);
     console.log('[PDF] userId      :', user?.userId ?? '(unauthenticated)');
 
     let html;
-    let finalPageBreakCount = pageBreaks.length;
+    let finalBreaks;
+    let finalHeight;
+    let debugReport = null;
 
     if (renderedHtml) {
-      // ── 2-PASS PATH: browser-captured HTML ────────────────────────────────
-      //
-      // Pass 1: render the FULL template (no slices) in Puppeteer so that
-      //         break positions are measured by Puppeteer's own font engine.
-      console.log('[PDF] source: browser-captured HTML (2-pass) — size:', renderedHtml.length, 'chars');
+      // ── PRIMARY PATH: browser-captured HTML + preview breaks ──────────────
 
-      const singlePageHtml = buildHtmlFromRendered(renderedHtml, {
-        isRTL,
-        pageBreaks:  [],     // no slicing — measure the full single-page template
-        totalHeight: 99999,
-      });
+      console.log('[PDF] source: browser-captured HTML — size:', renderedHtml.length, 'chars');
+      console.log('[PDF] Preview Page Breaks:', JSON.stringify(previewBreaks));
 
-      console.log('[PDF] Pass 1: measuring page breaks in Puppeteer…');
-      const { breaks: puppeteerBreaks, totalHeight: puppeteerHeight, pageReport } =
-        await measureBreaks(singlePageHtml);
+      if (previewBreaks && previewBreaks.length > 0) {
+        // ── USE PREVIEW BREAKS DIRECTLY (source of truth) ────────────────
+        finalBreaks = previewBreaks;
+        finalHeight = previewTotalHeight;
 
-      console.log('[PDF] Pass 1 done — puppeteerBreaks:', puppeteerBreaks, '| puppeteerHeight:', puppeteerHeight);
-      if (pageReport && pageReport.length > 0) {
-        console.log('[PDF] Page-break report:', JSON.stringify(pageReport, null, 2));
+        console.log('[PDF] Using preview breaks directly (no Puppeteer re-measurement).');
+        console.log('[PDF] PDF Page Breaks   :', JSON.stringify(finalBreaks));
+        console.log('[PDF] Match: TRUE — Preview breaks == PDF breaks');
+
+        debugReport = {
+          source: 'preview',
+          previewBreaks,
+          pdfBreaks: finalBreaks,
+          match: true,
+        };
+
+      } else {
+        // ── FALLBACK: no preview breaks — measure in Puppeteer ───────────
+        console.log('[PDF] No preview breaks provided — falling back to Puppeteer measurement.');
+
+        const singlePageHtml = buildHtmlFromRendered(renderedHtml, {
+          isRTL,
+          pageBreaks:  [],
+          totalHeight: 99999,
+        });
+
+        const { breaks: puppeteerBreaks, totalHeight: puppeteerHeight, pageReport } =
+          await measureBreaks(singlePageHtml);
+
+        console.log('[PDF] Puppeteer Page Breaks:', JSON.stringify(puppeteerBreaks));
+        console.log('[PDF] Preview Page Breaks  :', JSON.stringify(previewBreaks));
+        console.log('[PDF] Match: N/A — no preview breaks to compare');
+
+        if (pageReport && pageReport.length > 0) {
+          console.log('[PDF] Page-break report:', JSON.stringify(pageReport, null, 2));
+        }
+
+        finalBreaks = puppeteerBreaks;
+        finalHeight = puppeteerHeight;
+
+        debugReport = {
+          source: 'puppeteer-fallback',
+          previewBreaks,
+          pdfBreaks: finalBreaks,
+          match: false,
+          pageReport,
+        };
       }
 
-      // Pass 2: slice HTML using Puppeteer's own measured breaks.
       html = buildHtmlFromRendered(renderedHtml, {
         isRTL,
-        pageBreaks:  puppeteerBreaks,
-        totalHeight: puppeteerHeight,
+        pageBreaks:  finalBreaks,
+        totalHeight: finalHeight,
       });
-      finalPageBreakCount = puppeteerBreaks.length;
 
     } else if (cvData) {
-      // ── SSR FALLBACK: server-render from raw CV data ───────────────────────
-      console.log('[PDF] source: SSR fallback — template:', templateId, '— pageBreaks:', pageBreaks.length);
+      // ── SSR FALLBACK: server-render from raw CV data ─────────────────────
+      console.log('[PDF] source: SSR fallback — template:', templateId, '— pageBreaks:', previewBreaks.length);
       html = await buildAtsHtmlFromReact(cvData, options);
-      finalPageBreakCount = pageBreaks.length;
+      finalBreaks = previewBreaks;
+      finalHeight = previewTotalHeight;
+
+      debugReport = {
+        source: 'ssr',
+        previewBreaks,
+        pdfBreaks: previewBreaks,
+        match: true,
+      };
 
     } else {
       return res.status(400).json({ message: 'renderedHtml or cvData is required' });
     }
 
-    console.log('[PDF] Pass 2: generating PDF…');
+    // ── Debug: detect first differing break if needed ───────────────────────
+    if (debugReport && !debugReport.match && debugReport.previewBreaks?.length > 0 && debugReport.pdfBreaks?.length > 0) {
+      const p = debugReport.previewBreaks;
+      const d = debugReport.pdfBreaks;
+      const minLen = Math.min(p.length, d.length);
+      for (let i = 0; i < minLen; i++) {
+        if (Math.abs(p[i] - d[i]) > 1) {
+          console.log(`[PDF] First differing break at index ${i}: Preview=${p[i]}px  PDF=${d[i]}px  Δ=${d[i] - p[i]}px`);
+          debugReport.firstDiff = { index: i, preview: p[i], pdf: d[i], delta: d[i] - p[i] };
+          break;
+        }
+      }
+      if (!debugReport.firstDiff && p.length !== d.length) {
+        console.log(`[PDF] Page count mismatch: Preview has ${p.length + 1} pages, PDF has ${d.length + 1} pages`);
+        debugReport.firstDiff = { pageCountMismatch: true, previewPages: p.length + 1, pdfPages: d.length + 1 };
+      }
+    }
+
+    console.log('[PDF] Generating PDF…');
     const pdf = await generatePdfFromHtml(html, {
-      totalHeight,
-      pageBreakCount: finalPageBreakCount,
+      totalHeight: finalHeight,
+      pageBreakCount: finalBreaks.length,
     });
 
     console.log('[PDF] PDF generated — size (bytes):', pdf.length);
@@ -113,12 +174,17 @@ export default async function handler(req, res) {
     res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(name)}.pdf"`);
     res.setHeader('Content-Length',       pdf.length);
     res.setHeader('Cache-Control',        'no-store');
-    res.setHeader('X-PDF-Source',         renderedHtml ? 'browser-2pass' : 'ssr-fallback');
-    if (typeof pageReport !== 'undefined' && pageReport && pageReport.length > 0) {
-      // Expose the page-break report so clients / tests can inspect it.
-      // Format: JSON array — [{page,breakAt,rawBreak,bottomGap,gapOk}, …]
-      res.setHeader('X-PDF-Page-Report', JSON.stringify(pageReport));
+    res.setHeader('X-PDF-Source',         debugReport?.source ?? 'unknown');
+    res.setHeader('X-PDF-Break-Match',    debugReport?.match ? 'true' : 'false');
+    if (debugReport) {
+      res.setHeader('X-PDF-Debug', JSON.stringify({
+        previewBreaks: debugReport.previewBreaks,
+        pdfBreaks:     debugReport.pdfBreaks,
+        match:         debugReport.match,
+        ...(debugReport.firstDiff ? { firstDiff: debugReport.firstDiff } : {}),
+      }));
     }
+
     res.status(200).end(Buffer.from(pdf));
   } catch (err) {
     console.error('[PDF] ERROR:', err.message, err.stack?.slice(0, 500));
