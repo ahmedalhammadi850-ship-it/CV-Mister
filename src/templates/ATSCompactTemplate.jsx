@@ -394,6 +394,7 @@ const ATSCompactTemplate = ({
       {/* Full-width rule separating header from body */}
       <div style={{ borderBottom: `2px solid ${accent}`, marginBottom: '2pt' }} />
       {sectionOrder.map(key => renderSection(key))}
+      <div style={{ height: '15pt' }} />
     </article>
   );
 };

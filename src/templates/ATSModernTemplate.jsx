@@ -407,6 +407,7 @@ const ATSModernTemplate = ({
       <div style={s.body_wrap}>
         {sectionOrder.map(key => renderSection(key))}
       </div>
+      <div style={{ height: '15pt' }} />
     </article>
   );
 };

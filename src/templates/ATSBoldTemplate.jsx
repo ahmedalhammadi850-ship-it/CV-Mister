@@ -385,6 +385,7 @@ const ATSBoldTemplate = ({
         {contact && <address style={s.contact}>{contact}</address>}
       </div>
       {sectionOrder.map(key => renderSection(key))}
+      <div style={{ height: '15pt' }} />
     </article>
   );
 };
