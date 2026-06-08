@@ -460,7 +460,40 @@ const LivePreview = ({ breakDataRef }) => {
   /* ── expose break data + capture element for PDF export ── */
   useEffect(() => {
     if (breakDataRef) {
-      breakDataRef.current = { breaks: activeBreaks, totalHeight, captureEl: contentRef.current };
+      breakDataRef.current = {
+        breaks: activeBreaks,
+        totalHeight,
+        captureEl: contentRef.current,
+        // freshMeasure() — called by CVBuilder before PDF export.
+        // Waits for ALL fonts to finish loading, then re-runs the smart-break
+        // algorithm on the live DOM so that pageBreaks and captureEl.innerHTML
+        // are always computed from the same post-font layout.
+        //
+        // WHY: pageBreaks must be computed from the exact same DOM state as the
+        // HTML that Puppeteer will render. If breaks were computed pre-font
+        // (at the initial 80ms timeout) but the HTML is captured post-font,
+        // lines near the break boundary shift, causing content to appear cut off
+        // or "missing" at the bottom of PDF pages.
+        freshMeasure: async () => {
+          const el = contentRef.current;
+          if (!el) return { breaks: activeBreaks, totalHeight, captureEl: el };
+          // Ensure every @font-face is fully loaded
+          await document.fonts.ready;
+          const pending = [];
+          document.fonts.forEach(f => {
+            if (f.status !== 'loaded') pending.push(f.load().catch(() => {}));
+          });
+          if (pending.length) await Promise.all(pending);
+          // Two rAF ticks + 200 ms so the layout engine applies the loaded font
+          // metrics and scrollHeight reflects the true post-font content height
+          await new Promise(r =>
+            requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 200)))
+          );
+          const h = el.scrollHeight;
+          const breaks = h <= PAGE_H ? [] : computeSmartBreaks(el, h);
+          return { breaks, totalHeight: h, captureEl: el };
+        },
+      };
     }
   }, [activeBreaks, totalHeight, breakDataRef]);
 
@@ -488,17 +521,56 @@ const LivePreview = ({ breakDataRef }) => {
   /* ── measure + smart breaks ── */
   useEffect(() => {
     setManualBreaks(null); // reset manual overrides when content changes
-    const measure = () => {
+    let cancelled = false;
+
+    const measure = async () => {
       const el = contentRef.current;
-      if (!el) return;
-      const h = el.scrollHeight;
-      setTotalHeight(h);
-      setAutoBreaks(h <= PAGE_H ? [] : computeSmartBreaks(el, h));
+      if (!el || cancelled) return;
+
+      // First pass: immediate measurement with whatever fonts are available.
+      // This makes the preview render quickly without waiting for network fonts.
+      const hFirst = el.scrollHeight;
+      if (!cancelled) {
+        setTotalHeight(hFirst);
+        setAutoBreaks(hFirst <= PAGE_H ? [] : computeSmartBreaks(el, hFirst));
+      }
+
+      // Second pass: wait for ALL fonts to load, then re-measure.
+      // Web fonts change character metrics (advance widths, line heights), so
+      // text wraps differently post-font. Re-measuring ensures break positions
+      // match the final rendered layout — the same state from which the PDF
+      // export captures innerHTML. Without this, breaks computed pre-font
+      // are used with post-font HTML, causing lines to appear cut off or
+      // missing at the bottom of PDF pages.
+      try {
+        await document.fonts.ready;
+        const pending = [];
+        document.fonts.forEach(f => {
+          if (f.status !== 'loaded') pending.push(f.load().catch(() => {}));
+        });
+        if (pending.length) await Promise.all(pending);
+        // Two rAF ticks so the layout engine applies loaded font metrics
+        await new Promise(r =>
+          requestAnimationFrame(() => requestAnimationFrame(r))
+        );
+      } catch (_) {}
+
+      if (!contentRef.current || cancelled) return;
+      const hFinal = contentRef.current.scrollHeight;
+      if (!cancelled) {
+        setTotalHeight(hFinal);
+        setAutoBreaks(hFinal <= PAGE_H ? [] : computeSmartBreaks(contentRef.current, hFinal));
+      }
     };
-    const t = setTimeout(measure, 80);
-    const ro = new ResizeObserver(() => { clearTimeout(t); setTimeout(measure, 80); });
+
+    const t = setTimeout(() => measure(), 80);
+    const ro = new ResizeObserver(() => { clearTimeout(t); setTimeout(() => measure(), 80); });
     if (contentRef.current) ro.observe(contentRef.current);
-    return () => { clearTimeout(t); ro.disconnect(); };
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+      ro.disconnect();
+    };
   }, [cvData, selectedTemplate, theme, visibleSections, visiblePersonalFields, sectionOrder]);
 
   /* ── drag handlers ── */

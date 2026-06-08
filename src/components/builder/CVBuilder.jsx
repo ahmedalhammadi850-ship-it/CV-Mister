@@ -219,28 +219,32 @@ const CVBuilder = () => {
     // pageBreaks (pixel y-positions from LivePreview's smart-break algorithm)
     // are forwarded to the server so the PDF pages match the preview exactly.
     try {
-      const name        = cvData.personalInfo?.fullName || 'Resume';
-      const pageBreaks  = breakDataRef.current?.breaks      ?? [];
-      const totalHeight = breakDataRef.current?.totalHeight ?? PAGE_H_PX;
+      const name = cvData.personalInfo?.fullName || 'Resume';
 
-      // PRIMARY: capture the exact HTML the browser rendered for the live preview.
-      // captureEl is the hidden off-screen div (position:absolute, top:-9999px, width:794px)
-      // that LivePreview uses for measurements. Its innerHTML is the template's actual DOM.
-      // Sending this to the server means Puppeteer renders the SAME HTML the user sees —
-      // same fonts, same computed styles, same layout — giving a pixel-perfect PDF.
-      // Wait for all fonts to fully load before capturing the off-screen element.
-      // Without this, the hidden div at -9999px may still use fallback font metrics
-      // (different character widths → different text wrapping → layout mismatch in PDF).
-      await document.fonts.ready;
-      const pendingFonts = [];
-      document.fonts.forEach(face => {
-        if (face.status !== 'loaded') pendingFonts.push(face.load().catch(() => {}));
-      });
-      if (pendingFonts.length) await Promise.all(pendingFonts);
-      // One extra frame so the browser re-lays out text with correct font metrics
-      await new Promise(resolve => setTimeout(resolve, 80));
+      // PRIMARY: use freshMeasure() to get page-break positions AND the rendered HTML
+      // from the SAME post-font DOM state. This is the root fix for lines disappearing
+      // at page boundaries: previously pageBreaks were captured before document.fonts.ready
+      // but the HTML was captured after, so breaks didn't match the actual post-font layout.
+      //
+      // freshMeasure() (defined in LivePreview.jsx):
+      //   1. Waits for all @font-face rules to fully load
+      //   2. Waits 2 rAF + 200ms for the layout engine to apply loaded font metrics
+      //   3. Re-runs computeSmartBreaks() on the live post-font DOM
+      //   4. Returns { breaks, totalHeight, captureEl } — all from the same DOM state
+      //
+      // captureEl.innerHTML (captured after freshMeasure) then matches the breaks exactly.
+      const freshData = await (
+        breakDataRef.current?.freshMeasure?.() ??
+        Promise.resolve({
+          breaks:      breakDataRef.current?.breaks      ?? [],
+          totalHeight: breakDataRef.current?.totalHeight ?? PAGE_H_PX,
+          captureEl:   breakDataRef.current?.captureEl   ?? null,
+        })
+      );
 
-      const captureEl   = breakDataRef.current?.captureEl;
+      const pageBreaks  = freshData.breaks;
+      const totalHeight = freshData.totalHeight;
+      const captureEl   = freshData.captureEl;
       const renderedHtml = captureEl?.innerHTML || null;
 
       // ── Debug: log preview breaks before sending ──────────────────────────

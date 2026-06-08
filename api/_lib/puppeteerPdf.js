@@ -224,9 +224,24 @@ async function _openPage(html, viewportHeight = 1122) {
     if (pending.length) await Promise.all(pending);
     // Two rAF ticks so the compositor has fully applied font metrics
     await new Promise(r =>
-      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 150)))
+      requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(r, 300)))
     );
   });
+
+  // Extra guard: verify document.fonts.status is 'loaded' before proceeding.
+  // waitForFunction polls the page until the condition is true (or timeout).
+  // This catches rare cases where the evaluate above resolves but Chromium hasn't
+  // fully committed the font metrics into its layout pipeline yet.
+  try {
+    await page.waitForFunction(() => document.fonts.status === 'loaded', { timeout: 5000 });
+  } catch (_) {
+    console.warn('[Puppeteer] document.fonts.status did not reach "loaded" within 5s — proceeding anyway');
+  }
+  // Final 300ms pause: Chromium's PDF compositor runs on a separate thread and can
+  // lag the JS engine by a frame or two. Without this pause, the very first line of
+  // each page can render with wrong metrics (before the thread applies the fonts),
+  // causing the last line of a page to appear cut off in the exported PDF.
+  await new Promise(r => setTimeout(r, 300));
 
   return page;
 }
