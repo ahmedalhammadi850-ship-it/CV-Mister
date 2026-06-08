@@ -244,16 +244,11 @@ const HEADING_ORPHAN_PX = 120;
 // headings near the page boundary. Both checks use rawBreak as reference so
 // they cannot compound: worst-case blank at page bottom = 100px ≈ 2.6cm.
 const MAX_PULL = 100;
-// PDF_BOTTOM_MARGIN — extra px deducted from the raw break point to leave
-// white space at the bottom of each PDF page.
-//
-// Set to 0: the natural MARGIN (48 px ≈ 36 pt) already provides a comfortable
-// bottom-of-page white zone, and adding 20 px more was causing the PDF to break
-// 20 px earlier than the preview (rawBreak_PDF=1054 vs rawBreak_Preview=1074),
-// producing PDF=2 pages when Preview=1 page for borderline-length resumes.
-// With 0, both paths use rawBreak = PAGE_H - MARGIN = 1074, so page capacity is
-// identical and the Preview→PDF page count is consistent.
-const PDF_BOTTOM_MARGIN = 0;
+// BOTTOM_BLANK — blank px reserved at the bottom of each page for the raw break
+// calculation. Smaller = more content fits per page = less empty gap at page bottom.
+// 20 px ≈ 0.5 cm gives a barely-perceptible bottom margin while maximising content.
+// Must match BOTTOM_BLANK in src/components/builder/LivePreview.jsx.
+const BOTTOM_BLANK = 20;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -269,7 +264,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, PDF_BOTTOM_MARGIN) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], totalHeight: PAGE_H };
@@ -277,15 +272,15 @@ export async function measureBreaks(html) {
       const totalHeight = container.scrollHeight;
       if (totalHeight <= PAGE_H) return { breaks: [], totalHeight };
 
-      // Mirror of computeSmartBreaks in LivePreview.jsx, with PDF_BOTTOM_MARGIN
-      // subtracted so every page naturally has white space before the page edge.
+      // Mirror of computeSmartBreaks in LivePreview.jsx.
+      // BOTTOM_BLANK limits blank space at page bottom and must match LivePreview.jsx.
       const containerTop = container.getBoundingClientRect().top;
 
       const breaks = [];
       let pageStart = 0;
 
       while (pageStart + PAGE_H < totalHeight) {
-        const rawBreak = pageStart + PAGE_H - MARGIN - PDF_BOTTOM_MARGIN;
+        const rawBreak = pageStart + PAGE_H - BOTTOM_BLANK;
         let bestBreak = rawBreak;
 
         // Avoid splitting elements with break-inside:avoid (e.g. cv item cards).
@@ -339,7 +334,7 @@ export async function measureBreaks(html) {
       }
 
       return { breaks, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, PDF_BOTTOM_MARGIN);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL, BOTTOM_BLANK);
 
     // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
     const fontStatus = await page.evaluate(() => {

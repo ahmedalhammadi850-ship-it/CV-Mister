@@ -42,7 +42,12 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
 const PAGE_W = 794;    // A4 width  at 96 dpi
-const MARGIN = 48;     // top/bottom page margin (≈ 36pt)
+const MARGIN = 48;     // top margin for pages 2+ (≈ 36pt) — visual breathing room
+// Blank px reserved at the page bottom for the raw break calculation.
+// Smaller = more content fits per page = less empty gap at page bottom.
+// 20px gives ~0.5cm of white space which is barely perceptible in print.
+// Must match BOTTOM_BLANK in api/_lib/puppeteerPdf.js.
+const BOTTOM_BLANK = 20;
 const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag handle clamping)
 // Heading orphan threshold: if a section heading ends within this many pixels of
 // the break point, it would be left alone on the page. Move the break to before
@@ -56,7 +61,7 @@ const HEADING_ORPHAN_PX = 120;
 // so the two adjustments cannot compound into a large blank area.
 // 100px covers typical project/experience cards (50-80px tall) and section headings
 // that land near the page boundary. Both checks reference rawBreak independently so
-// they cannot compound: worst-case blank space at page bottom = 100px ≈ 2.6cm.
+// they cannot compound: worst-case blank space at page bottom = BOTTOM_BLANK + 100px.
 const MAX_PULL = 100;
 
 function computeSmartBreaks(container, totalHeight) {
@@ -66,7 +71,7 @@ function computeSmartBreaks(container, totalHeight) {
   let pageStart = 0;
 
   while (pageStart + PAGE_H < totalHeight) {
-    const rawBreak = pageStart + PAGE_H - MARGIN;
+    const rawBreak = pageStart + PAGE_H - BOTTOM_BLANK;
     let bestBreak = rawBreak;
 
     // Avoid splitting elements that have break-inside:avoid (e.g. cv item cards).
