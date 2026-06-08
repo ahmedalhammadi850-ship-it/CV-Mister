@@ -54,11 +54,11 @@ const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag 
 const HEADING_ORPHAN_PX = 120;
 
 // Max pixels to pull a break back when an AVOID-INSIDE element spans the break.
-// Keeping this equal to MAX_BOTTOM_GAP ensures the pull-back itself never leaves
-// more than MAX_BOTTOM_GAP blank px at the page bottom.
-// If the element requires a larger pull, we allow the split at rawBreak (gap = 0).
+// Set high enough to protect individual bullet lines (~20px) AND complete resume
+// items (job entries, education blocks, ~150-200px). Elements larger than this
+// are split at rawBreak; Phase 3 (greedy fill) then minimises the resulting gap.
 // Must match MAX_PULL_AVOID in api/_lib/puppeteerPdf.js.
-const MAX_PULL_AVOID = 15;
+const MAX_PULL_AVOID = 200;
 
 // Max pixels to pull a break back for a heading-orphan fix.
 // Headings are small, so a 100px budget is safe; the greedy-fill phase then

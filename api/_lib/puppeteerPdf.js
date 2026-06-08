@@ -238,10 +238,11 @@ const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePrevie
 // Heading orphan threshold — must match HEADING_ORPHAN_PX in LivePreview.jsx.
 const HEADING_ORPHAN_PX = 120;
 // Max px to pull a break back when an AVOID-INSIDE element spans the break.
-// Equal to MAX_BOTTOM_GAP — guarantees the pull itself leaves ≤ 15px blank.
-// Elements requiring a larger pull are split at rawBreak instead (gap = 0).
+// Set high enough to protect individual bullet lines (~20px) AND complete resume
+// items (job entries, education blocks, ~150-200px). Elements larger than this
+// are split at rawBreak; Phase 3 (greedy fill) then minimises the resulting gap.
 // Must match MAX_PULL_AVOID in LivePreview.jsx.
-const MAX_PULL_AVOID = 15;
+const MAX_PULL_AVOID = 200;
 // Max px to pull a break back for a heading-orphan fix.
 // Headings are small; the greedy-fill phase recovers the resulting gap.
 // Must match MAX_PULL in LivePreview.jsx.

@@ -406,23 +406,27 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     // measureBreaks() places each break 20 px before the raw page edge.
     const innerHeight = totalSliceHeight - MARGIN;
 
-    // TOP-CLIP GUARD: subtract 2 px from the translateY so the inner-clip
-    // starts 2 px BEFORE the measured break point.
+    // TOP-CLIP GUARD: subtract 8 px from the translateY so the inner-clip
+    // starts 8 px BEFORE the measured break point.
     //
     // WHY THIS IS NEEDED:
     //   The break algorithm sets start = elTop (getBoundingClientRect top of the
     //   first element on the new page).  Some elements render a top-border,
-    //   rule, or decorative line whose paint box starts 1-2 px ABOVE elTop
+    //   rule, or decorative line whose paint box starts a few px ABOVE elTop
     //   (e.g. a section heading with border-top, or a pseudo-element).
     //   translateY(-Math.round(start)) positions that content at y ≤ -1 inside
     //   the overflow:hidden inner-clip → clipped → "first line missing" in PDF.
     //
-    //   By translating 2 px less (start - 2), the element's paint box lands at
-    //   inner-clip y ≥ 0 and is always visible.  The top 2 px of the inner-clip
-    //   then show the inter-section gap immediately before the break (white
-    //   space), which is invisible to the eye and doesn't disturb the MARGIN
-    //   white area above.
-    const translateY = Math.max(0, Math.floor(start) - 2);
+    //   By translating 8 px less (start - 8), any element whose paint box
+    //   starts up to 8 px before the measured break lands at inner-clip y ≥ 0
+    //   and is always visible.  The top 8 px of the inner-clip show the
+    //   inter-element gap just before the break (whitespace/margin), which is
+    //   invisible to the reader and doesn't disturb the MARGIN white area above.
+    //
+    //   8 px (vs the previous 2 px) gives extra safety for the cases where
+    //   MAX_PULL_AVOID cannot pull a large element and the split happens near
+    //   a text line boundary that slightly precedes the measured break point.
+    const translateY = Math.max(0, Math.floor(start) - 8);
 
     return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${totalSliceHeight}px">
   <div style="position:absolute;top:${MARGIN}px;left:0;width:794px;height:${innerHeight}px;overflow:hidden">
