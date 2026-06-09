@@ -20,7 +20,7 @@ const FONTS_EN = [
   { label: 'Inter',          value: 'Inter'          },
   { label: 'Outfit',         value: 'Outfit'         },
   { label: 'Merriweather',   value: 'Merriweather'   },
-  { label: 'Calibri',        value: 'Calibri'        },
+  { label: 'Calibri (Inter)', value: 'Calibri'        },
   { label: 'Arial',          value: 'Arial'          },
   { label: 'Georgia',        value: 'Georgia'        },
   { label: 'Times New Roman',value: 'Times New Roman'},

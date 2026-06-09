@@ -82,7 +82,7 @@ export function CVProvider({ children }) {
 
   const [theme, setTheme] = useState({
     primaryColor: '#4f46e5',
-    fontFamily: 'Calibri',
+    fontFamily: 'Inter',
     fontSize: 'medium',
     lineHeight: 'normal',
     pagePadding: 'medium',
@@ -334,7 +334,7 @@ export function CVProvider({ children }) {
     setSelectedTemplate('minimal');
     setTheme({
       primaryColor: '#4f46e5',
-      fontFamily: 'Calibri',
+      fontFamily: 'Inter',
       fontSize: 'medium',
       lineHeight: 'normal',
       pagePadding: 'medium',
@@ -355,7 +355,7 @@ export function CVProvider({ children }) {
     setSelectedTemplate(templateId || 'modern');
     setTheme({
       primaryColor: templateColor || '#4f46e5',
-      fontFamily: 'Calibri',
+      fontFamily: 'Inter',
       fontSize: 'medium',
       lineHeight: 'normal',
       pagePadding: 'medium',

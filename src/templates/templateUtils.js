@@ -51,13 +51,19 @@ export function resolveTheme(theme, isRTL) {
     fontFamily = 'Inter';
   }
 
-  // For LTR: fall through to Inter (loaded from Google Fonts) before the
-  // generic sans-serif, so non-Windows browsers and the server-side PDF
-  // renderer both use the same web font when Calibri is not installed.
-  // For RTL: Tajawal is always a Google Font, so the stack is consistent.
+  // For LTR: Calibri is a Windows-only system font — it is not installed on
+  // Linux (Puppeteer/server). If the stack starts with Calibri, Windows Chrome
+  // uses it while Puppeteer falls back to Inter, causing ~80-100 px of layout
+  // drift between preview and PDF (blank space / content clipping).
+  // Fix: when fontFamily is Calibri, skip it and use Inter directly so both
+  // the browser preview and Puppeteer always render with the same web font.
+  // For all other LTR fonts (Inter, Merriweather, etc.) keep Inter as fallback.
+  // For RTL: Tajawal is always a Google Font, so the stack is already consistent.
   const baseFont = isRTL
     ? `'${fontFamily}', 'Tajawal', Arial, sans-serif`
-    : `'${fontFamily}', 'Inter', Arial, sans-serif`;
+    : fontFamily === 'Calibri'
+      ? `'Inter', Arial, sans-serif`
+      : `'${fontFamily}', 'Inter', Arial, sans-serif`;
 
   return {
     sz: SIZES[fontSize],
