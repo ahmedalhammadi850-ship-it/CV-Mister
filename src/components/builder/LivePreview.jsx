@@ -163,16 +163,42 @@ function computeSmartBreaks(container, totalHeight) {
     // We cap at rawBreak (not pageEnd) so that Phase 3 never pushes content
     // into the reserved BOTTOM_BLANK zone — the 15px gap at the page bottom
     // is always preserved after this phase.
+    //
+    // ANCESTOR GUARD: do NOT include a sub-element whose break-inside:avoid
+    // ancestor is too large to fit on page 1 (ancestor.bot > rawBreak).
+    // Including such a sub-element would split the outer container, violating
+    // break-inside:avoid and causing the section heading + title to appear on
+    // page 1 while the description appears on page 2 (orphaned content).
     if (rawBreak - bestBreak > MAX_BOTTOM_GAP) {
+      // Identify "unbreakable" containers: break-inside:avoid elements that span
+      // from within the gap zone into page 2 (too large to place entirely on p1).
+      const unbreakableContainers = new Set(
+        avoidEls.filter(el => {
+          const r = el.getBoundingClientRect();
+          const t = r.top    - containerTop;
+          const b = r.bottom - containerTop;
+          return t <= bestBreak && b > rawBreak;
+        })
+      );
+      const isInsideUnbreakable = (el) => {
+        let p = el.parentElement;
+        while (p && p !== container) {
+          if (unbreakableContainers.has(p)) return true;
+          p = p.parentElement;
+        }
+        return false;
+      };
+
       const avoidPositions = avoidEls
         .map(el => {
           const r = el.getBoundingClientRect();
-          return { top: r.top - containerTop, bot: r.bottom - containerTop };
+          return { top: r.top - containerTop, bot: r.bottom - containerTop, el };
         })
-        .filter(({ top, bot }) =>
+        .filter(({ top, bot, el }) =>
           top >= bestBreak - 2 &&   // starts at or after current break
           bot  <= rawBreak     &&   // fits within the page, respecting BOTTOM_BLANK
-          bot  >  bestBreak         // actually adds content
+          bot  >  bestBreak    &&   // actually adds content
+          !isInsideUnbreakable(el)  // not inside an unbreakable ancestor
         )
         .sort((a, b) => a.top - b.top);
 
