@@ -15,9 +15,11 @@ const ALLOWED_ORIGINS = [
 ].filter(Boolean);
 
 // In Replit's proxied environment, the Vite dev server forwards API requests
-// from the same origin — allow null/undefined origin (same-origin proxy calls)
+// from the same origin — allow null/undefined origin (same-origin proxy calls).
+// Also allow the literal string "null" which Puppeteer's headless Chromium sends
+// when making sub-resource requests (e.g. loading font files from @font-face rules).
 function isCorsAllowed(origin: string | undefined): boolean {
-  if (!origin) return true; // same-origin or server-to-server
+  if (!origin || origin === "null") return true; // same-origin, server-to-server, or Puppeteer Chromium
   if (ALLOWED_ORIGINS.includes(origin)) return true;
   // Allow any *.replit.dev / *.repl.co / *.replit.app domain (with optional port)
   if (/^https:\/\/.+\.replit\.dev(:\d+)?$/.test(origin)) return true;
