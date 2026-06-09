@@ -103,35 +103,55 @@ function computeSmartBreaks(container, totalHeight) {
     const rawBreak = pageStart + pageVisibleH - BOTTOM_BLANK;
     let bestBreak = rawBreak;
 
-    // ── Phase 1: Avoid splitting break-inside:avoid elements ─────────────────
-    // Pull the break back to the element's top ONLY if the pull ≤ MAX_PULL_AVOID.
-    // This guarantees the pull-back itself leaves ≤ MAX_BOTTOM_GAP blank px.
-    // Elements requiring a larger pull are split at rawBreak instead (gap = 0).
-    //
-    // avoidEls includes TWO categories:
-    //  1. Elements explicitly marked break-inside:avoid (CSS or inline style).
-    //  2. "Single-line" elements ≤ MAX_LINE_H px tall — this auto-protects role,
-    //     company, meta, date divs (inline-styled, no CSS class) so the algorithm
-    //     can always snap to a line boundary even inside large items it cannot pull.
+    // ── avoidEls: built once, shared by Phase 1 & Phase 3 ───────────────────
+    // Includes break-inside:avoid elements AND single-line elements (≤MAX_LINE_H).
     const avoidEls = Array.from(container.querySelectorAll('*')).filter(el => {
       const s = getComputedStyle(el);
       if (s.breakInside === 'avoid' || s.pageBreakInside === 'avoid') return true;
-      // Auto-protect single-line block/inline-block elements so that even when a
-      // large container cannot be pulled back, the break lands between lines not
-      // through a character (prevents horizontal text-splitting "ghosting").
       const d = s.display;
       if (d === 'none' || d === 'contents' || d === 'table' || d === 'table-row') return false;
       const h = el.getBoundingClientRect().height;
       return h > 0 && h <= MAX_LINE_H;
     });
 
+    // ── Phase 4 (PRIMARY — runs FIRST): Line-boundary snap at rawBreak ───────
+    // Targets rawBreak directly so the break always lands on a complete text-line
+    // boundary, never mid-character. Typically gives bestBreak ≈ rawBreak − 0..15px
+    // (one line height), keeping the bottom gap small and lines intact.
+    // Running this first means large containers are split at a line boundary
+    // instead of being avoided entirely (which used to leave 80-100px blank).
+    {
+      let ph4El = null, ph4ElH = Infinity;
+      for (const el of container.querySelectorAll('p, li, td, th, address, div, span')) {
+        const hasText = Array.from(el.childNodes).some(
+          n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0
+        );
+        if (!hasText) continue;
+        const r  = el.getBoundingClientRect();
+        const eT = r.top    - containerTop;
+        const eB = r.bottom - containerTop;
+        if (eT >= rawBreak || eB <= rawBreak) continue; // must straddle rawBreak
+        if (eT >= rawBreak - 3) continue;               // already at element top
+        if (r.height < ph4ElH) { ph4El = el; ph4ElH = r.height; }
+      }
+      if (ph4El) {
+        const lb = findLineBottomBefore(ph4El, rawBreak, containerTop);
+        if (lb !== null) bestBreak = lb;
+      }
+    }
+
+    // ── Phase 1: Micro-pull for tiny atomic elements only ────────────────────
+    // After line-snapping, only pull back further for tiny elements whose top
+    // is within MAX_BOTTOM_GAP (15 px) of rawBreak. This protects single-line
+    // atomic elements (dates, role titles) from being split. Large blocks
+    // (job entries, education blocks) are intentionally split at the line
+    // boundary found by Phase 4 — avoids the 80-100 px blank-space problem.
     for (const el of avoidEls) {
       const rect = el.getBoundingClientRect();
       const elTop = rect.top    - containerTop;
       const elBot = rect.bottom - containerTop;
-
       if (elTop < bestBreak && elBot > bestBreak) {
-        if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_PULL_AVOID) {
+        if (elTop > pageStart + MIN_PAGE_CONTENT && (rawBreak - elTop) <= MAX_BOTTOM_GAP) {
           bestBreak = elTop;
         }
       }
@@ -156,22 +176,13 @@ function computeSmartBreaks(container, totalHeight) {
     });
 
     // ── Phase 3: Greedy forward fill (minimize bottom blank space) ────────────
-    // After pull-backs, the gap = rawBreak - bestBreak may be > MAX_BOTTOM_GAP.
-    // Greedily include complete avoid-elements that start at/after bestBreak
-    // and fit entirely within rawBreak (= PAGE_H - BOTTOM_BLANK).
+    // If bestBreak is still > MAX_BOTTOM_GAP below rawBreak (e.g. after a heading
+    // orphan pull), greedily include complete avoid-elements that fit before rawBreak.
+    // Capped at rawBreak so Phase 3 never enters the BOTTOM_BLANK reserved zone.
     //
-    // We cap at rawBreak (not pageEnd) so that Phase 3 never pushes content
-    // into the reserved BOTTOM_BLANK zone — the 15px gap at the page bottom
-    // is always preserved after this phase.
-    //
-    // ANCESTOR GUARD: do NOT include a sub-element whose break-inside:avoid
-    // ancestor is too large to fit on page 1 (ancestor.bot > rawBreak).
-    // Including such a sub-element would split the outer container, violating
-    // break-inside:avoid and causing the section heading + title to appear on
-    // page 1 while the description appears on page 2 (orphaned content).
+    // ANCESTOR GUARD: skip sub-elements whose break-inside:avoid ancestor spans
+    // into page 2 — including them would orphan that container's content.
     if (rawBreak - bestBreak > MAX_BOTTOM_GAP) {
-      // Identify "unbreakable" containers: break-inside:avoid elements that span
-      // from within the gap zone into page 2 (too large to place entirely on p1).
       const unbreakableContainers = new Set(
         avoidEls.filter(el => {
           const r = el.getBoundingClientRect();
@@ -195,10 +206,10 @@ function computeSmartBreaks(container, totalHeight) {
           return { top: r.top - containerTop, bot: r.bottom - containerTop, el };
         })
         .filter(({ top, bot, el }) =>
-          top >= bestBreak - 2 &&   // starts at or after current break
-          bot  <= rawBreak     &&   // fits within the page, respecting BOTTOM_BLANK
-          bot  >  bestBreak    &&   // actually adds content
-          !isInsideUnbreakable(el)  // not inside an unbreakable ancestor
+          top >= bestBreak - 2 &&
+          bot  <= rawBreak     &&
+          bot  >  bestBreak    &&
+          !isInsideUnbreakable(el)
         )
         .sort((a, b) => a.top - b.top);
 
@@ -206,39 +217,6 @@ function computeSmartBreaks(container, totalHeight) {
         if (top >= bestBreak - 2) {
           bestBreak = Math.max(bestBreak, bot);
         }
-      }
-    }
-
-    // ── Phase 4: Range API line-boundary snap ────────────────────────────────
-    // Safety net: if bestBreak is STILL inside a text element after Phases 1-3,
-    // use Range.getClientRects() to find the last complete text line before
-    // bestBreak. This eliminates the "half-character" horizontal split.
-    //
-    // Covers ALL elements that contain at least one direct text node — not just
-    // semantic elements (p, li, …) but also div/span which resume templates use
-    // heavily for descriptions, bullets, job titles, etc.
-    {
-      // Collect all elements that straddle bestBreak and contain direct text.
-      // Pick the smallest (most specific) straddling element so Range gives us
-      // the tightest line-rect set for that text block.
-      let ph4El = null, ph4ElH = Infinity;
-      const ph4Selector = 'p, li, td, th, address, div, span';
-      for (const el of container.querySelectorAll(ph4Selector)) {
-        // Only elements that have at least one direct text node with content
-        const hasText = Array.from(el.childNodes).some(
-          n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0
-        );
-        if (!hasText) continue;
-        const r   = el.getBoundingClientRect();
-        const eT  = r.top    - containerTop;
-        const eB  = r.bottom - containerTop;
-        if (eT >= bestBreak || eB <= bestBreak) continue; // doesn't straddle
-        if (eT >= bestBreak - 3) continue;               // already at element top
-        if (r.height < ph4ElH) { ph4El = el; ph4ElH = r.height; }
-      }
-      if (ph4El) {
-        const lb = findLineBottomBefore(ph4El, bestBreak, containerTop);
-        if (lb !== null) bestBreak = lb;
       }
     }
 
