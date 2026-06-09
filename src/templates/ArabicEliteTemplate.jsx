@@ -247,10 +247,10 @@ const ArabicEliteTemplate = ({
     switch (key) {
 
       case 'skills': return data.skills?.length > 0 ? (
-        <section key="skills" style={BREAK_ITEM}>
+        <section key="skills">
           <SbHeading label={L.skills} />
           {data.skills.map((sk, i) => (
-            <div key={i} style={{ marginBottom: '8pt', direction: 'rtl' }}>
+            <div key={i} style={{ marginBottom: '8pt', direction: 'rtl', breakInside: 'avoid', pageBreakInside: 'avoid' }}>
               <div style={{ fontSize: '8.5pt', color: '#fff', textAlign: 'right', marginBottom: '3pt' }}>
                 {typeof sk === 'string' ? sk : (sk.name || sk)}
               </div>

@@ -177,7 +177,7 @@ const ModernTemplate = ({
       case 'skills': {
         const hasLevels = data.skills?.some(sk => (sk.level || 0) > 0);
         return data.skills?.length > 0 ? (
-          <section key="skills" style={BREAK_ITEM}>
+          <section key="skills">
             <SectionHeading label={tr('skills', isRTL)} />
             {hasLevels ? (
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '5pt 12pt' }}>
@@ -185,7 +185,7 @@ const ModernTemplate = ({
                   const name = sk.name || sk;
                   const level = sk.level || 0;
                   return (
-                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '2pt' }}>
+                    <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '2pt', breakInside: 'avoid', pageBreakInside: 'avoid' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <span style={{ fontSize: sz.body, color: '#1a1a1a', fontWeight: '500' }}>{name}</span>
                         {level > 0 && <span style={{ fontSize: '7pt', color: accent, fontWeight: '600' }}>{level}%</span>}
