@@ -852,38 +852,6 @@ const LivePreview = ({ breakDataRef }) => {
                 );
               })()}
 
-              {/* ── Quality strip — 4px colored line at the break point ─────────
-                  Green  = clean (gap ≤ 60px, no split)
-                  Amber  = gap   (section pulled to next page, blank space remains)
-                  Red    = split (a protected element straddles the break)
-                  Pulses red when there is a split so it's immediately noticeable.  */}
-              {!isLast && (() => {
-                const q = breakQuality[pageIndex];
-                if (!q) return null;
-                const cef = (end - clipStart) * scale;
-                const stripTop = Math.min(Math.max(cef - 2, 0), PAGE_H * scale - 4);
-                const color = q.status === 'clean' ? '#10b981'
-                            : q.status === 'gap'   ? '#f59e0b'
-                            : '#ef4444';
-                const title = isRTL
-                  ? (q.status === 'split' ? 'انقسام في المحتوى' : q.status === 'gap' ? `مسافة فارغة (${q.gap}px)` : 'فاصل نظيف')
-                  : (q.status === 'split' ? 'Content split here' : q.status === 'gap' ? `Empty gap (${q.gap}px)` : 'Clean page break');
-                return (
-                  <div
-                    title={title}
-                    style={{
-                      position: 'absolute',
-                      top: stripTop,
-                      left: 0, right: 0,
-                      height: 4,
-                      background: color,
-                      zIndex: 8,
-                      opacity: 0.88,
-                      pointerEvents: 'none',
-                    }}
-                  />
-                );
-              })()}
             </div>
           </div>
         );
