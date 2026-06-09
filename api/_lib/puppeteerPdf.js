@@ -453,7 +453,16 @@ export async function measureBreaks(html) {
       // Phantom-page guard — remove trailing breaks where the last page has
       // fewer than MIN_PHANTOM_PAGE px of content (likely just CSS bottom padding).
       // Must match the same guard in LivePreview.jsx computeSmartBreaks.
+      //
+      // SAFETY CHECK: never remove a break if doing so would cause the preceding
+      // page to exceed its visible height.  Without this, content just over one
+      // page tall can lose its only break and be clipped in the downloaded PDF.
       while (breaks.length > 0 && totalHeight - breaks[breaks.length - 1] < MIN_PHANTOM_PAGE) {
+        const prevBreakStart    = breaks.length >= 2 ? breaks[breaks.length - 2] : 0;
+        const isPrevFirstPage   = prevBreakStart === 0;
+        const prevPageTopMargin = isPrevFirstPage ? 0 : MARGIN;
+        const prevPageVisibleH  = PAGE_H - prevPageTopMargin;
+        if (totalHeight - prevBreakStart > prevPageVisibleH) break;
         breaks.pop();
         pageReport.pop();
       }

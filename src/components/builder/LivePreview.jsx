@@ -224,7 +224,18 @@ function computeSmartBreaks(container, totalHeight) {
   // A template's bottom padding can push scrollHeight slightly above PAGE_H
   // even for short CVs, producing a near-empty second page.  If the last page
   // has fewer real content pixels than MIN_PHANTOM_PAGE, discard its break.
+  //
+  // SAFETY CHECK: never remove a break if doing so would cause the preceding
+  // page to exceed its visible height (pageVisibleH).  Without this guard,
+  // content just over one page tall (e.g. 1125px when PAGE_H = 1122px) can
+  // lose its only break — making that content invisible in the downloaded PDF.
   while (breaks.length > 0 && totalHeight - breaks[breaks.length - 1] < MIN_PHANTOM_PAGE) {
+    const prevBreakStart    = breaks.length >= 2 ? breaks[breaks.length - 2] : 0;
+    const isPrevFirstPage   = prevBreakStart === 0;
+    const prevPageTopMargin = isPrevFirstPage ? 0 : MARGIN;
+    const prevPageVisibleH  = PAGE_H - prevPageTopMargin;
+    // If removing this break would make the preceding page overflow, stop.
+    if (totalHeight - prevBreakStart > prevPageVisibleH) break;
     breaks.pop();
   }
 
