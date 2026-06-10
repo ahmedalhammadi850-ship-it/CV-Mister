@@ -393,21 +393,40 @@ export async function measureBreaks(html) {
         }
 
         // ── Phase 2: Heading orphan fix ───────────────────────────────────────
-        // A section heading with break-after:avoid must NOT be the last element
-        // on a page. Pull the break to before the heading.
+        // Case A: A section heading with break-after:avoid ends before bestBreak
+        //         but is orphaned (stranded alone on the page). Move the break
+        //         to before the heading so it travels to page 2 with its content.
+        //
+        // Case B: bestBreak falls INSIDE the heading element itself. This happens
+        //         when Phase 4 calls getClientRects() on a large parent container
+        //         and finds the heading's own text line as the nearest boundary
+        //         before rawBreak. The resulting break splits the heading across
+        //         pages, hiding its decorative elements or its text.
+        //         Fix: if bestBreak is between hTop and hBot, move it to hTop.
+        //
+        // Both cases respect (rawBreak − hTop) ≤ MAX_PULL to avoid large pulls.
+        // Must stay in sync with Phase 2 in LivePreview.jsx computeSmartBreaks.
         Array.from(container.querySelectorAll('*')).forEach(el => {
           const cs = getComputedStyle(el);
           if (cs.breakAfter !== 'avoid' && cs.pageBreakAfter !== 'avoid') return;
           const rect = el.getBoundingClientRect();
           const hTop = rect.top    - containerTop;
           const hBot = rect.bottom - containerTop;
+          if ((rawBreak - hTop) > MAX_PULL) return;
           if (
             hBot > pageStart + MARGIN &&
             hBot <= bestBreak &&
-            (bestBreak - hBot) <= HEADING_ORPHAN_PX &&
-            (rawBreak - hTop) <= MAX_PULL
+            (bestBreak - hBot) <= HEADING_ORPHAN_PX
           ) {
+            // Case A: heading ends before break — orphan pull
             bestBreak = Math.min(bestBreak, hTop);
+          } else if (
+            hTop > pageStart + MARGIN &&
+            hTop < bestBreak &&
+            hBot > bestBreak
+          ) {
+            // Case B: break falls inside heading — move break to heading top
+            bestBreak = hTop;
           }
         });
 
