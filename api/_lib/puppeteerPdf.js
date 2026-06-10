@@ -438,15 +438,19 @@ export async function measureBreaks(html) {
             )
             .sort((a, b) => a.top - b.top);
 
-          for (const { top, bot, el } of avoidPositions) {
+          for (let _i = 0; _i < avoidPositions.length; _i++) {
+            const { top, bot, el } = avoidPositions[_i];
             if (top >= bestBreak - 2) {
-              // Phase 3 must NOT advance past a heading with break-after:avoid.
-              // Including such an element orphans it at the bottom of the page —
-              // the heading appears alone on page 1 while its content is on page 2,
-              // and the heading can be clipped in the PDF by overflow:hidden.
-              // Stop the greedy fill here; the heading will be on page 2 with its content.
+              // If this element has break-after:avoid (i.e. a section heading),
+              // only include it when there is at least one more avoidEl that also
+              // fits on this page AFTER it.  That guarantees the heading is followed
+              // by real content on the same page (not stranded alone at the bottom).
+              // If nothing fits after it, stop here so the heading moves to page 2.
               const cs = getComputedStyle(el);
-              if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') break;
+              if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') {
+                const hasFollowingContent = _i + 1 < avoidPositions.length;
+                if (!hasFollowingContent) break;
+              }
               bestBreak = Math.max(bestBreak, bot);
             }
           }
