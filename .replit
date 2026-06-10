@@ -70,9 +70,13 @@ VITE_N8N_CHAT_WEBHOOK_URL = "https://ahmed144.app.n8n.cloud/webhook/1d6ee35d-028
 VITE_N8N_PAYMENT_WEBHOOK_URL = "https://ahmed144.app.n8n.cloud/webhook/dfa3be7f-785a-4472-95b8-b9c5fb5bdeeb"
 
 [[ports]]
-localPort = 5173
-externalPort = 5173
+localPort = 3001
+externalPort = 3001
 
 [[ports]]
-localPort = 23636
-externalPort = 3000
+localPort = 5000
+externalPort = 80
+
+[[ports]]
+localPort = 5173
+externalPort = 5173
