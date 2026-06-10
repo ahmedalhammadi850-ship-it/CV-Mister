@@ -42,11 +42,11 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 
 const PAGE_H = 1122;   // A4 height at 96 dpi
 const PAGE_W = 794;    // A4 width  at 96 dpi
-const MARGIN = 48;     // top margin for pages 2+ (≈ 36pt) — visual breathing room
+const MARGIN = 20;     // top margin for pages 2+ — 20 px breathing room
 // Blank px reserved at the bottom of each page for the raw break calculation.
 // Set equal to MAX_BOTTOM_GAP so the base case already respects the gap limit.
 // Must match BOTTOM_BLANK in api/_lib/puppeteerPdf.js.
-const BOTTOM_BLANK = 15;
+const BOTTOM_BLANK = 20;
 const MIN_PAGE_CONTENT = 200; // minimum content pixels per page (used for drag handle clamping)
 // Heading orphan threshold: if a section heading ends within this many pixels of
 // the break point, it would be left alone on the page. Move the break to before
@@ -76,7 +76,7 @@ const MIN_PHANTOM_PAGE = 200;
 // After pull-backs, the greedy-fill phase packs complete avoid-elements into the
 // remaining space until the gap is ≤ this.
 // Must match MAX_BOTTOM_GAP in api/_lib/puppeteerPdf.js.
-const MAX_BOTTOM_GAP = 15;
+const MAX_BOTTOM_GAP = 20;
 
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;

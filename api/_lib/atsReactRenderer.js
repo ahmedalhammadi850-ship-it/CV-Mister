@@ -351,7 +351,7 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   //
   // PAGE 2+ TOP MARGIN  (mirrors LivePreview.jsx exactly)
   //   LivePreview renders page 2+ with:
-  //     clipStart = start - MARGIN  (48px before the break point)
+  //     clipStart = start - MARGIN  (20px before the break point)
   //     white overlay of MARGIN px covering the top of the frame
   //   This makes pages 2+ show a clean MARGIN px of white at the top, then
   //   content from exactly `start`.  We replicate this in the PDF using a
@@ -366,7 +366,7 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   //   The inner-clip sits BELOW the MARGIN px white zone and tightly clips
   //   content from template y=start to y=(start+sliceHeight).  No template
   //   content can bleed upward into the white margin.
-  const MARGIN = 48; // px — matches LivePreview.jsx MARGIN constant (≈ 36pt at 96dpi)
+  const MARGIN = 20; // px — matches LivePreview.jsx MARGIN constant
 
   const pageStarts = [0, ...pageBreaks];
 
