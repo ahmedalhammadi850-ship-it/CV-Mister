@@ -248,7 +248,7 @@ async function _openPage(html, viewportHeight = 1122) {
 
 // ── Constants shared with LivePreview.jsx ────────────────────────────────────
 const PAGE_H  = 1122;  // A4 height at 96 dpi  (must match LivePreview.jsx)
-const MARGIN  =   20;  // top/bottom page margin — 20 px (must match LivePreview.jsx)
+const MARGIN  =   48;  // top/bottom page margin (must match LivePreview.jsx)
 const MIN_PAGE_CONTENT = 200; // minimum content per page (must match LivePreview.jsx)
 // Heading orphan threshold — must match HEADING_ORPHAN_PX in LivePreview.jsx.
 const HEADING_ORPHAN_PX = 120;
@@ -264,15 +264,16 @@ const MAX_PULL_AVOID = 200;
 const MAX_PULL = 200;
 // BOTTOM_BLANK — blank px reserved at the bottom of each page for the raw break.
 // Must match BOTTOM_BLANK in src/components/builder/LivePreview.jsx.
-const BOTTOM_BLANK = 20;
+const BOTTOM_BLANK = 15;
 // MAX_BOTTOM_GAP — maximum allowed blank px at the bottom of any PDF page.
 // The greedy-fill phase packs complete avoid-elements into any gap > this.
 // Must match MAX_BOTTOM_GAP in src/components/builder/LivePreview.jsx.
-const MAX_BOTTOM_GAP = 20;
+const MAX_BOTTOM_GAP = 15;
 // MIN_PHANTOM_PAGE — minimum real content on the last page before we consider
 // the break a phantom caused by CSS bottom-padding and remove it.
 // Must match MIN_PHANTOM_PAGE in src/components/builder/LivePreview.jsx.
-const MIN_PHANTOM_PAGE = 200;
+const MIN_PHANTOM_PAGE = 50;
+
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
  *
@@ -469,30 +470,15 @@ export async function measureBreaks(html) {
       // fewer than MIN_PHANTOM_PAGE px of content (likely just CSS bottom padding).
       // Must match the same guard in LivePreview.jsx computeSmartBreaks.
       //
-      // CONTENT-SAFETY CHECK: only remove a break when no real text node has its
-      // bottom edge below the previous page's cutoff line.  Verified by DOM
-      // inspection — never clips visible text content.
+      // SAFETY CHECK: never remove a break if doing so would cause the preceding
+      // page to exceed its visible height.  Without this, content just over one
+      // page tall can lose its only break and be clipped in the downloaded PDF.
       while (breaks.length > 0 && totalHeight - breaks[breaks.length - 1] < MIN_PHANTOM_PAGE) {
         const prevBreakStart    = breaks.length >= 2 ? breaks[breaks.length - 2] : 0;
         const isPrevFirstPage   = prevBreakStart === 0;
         const prevPageTopMargin = isPrevFirstPage ? 0 : MARGIN;
         const prevPageVisibleH  = PAGE_H - prevPageTopMargin;
-        const cutoff            = prevBreakStart + prevPageVisibleH;
-
-        // Walk every text-bearing leaf; if any bottom > cutoff, removing this
-        // break would clip real content — stop immediately.
-        const wouldClipContent = Array.from(
-          container.querySelectorAll('p, span, li, h1, h2, h3, h4, h5, h6, address, td, th')
-        ).some(el => {
-          const hasText = Array.from(el.childNodes).some(
-            n => n.nodeType === 3 && n.textContent.trim().length > 0
-          );
-          if (!hasText) return false;
-          const elBottom = el.getBoundingClientRect().bottom - containerTop;
-          return elBottom > cutoff + 4; // 4 px rounding tolerance
-        });
-
-        if (wouldClipContent) break;
+        if (totalHeight - prevBreakStart > prevPageVisibleH) break;
         breaks.pop();
         pageReport.pop();
       }
