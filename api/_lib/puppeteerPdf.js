@@ -408,12 +408,19 @@ export async function measureBreaks(html) {
         // ANCESTOR GUARD: skip sub-elements whose break-inside:avoid ancestor spans
         // into page 2 — including them would orphan that container's content.
         if (rawBreak - bestBreak > MAX_BOTTOM_GAP) {
+          // A container is "unbreakable" only if it has content that already
+          // started on this page (t < bestBreak - 2).  If the container starts
+          // exactly at bestBreak (e.g. Phase 2 pulled the break to the heading's
+          // top which is the first child of a break-inside:avoid item div), the
+          // container hasn't started on page 1 yet — treating it as unbreakable
+          // would block Phase 3 from filling any elements and force the entire
+          // section to page 2 as one block.
           const unbreakableContainers = new Set(
             avoidEls.filter(el => {
               const r = el.getBoundingClientRect();
               const t = r.top    - containerTop;
               const b = r.bottom - containerTop;
-              return t <= bestBreak && b > rawBreak;
+              return t < bestBreak - 2 && b > rawBreak;
             })
           );
           const isInsideUnbreakable = (el) => {

@@ -1,28 +1,35 @@
 ---
-name: Phase 3 heading orphan / PDF clip buffer
-description: Section headings disappear in the PDF because the overflow:hidden clip cuts them at the exact break boundary. Fixed with CLIP_BUFFER in _buildDocument.
+name: Phase 3 ancestor guard — unbreakable container boundary fix
+description: When Phase 2 pulls bestBreak to a heading's top that is the first child of a break-inside:avoid item div, the whole section moves to page 2 as a block. Fixed by using strict less-than in unbreakableContainers filter.
 ---
 
-# Section Heading Disappears in PDF
+# Phase 3 Ancestor Guard — Section Moves as a Block Bug
 
-## Root Cause
-The smart-break algorithm (Phase 3 greedy fill) sets `bestBreak = heading.bottom` — the break falls right on the bottom edge of the heading.  `_buildDocument` then creates an `overflow:hidden` clip with `height = bestBreak`.
+## The Rule
+In Phase 3's `unbreakableContainers` filter, use **strict** `t < bestBreak - 2` (not `t <= bestBreak`).
 
-Pass 1 (measureBreaks) and Pass 2 (generatePdfFromHtml) run in the same Chromium process, but sub-pixel font hinting can shift an element's rendered bottom by 1-3 px between the two passes.  If the heading renders 2 px taller in Pass 2 than in Pass 1, its bottom falls just outside the clip → heading is invisible in the PDF.
+**Why:** A container is "unbreakable" only if it has content already on page 1 (started before bestBreak). When Phase 2 pulls bestBreak to a heading's top, and the heading is the first child of a `break-inside:avoid` item div, that div's top equals bestBreak exactly. With `t <= bestBreak`, the div is incorrectly treated as "partly on page 1" and placed in unbreakableContainers → Phase 3 sees all its children as "inside unbreakable" → skips all of them → bestBreak stays at heading.top → entire section (heading + all items) moves to page 2 as one block.
 
-## Fix: CLIP_BUFFER = 4 px in _buildDocument (atsReactRenderer.js)
-Add 4 px to the clip height of every **non-last** page:
+**How to apply:** In BOTH `src/components/builder/LivePreview.jsx` and `api/_lib/puppeteerPdf.js`, Phase 3 unbreakableContainers filter:
 
-- **Page 1** `.page-slice` height: `sliceHeight + CLIP_BUFFER`
-- **Pages 2+** inner clip height: derived from `totalSliceHeight = sliceHeight + MARGIN + CLIP_BUFFER`
+```js
+const unbreakableContainers = new Set(
+  avoidEls.filter(el => {
+    const r = el.getBoundingClientRect();
+    const t = r.top    - containerTop;
+    const b = r.bottom - containerTop;
+    return t < bestBreak - 2 && b > rawBreak;  // ← strict <, not <=
+  })
+);
+```
 
-4 px is larger than any realistic hinting drift, yet safely within the 15 px `BOTTOM_BLANK` reserved zone, so no next-page content ever bleeds through.
+## Result after fix
+- Phase 2 pulls bestBreak to heading.top (correct orphan protection)
+- Phase 3 finds the item div is NOT in unbreakableContainers (it starts at bestBreak, not before it)
+- Phase 3 greedily includes: heading → rule → project title (h3)
+- Project description (if too long) stays on page 2 — line-by-line flow
+- Heading is 20-50px above the clip boundary → no PDF clipping risk
 
-**Why not apply to last page?** Last page already has `LAST_PAGE_SSR_BUFFER = 200 px`, which is more than enough.
-
-## What NOT to do
-- Do NOT change Phase 3's loop to skip / stop at `break-after:avoid` headings — that pushes the entire section to the next page and breaks the line-by-line flow the user expects.
-- Do NOT use browser-measured breaks for the PDF — Puppeteer must measure its own breaks (Pass 1) because Linux/Windows font metrics differ by 30-150 px per page.
-
-## Files changed
-- `api/_lib/atsReactRenderer.js` — `CLIP_BUFFER = 4` added near top of `pageContainers` map, applied to `singleHeight` (page 1) and `rawTotalSliceHeight` (pages 2+).
+## Files to keep in sync
+- `src/components/builder/LivePreview.jsx` — Phase 3 unbreakableContainers filter
+- `api/_lib/puppeteerPdf.js` — Phase 3 unbreakableContainers filter
