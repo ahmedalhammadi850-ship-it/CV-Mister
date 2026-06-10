@@ -438,19 +438,8 @@ export async function measureBreaks(html) {
             )
             .sort((a, b) => a.top - b.top);
 
-          for (let _i = 0; _i < avoidPositions.length; _i++) {
-            const { top, bot, el } = avoidPositions[_i];
+          for (const { top, bot } of avoidPositions) {
             if (top >= bestBreak - 2) {
-              // If this element has break-after:avoid (i.e. a section heading),
-              // only include it when there is at least one more avoidEl that also
-              // fits on this page AFTER it.  That guarantees the heading is followed
-              // by real content on the same page (not stranded alone at the bottom).
-              // If nothing fits after it, stop here so the heading moves to page 2.
-              const cs = getComputedStyle(el);
-              if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') {
-                const hasFollowingContent = _i + 1 < avoidPositions.length;
-                if (!hasFollowingContent) break;
-              }
               bestBreak = Math.max(bestBreak, bot);
             }
           }
