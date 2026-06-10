@@ -79,6 +79,13 @@ const MIN_PHANTOM_PAGE = 50;
 // Must match MAX_BOTTOM_GAP in api/_lib/puppeteerPdf.js.
 const MAX_BOTTOM_GAP = 15;
 
+// Maximum distance (px) Phase 4 is allowed to snap bestBreak back from rawBreak.
+// When the nearest text-line boundary is farther than this, the content between
+// rawBreak and that boundary is section-spacing (not text), so it is cleaner to
+// break at rawBreak and get a 0-gap than to pull back and leave a large blank.
+// Must match MAX_PHASE4_SNAP in api/_lib/puppeteerPdf.js.
+const MAX_PHASE4_SNAP = 40;
+
 function computeSmartBreaks(container, totalHeight) {
   const containerTop = container.getBoundingClientRect().top;
 
@@ -115,13 +122,15 @@ function computeSmartBreaks(container, totalHeight) {
     });
 
     // ── Phase 4 (PRIMARY — runs FIRST): Line-boundary snap at rawBreak ───────
-    // Targets rawBreak directly so the break always lands on a complete text-line
-    // boundary, never mid-character. Typically gives bestBreak ≈ rawBreak − 0..15px
-    // (one line height), keeping the bottom gap small and lines intact.
-    // Running this first means large containers are split at a line boundary
-    // instead of being avoided entirely (which used to leave 80-100px blank).
+    // Scans ALL elements that straddle rawBreak and finds the MAXIMUM lastSafe
+    // (nearest text-line bottom to rawBreak) across all of them.
+    // Using max() instead of picking the smallest element prevents large gaps
+    // caused by tall containers whose last text line is far above rawBreak.
+    // Only applied when the snap is ≤ MAX_PHASE4_SNAP (40px): a larger snap
+    // means the nearest text is in a distant section, and breaking at rawBreak
+    // itself (gap=0) is cleaner than a large blank at the page bottom.
     {
-      let ph4El = null, ph4ElH = Infinity;
+      let ph4BestSnap = null;
       for (const el of container.querySelectorAll('p, li, td, th, address, div, span')) {
         const hasText = Array.from(el.childNodes).some(
           n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0
@@ -132,11 +141,11 @@ function computeSmartBreaks(container, totalHeight) {
         const eB = r.bottom - containerTop;
         if (eT >= rawBreak || eB <= rawBreak) continue; // must straddle rawBreak
         if (eT >= rawBreak - 3) continue;               // already at element top
-        if (r.height < ph4ElH) { ph4El = el; ph4ElH = r.height; }
+        const lb = findLineBottomBefore(el, rawBreak, containerTop);
+        if (lb !== null && (ph4BestSnap === null || lb > ph4BestSnap)) ph4BestSnap = lb;
       }
-      if (ph4El) {
-        const lb = findLineBottomBefore(ph4El, rawBreak, containerTop);
-        if (lb !== null) bestBreak = lb;
+      if (ph4BestSnap !== null && rawBreak - ph4BestSnap <= MAX_PHASE4_SNAP) {
+        bestBreak = ph4BestSnap;
       }
     }
 

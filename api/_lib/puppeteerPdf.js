@@ -269,6 +269,13 @@ const BOTTOM_BLANK = 15;
 // The greedy-fill phase packs complete avoid-elements into any gap > this.
 // Must match MAX_BOTTOM_GAP in src/components/builder/LivePreview.jsx.
 const MAX_BOTTOM_GAP = 15;
+
+// Maximum distance (px) Phase 4 is allowed to snap bestBreak back from rawBreak.
+// When the nearest text-line boundary is farther than this, the content between
+// rawBreak and that boundary is section-spacing (not text), so it is cleaner to
+// break at rawBreak and get a 0-gap than to pull back and leave a large blank.
+// Must match MAX_PHASE4_SNAP in src/components/builder/LivePreview.jsx.
+const MAX_PHASE4_SNAP = 40;
 // MIN_PHANTOM_PAGE — minimum real content on the last page before we consider
 // the break a phantom caused by CSS bottom-padding and remove it.
 // Must match MIN_PHANTOM_PAGE in src/components/builder/LivePreview.jsx.
@@ -288,7 +295,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE, MAX_PHASE4_SNAP) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], pageReport: [], totalHeight: PAGE_H };
@@ -331,38 +338,41 @@ export async function measureBreaks(html) {
         });
 
         // ── Phase 4 (PRIMARY — runs FIRST): Line-boundary snap at rawBreak ─────
-        // Targets rawBreak directly so the break always lands on a complete text-line
-        // boundary. Typically gives bestBreak ≈ rawBreak − 0..15 px (one line height).
-        // Running first means large containers are split at a line boundary instead
-        // of being avoided entirely (which caused 80-100 px blank gaps).
+        // Scans ALL elements that straddle rawBreak and finds the MAXIMUM lastSafe
+        // (nearest text-line bottom to rawBreak) across all of them.
+        // Using max() instead of the smallest element prevents large gaps caused
+        // by tall containers whose last text line is far above rawBreak.
+        // Only applied when the snap is ≤ MAX_PHASE4_SNAP (40 px): a larger snap
+        // means the nearest text is in a distant section, and breaking at rawBreak
+        // itself (gap=0) is cleaner than a large blank at the page bottom.
         // Must stay in sync with Phase 4 in LivePreview.jsx computeSmartBreaks.
         {
-          let ph4El = null, ph4ElH = Infinity;
+          let ph4BestSnap = null;
           const ph4Els = container.querySelectorAll('p, li, td, th, address, div, span');
           for (const el of ph4Els) {
             const hasText = Array.from(el.childNodes).some(
               n => n.nodeType === 3 && n.textContent.trim().length > 0
             );
             if (!hasText) continue;
-            const r   = el.getBoundingClientRect();
-            const eT  = r.top    - containerTop;
-            const eB  = r.bottom - containerTop;
+            const r  = el.getBoundingClientRect();
+            const eT = r.top    - containerTop;
+            const eB = r.bottom - containerTop;
             if (eT >= rawBreak || eB <= rawBreak) continue; // must straddle rawBreak
             if (eT >= rawBreak - 3) continue;               // already at element top
-            if (r.height < ph4ElH) { ph4El = el; ph4ElH = r.height; }
-          }
-          if (ph4El) {
             try {
               const range = document.createRange();
-              range.selectNodeContents(ph4El);
+              range.selectNodeContents(el);
               const rects = Array.from(range.getClientRects());
-              let lastSafe = null;
               for (const rect of rects) {
                 const rBot = rect.bottom - containerTop;
-                if (rBot <= rawBreak - 1) lastSafe = rBot;
+                if (rBot <= rawBreak - 1 && (ph4BestSnap === null || rBot > ph4BestSnap)) {
+                  ph4BestSnap = rBot;
+                }
               }
-              if (lastSafe !== null) bestBreak = lastSafe;
             } catch (_) {}
+          }
+          if (ph4BestSnap !== null && rawBreak - ph4BestSnap <= MAX_PHASE4_SNAP) {
+            bestBreak = ph4BestSnap;
           }
         }
 
@@ -490,7 +500,7 @@ export async function measureBreaks(html) {
       }
 
       return { breaks, pageReport, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE, MAX_PHASE4_SNAP);
 
     // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
     const fontStatus = await page.evaluate(() => {
