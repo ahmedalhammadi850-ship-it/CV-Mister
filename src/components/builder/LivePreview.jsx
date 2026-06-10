@@ -220,7 +220,15 @@ function computeSmartBreaks(container, totalHeight) {
         )
         .sort((a, b) => a.top - b.top);
 
-      for (const { top, bot } of avoidPositions) {
+      for (const { top, bot, el } of avoidPositions) {
+        // A break-after:avoid heading must NOT be stranded at the bottom of the
+        // page without its content.  If we encounter one here it means its
+        // following content does NOT fit before rawBreak (otherwise the content
+        // would also be in avoidPositions and would have been included already).
+        // Stop immediately — leave the heading on page 2 where its content is.
+        const cs = getComputedStyle(el);
+        if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') break;
+
         if (top >= bestBreak - 2) {
           bestBreak = Math.max(bestBreak, bot);
         }

@@ -1,35 +1,34 @@
 ---
-name: Phase 3 ancestor guard — unbreakable container boundary fix
-description: When Phase 2 pulls bestBreak to a heading's top that is the first child of a break-inside:avoid item div, the whole section moves to page 2 as a block. Fixed by using strict less-than in unbreakableContainers filter.
+name: Phase 3 heading orphan bug — break-after:avoid stop guard
+description: Phase 3 greedy fill advances bestBreak past break-after:avoid headings whose following content doesn't fit, stranding the heading at the page bottom where it gets clipped in PDF.
 ---
 
-# Phase 3 Ancestor Guard — Section Moves as a Block Bug
+# Phase 3 Heading Orphan Bug
 
 ## The Rule
-In Phase 3's `unbreakableContainers` filter, use **strict** `t < bestBreak - 2` (not `t <= bestBreak`).
+In Phase 3's for loop over `avoidPositions`, **break out immediately** when the element has `break-after: avoid` (or `pageBreakAfter: avoid`).
 
-**Why:** A container is "unbreakable" only if it has content already on page 1 (started before bestBreak). When Phase 2 pulls bestBreak to a heading's top, and the heading is the first child of a `break-inside:avoid` item div, that div's top equals bestBreak exactly. With `t <= bestBreak`, the div is incorrectly treated as "partly on page 1" and placed in unbreakableContainers → Phase 3 sees all its children as "inside unbreakable" → skips all of them → bestBreak stays at heading.top → entire section (heading + all items) moves to page 2 as one block.
+**Why:** Phase 3 greedily includes elements whose `bot <= rawBreak`. A section heading (`.cv-heading`, `break-after:avoid`) can fit before rawBreak but its following content (e.g. "English (Native)...") cannot. Phase 3 advances bestBreak to the heading's bottom, orphaning the heading at the very bottom of page 1 without its content. The heading then gets clipped in the PDF by the page-slice overflow:hidden. The heading is missing from both page 1 (clipped) and page 2 (translateY=heading.bot means heading is at inner-clip y<0).
 
-**How to apply:** In BOTH `src/components/builder/LivePreview.jsx` and `api/_lib/puppeteerPdf.js`, Phase 3 unbreakableContainers filter:
+**How to apply:** In BOTH `src/components/builder/LivePreview.jsx` and `api/_lib/puppeteerPdf.js`, Phase 3 for loop:
 
 ```js
-const unbreakableContainers = new Set(
-  avoidEls.filter(el => {
-    const r = el.getBoundingClientRect();
-    const t = r.top    - containerTop;
-    const b = r.bottom - containerTop;
-    return t < bestBreak - 2 && b > rawBreak;  // ← strict <, not <=
-  })
-);
+for (const { top, bot, el } of avoidPositions) {
+  // A break-after:avoid heading must NOT be stranded at the bottom of the
+  // page without its content. Stop here — leave it on page 2 with content.
+  const cs = getComputedStyle(el);
+  if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') break;
+
+  if (top >= bestBreak - 2) {
+    bestBreak = Math.max(bestBreak, bot);
+  }
+}
 ```
 
-## Result after fix
-- Phase 2 pulls bestBreak to heading.top (correct orphan protection)
-- Phase 3 finds the item div is NOT in unbreakableContainers (it starts at bestBreak, not before it)
-- Phase 3 greedily includes: heading → rule → project title (h3)
-- Project description (if too long) stays on page 2 — line-by-line flow
-- Heading is 20-50px above the clip boundary → no PDF clipping risk
+## Separate fix: unbreakableContainers strict < guard
+Phase 3's `unbreakableContainers` filter uses **strict** `t < bestBreak - 2` (not `t <= bestBreak`).
+This prevents a container starting exactly at bestBreak from being treated as "partly on page 1", which would block Phase 3 from filling any of its children. Both fixes must coexist.
 
 ## Files to keep in sync
-- `src/components/builder/LivePreview.jsx` — Phase 3 unbreakableContainers filter
-- `api/_lib/puppeteerPdf.js` — Phase 3 unbreakableContainers filter
+- `src/components/builder/LivePreview.jsx` — Phase 3 for loop
+- `api/_lib/puppeteerPdf.js` — Phase 3 for loop (inside page.evaluate callback)

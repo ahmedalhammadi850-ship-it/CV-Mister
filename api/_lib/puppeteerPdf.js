@@ -445,7 +445,13 @@ export async function measureBreaks(html) {
             )
             .sort((a, b) => a.top - b.top);
 
-          for (const { top, bot } of avoidPositions) {
+          for (const { top, bot, el } of avoidPositions) {
+            // A break-after:avoid heading must NOT be stranded at the bottom
+            // of the page without its content.  Stop here — leave the heading
+            // on page 2 where its content is.
+            const cs = getComputedStyle(el);
+            if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') break;
+
             if (top >= bestBreak - 2) {
               bestBreak = Math.max(bestBreak, bot);
             }
