@@ -438,8 +438,15 @@ export async function measureBreaks(html) {
             )
             .sort((a, b) => a.top - b.top);
 
-          for (const { top, bot } of avoidPositions) {
+          for (const { top, bot, el } of avoidPositions) {
             if (top >= bestBreak - 2) {
+              // Phase 3 must NOT advance past a heading with break-after:avoid.
+              // Including such an element orphans it at the bottom of the page —
+              // the heading appears alone on page 1 while its content is on page 2,
+              // and the heading can be clipped in the PDF by overflow:hidden.
+              // Stop the greedy fill here; the heading will be on page 2 with its content.
+              const cs = getComputedStyle(el);
+              if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') break;
               bestBreak = Math.max(bestBreak, bot);
             }
           }
