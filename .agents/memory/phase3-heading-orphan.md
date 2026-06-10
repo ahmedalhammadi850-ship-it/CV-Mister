@@ -1,47 +1,28 @@
 ---
-name: Phase 3 heading orphan bug
-description: Phase 3 greedy fill pushes bestBreak past break-after:avoid headings, orphaning them at page bottom and hiding them in the PDF.
+name: Phase 3 heading orphan / PDF clip buffer
+description: Section headings disappear in the PDF because the overflow:hidden clip cuts them at the exact break boundary. Fixed with CLIP_BUFFER in _buildDocument.
 ---
 
-# Phase 3 Heading Orphan Bug
+# Section Heading Disappears in PDF
 
-## The Rule
-In Phase 3's greedy fill loop, when encountering an element with `break-after:avoid` (a section heading):
-- **Allow** it if there is at least one more avoidEl after it in `avoidPositions` (so content follows the heading on the same page)
-- **Stop (`break`)** if the heading is the last element — it would be stranded alone at the page bottom
+## Root Cause
+The smart-break algorithm (Phase 3 greedy fill) sets `bestBreak = heading.bottom` — the break falls right on the bottom edge of the heading.  `_buildDocument` then creates an `overflow:hidden` clip with `height = bestBreak`.
 
-**Why:** BREAK_HEADING in templateUtils.js sets `breakAfter: 'avoid'` on h2 section headings. Phase 3 can greedily push bestBreak past the heading, leaving it orphaned at the bottom of page 1 with its content on page 2. In the PDF this causes the heading to be clipped by overflow:hidden (appears missing). Correct behavior: heading may sit at the page bottom only when at least one line of content follows it there.
+Pass 1 (measureBreaks) and Pass 2 (generatePdfFromHtml) run in the same Chromium process, but sub-pixel font hinting can shift an element's rendered bottom by 1-3 px between the two passes.  If the heading renders 2 px taller in Pass 2 than in Pass 1, its bottom falls just outside the clip → heading is invisible in the PDF.
 
-**How to apply:** In the Phase 3 `for` loop in BOTH files:
+## Fix: CLIP_BUFFER = 4 px in _buildDocument (atsReactRenderer.js)
+Add 4 px to the clip height of every **non-last** page:
 
-```js
-// src/components/builder/LivePreview.jsx  AND  api/_lib/puppeteerPdf.js
-for (let _i = 0; _i < avoidPositions.length; _i++) {
-  const { top, bot, el } = avoidPositions[_i];
-  if (top >= bestBreak - 2) {
-    const cs = getComputedStyle(el);
-    if (cs.breakAfter === 'avoid' || cs.pageBreakAfter === 'avoid') {
-      // Only include heading if something follows it on this page
-      const hasFollowingContent = _i + 1 < avoidPositions.length;
-      if (!hasFollowingContent) break;   // heading would be last → push to page 2
-    }
-    bestBreak = Math.max(bestBreak, bot);
-  }
-}
-```
+- **Page 1** `.page-slice` height: `sliceHeight + CLIP_BUFFER`
+- **Pages 2+** inner clip height: derived from `totalSliceHeight = sliceHeight + MARGIN + CLIP_BUFFER`
 
-## Symptom
-Preview shows section heading (e.g. "PROJECTS") at the bottom of page 1 with content on page 2. PDF shows content on page 2 with NO heading — the heading is completely missing.
+4 px is larger than any realistic hinting drift, yet safely within the 15 px `BOTTOM_BLANK` reserved zone, so no next-page content ever bleeds through.
 
-## Root Cause Chain
-1. Phase 4 snaps bestBreak to last safe line before rawBreak (e.g. end of Skills section)
-2. Phase 2 checks for orphaned headings: heading.bottom must be ≤ bestBreak — but heading is BELOW bestBreak so Phase 2 skips it
-3. Phase 3 greedily includes avoidEls after bestBreak. The heading (height ≤ 35px → in avoidEls) gets included → bestBreak advances past heading to heading.bot
-4. If heading.bot ≈ rawBreak, any Puppeteer font-metric difference causes heading to overflow the clip in the PDF → heading invisible
+**Why not apply to last page?** Last page already has `LAST_PAGE_SSR_BUFFER = 200 px`, which is more than enough.
 
-## Desired behaviour
-Heading MAY be at the bottom of a page as long as at least one more avoidEl (content line) follows it on that page. If heading is the last avoidEl that fits, push it to page 2.
+## What NOT to do
+- Do NOT change Phase 3's loop to skip / stop at `break-after:avoid` headings — that pushes the entire section to the next page and breaks the line-by-line flow the user expects.
+- Do NOT use browser-measured breaks for the PDF — Puppeteer must measure its own breaks (Pass 1) because Linux/Windows font metrics differ by 30-150 px per page.
 
-## Files to keep in sync
-- `src/components/builder/LivePreview.jsx` Phase 3 loop
-- `api/_lib/puppeteerPdf.js` Phase 3 loop
+## Files changed
+- `api/_lib/atsReactRenderer.js` — `CLIP_BUFFER = 4` added near top of `pageContainers` map, applied to `singleHeight` (page 1) and `rawTotalSliceHeight` (pages 2+).

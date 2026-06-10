@@ -388,6 +388,18 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
   // which prevents an unwanted blank third page.
   const LAST_PAGE_SSR_BUFFER = 200;
 
+  // Small overflow buffer added to every non-last page's clip height.
+  //
+  // WHY: The smart-break algorithm places bestBreak at the exact bottom of the
+  // last element on a page (e.g. a section heading or a text line).  Puppeteer
+  // then clips that page at overflow:hidden with height = bestBreak.
+  // Sub-pixel font hinting differences between the measurement pass (Pass 1)
+  // and the rendering pass (Pass 2) can shift an element's bottom by 1-3 px,
+  // placing it fractionally BELOW the clip boundary → it disappears from the PDF.
+  // A 4 px buffer is larger than any realistic hinting drift, yet safely within
+  // the 15 px BOTTOM_BLANK reserved zone, so no next-page content ever bleeds in.
+  const CLIP_BUFFER = 4;
+
   const pageContainers = pageStarts.map((start, i) => {
     const isFirst = i === 0;
     const isLast  = i === pageStarts.length - 1;
@@ -400,8 +412,9 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     if (isFirst) {
       // Page 1 (single-page OR first of multi-page): template at translateY(0).
       // For single-page documents cap at A4 height so Puppeteer never emits a
-      // second blank page.
-      const singleHeight = isLast ? Math.min(sliceHeight, 1122) : sliceHeight;
+      // second blank page.  Add CLIP_BUFFER to non-last pages so elements whose
+      // bottom lands exactly at the break point are not clipped by overflow:hidden.
+      const singleHeight = isLast ? Math.min(sliceHeight, 1122) : sliceHeight + CLIP_BUFFER;
       return `<div class="page-slice${isLast ? ' last-slice' : ''}" style="height:${singleHeight}px">
   <div class="template-wrap" style="transform:translateY(0px)">
     ${bodyHtml}
@@ -413,7 +426,10 @@ function _buildDocument(bodyHtml, isRTL, pageBreaks, totalHeight) {
     // For the last page, cap totalSliceHeight at A4 height (1122 px) so
     // the SSR buffer never pushes the slice past one full page and causes
     // Puppeteer to emit an unwanted blank extra page.
-    const rawTotalSliceHeight = sliceHeight + MARGIN;
+    // CLIP_BUFFER is added to non-last pages (both outer and inner dimensions)
+    // so boundary elements are not clipped by the inner overflow:hidden.
+    const clipExtra = isLast ? 0 : CLIP_BUFFER;
+    const rawTotalSliceHeight = sliceHeight + MARGIN + clipExtra;
     const totalSliceHeight = Math.min(rawTotalSliceHeight, 1122);
     const innerHeight = totalSliceHeight - MARGIN;
 
