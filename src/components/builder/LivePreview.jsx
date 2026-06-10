@@ -72,13 +72,6 @@ const MAX_LINE_H = 35;  // px — covers one line at up to ~14pt / line-height 1
 // 200 px covers a single short section (e.g. a one-line Languages block ~80-120 px)
 // so it gets pulled back to page 1 instead of sitting alone on page 2.
 const MIN_PHANTOM_PAGE = 200;
-// Maximum px of content that may be clipped when the phantom guard removes a break.
-// The previous page's overflow beyond PAGE_H is almost always template bottom-padding
-// (typically 40-60 px), not real text.  Allowing up to 60 px of "clip" lets the guard
-// merge a sparse last page even when the preceding page is just slightly over PAGE_H.
-// Must match CLIP_TOLERANCE in api/_lib/puppeteerPdf.js.
-const CLIP_TOLERANCE = 60;
-
 // Maximum allowed blank space (px) at the bottom of any page.
 // After pull-backs, the greedy-fill phase packs complete avoid-elements into the
 // remaining space until the gap is ≤ this.
@@ -240,21 +233,34 @@ function computeSmartBreaks(container, totalHeight) {
   // ── Phantom-page guard ────────────────────────────────────────────────────
   // A template's bottom padding can push scrollHeight slightly above PAGE_H
   // even for short CVs, producing a near-empty second page.  If the last page
-  // has fewer real content pixels than MIN_PHANTOM_PAGE, discard its break.
+  // has fewer real content pixels than MIN_PHANTOM_PAGE, try to discard its break.
   //
-  // SAFETY CHECK: never remove a break if doing so would cause the preceding
-  // page to exceed its visible height (pageVisibleH).  Without this guard,
-  // content just over one page tall (e.g. 1125px when PAGE_H = 1122px) can
-  // lose its only break — making that content invisible in the downloaded PDF.
+  // CONTENT-SAFETY CHECK: only remove a break when no real text node has its
+  // bottom edge below the previous page's cutoff line.  The overflow beyond
+  // PAGE_H is almost always empty spacing / template bottom-padding — verified
+  // by DOM inspection rather than a blind pixel tolerance.  This guarantees
+  // that no visible text is ever clipped when the break is removed.
   while (breaks.length > 0 && totalHeight - breaks[breaks.length - 1] < MIN_PHANTOM_PAGE) {
     const prevBreakStart    = breaks.length >= 2 ? breaks[breaks.length - 2] : 0;
     const isPrevFirstPage   = prevBreakStart === 0;
     const prevPageTopMargin = isPrevFirstPage ? 0 : MARGIN;
     const prevPageVisibleH  = PAGE_H - prevPageTopMargin;
-    const overflow          = (totalHeight - prevBreakStart) - prevPageVisibleH;
-    // Only remove the break if the previous page stays within bounds, OR the overflow
-    // is ≤ CLIP_TOLERANCE (template bottom-padding, not real content).
-    if (overflow > CLIP_TOLERANCE) break;
+    const cutoff            = prevBreakStart + prevPageVisibleH;
+
+    // Walk every text-bearing leaf element; if any has its bottom > cutoff,
+    // removing this break would clip real content — stop immediately.
+    const wouldClipContent = Array.from(
+      container.querySelectorAll('p, span, li, h1, h2, h3, h4, h5, h6, address, td, th')
+    ).some(el => {
+      const hasText = Array.from(el.childNodes).some(
+        n => n.nodeType === Node.TEXT_NODE && n.textContent.trim().length > 0
+      );
+      if (!hasText) return false;
+      const elBottom = el.getBoundingClientRect().bottom - containerTop;
+      return elBottom > cutoff + 4; // 4 px rounding tolerance
+    });
+
+    if (wouldClipContent) break;
     breaks.pop();
   }
 

@@ -273,12 +273,6 @@ const MAX_BOTTOM_GAP = 15;
 // the break a phantom caused by CSS bottom-padding and remove it.
 // Must match MIN_PHANTOM_PAGE in src/components/builder/LivePreview.jsx.
 const MIN_PHANTOM_PAGE = 200;
-// CLIP_TOLERANCE — max px of overflow allowed when phantom guard removes a break.
-// The overflow is almost always template bottom-padding (40-60 px), not real text.
-// Allows merging a sparse last page even when the previous page is marginally > PAGE_H.
-// Must match CLIP_TOLERANCE in src/components/builder/LivePreview.jsx.
-const CLIP_TOLERANCE = 60;
-
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
  *
@@ -293,7 +287,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE, CLIP_TOLERANCE) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], pageReport: [], totalHeight: PAGE_H };
@@ -475,24 +469,36 @@ export async function measureBreaks(html) {
       // fewer than MIN_PHANTOM_PAGE px of content (likely just CSS bottom padding).
       // Must match the same guard in LivePreview.jsx computeSmartBreaks.
       //
-      // SAFETY CHECK: never remove a break if doing so would cause the preceding
-      // page to exceed its visible height.  Without this, content just over one
-      // page tall can lose its only break and be clipped in the downloaded PDF.
+      // CONTENT-SAFETY CHECK: only remove a break when no real text node has its
+      // bottom edge below the previous page's cutoff line.  Verified by DOM
+      // inspection — never clips visible text content.
       while (breaks.length > 0 && totalHeight - breaks[breaks.length - 1] < MIN_PHANTOM_PAGE) {
         const prevBreakStart    = breaks.length >= 2 ? breaks[breaks.length - 2] : 0;
         const isPrevFirstPage   = prevBreakStart === 0;
         const prevPageTopMargin = isPrevFirstPage ? 0 : MARGIN;
         const prevPageVisibleH  = PAGE_H - prevPageTopMargin;
-        const overflow          = (totalHeight - prevBreakStart) - prevPageVisibleH;
-        // Only remove the break if the previous page stays within bounds, OR the overflow
-        // is ≤ CLIP_TOLERANCE (template bottom-padding, not real content).
-        if (overflow > CLIP_TOLERANCE) break;
+        const cutoff            = prevBreakStart + prevPageVisibleH;
+
+        // Walk every text-bearing leaf; if any bottom > cutoff, removing this
+        // break would clip real content — stop immediately.
+        const wouldClipContent = Array.from(
+          container.querySelectorAll('p, span, li, h1, h2, h3, h4, h5, h6, address, td, th')
+        ).some(el => {
+          const hasText = Array.from(el.childNodes).some(
+            n => n.nodeType === 3 && n.textContent.trim().length > 0
+          );
+          if (!hasText) return false;
+          const elBottom = el.getBoundingClientRect().bottom - containerTop;
+          return elBottom > cutoff + 4; // 4 px rounding tolerance
+        });
+
+        if (wouldClipContent) break;
         breaks.pop();
         pageReport.pop();
       }
 
       return { breaks, pageReport, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE, CLIP_TOLERANCE);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE);
 
     // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
     const fontStatus = await page.evaluate(() => {
