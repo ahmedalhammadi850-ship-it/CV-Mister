@@ -272,7 +272,12 @@ const MAX_BOTTOM_GAP = 15;
 // MIN_PHANTOM_PAGE — minimum real content on the last page before we consider
 // the break a phantom caused by CSS bottom-padding and remove it.
 // Must match MIN_PHANTOM_PAGE in src/components/builder/LivePreview.jsx.
-const MIN_PHANTOM_PAGE = 50;
+const MIN_PHANTOM_PAGE = 200;
+// CLIP_TOLERANCE — max px of overflow allowed when phantom guard removes a break.
+// The overflow is almost always template bottom-padding (40-60 px), not real text.
+// Allows merging a sparse last page even when the previous page is marginally > PAGE_H.
+// Must match CLIP_TOLERANCE in src/components/builder/LivePreview.jsx.
+const CLIP_TOLERANCE = 60;
 
 /**
  * Pass 1 — measure smart page-break positions using Puppeteer's own layout.
@@ -288,7 +293,7 @@ export async function measureBreaks(html) {
   // Very tall viewport so nothing is clipped during measurement
   const page = await _openPage(html, 10000);
   try {
-    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE) => {
+    const result = await page.evaluate((PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE, CLIP_TOLERANCE) => {
       // The template root div is the first child of <body>
       const container = document.body.firstElementChild;
       if (!container) return { breaks: [], pageReport: [], totalHeight: PAGE_H };
@@ -478,13 +483,16 @@ export async function measureBreaks(html) {
         const isPrevFirstPage   = prevBreakStart === 0;
         const prevPageTopMargin = isPrevFirstPage ? 0 : MARGIN;
         const prevPageVisibleH  = PAGE_H - prevPageTopMargin;
-        if (totalHeight - prevBreakStart > prevPageVisibleH) break;
+        const overflow          = (totalHeight - prevBreakStart) - prevPageVisibleH;
+        // Only remove the break if the previous page stays within bounds, OR the overflow
+        // is ≤ CLIP_TOLERANCE (template bottom-padding, not real content).
+        if (overflow > CLIP_TOLERANCE) break;
         breaks.pop();
         pageReport.pop();
       }
 
       return { breaks, pageReport, totalHeight };
-    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE);
+    }, PAGE_H, MARGIN, MIN_PAGE_CONTENT, HEADING_ORPHAN_PX, MAX_PULL_AVOID, MAX_PULL, BOTTOM_BLANK, MAX_BOTTOM_GAP, MIN_PHANTOM_PAGE, CLIP_TOLERANCE);
 
     // Diagnostic: log which fonts actually loaded so we can detect fallback-to-Arial.
     const fontStatus = await page.evaluate(() => {

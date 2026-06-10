@@ -68,10 +68,16 @@ const MAX_PULL = 200;
 const MAX_LINE_H = 35;  // px — covers one line at up to ~14pt / line-height 1.8
 // Minimum pixels of real content on the last page.
 // If the final page would have less content than this, it is a "phantom page"
-// caused by template bottom padding and the break is discarded.
-// Set to 50 px — enough to include even short sections (2-3 lines) while
-// still filtering out pure CSS bottom-padding artefacts (typically ≤ 30 px).
-const MIN_PHANTOM_PAGE = 50;
+// and its break is discarded (merged into the previous page, if it fits).
+// 200 px covers a single short section (e.g. a one-line Languages block ~80-120 px)
+// so it gets pulled back to page 1 instead of sitting alone on page 2.
+const MIN_PHANTOM_PAGE = 200;
+// Maximum px of content that may be clipped when the phantom guard removes a break.
+// The previous page's overflow beyond PAGE_H is almost always template bottom-padding
+// (typically 40-60 px), not real text.  Allowing up to 60 px of "clip" lets the guard
+// merge a sparse last page even when the preceding page is just slightly over PAGE_H.
+// Must match CLIP_TOLERANCE in api/_lib/puppeteerPdf.js.
+const CLIP_TOLERANCE = 60;
 
 // Maximum allowed blank space (px) at the bottom of any page.
 // After pull-backs, the greedy-fill phase packs complete avoid-elements into the
@@ -245,8 +251,10 @@ function computeSmartBreaks(container, totalHeight) {
     const isPrevFirstPage   = prevBreakStart === 0;
     const prevPageTopMargin = isPrevFirstPage ? 0 : MARGIN;
     const prevPageVisibleH  = PAGE_H - prevPageTopMargin;
-    // If removing this break would make the preceding page overflow, stop.
-    if (totalHeight - prevBreakStart > prevPageVisibleH) break;
+    const overflow          = (totalHeight - prevBreakStart) - prevPageVisibleH;
+    // Only remove the break if the previous page stays within bounds, OR the overflow
+    // is ≤ CLIP_TOLERANCE (template bottom-padding, not real content).
+    if (overflow > CLIP_TOLERANCE) break;
     breaks.pop();
   }
 
